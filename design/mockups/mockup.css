@@ -140,3 +140,28 @@ body { background: #e9e3d6; }
 .perk { color: var(--confirmed); font-weight: 500; }
 .perk--no { color: var(--ink-soft); font-weight: 400; }
 .option { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+
+/* Budget screen */
+.budget--page { position: static; border-bottom: 0; padding-bottom: 0; }
+.notice { margin: var(--space-3) var(--space-4) 0; padding: var(--space-2) var(--space-3); border: 1px dashed var(--line); border-radius: var(--radius); font-size: 0.8125rem; color: var(--ink-soft); display: flex; gap: var(--space-2); align-items: baseline; }
+.notice b { color: var(--ink); font-weight: 600; }
+.brow { padding: var(--space-3); border-top: 1px solid var(--line); }
+.card > .brow:first-child { border-top: 0; }
+.brow__top { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); }
+.brow__name { font-weight: 500; }
+.brow__amount { font-weight: 600; white-space: nowrap; }
+.brow__bar { display: flex; height: 6px; margin-top: 0.4rem; border-radius: var(--radius-pill); overflow: hidden; background: transparent; }
+.brow__bar i { display: block; height: 100%; }
+.brow__bar .c { background: var(--confirmed); }
+.brow__bar .e { background: var(--estimated); }
+.brow__meta { margin-top: 0.3rem; font-size: 0.75rem; color: var(--ink-soft); }
+.subhead { padding: var(--space-3) var(--space-3) 0; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.02em; color: var(--ink-soft); }
+.person { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3); border-top: 1px solid var(--line); }
+.card > .person:first-child { border-top: 0; }
+.person .avatar { margin: 0; border: 0; width: 2rem; height: 2rem; font-size: 0.75rem; }
+.person__main { flex: 1; min-width: 0; }
+.person__name { font-weight: 500; }
+.person__amount { font-weight: 600; white-space: nowrap; text-align: right; }
+.person--me { background: #f6f1e6; }
+.card__foot { display: flex; justify-content: space-between; padding: var(--space-3); border-top: 1px solid var(--line); font-size: 0.875rem; color: var(--ink-soft); }
+.card__foot b { color: var(--ink); }
