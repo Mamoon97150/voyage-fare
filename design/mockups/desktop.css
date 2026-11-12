@@ -28,3 +28,10 @@
 .desk__budget .route { margin: 1.25rem 0 0; }
 .desk__budget .budget__row { flex-direction: column; align-items: flex-start; gap: 0.6rem; }
 .desk__budget .budget__figure { white-space: nowrap; }
+
+/* v2: places are separate sheets, so the middle column is no longer one big sheet; the map is big */
+.desk__main--trip { background: none; border: 0; box-shadow: none; padding: 0; }
+.desk__main--trip .place { margin-left: 0; margin-right: 0; padding: 0.25rem 1.75rem 1rem; }
+.desk__main--trip .desk__title { margin-bottom: 0; }
+.desk__budget .route--big { margin: 1.5rem 0 0; background: var(--paper-raised); box-shadow: 0 3px 10px rgb(31 42 36 / 0.07); }
+.route--big text { font-family: var(--font-text); }

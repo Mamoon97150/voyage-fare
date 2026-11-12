@@ -274,3 +274,14 @@ body { background: #e9e3d6; }
 .card__foot { padding: 0.7rem 0; }
 .btn { border-radius: 6px; padding: 0.4rem 0.6rem; }
 .notice { border-radius: 8px; }
+
+/* Look v2.1 (12 Nov) — each place is its own sheet on the page, numbered like its pin on the map */
+.phone--trip { background: var(--paper); }
+.place { margin: var(--space-6) var(--space-3) 0; padding: 0 var(--space-4) var(--space-2); background: var(--paper-raised); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 3px 10px rgb(31 42 36 / 0.07); }
+.place .section__head { padding-top: var(--space-4); align-items: center; }
+.place .section__head h2 { display: flex; align-items: center; gap: 0.55rem; font-size: 1.5rem; }
+.place .section__total { font-size: 1.15rem; }
+.pin { flex: none; width: 1.7rem; height: 1.7rem; border-radius: 50%; display: grid; place-items: center; background: var(--confirmed); color: var(--paper-raised); font-family: var(--font-text); font-size: 0.8125rem; font-weight: 700; }
+.place .card { border-top-width: 1.5px; }
+.leg { margin-top: var(--space-6); }
+.route text.n { font-family: var(--font-text); font-size: 10px; font-weight: 700; fill: var(--paper-raised); }
