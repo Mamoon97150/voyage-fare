@@ -188,3 +188,11 @@ body { background: #e9e3d6; }
 .d .nav span { flex: 1; display: grid; justify-items: center; gap: 2px; font-size: 0.65rem; color: var(--ink-soft); }
 .d .nav .on { color: var(--ink); font-weight: 600; }
 [data-only='d1'] #style-d1, [data-only='d2'] #style-d2 { display: block; }
+
+/* Folder tabs, reworked (12 Nov): only palette colours, no dark outline, a dot for "to decide". */
+.d .folder { background: linear-gradient(var(--paper), var(--paper)) top / 100% calc(100% - 1px) no-repeat, var(--line); }
+.d .folder span,
+.d .folder span:nth-child(odd):not(.on) { background: var(--paper); border-color: var(--line); color: var(--ink-soft); }
+.d .folder .on { background: var(--paper-raised); border-color: var(--line); color: var(--ink); box-shadow: 0 -3px 8px rgb(31 42 36 / 0.07); }
+.d .folder .todo::after { top: 5px; right: 5px; width: 5px; height: 5px; border-radius: 50%; clip-path: none; }
+.d .folder .todo { padding-right: 0.85rem; }
