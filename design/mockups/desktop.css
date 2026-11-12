@@ -1,0 +1,30 @@
+/* Computer layout: three columns. Same building blocks as the phone. */
+.desk-body { background: var(--paper); }
+.desk { display: grid; grid-template-columns: 12rem minmax(0, 40rem) 21rem; gap: 3rem; justify-content: center; align-items: start; max-width: 84rem; margin: 0 auto; padding: 2.5rem 2rem 4rem; }
+
+.desk__side { position: sticky; top: 2.5rem; }
+.desk__brand { font-family: var(--font-title); font-size: 1.1rem; font-weight: 600; color: var(--confirmed); margin-bottom: 2rem; }
+.desk__trip { font-family: var(--font-title); font-size: 1.25rem; font-weight: 600; line-height: 1.2; }
+.desk__nav { display: grid; gap: 2px; margin: 1.5rem 0 2rem; border-top: 1.5px solid var(--ink); padding-top: 0.75rem; }
+.desk__nav a { display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0.6rem; border-radius: 8px; font-size: 0.9375rem; color: var(--ink-soft); }
+.desk__nav a svg { width: 1.25rem; height: 1.25rem; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.desk__nav a.on { background: var(--paper-raised); color: var(--ink); font-weight: 600; box-shadow: 0 1px 4px rgb(31 42 36 / 0.08); }
+.desk__label { margin-bottom: 0.5rem; }
+.desk__people { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; font-size: 0.9375rem; }
+.desk__people li { display: flex; align-items: center; gap: 0.6rem; }
+.desk__people .avatar { margin: 0; border: 0; }
+
+.desk__main { background: var(--paper-raised); border: 1px solid var(--line); border-radius: 14px; padding: 2rem 2.25rem 2.5rem; box-shadow: 0 2px 10px rgb(31 42 36 / 0.05); }
+.desk__title { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 0.5rem; }
+.desk__title h1 { font-size: 1.75rem; }
+.desk__add { font-size: 0.875rem; font-weight: 600; color: var(--paper); background: var(--ink); padding: 0.45rem 0.9rem; border-radius: 8px; }
+.desk__main .section { padding-left: 0; padding-right: 0; }
+.desk__main .leg { margin-left: 0; margin-right: 0; }
+
+.desk__budget { position: sticky; top: 2.5rem; }
+.desk__budget .budget { padding: 0; background: none; }
+.desk__budget .budget__figure { font-size: 2.25rem; }
+.desk__budget .left { margin: 1.25rem 0 0; }
+.desk__budget .route { margin: 1.25rem 0 0; }
+.desk__budget .budget__row { flex-direction: column; align-items: flex-start; gap: 0.6rem; }
+.desk__budget .budget__figure { white-space: nowrap; }
