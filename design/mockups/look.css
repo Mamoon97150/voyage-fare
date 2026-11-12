@@ -135,3 +135,56 @@ body { background: #e9e3d6; }
 [data-only='a'] #style-a, [data-only='b'] #style-b, [data-only='c'] #style-c { display: block; }
 .b .opt .tags { gap: 0.25rem; }
 .b .opt .tags span { font-size: 0.65rem; padding: 0.1rem 0.4rem; white-space: nowrap; }
+
+/* ───────── D · The mix (A's page + C's place stepper, rows and caps) ───────── */
+.d { background: #fbf7ef; }
+.d .head { display: flex; align-items: center; gap: 0.6rem; padding: 1rem 1.1rem 0.5rem; }
+.d .head b { flex: 1; font-family: var(--font-title); font-size: 1.05rem; }
+.d .back { font-size: 1.3rem; line-height: 1; color: var(--ink-soft); }
+.d .money { padding: 0 1.1rem 0.9rem; }
+.d .money p { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.4rem; }
+.d .money strong { font-family: var(--font-title); font-size: 1.2rem; }
+.d .money small { font-size: 0.75rem; color: var(--ink-soft); }
+.d .money em { font-style: normal; font-size: 0.75rem; color: var(--confirmed); font-weight: 500; }
+
+/* Tabs, version 1: folder dividers. The open tab is part of the page. */
+.d .folder { display: flex; align-items: flex-end; padding: 0 0.7rem; background: linear-gradient(#fbf7ef, #fbf7ef) top / 100% calc(100% - 1px) no-repeat, var(--ink); }
+.d .folder span { position: relative; padding: 0.35rem 0.6rem 0.3rem; margin-right: -1px; font-family: var(--font-title); font-size: 0.8rem; color: var(--ink-soft); background: #efe8d8; border: 1px solid #d9cfba; border-bottom: 0; border-radius: 10px 10px 0 0; white-space: nowrap; }
+.d .folder span:nth-child(odd):not(.on) { background: #ebe3d1; }
+.d .folder .on { z-index: 1; padding: 0.5rem 0.8rem 0.45rem; font-size: 0.9rem; font-weight: 600; color: var(--ink); background: #fffdf8; border-color: var(--ink); margin-bottom: -1px; box-shadow: 0 -2px 6px rgb(31 42 36 / 0.08); }
+.d .folder .todo::after { content: ''; position: absolute; top: -1px; right: 7px; width: 6px; height: 9px; background: var(--estimated); clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 70%, 0 100%); }
+.d .sheet { background: #fffdf8; flex: 1; display: flex; flex-direction: column; }
+
+/* Tabs, version 2: small capitals with a ribbon bookmark on the open one. */
+.d .ribbon { display: flex; justify-content: space-between; padding: 0.2rem 1.1rem 0; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--line); }
+.d .ribbon span { position: relative; padding: 0.55rem 0 0.6rem; font-size: 0.65rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #a79f8f; white-space: nowrap; }
+.d .ribbon .on { color: var(--ink); }
+.d .ribbon .on::before { content: ''; position: absolute; left: 50%; top: -0.2rem; width: 14px; height: 9px; margin-left: -7px; background: var(--confirmed); clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 60%, 0 100%); }
+.d .ribbon .todo::after { content: ''; display: inline-block; width: 5px; height: 5px; margin-left: 3px; border-radius: 50%; background: var(--estimated); vertical-align: 0.15em; }
+
+/* Place: turn the page */
+.d .step { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1.1rem 0.7rem; border-bottom: 1px solid var(--line); }
+.d .step h3 { font-size: 1.3rem; text-align: center; }
+.d .step p { font-size: 0.75rem; color: var(--ink-soft); text-align: center; margin-top: 0.1rem; }
+.d .step i { font-style: normal; width: 2rem; height: 2rem; display: grid; place-items: center; border: 1px solid var(--ink); border-radius: 50%; font-size: 1rem; }
+.d .step i.off { border-color: var(--line); color: var(--line); }
+
+/* Options: C's layout on paper */
+.d .opt { display: grid; grid-template-columns: 1fr auto; gap: 0.2rem 0.8rem; padding: 0.8rem 1.1rem; border-bottom: 1px solid var(--line); }
+.d .opt h4 { font-family: var(--font-title); font-size: 1.1rem; font-weight: 600; margin: 0; }
+.d .opt .price { grid-row: span 2; text-align: right; white-space: nowrap; }
+.d .opt .price b { font-family: var(--font-title); font-size: 1.35rem; font-weight: 600; }
+.d .opt .price span { display: block; font-size: 0.675rem; font-weight: 600; color: var(--ink-soft); letter-spacing: 0.06em; text-transform: uppercase; }
+.d .opt .price .best { color: var(--confirmed); }
+.d .opt p { font-size: 0.75rem; color: var(--ink-soft); }
+.d .opt .q { font-family: var(--font-title); font-style: italic; color: var(--ink); }
+.d .opt .wide { grid-column: 1 / -1; }
+.d .opt.chosen { background: #f1f5ee; box-shadow: inset 4px 0 0 var(--confirmed); }
+.d .opt.chosen h4::before { content: '✓'; display: inline-grid; place-items: center; width: 1.1rem; height: 1.1rem; margin-right: 0.4rem; border-radius: 50%; background: var(--confirmed); color: #fff; font-family: var(--font-text); font-size: 0.65rem; vertical-align: 0.15em; }
+.d .opt .note { margin-top: 0.3rem; font-size: 0.675rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--confirmed); }
+.d .opt .note .heart { color: var(--over); }
+.d .opt .note .est { color: #9a6b0c; }
+.d .nav { display: flex; margin-top: auto; border-top: 1.5px solid var(--ink); padding: 0.55rem 0.4rem 0.8rem; background: #fbf7ef; }
+.d .nav span { flex: 1; display: grid; justify-items: center; gap: 2px; font-size: 0.65rem; color: var(--ink-soft); }
+.d .nav .on { color: var(--ink); font-weight: 600; }
+[data-only='d1'] #style-d1, [data-only='d2'] #style-d2 { display: block; }
