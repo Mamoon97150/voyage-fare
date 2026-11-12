@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mockup — Who paid what on a computer (v1)</title>
+    <script type="module">
+      import '/src/index.css'
+      import './mockup.css'
+      import './desktop.css'
+    </script>
+  </head>
+  <body class="desk-body">
+    <!-- Static mockup, computer size. Same content as who-paid.html: what to settle in the middle, your position on the right. -->
+    <div class="desk">
+      <aside class="desk__side">
+        <p class="desk__brand">Voyage Fare</p>
+        <p class="desk__trip">Lisbon &amp; Porto</p>
+        <p class="small muted">5 nights · from St Martin</p>
+        <nav class="desk__nav" aria-label="Trip"><a><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 18h7a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h7"/></svg>Trip</a><a><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="6" height="14" rx="1.5"/><rect x="14" y="5" width="6" height="14" rx="1.5"/></svg>Compare</a><a><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4v8l6 5"/></svg>Budget</a><a class="on"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h14l-3-3M20 15H6l3 3"/></svg>Who paid</a></nav>
+        <p class="caps muted desk__label">Travellers</p>
+        <ul class="desk__people">
+          <li><span class="avatar avatar--me">A</span>Ana <span class="caps muted">you</span></li>
+          <li><span class="avatar avatar--b">B</span>Bea</li>
+          <li><span class="avatar avatar--c">C</span>Cleo</li>
+          <li><span class="avatar avatar--d">D</span>Dana</li>
+        </ul>
+      </aside>
+
+      <main class="desk__main desk__main--sheets">
+        <div class="desk__title"><h1>Who paid what</h1></div>
+        <section class="section sheet">
+        <div class="section__head"><h2>To settle up</h2><span class="small muted">3 payments</span></div>
+        <div class="card">
+          <div class="settle">
+            <span class="avatar avatar--c">C</span>
+            <p class="settle__main num">Cleo pays you <b>910 €</b></p>
+            <span class="btn">Paid back</span>
+          </div>
+          <div class="settle">
+            <span class="avatar avatar--b">B</span>
+            <p class="settle__main num">Bea pays you <b>800 €</b></p>
+            <span class="btn">Paid back</span>
+          </div>
+          <div class="settle">
+            <span class="avatar avatar--d">D</span>
+            <p class="settle__main num">Dana pays you <b>500 €</b></p>
+            <span class="btn">Paid back</span>
+          </div>
+        </div>
+      </section>
+        <section class="section sheet">
+        <div class="section__head"><h2>Balances</h2></div>
+        <div class="card">
+          <div class="person person--me">
+            <span class="avatar">A</span>
+            <div class="person__main"><p class="person__name">Ana</p><p class="item__meta num">Paid 3 600 € · share 990 €</p></div>
+            <span class="person__amount num plus">+2 210 €<small>is owed</small></span>
+          </div>
+          <div class="person">
+            <span class="avatar avatar--b">B</span>
+            <div class="person__main"><p class="person__name">Bea</p><p class="item__meta num">Paid 150 € · share 950 €</p></div>
+            <span class="person__amount num">−800 €<small>owes</small></span>
+          </div>
+          <div class="person">
+            <span class="avatar avatar--c">C</span>
+            <div class="person__main"><p class="person__name">Cleo</p><p class="item__meta num">Paid 80 € · share 990 €</p></div>
+            <span class="person__amount num">−910 €<small>owes</small></span>
+          </div>
+          <div class="person">
+            <span class="avatar avatar--d">D</span>
+            <div class="person__main"><p class="person__name">Dana</p><p class="item__meta num">Paid 0 € · share 900 € · paid back 400 €</p></div>
+            <span class="person__amount num">−500 €<small>owes</small></span>
+          </div>
+        </div>
+      </section>
+        <section class="section sheet">
+        <div class="section__head"><h2>Paid so far</h2><span class="section__total num">3 830 €</span></div>
+        <div class="card">
+          <div class="item">
+            <i class="dot dot--confirmed"></i>
+            <div class="item__main"><p class="item__name">St Martin ⇄ Paris</p><p class="item__meta">Paid by you · split between 4</p></div>
+            <div class="item__amount num"><b>3 600 €</b></div>
+          </div>
+          <div class="item">
+            <i class="dot dot--confirmed"></i>
+            <div class="item__main"><p class="item__name">Photo shoot</p><p class="item__meta">Paid by Bea · gift, split between 3</p></div>
+            <div class="item__amount num"><b>150 €</b></div>
+          </div>
+          <div class="item">
+            <i class="dot dot--confirmed"></i>
+            <div class="item__main"><p class="item__name">Surf lesson</p><p class="item__meta">Paid by Cleo · you and Cleo</p></div>
+            <div class="item__amount num"><b>80 €</b></div>
+          </div>
+        </div>
+      </section>
+        <section class="section sheet">
+        <div class="section__head"><h2>Booked, not paid yet</h2><span class="section__total num">1 060 €</span></div>
+        <div class="card">
+          <div class="group-label"><span>NOT IN THE BALANCES UNTIL SOMEONE PAYS</span></div>
+          <div class="item">
+            <i class="dot dot--none"></i>
+            <div class="item__main"><p class="item__name">Paris → Lisbon</p><p class="item__meta">Split between 4</p></div>
+            <div class="item__amount num"><b>400 €</b></div>
+          </div>
+          <div class="item">
+            <i class="dot dot--none"></i>
+            <div class="item__main"><p class="item__name">Alfama flat</p><p class="item__meta">Split by room</p></div>
+            <div class="item__amount num"><b>500 €</b></div>
+          </div>
+          <div class="item">
+            <i class="dot dot--none"></i>
+            <div class="item__main"><p class="item__name">Car rental</p><p class="item__meta">Split between 4</p></div>
+            <div class="item__amount num"><b>160 €</b></div>
+          </div>
+        </div>
+      </section>
+      </main>
+
+      <aside class="desk__budget">
+        <section class="owed" style="padding-top:0" aria-label="Your balance">
+        <p class="owed__label">You are owed</p>
+        <p class="owed__figure num">2 210 €</p>
+        <p class="owed__detail num">You paid 3 600 € · your share of it is 990 € · 400 € already paid back</p>
+      </section>
+        <section class="section">
+        <div class="section__head"><h2>Paid back</h2></div>
+        <div class="card">
+          <div class="item">
+            <i class="dot dot--confirmed"></i>
+            <div class="item__main"><p class="item__name">Dana paid you back</p><p class="item__meta">10 November</p></div>
+            <div class="item__amount num"><b>400 €</b></div>
+          </div>
+          <div class="add-row">+ Record a repayment</div>
+        </div>
+      </section>
+        <div style="margin-top:2rem"><section class="budget budget--page" aria-label="Budget">
+        <div class="budget__row">
+          <p class="budget__figure num">1 620 € <small>your share</small></p>
+          <p class="budget__target num">80 € under target</p>
+        </div>
+        <div class="track" aria-hidden="true">
+          <div class="track__confirmed" style="width: 75.3%"></div>
+          <div class="track__estimated" style="width: 20%"></div>
+          <div class="track__target"></div>
+        </div>
+      </section></div>
+      </aside>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mockup — Budget on a computer (v1)</title>
+    <script type="module">
+      import '/src/index.css'
+      import './mockup.css'
+      import './desktop.css'
+    </script>
+  </head>
+  <body class="desk-body">
+    <!-- Static mockup, computer size. Same content as budget.html: the breakdowns in the middle, your share and everyone’s on the right. -->
+    <div class="desk">
+      <aside class="desk__side">
+        <p class="desk__brand">Voyage Fare</p>
+        <p class="desk__trip">Lisbon &amp; Porto</p>
+        <p class="small muted">5 nights · from St Martin</p>
+        <nav class="desk__nav" aria-label="Trip"><a><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 18h7a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h7"/></svg>Trip</a><a><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="6" height="14" rx="1.5"/><rect x="14" y="5" width="6" height="14" rx="1.5"/></svg>Compare</a><a class="on"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4v8l6 5"/></svg>Budget</a><a><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h14l-3-3M20 15H6l3 3"/></svg>Who paid</a></nav>
+        <p class="caps muted desk__label">Travellers</p>
+        <ul class="desk__people">
+          <li><span class="avatar avatar--me">A</span>Ana <span class="caps muted">you</span></li>
+          <li><span class="avatar avatar--b">B</span>Bea</li>
+          <li><span class="avatar avatar--c">C</span>Cleo</li>
+          <li><span class="avatar avatar--d">D</span>Dana</li>
+        </ul>
+      </aside>
+
+      <main class="desk__main desk__main--sheets">
+        <div class="desk__title"><h1>Budget</h1></div>
+        <section class="section sheet">
+        <div class="section__head"><h2>By category</h2></div>
+        <div class="card">
+          <div class="brow">
+            <div class="brow__top"><span class="brow__name">Travel</span><span class="brow__amount num">1 120 €</span></div>
+            <div class="brow__bar" aria-hidden="true"><i class="c" style="width:89.3%"></i><i class="e" style="width:10.7%"></i></div>
+            <p class="brow__meta num">1 000 € confirmed · 120 € estimated</p>
+          </div>
+          <div class="brow">
+            <div class="brow__top"><span class="brow__name">Stay</span><span class="brow__amount num">240 €</span></div>
+            <div class="brow__bar" aria-hidden="true"><i class="c" style="width:13.4%"></i><i class="e" style="width:8.0%"></i></div>
+            <p class="brow__meta num">150 € confirmed · 90 € estimated</p>
+          </div>
+          <div class="brow">
+            <div class="brow__top"><span class="brow__name">Food</span><span class="brow__amount num">130 €</span></div>
+            <div class="brow__bar" aria-hidden="true"><i class="c" style="width:0.0%"></i><i class="e" style="width:11.6%"></i></div>
+            <p class="brow__meta num">130 € estimated</p>
+          </div>
+          <div class="brow">
+            <div class="brow__top"><span class="brow__name">Activities</span><span class="brow__amount num">90 €</span></div>
+            <div class="brow__bar" aria-hidden="true"><i class="c" style="width:8.0%"></i><i class="e" style="width:0.0%"></i></div>
+            <p class="brow__meta num">90 € confirmed</p>
+          </div>
+          <div class="brow">
+            <div class="brow__top"><span class="brow__name">Getting around</span><span class="brow__amount num">40 €</span></div>
+            <div class="brow__bar" aria-hidden="true"><i class="c" style="width:3.6%"></i><i class="e" style="width:0.0%"></i></div>
+            <p class="brow__meta num">40 € confirmed</p>
+          </div>
+        </div>
+      </section>
+        <section class="section sheet">
+        <div class="section__head"><h2>By place</h2></div>
+        <div class="card">
+          <div class="brow">
+            <div class="brow__top"><span class="brow__name">Lisbon <span class="sub muted small">3 nights</span></span><span class="brow__amount num">230 €</span></div>
+            <div class="brow__bar" aria-hidden="true"><i class="c" style="width:17.9%"></i><i class="e" style="width:2.7%"></i></div>
+            <p class="brow__meta num">200 € confirmed · 30 € estimated</p>
+          </div>
+          <div class="brow">
+            <div class="brow__top"><span class="brow__name">Porto <span class="sub muted small">2 nights</span></span><span class="brow__amount num">170 €</span></div>
+            <div class="brow__bar" aria-hidden="true"><i class="c" style="width:7.1%"></i><i class="e" style="width:8.0%"></i></div>
+            <p class="brow__meta num">80 € confirmed · 90 € estimated</p>
+          </div>
+          <p class="subhead">NOT TIED TO A PLACE</p>
+          <div class="brow">
+            <div class="brow__top"><span class="brow__name">Travel to, from and between</span><span class="brow__amount num">1 120 €</span></div>
+            <div class="brow__bar" aria-hidden="true"><i class="c" style="width:89.3%"></i><i class="e" style="width:10.7%"></i></div>
+            <p class="brow__meta num">1 000 € confirmed · 120 € estimated</p>
+          </div>
+          <div class="brow">
+            <div class="brow__top"><span class="brow__name">Whole trip <span class="sub muted small">food estimate</span></span><span class="brow__amount num">100 €</span></div>
+            <div class="brow__bar" aria-hidden="true"><i class="c" style="width:0.0%"></i><i class="e" style="width:8.9%"></i></div>
+            <p class="brow__meta num">100 € estimated</p>
+          </div>
+        </div>
+      </section>
+      </main>
+
+      <aside class="desk__budget">
+        <section class="budget budget--page" aria-label="Budget">
+        <div class="budget__row">
+          <p class="budget__figure num">1 620 € <small>your share</small></p>
+          <div class="switch"><span class="on who">Ana</span><span>Total</span></div>
+        </div>
+        <div class="track" aria-hidden="true">
+          <div class="track__confirmed" style="width: 75.3%"></div>
+          <div class="track__estimated" style="width: 20%"></div>
+          <div class="track__target"></div>
+        </div>
+        <div class="budget__legend num">
+          <span class="key"><i class="dot dot--confirmed"></i>Confirmed 1 280 €</span>
+          <span class="key"><i class="dot dot--estimated"></i>Still estimated 340 €</span>
+        </div>
+        <p class="budget__target num">80 € under your 1 700 € target</p>
+      </section>
+        <p class="notice"><span>—</span><span><b>1 item has no price yet</b> and is not counted: the Lisbon → Porto train.</span></p>
+        <section class="section">
+        <div class="section__head"><h2>Everyone’s share</h2></div>
+        <div class="card">
+          <div class="person person--me">
+            <span class="avatar">A</span>
+            <div class="person__main"><p class="person__name">Ana</p></div>
+            <span class="person__amount num">1 620 €</span>
+          </div>
+          <div class="person">
+            <span class="avatar avatar--b">B</span>
+            <div class="person__main"><p class="person__name">Bea</p></div>
+            <span class="person__amount num">1 580 €</span>
+          </div>
+          <div class="person">
+            <span class="avatar avatar--c">C</span>
+            <div class="person__main"><p class="person__name">Cleo</p></div>
+            <span class="person__amount num">1 570 €</span>
+          </div>
+          <div class="person">
+            <span class="avatar avatar--d">D</span>
+            <div class="person__main"><p class="person__name">Dana</p><p class="item__meta">Day 2 is a gift to her</p></div>
+            <span class="person__amount num">1 450 €</span>
+          </div>
+          <div class="card__foot num"><span>The whole trip, for 4</span><b>6 220 €</b></div>
+        </div>
+      </section>
+      </aside>
+    </div>
+  </body>
+</html>
