@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mockup — Compare (v1)</title>
+    <script type="module">
+      import '/src/index.css'
+      import './mockup.css'
+    </script>
+  </head>
+  <body>
+    <!--
+      Static mockup, phone size. Compare by category: the "housing page" of the notebook.
+      Same made-up trip as trip-view.html, shown as Ana sees it (amounts = her share).
+
+      Stay in Lisbon, 3 nights, 4 travellers:
+        Bairro Alto guesthouse   440 total   147 a night   Ana 110   cheapest
+        Graça house              480         160           Ana 120   +10
+        Alfama flat (by room)    500         167           Ana 150   +40   coup de cœur, chosen, booked
+        Baixa hotel              620         207           Ana 155   +45
+        Chiado apartment         720         240           Ana 180   +70
+    -->
+    <div class="phone">
+      <header class="top top--compact">
+        <span class="top__back">‹</span>
+        <div class="top__title">
+          <h1>Lisbon &amp; Porto</h1>
+        </div>
+        <div class="avatars" aria-label="Ana (you), Bea, Cleo, Dana">
+          <span class="avatar avatar--me">A</span><span class="avatar avatar--b">B</span
+          ><span class="avatar avatar--c">C</span><span class="avatar avatar--d">D</span>
+        </div>
+      </header>
+
+      <section class="budget budget--compact" aria-label="Budget">
+        <div class="budget__row">
+          <p class="budget__figure num">1 620 € <small>your share</small></p>
+          <p class="budget__target num">80 € under target</p>
+        </div>
+        <div class="track" aria-hidden="true">
+          <div class="track__confirmed" style="width: 75.3%"></div>
+          <div class="track__estimated" style="width: 20%"></div>
+          <div class="track__target"></div>
+        </div>
+      </section>
+
+      <div class="chips" aria-label="Categories">
+        <span class="chip">Travel <i class="todo"></i></span>
+        <span class="chip on">Stay</span>
+        <span class="chip">Getting around</span>
+        <span class="chip">Activities</span>
+        <span class="chip">Food <i class="todo"></i></span>
+      </div>
+
+      <div class="decision">
+        <div class="decision__places"><span class="on">Lisbon</span><span>Porto</span></div>
+        <div class="decision__head">
+          <h2>Stay in Lisbon <span class="sub muted small">3 nights · 5 options</span></h2>
+          <span class="sort">Price ↑</span>
+        </div>
+      </div>
+
+      <div class="card options">
+        <div class="option">
+          <span class="option__pick"></span>
+          <div class="option__main">
+            <p class="option__name">Bairro Alto guesthouse</p>
+            <p class="option__facts">Guesthouse · Location <b>8,7</b> · Breakfast included</p>
+            <p class="option__facts num">147 € a night for 4</p>
+          </div>
+          <div class="option__price num"><b>110 €</b><span class="cheapest">Cheapest</span></div>
+        </div>
+        <div class="option">
+          <span class="option__pick"></span>
+          <div class="option__main">
+            <p class="option__name">Graça house</p>
+            <p class="option__facts">House · Location <b>8,2</b> · No breakfast</p>
+            <p class="option__facts num">160 € a night for 4</p>
+          </div>
+          <div class="option__price num"><b>120 €</b><span>+10 €</span></div>
+        </div>
+        <div class="option option--chosen">
+          <span class="option__pick">✓</span>
+          <div class="option__main">
+            <p class="option__name">Alfama flat <span class="heart">♥</span></p>
+            <p class="option__facts">Apartment · Location <b>9,1</b> · No breakfast · 2 rooms</p>
+            <p class="option__facts num">167 € a night for 4</p>
+            <p class="option__note"><span class="heart">♥</span> Your coup de cœur · Chosen · Booked</p>
+          </div>
+          <div class="option__price num"><b>150 €</b><span>+40 €</span></div>
+        </div>
+        <div class="option">
+          <span class="option__pick"></span>
+          <div class="option__main">
+            <p class="option__name">Baixa hotel</p>
+            <p class="option__facts">Hotel · Location <b>9,4</b> · Breakfast included</p>
+            <p class="option__facts num">207 € a night for 4</p>
+          </div>
+          <div class="option__price num"><b>155 €</b><span>+45 €</span></div>
+        </div>
+        <div class="option">
+          <span class="option__pick"></span>
+          <div class="option__main">
+            <p class="option__name">Chiado apartment</p>
+            <p class="option__facts">Apartment · Location <b>9,6</b> · No breakfast</p>
+            <p class="option__facts num">240 € a night for 4</p>
+          </div>
+          <div class="option__price num"><b>180 €</b><span>+70 €</span></div>
+        </div>
+        <div class="add-row">+ Add an option</div>
+      </div>
+
+      <nav class="nav" aria-label="Trip">
+        <a><i></i>Trip</a>
+        <a class="on"><i></i>Compare</a>
+        <a><i></i>Budget</a>
+        <a><i></i>Who paid</a>
+      </nav>
+    </div>
+    <p class="mock-note">Mockup 2 · Compare · v1 · static, nothing is clickable yet.</p>
+  </body>
+</html>
