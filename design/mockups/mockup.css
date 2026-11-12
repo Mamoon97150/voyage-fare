@@ -90,3 +90,6 @@ body { background: #e9e3d6; }
 .leg__icon { width: 1.75rem; height: 1.75rem; border-radius: 50%; background: #f1ebdd; display: grid; place-items: center; font-size: 0.875rem; flex: none; }
 .leg .item { align-items: center; }
 .leg .item__amount .dotline { display: flex; align-items: center; justify-content: flex-end; gap: 0.35rem; }
+
+.leg .tag { margin-right: 0.25rem; }
+.leg .item + .item { border-top: 1px dashed var(--line); }
