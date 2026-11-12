@@ -132,3 +132,11 @@ body { background: #e9e3d6; }
 .option--chosen .option__pick { border-color: var(--confirmed); background: var(--confirmed); color: var(--paper); font-size: 0.7rem; }
 .option__note { margin-top: 0.3rem; font-size: 0.75rem; font-weight: 500; color: var(--ink); }
 .option__note .heart { font-size: 0.75rem; }
+
+/* Compare v2 — looks, location in the person's own words, breakfast, free cancellation */
+.looks { letter-spacing: 0.05em; color: var(--ink); font-size: 0.7rem; }
+.looks .off { color: var(--line); }
+.perks { display: flex; flex-wrap: wrap; gap: 0 var(--space-3); }
+.perk { color: var(--confirmed); font-weight: 500; }
+.perk--no { color: var(--ink-soft); font-weight: 400; }
+.option { padding-top: 0.5rem; padding-bottom: 0.5rem; }
