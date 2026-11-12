@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mockup — Your trips (v1)</title>
+    <script type="module">
+      import '/src/index.css'
+      import './mockup.css'
+    </script>
+  </head>
+  <body>
+    <!-- Static mockup, phone size. The home of the app: all your trips. Tapping one opens its trip view;
+         the back arrow at the top of a trip comes back here. Made-up trips, amounts are Ana's share. -->
+    <div class="phone phone--trip" style="padding-bottom: 2.5rem">
+      <header class="home-top">
+        <span class="brand">Voyage Fare</span>
+        <span class="avatar avatar--me" style="margin:0" aria-label="Your account">A</span>
+      </header>
+      <div class="home-title"><h1>Your trips</h1><span class="newtrip">+ New trip</span></div>
+
+      <p class="home-group caps">Planning and coming up</p>
+      <a class="tripcard">
+          <div class="tripcard__top">
+            <div><h2>Lisbon &amp; Porto</h2><p class="tripcard__meta">Planning · 5 nights · no dates yet</p></div>
+            <div class="tripcard__share num"><b>1 620 €</b><span>your share</span></div>
+          </div>
+          <div class="track" aria-hidden="true"><div class="track__confirmed" style="width: 75.3%"></div><div class="track__estimated" style="width: 20%"></div></div>
+          <div class="tripcard__foot"><div class="avatars"><span class="avatar avatar--me">A</span><span class="avatar avatar--b">B</span><span class="avatar avatar--c">C</span><span class="avatar avatar--d">D</span></div><span class="caps">1 to decide · 4 to book · 3 to pay</span></div>
+        </a>
+      <a class="tripcard">
+          <div class="tripcard__top">
+            <div><h2>Greece &amp; Istanbul</h2><p class="tripcard__meta">12 – 24 May 2027 · 12 nights</p></div>
+            <div class="tripcard__share num"><b>2 340 €</b><span>your share</span></div>
+          </div>
+          <div class="track" aria-hidden="true"><div class="track__confirmed" style="width: 88%"></div><div class="track__estimated" style="width: 12%"></div></div>
+          <div class="tripcard__foot"><div class="avatars"><span class="avatar avatar--me">A</span><span class="avatar avatar--d">D</span></div><span class="caps">All booked · 2 to pay</span></div>
+        </a>
+
+      <p class="home-group caps">Past trips</p>
+      <a class="tripcard tripcard--past">
+          <div class="tripcard__top">
+            <div><h2>Colombia</h2><p class="tripcard__meta">September 2026 · 14 nights</p></div>
+            <div class="tripcard__share num"><b>2 980 €</b><span>your share</span></div>
+          </div>
+          <div class="track" aria-hidden="true"><div class="track__confirmed" style="width: 100%"></div><div class="track__estimated" style="width: 0%"></div></div>
+          <div class="tripcard__foot"><div class="avatars"><span class="avatar avatar--me">A</span><span class="avatar avatar--b">B</span><span class="avatar avatar--c">C</span><span class="avatar avatar--d">D</span></div><span class="caps done">Settled</span></div>
+        </a>
+
+      <p class="home-demo">New here? <b>Open the demo trip</b> to see how it works.</p>
+    </div>
+    <p class="mock-note">Mockup 5 · Your trips · v1 · static, nothing is clickable yet.</p>
+  </body>
+</html>

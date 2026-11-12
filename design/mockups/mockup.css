@@ -285,3 +285,26 @@ body { background: #e9e3d6; }
 .place .card { border-top-width: 1.5px; }
 .leg { margin-top: var(--space-6); }
 .route text.n { font-family: var(--font-text); font-size: 10px; font-weight: 700; fill: var(--paper-raised); }
+
+/* Home: your trips */
+.home-top { display: flex; align-items: center; justify-content: space-between; padding: var(--space-4) var(--space-4) var(--space-2); }
+.brand { font-family: var(--font-title); font-size: 1.15rem; font-weight: 600; color: var(--confirmed); }
+.home-title { display: flex; align-items: center; justify-content: space-between; padding: var(--space-4) var(--space-4) 0; }
+.home-title h1 { font-size: 1.75rem; }
+.newtrip { font-size: 0.875rem; font-weight: 600; color: var(--paper); background: var(--ink); padding: 0.45rem 0.9rem; border-radius: 8px; white-space: nowrap; }
+.home-group { padding: var(--space-6) var(--space-4) 0; color: var(--ink-soft); }
+.tripcard { display: block; margin: var(--space-3) var(--space-3) 0; padding: var(--space-4); background: var(--paper-raised); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 3px 10px rgb(31 42 36 / 0.07); }
+.tripcard__top { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-3); }
+.tripcard h2 { font-size: 1.4rem; }
+.tripcard__meta { font-size: 0.8125rem; color: var(--ink-soft); margin-top: 2px; }
+.tripcard__share { text-align: right; white-space: nowrap; }
+.tripcard__share b { font-family: var(--font-title); font-size: 1.25rem; font-weight: 600; }
+.tripcard__share span { display: block; font-size: 0.75rem; color: var(--ink-soft); }
+.tripcard .track { height: 6px; margin-top: var(--space-3); overflow: hidden; }
+.tripcard__foot { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); margin-top: var(--space-3); }
+.tripcard__foot .avatar { width: 1.5rem; height: 1.5rem; font-size: 0.625rem; border-color: var(--paper-raised); }
+.tripcard__foot .caps { color: var(--ink-soft); }
+.tripcard__foot .caps.done { color: var(--confirmed); }
+.tripcard--past { box-shadow: none; background: transparent; }
+.home-demo { margin: var(--space-6) var(--space-4) 0; padding-top: var(--space-4); border-top: 1px dashed var(--line); font-size: 0.875rem; color: var(--ink-soft); }
+.home-demo b { color: var(--confirmed); font-weight: 600; }
