@@ -1,0 +1,142 @@
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/lora';
+@import './styles/tokens.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-text);
+  font-size: 1rem;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-title);
+  font-weight: 600;
+  line-height: 1.2;
+  margin: 0;
+}
+
+p {
+  margin: 0;
+}
+
+.page {
+  max-width: var(--page-width);
+  margin: 0 auto;
+  padding: var(--space-4);
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding-block: var(--space-4);
+  border-bottom: 1px solid var(--line);
+}
+
+.app-header__name {
+  font-family: var(--font-title);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.hero {
+  padding-block: var(--space-12) var(--space-8);
+}
+
+.hero h1 {
+  font-size: clamp(1.75rem, 6vw, 2.5rem);
+  text-wrap: balance;
+}
+
+.hero p {
+  margin-top: var(--space-4);
+  color: var(--ink-soft);
+  max-width: 34rem;
+}
+
+.card {
+  background: var(--paper-raised);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: var(--space-6);
+}
+
+.card__label {
+  font-size: 0.8125rem;
+  color: var(--ink-soft);
+}
+
+/* Budget bar */
+.budget-bar__figure {
+  font-family: var(--font-title);
+  font-size: 2rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  margin-top: var(--space-1);
+}
+
+.budget-bar__track {
+  display: flex;
+  height: 10px;
+  margin-top: var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--line);
+  overflow: hidden;
+}
+
+.budget-bar__confirmed {
+  background: var(--confirmed);
+}
+
+.budget-bar__estimated {
+  background: var(--estimated);
+}
+
+.budget-bar__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-6);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.budget-bar__legend li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.dot--confirmed {
+  background: var(--confirmed);
+}
+
+.dot--estimated {
+  background: var(--estimated);
+}
+
+.note {
+  margin-top: var(--space-6);
+  font-size: 0.875rem;
+  color: var(--ink-soft);
+}
