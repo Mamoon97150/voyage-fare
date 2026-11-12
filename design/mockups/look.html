@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Look pass — three styles</title>
+    <script type="module">
+      import '/src/index.css'
+      import './look.css'
+      // look.html#a (or #b, #c) shows one style alone, for a phone-size look.
+      const only = location.hash.slice(1)
+      if (only) document.documentElement.dataset.only = only
+    </script>
+  </head>
+  <body>
+    <!-- Look pass (12 Nov 2026): the same slice of the Compare screen, same content, three styles.
+         Same palette (Carnet) and fonts (Lora + Inter) in all three. Three of the five options are shown. -->
+    <svg width="0" height="0" style="position:absolute"><defs>
+<symbol id="i-trip" viewBox="0 0 24 24"><circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 18h7a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h7"/></symbol>
+<symbol id="i-compare" viewBox="0 0 24 24"><rect x="4" y="5" width="6" height="14" rx="1.5"/><rect x="14" y="5" width="6" height="14" rx="1.5"/></symbol>
+<symbol id="i-budget" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 4v8l6 5"/></symbol>
+<symbol id="i-paid" viewBox="0 0 24 24"><path d="M4 9h14l-3-3M20 15H6l3 3"/></symbol>
+</defs></svg>
+    <div class="board">
+      <div class="col" id="style-a"><p class="col__label">A · Notebook</p><p class="col__desc">A page of your carnet: lines instead of boxes, index tabs like a notebook, the place in the title.</p><div class="frame a">
+<div class="head"><span class="back">‹</span><b>Lisbon &amp; Porto</b><div class="av"><span>A</span><span>B</span><span>C</span><span>D</span></div></div>
+<div class="money"><p><span><strong class="num">1 620 €</strong> <small>your share</small></span><em class="num">80 € under target</em></p><div class="bar"><i></i><i></i></div></div>
+<div class="index"><span class="todo">Travel</span><span class="on">Stay</span><span>Around</span><span>Activities</span><span class="todo">Food</span></div>
+<div class="title"><h3>Stay in Lisbon <span>▾</span></h3><p><span>3 nights · 5 options</span><span>Price ↑</span></p></div>
+<div class="opt"><span class="pick"></span><div class="main"><h4>Bairro Alto guesthouse</h4><p class="num">Guesthouse · 147 € a night for 4</p><p><span class="stars">★★★<i>★★</i></span> <span class="q">“Lively, noisy at night”</span></p><p><span class="tick">✓ Breakfast</span> · <span class="tick">✓ Free cancellation</span></p></div><div class="price num"><b>110 €</b><span>Cheapest</span></div></div><div class="opt chosen"><span class="pick">✓</span><div class="main"><h4>Alfama flat <span class="heart">♥</span></h4><p class="num">2-room flat · 167 € a night for 4</p><p><span class="stars">★★★★★<i></i></span> <span class="q">“Great area, lots of stairs”</span></p><p><span class="tick">✓ Free cancellation</span> · <span class="no">No breakfast</span></p><p class="note"><span class="heart">♥</span> Your coup de cœur · Chosen · Booked</p></div><div class="price num"><b>150 €</b><span>+40 €</span></div></div><div class="opt"><span class="pick"></span><div class="main"><h4>Baixa hotel</h4><p class="num">Hotel · 207 € a night for 4</p><p><span class="stars">★★★<i>★★</i></span> <span class="q">“Right in the centre”</span></p><p><span class="tick">✓ Breakfast</span> · <span class="tick">✓ Free cancellation</span></p></div><div class="price num"><b>155 €</b><span>+45 €</span></div></div>
+<div class="nav"><span><svg class="ico"><use href="#i-trip"/></svg>Trip</span><span class="on"><svg class="ico"><use href="#i-compare"/></svg>Compare</span><span><svg class="ico"><use href="#i-budget"/></svg>Budget</span><span><svg class="ico"><use href="#i-paid"/></svg>Who paid</span></div>
+</div></div>
+      <div class="col" id="style-b"><p class="col__label">B · Soft cards</p><p class="col__desc">Airy and rounded: each option is its own card, the place is picked with two big buttons.</p><div class="frame b">
+<div class="head"><span class="back">‹</span><b>Lisbon &amp; Porto</b><div class="av"><span>A</span><span>B</span><span>C</span><span>D</span></div></div>
+<div class="money"><p><span><strong class="num">1 620 €</strong> <small>your share</small></span><em class="num">80 € under target</em></p><div class="bar"><i></i><i></i></div></div>
+<div class="seg"><span class="todo">Travel</span><span class="on">Stay</span><span>Around</span><span>Activities</span><span class="todo">Food</span></div>
+<div class="places"><div class="on"><b>Lisbon</b><span>3 nights · chosen</span></div><div><b>Porto</b><span>2 nights · chosen</span></div></div>
+<div class="title"><b>5 places to stay</b><span>Price ↑</span></div>
+<div class="opt"><span class="pick"></span><div class="main"><h4>Bairro Alto guesthouse</h4><p class="num">Guesthouse · 147 € a night for 4</p><p><span class="stars">★★★<i>★★</i></span> “Lively, noisy at night”</p><div class="tags"><span>✓ Breakfast</span><span>✓ Free cancellation</span></div></div><div class="price num"><b>110 €</b><span>Cheapest</span></div></div><div class="opt chosen"><span class="pick">✓</span><div class="main"><h4>Alfama flat <span class="heart">♥</span></h4><p class="num">2-room flat · 167 € a night for 4</p><p><span class="stars">★★★★★<i></i></span> “Great area, lots of stairs”</p><div class="tags"><span>✓ Free cancellation</span><span class="no">No breakfast</span></div><p class="note"><span class="heart">♥</span> Your coup de cœur · Chosen · Booked</p></div><div class="price num"><b>150 €</b><span>+40 €</span></div></div><div class="opt"><span class="pick"></span><div class="main"><h4>Baixa hotel</h4><p class="num">Hotel · 207 € a night for 4</p><p><span class="stars">★★★<i>★★</i></span> “Right in the centre”</p><div class="tags"><span>✓ Breakfast</span><span>✓ Free cancellation</span></div></div><div class="price num"><b>155 €</b><span>+45 €</span></div></div>
+<div class="nav"><span><svg class="ico"><use href="#i-trip"/></svg>Trip</span><span class="on"><svg class="ico"><use href="#i-compare"/></svg>Compare</span><span><svg class="ico"><use href="#i-budget"/></svg>Budget</span><span><svg class="ico"><use href="#i-paid"/></svg>Who paid</span></div>
+</div></div>
+      <div class="col" id="style-c"><p class="col__label">C · Editorial</p><p class="col__desc">Like a travel magazine: a dark band for the budget, big type, the chosen option in full green.</p><div class="frame c">
+<div class="band"><div class="head"><span class="back">‹</span><b>Lisbon &amp; Porto</b><div class="av"><span>A</span><span>B</span><span>C</span><span>D</span></div></div><div class="money"><p><span><strong class="num">1 620 €</strong> <small>your share</small></span><em class="num">80 € under target</em></p><div class="bar"><i></i><i></i></div></div></div>
+<div class="words"><span class="todo">Travel</span><span class="on">Stay</span><span>Getting around</span><span>Activities</span><span class="todo">Food</span></div>
+<div class="step"><i class="off">‹</i><div style="text-align:center"><b>Lisbon</b><br><span>3 nights · 5 options · 1 of 2 places</span></div><i>›</i></div>
+<div class="opt"><h4>Bairro Alto guesthouse</h4><div class="price num"><b>110 €</b><span>Cheapest</span></div><p class="num">Guesthouse · 147 € a night for 4</p><p class="wide"><span class="stars">★★★<i>★★</i></span> “Lively, noisy at night”</p><p class="wide"><span class="tick">✓ Breakfast</span> · <span class="tick">✓ Free cancellation</span></p></div><div class="opt chosen"><h4>Alfama flat <span class="heart">♥</span></h4><div class="price num"><b>150 €</b><span>+40 €</span></div><p class="num">2-room flat · 167 € a night for 4</p><p class="wide"><span class="stars">★★★★★<i></i></span> “Great area, lots of stairs”</p><p class="wide"><span class="tick">✓ Free cancellation</span> · <span class="no">No breakfast</span></p><p class="wide note">♥ Your coup de cœur · Chosen · Booked</p></div><div class="opt"><h4>Baixa hotel</h4><div class="price num"><b>155 €</b><span>+45 €</span></div><p class="num">Hotel · 207 € a night for 4</p><p class="wide"><span class="stars">★★★<i>★★</i></span> “Right in the centre”</p><p class="wide"><span class="tick">✓ Breakfast</span> · <span class="tick">✓ Free cancellation</span></p></div>
+<div class="nav"><span>Trip</span><span class="on">Compare</span><span>Budget</span><span>Who paid</span></div>
+</div></div>
+    </div>
+  </body>
+</html>
