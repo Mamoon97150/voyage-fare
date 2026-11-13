@@ -8,6 +8,7 @@
   --line: #e4dccb;
   --confirmed: #2f6b4f; /* forest green: booked or paid, with an actual amount */
   --estimated: #e2a93b; /* mustard: everything still estimated */
+  --estimated-ink: #b07d1a; /* mustard for small marks (dots): 3.4:1 on paper, readable outdoors */
   --over: #c2513f; /* red: over budget only */
 
   /* Type */

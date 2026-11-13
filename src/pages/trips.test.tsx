@@ -81,6 +81,7 @@ const detail = (over: Record<string, unknown> = {}) => ({
 })
 
 beforeEach(() => {
+  window.localStorage.clear()
   Object.values(data).forEach((fn) => fn.mockReset())
   data.searchPlaces.mockResolvedValue([])
   data.getTrip.mockResolvedValue(detail())
@@ -515,6 +516,40 @@ describe('changing what was added', () => {
     expect(screen.getByText(/Cartagena and the 1 thing in it go. Tickets after it move up in the route./)).toBeInTheDocument()
     click('Yes, delete Cartagena')
     await waitFor(() => expect(data.deletePlace).toHaveBeenCalledWith('p1'))
+  })
+})
+
+describe('design review fixes (13 Nov)', () => {
+  const trip3 = {
+    places: [cartagena],
+    items: [
+      { id: 'i1', place_id: 'p1', kind: 'housing', name: 'Casa Lola', status: 'chosen', day_number: null, end_day_number: null },
+      { id: 'i2', place_id: 'p1', kind: 'activity', name: 'Islands', status: 'booked', day_number: 2, end_day_number: null },
+    ],
+    amounts: [
+      { item_id: 'i1', current: 1200, is_confirmed: false },
+      { item_id: 'i2', current: 90, is_confirmed: true },
+    ],
+  }
+
+  it('says once that rows can be tapped, until the first time', async () => {
+    data.getTrip.mockResolvedValue(detail(trip3))
+    const first = open('/trips/t1')
+    expect(await screen.findByText('tap anything to change it')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Change Casa Lola' }))
+    expect(screen.queryByText('tap anything to change it')).not.toBeInTheDocument()
+    first.unmount()
+    open('/trips/t1')
+    await screen.findByRole('heading', { name: /Cartagena/ })
+    expect(screen.queryByText('tap anything to change it')).not.toBeInTheDocument()
+  })
+
+  it('“Chosen” stays silent; Booked says so', async () => {
+    data.getTrip.mockResolvedValue(detail(trip3))
+    open('/trips/t1')
+    await screen.findByRole('button', { name: 'Change Casa Lola' })
+    expect(screen.queryByText('Chosen')).not.toBeInTheDocument()
+    expect(screen.getByText('Booked')).toBeInTheDocument()
   })
 })
 

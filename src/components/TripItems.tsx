@@ -17,7 +17,8 @@ import { FormMessage } from './AuthForm'
 import { FormActions } from './FormActions'
 import { TicketForm } from './TicketForm'
 
-const STATUS: Record<string, string> = { idea: 'Idea', chosen: 'Chosen', booked: 'Booked', paid: 'Paid' }
+// "Chosen" is the default and stays silent: the dot already says estimated or confirmed (review 13 Nov).
+const STATUS: Record<string, string | undefined> = { idea: 'Idea', booked: 'Booked', paid: 'Paid' }
 
 const priceOf = (detail: TripDetail, item: Item) => {
   const current = detail.amounts.find((a) => a.item_id === item.id)?.current
@@ -37,6 +38,7 @@ export function ItemRow({
   days,
   showDays = true,
   onChanged,
+  onOpen,
 }: {
   detail: TripDetail
   item: Item
@@ -46,6 +48,7 @@ export function ItemRow({
   days: number
   showDays?: boolean
   onChanged: () => void
+  onOpen?: () => void
 }) {
   const [editing, setEditing] = useState(false)
   const line = itemLine(detail, item, viewer, mode)
@@ -87,7 +90,15 @@ export function ItemRow({
 
   return (
     <li className="item-row">
-      <button type="button" className="item-row__tap" onClick={() => setEditing(true)} aria-label={`Change ${item.name}`}>
+      <button
+        type="button"
+        className="item-row__tap"
+        onClick={() => {
+          setEditing(true)
+          onOpen?.()
+        }}
+        aria-label={`Change ${item.name}`}
+      >
         <i className={`dot ${dot}`} aria-hidden="true" />
         <span className="item-row__main">
           <span className="item-row__name">{item.name}</span>
@@ -95,7 +106,10 @@ export function ItemRow({
         </span>
         <span className="item-row__amount num">
           <b>{line.concernsViewer ? formatMoney(line.amount, detail.trip.currency) : 'Not yours'}</b>
-          <span className="item-row__status">{STATUS[item.status] ?? item.status}</span>
+          {STATUS[item.status] && <span className="item-row__status">{STATUS[item.status]}</span>}
+        </span>
+        <span className="item-row__chev" aria-hidden="true">
+          ›
         </span>
       </button>
     </li>
@@ -358,12 +372,14 @@ export function RouteGap({
   viewer,
   mode,
   onChanged,
+  onOpen,
 }: {
   detail: TripDetail
   legs: LegLine[]
   viewer: string | null
   mode: Mode
   onChanged: () => void
+  onOpen?: () => void
 }) {
   const [editing, setEditing] = useState<string | null>(null) // an item id
   if (legs.length === 0) return null
@@ -408,7 +424,10 @@ export function RouteGap({
             <button
               type="button"
               className="leg__tap"
-              onClick={() => setEditing(item.id)}
+              onClick={() => {
+                setEditing(item.id)
+                onOpen?.()
+              }}
               aria-label={`Change ${leg.from_name} → ${leg.to_name}`}
             >
               <span className="leg__icon" aria-hidden="true">
@@ -424,10 +443,13 @@ export function RouteGap({
                 <span className="item-row__amount num">
                   <b>{line.concernsViewer ? formatMoney(line.amount, detail.trip.currency) : 'Not yours'}</b>
                   <span className="item-row__status">
-                    <i className={`dot ${dot}`} aria-hidden="true" /> {STATUS[item.status] ?? item.status}
+                    <i className={`dot ${dot}`} aria-hidden="true" /> {STATUS[item.status]}
                   </span>
                 </span>
               )}
+              <span className="item-row__chev" aria-hidden="true">
+                ›
+              </span>
             </button>
           </li>
         )

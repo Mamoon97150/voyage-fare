@@ -7,6 +7,7 @@ import { Sketch, SketchBox } from '../components/Sketch'
 import { TripBudget } from '../components/TripBudget'
 import { AddItem, ItemRow, RouteGap } from '../components/TripItems'
 import { Loading } from '../lib/auth'
+import { hintSeen, markHintSeen } from '../lib/hints'
 import { useAuth } from '../lib/authContext'
 import { explainAuthError } from '../lib/authForm'
 import { formatMoney } from '../lib/money'
@@ -39,6 +40,8 @@ export function TripPage() {
   const [mode, setMode] = useState<Mode>('mine')
   const [adding, setAdding] = useState<string | null>(null) // a place id, 'trip', or nothing
   const [editingPlace, setEditingPlace] = useState<string | null>(null)
+  // Tapping a row opens it for changes: say so once, until the first time it's used (review 13 Nov).
+  const [tapHint, setTapHint] = useState(() => !hintSeen('tap-to-change'))
 
   const load = useCallback(
     () =>
@@ -99,6 +102,10 @@ export function TripPage() {
   const wholeTrip = items.filter((i) => !i.place_id && !hasLegs(detail, i))
 
   const reload = () => void load()
+  const opened = () => {
+    markHintSeen('tap-to-change')
+    setTapHint(false)
+  }
   const added = () => {
     setAdding(null)
     reload()
@@ -119,6 +126,11 @@ export function TripPage() {
       />
 
       <div className="screen__body">
+        {tapHint && items.length > 0 && (
+          <p className="tap-hint">
+            <span className="hand">tap anything to change it</span>
+          </p>
+        )}
         {places.length === 0 ? (
           <SketchBox tape="mustard" className="empty" seed={21}>
             <Sketch name="empty-trip" width={200} />
@@ -128,7 +140,7 @@ export function TripPage() {
           </SketchBox>
         ) : (
           <>
-            <RouteGap detail={detail} legs={legsAfter(detail, null)} viewer={viewer} mode={shownMode} onChanged={reload} />
+            <RouteGap detail={detail} legs={legsAfter(detail, null)} viewer={viewer} mode={shownMode} onChanged={reload} onOpen={opened} />
             {places.map((place, i) => {
               const placeItems = items.filter((it) => it.place_id === place.id)
               return (
@@ -150,7 +162,10 @@ export function TripPage() {
                           <button
                             type="button"
                             className="place__edit"
-                            onClick={() => setEditingPlace(place.id)}
+                            onClick={() => {
+                              setEditingPlace(place.id)
+                              opened()
+                            }}
                             aria-label={`Change ${place.name}`}
                           >
                             Edit
@@ -182,6 +197,7 @@ export function TripPage() {
                                 kinds={KINDS_FOR_PLACE}
                                 days={days}
                                 onChanged={reload}
+                                onOpen={opened}
                                 showDays={group.key === 'stay' || group.key === 'ideas'}
                               />
                             ))}
@@ -207,7 +223,7 @@ export function TripPage() {
                       )}
                     </SketchBox>
                   </section>
-                  <RouteGap detail={detail} legs={legsAfter(detail, place.id)} viewer={viewer} mode={shownMode} onChanged={reload} />
+                  <RouteGap detail={detail} legs={legsAfter(detail, place.id)} viewer={viewer} mode={shownMode} onChanged={reload} onOpen={opened} />
                 </Fragment>
               )
             })}
@@ -232,6 +248,7 @@ export function TripPage() {
                         kinds={KINDS_FOR_TRIP}
                         days={days}
                         onChanged={reload}
+                        onOpen={opened}
                       />
                     ))}
                   </ul>

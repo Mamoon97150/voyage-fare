@@ -133,7 +133,7 @@ p {
 }
 
 .dot--estimated {
-  background: var(--estimated);
+  background: var(--estimated-ink); /* the soft mustard is too faint for a small mark (1.97:1) */
 }
 
 .note {
@@ -207,10 +207,9 @@ a {
   cursor: progress;
 }
 
-.button:focus-visible,
-.field__input:focus-visible,
-a:focus-visible {
-  outline: 2px solid var(--estimated);
+/* Keyboard focus: ink, which shows on every surface (mustard was 1.97:1). */
+:focus-visible {
+  outline: 2px solid var(--ink);
   outline-offset: 2px;
 }
 
@@ -1006,7 +1005,7 @@ select.field__input,
   margin-top: var(--space-3);
   padding-bottom: var(--space-1);
   border-bottom: 1px solid var(--line);
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -1082,7 +1081,7 @@ select.field__input,
 }
 
 .item-row__status {
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -1242,4 +1241,44 @@ select.field__input,
   white-space: normal;
   line-height: 1.25;
   padding-block: var(--space-2);
+}
+
+/* Review 13 Nov: rows say "tap me", and small controls get a 44 px touch area. */
+.item-row__chev {
+  align-self: center;
+  margin-left: calc(var(--space-1) * -1);
+  color: var(--ink-soft);
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.tap-hint {
+  margin: calc(var(--space-2) * -1) 0 calc(var(--space-2) * -1);
+  text-align: right;
+  font-size: 1.25rem;
+  color: var(--confirmed);
+}
+
+.tap-hint .hand::after {
+  content: ' ↓';
+}
+
+/* The visible control stays small; an invisible frame makes it 44 px to the finger. */
+.switch button,
+.place__edit {
+  position: relative;
+}
+
+.switch button::after,
+.place__edit::after {
+  content: '';
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: max(100%, 44px);
+  height: 44px;
+  transform: translate(-50%, -50%);
+}
+
+.add-row {
+  min-height: 44px;
 }
