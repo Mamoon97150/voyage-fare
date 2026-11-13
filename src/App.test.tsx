@@ -29,6 +29,7 @@ const fake = vi.hoisted(() => {
       signUp: vi.fn(),
       resetPasswordForEmail: vi.fn(),
       updateUser: vi.fn(),
+      resend: vi.fn(),
       signOut: vi.fn(async () => emit('SIGNED_OUT', null)),
     },
   }
@@ -143,41 +144,58 @@ describe('sign in', () => {
 })
 
 describe('create an account', () => {
-  it('checks the password before sending', async () => {
+  async function fillSignUp(name: string, email: string, password: string) {
     open('/sign-up')
-    await screen.findByLabelText('Email')
-    type('Email', 'dana@mail.com')
-    type('Password', 'short')
-    type('Password again', 'shorter')
+    await screen.findByLabelText('Your first name')
+    type('Your first name', name)
+    type('Email', email)
+    type('Password', password)
     fireEvent.click(screen.getByRole('button', { name: 'Create account' }))
+  }
+
+  it('checks every field before sending', async () => {
+    await fillSignUp(' ', 'dana@mail.com', 'short')
+    expect(screen.getByLabelText('Your first name')).toHaveAccessibleDescription('Enter your first name.')
     expect(screen.getByLabelText('Password')).toHaveAccessibleDescription('Use at least 8 characters.')
-    expect(screen.getByLabelText('Password again')).toHaveAccessibleDescription('The two passwords don’t match.')
     expect(fake.auth.signUp).not.toHaveBeenCalled()
   })
 
-  it('asks to confirm the email when the server waits for it', async () => {
-    fake.auth.signUp.mockResolvedValue({ data: { session: null, user: {} }, error: null })
+  it('the password can be shown instead of typed twice', async () => {
     open('/sign-up')
-    await screen.findByLabelText('Email')
-    type('Email', ' dana@mail.com ')
-    type('Password', 'long enough')
-    type('Password again', 'long enough')
-    fireEvent.click(screen.getByRole('button', { name: 'Create account' }))
+    const field = await screen.findByLabelText('Password')
+    expect(field).toHaveAttribute('type', 'password')
+    fireEvent.click(screen.getByRole('button', { name: 'Show password' }))
+    expect(field).toHaveAttribute('type', 'text')
+    fireEvent.click(screen.getByRole('button', { name: 'Hide password' }))
+    expect(field).toHaveAttribute('type', 'password')
+  })
+
+  it('keeps the first name, and asks to confirm the email when the server waits for it', async () => {
+    fake.auth.signUp.mockResolvedValue({ data: { session: null, user: {} }, error: null })
+    await fillSignUp(' Dana ', ' dana@mail.com ', 'long enough')
     expect(await screen.findByRole('heading', { name: 'Check your inbox' })).toBeInTheDocument()
     expect(screen.getByText('dana@mail.com')).toBeInTheDocument()
     expect(fake.auth.signUp).toHaveBeenCalledWith(
-      expect.objectContaining({ email: 'dana@mail.com', password: 'long enough' }),
+      expect.objectContaining({
+        email: 'dana@mail.com',
+        password: 'long enough',
+        options: expect.objectContaining({ data: { first_name: 'Dana' } }),
+      }),
     )
+  })
+
+  it('the confirmation link can be sent again', async () => {
+    fake.auth.signUp.mockResolvedValue({ data: { session: null, user: {} }, error: null })
+    fake.auth.resend.mockResolvedValue({ data: {}, error: null })
+    await fillSignUp('Dana', 'dana@mail.com', 'long enough')
+    fireEvent.click(await screen.findByRole('button', { name: 'send the link again' }))
+    expect(await screen.findByText('A new link is on its way.')).toBeInTheDocument()
+    expect(fake.auth.resend).toHaveBeenCalledWith(expect.objectContaining({ type: 'signup', email: 'dana@mail.com' }))
   })
 
   it('an email already used is said on the email field', async () => {
     fake.auth.signUp.mockResolvedValue({ data: {}, error: { code: 'user_already_exists', message: 'x' } })
-    open('/sign-up')
-    await screen.findByLabelText('Email')
-    type('Email', 'dana@mail.com')
-    type('Password', 'long enough')
-    type('Password again', 'long enough')
-    fireEvent.click(screen.getByRole('button', { name: 'Create account' }))
+    await fillSignUp('Dana', 'dana@mail.com', 'long enough')
     expect(await screen.findByText(/already exists/)).toBeInTheDocument()
   })
 })
@@ -204,7 +222,6 @@ describe('forgot password', () => {
     open('/reset-password')
     await screen.findByLabelText('New password')
     type('New password', 'brand new pass')
-    type('New password again', 'brand new pass')
     fireEvent.click(screen.getByRole('button', { name: 'Save the new password' }))
     expect(await screen.findByRole('heading', { name: 'Your trips' })).toBeInTheDocument()
     expect(fake.auth.updateUser).toHaveBeenCalledWith({ password: 'brand new pass' })

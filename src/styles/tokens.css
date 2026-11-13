@@ -13,6 +13,7 @@
   /* Type */
   --font-title: 'Lora Variable', Georgia, serif;
   --font-text: 'Inter Variable', system-ui, sans-serif;
+  --font-hand: 'Caveat', 'Segoe Print', cursive; /* notes only, never amounts */
 
   /* Space and shape */
   --space-1: 0.25rem;

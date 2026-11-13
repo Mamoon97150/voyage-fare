@@ -1,6 +1,5 @@
 import { Link } from 'react-router'
 import { BudgetBar } from '../components/BudgetBar'
-import { Logo } from '../components/Logo'
 import { useAuth } from '../lib/authContext'
 
 export function Home() {
@@ -8,7 +7,7 @@ export function Home() {
   return (
     <div className="page">
       <header className="app-header">
-        <Logo />
+        <img src="/illustrations/compass.svg" width={28} height={28} alt="" />
         <span className="app-header__name">Voyage Fare</span>
         <span className="app-header__account">
           {session ? (

@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Link } from 'react-router'
 import { AuthSheet, FormMessage, SubmitButton, TextField } from '../components/AuthForm'
+import { SketchBox } from '../components/Sketch'
 import { checkEmail, explainAuthError, onlyErrors, type FieldErrors } from '../lib/authForm'
 import { supabase } from '../lib/supabase'
 
@@ -34,11 +35,15 @@ export function ForgotPassword() {
 
   if (sentTo) {
     return (
-      <AuthSheet title="Check your inbox">
-        {/* Same answer whether the account exists or not: nobody can test which emails are signed up. */}
-        <p className="auth__intro">
-          If an account exists for <strong>{sentTo}</strong>, we sent it a link to choose a new password.
-        </p>
+      <AuthSheet
+        title="Check your inbox"
+        // Same answer whether the account exists or not: nobody can test which emails are signed up.
+        intro={
+          <>
+            If an account exists for <strong>{sentTo}</strong>, we sent it a link to choose a new password.
+          </>
+        }
+      >
         <p className="auth__switch">
           <Link to="/sign-in">Back to sign in</Link>
         </p>
@@ -50,16 +55,18 @@ export function ForgotPassword() {
     <AuthSheet title="Forgot your password?" intro="Enter your email and we’ll send you a link to choose a new one.">
       <form onSubmit={submit} noValidate className="form">
         {formError && <FormMessage tone="error">{formError}</FormMessage>}
-        <TextField
-          field="email"
-          label="Email"
-          type="email"
-          value={email}
-          onChange={setEmail}
-          errors={errors}
-          autoComplete="email"
-          autoFocus
-        />
+        <SketchBox tape="mustard" className="form__sheet">
+          <TextField
+            field="email"
+            label="Email"
+            type="email"
+            value={email}
+            onChange={setEmail}
+            errors={errors}
+            autoComplete="email"
+            autoFocus
+          />
+        </SketchBox>
         <SubmitButton busy={busy} label="Send the link" busyLabel="Sending…" />
       </form>
       <p className="auth__switch">

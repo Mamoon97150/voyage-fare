@@ -1,18 +1,31 @@
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import type { Field, FieldErrors } from '../lib/authForm'
-import { Logo } from './Logo'
+import { Sketch, Underlined, type Drawing } from './Sketch'
 
-/** One notebook sheet in the middle of the paper, for every account page. */
-export function AuthSheet({ title, intro, children }: { title: string; intro?: string; children: ReactNode }) {
+/** The account pages: the compass, a drawing, the title, then the form (mockup 6, look B). */
+export function AuthSheet({
+  title,
+  intro,
+  drawing,
+  children,
+}: {
+  title: string
+  intro?: ReactNode
+  drawing?: Drawing
+  children: ReactNode
+}) {
   return (
     <div className="auth">
       <Link to="/" className="auth__brand">
-        <Logo size={28} />
+        <img src="/illustrations/compass.svg" width={28} height={28} alt="" />
         <span>Voyage Fare</span>
       </Link>
-      <main className="sheet auth__sheet">
-        <h1 className="auth__title">{title}</h1>
+      <main className="auth__page">
+        {drawing && <Sketch name={drawing} width={330} />}
+        <h1 className="auth__title">
+          <Underlined>{title}</Underlined>
+        </h1>
         {intro && <p className="auth__intro">{intro}</p>}
         {children}
       </main>
@@ -23,7 +36,7 @@ export function AuthSheet({ title, intro, children }: { title: string; intro?: s
 type InputProps = {
   field: Field
   label: string
-  type: 'email' | 'password'
+  type: 'email' | 'password' | 'text'
   value: string
   onChange: (value: string) => void
   errors: FieldErrors
@@ -33,26 +46,42 @@ type InputProps = {
 }
 
 export function TextField({ field, label, type, value, onChange, errors, autoComplete, hint, autoFocus }: InputProps) {
+  const [shown, setShown] = useState(false)
   const id = `field-${field}`
   const error = errors[field]
-  const describedBy = [hint && `${id}-hint`, error && `${id}-error`].filter(Boolean).join(' ') || undefined
+  const describedBy = [hint && !error && `${id}-hint`, error && `${id}-error`].filter(Boolean).join(' ') || undefined
+  const isPassword = type === 'password'
   return (
     <div className={`field${error ? ' field--error' : ''}`}>
       <label htmlFor={id} className="field__label">
         {label}
       </label>
-      <input
-        id={id}
-        name={field}
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        autoComplete={autoComplete}
-        autoFocus={autoFocus}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={describedBy}
-        className="field__input"
-      />
+      <div className="field__box">
+        <input
+          id={id}
+          name={field}
+          type={isPassword && shown ? 'text' : type}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          autoComplete={autoComplete}
+          autoFocus={autoFocus}
+          autoCapitalize={type === 'text' ? 'words' : 'off'}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={describedBy}
+          className="field__input"
+        />
+        {isPassword && (
+          <button
+            type="button"
+            className="field__show"
+            onClick={() => setShown((s) => !s)}
+            aria-pressed={shown}
+            aria-label={shown ? 'Hide password' : 'Show password'}
+          >
+            {shown ? 'Hide' : 'Show'}
+          </button>
+        )}
+      </div>
       {hint && !error && (
         <p id={`${id}-hint`} className="field__hint">
           {hint}
@@ -78,7 +107,7 @@ export function FormMessage({ tone, children }: { tone: 'error' | 'info'; childr
 
 export function SubmitButton({ busy, label, busyLabel }: { busy: boolean; label: string; busyLabel: string }) {
   return (
-    <button type="submit" className="button button--primary" disabled={busy} aria-busy={busy || undefined}>
+    <button type="submit" className="button button--primary button--wide" disabled={busy} aria-busy={busy || undefined}>
       {busy ? busyLabel : label}
     </button>
   )

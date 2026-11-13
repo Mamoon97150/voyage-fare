@@ -1,5 +1,6 @@
 @import '@fontsource-variable/inter';
 @import '@fontsource-variable/lora';
+@import '@fontsource/caveat/500.css';
 @import './styles/tokens.css';
 
 *,
@@ -172,14 +173,6 @@ a {
   color: var(--ink-soft);
 }
 
-/* A sheet of the notebook, as in the mockups (each place is its own sheet). */
-.sheet {
-  background: var(--paper-raised);
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  box-shadow: 0 3px 10px rgb(31 42 36 / 0.07);
-}
-
 /* Buttons */
 .button {
   display: inline-flex;
@@ -239,13 +232,16 @@ a:focus-visible {
   font-family: var(--font-title);
   font-size: 1.125rem;
   font-weight: 600;
-  margin-bottom: var(--space-8);
+  margin-bottom: var(--space-4);
 }
 
-.auth__sheet {
+.auth__page {
   width: 100%;
   max-width: 24rem;
-  padding: var(--space-8) var(--space-6);
+}
+
+.auth__page > .sketch {
+  margin-bottom: var(--space-4);
 }
 
 .auth__title {
@@ -259,8 +255,7 @@ a:focus-visible {
 
 .auth__switch {
   margin-top: var(--space-6);
-  padding-top: var(--space-4);
-  border-top: 1px solid var(--line);
+  text-align: center;
   font-size: 0.875rem;
   color: var(--ink-soft);
 }
@@ -273,9 +268,26 @@ a:focus-visible {
   margin-top: var(--space-6);
 }
 
-.form .button--primary {
+.button--wide {
   width: 100%;
+}
+
+.form__sheet {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
   margin-top: var(--space-2);
+}
+
+.link-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--confirmed);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  cursor: pointer;
 }
 
 .form__aside {
@@ -296,6 +308,36 @@ a:focus-visible {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--ink-soft);
+}
+
+.field__box {
+  position: relative;
+  display: flex;
+}
+
+.field__box .field__input {
+  flex: 1;
+  min-width: 0;
+}
+
+.field__show {
+  position: absolute;
+  right: 0.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  min-height: 2.25rem;
+  padding: 0 var(--space-3);
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 0.875rem;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.field__input[type='password'],
+.field__box:has(.field__show) .field__input {
+  padding-right: 4rem;
 }
 
 .field__input {
@@ -338,4 +380,97 @@ a:focus-visible {
 .form-message--info {
   border-color: var(--confirmed);
   background: rgb(47 107 79 / 0.07);
+}
+
+/* ═════ Look B — illustrated carnet (chosen 13 Nov 2026) ═════
+   Drawings on welcome and empty pages, sheets outlined by hand, a strip of tape.
+   Working screens stay clean, and amounts never use the hand font. */
+.hand {
+  font-family: var(--font-hand);
+  font-weight: 500;
+}
+
+.sketch {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  mix-blend-mode: multiply; /* the white of the drawing paper melts into the app paper */
+}
+
+.sketch-box {
+  position: relative;
+  background: var(--paper-raised);
+  color: var(--ink);
+  padding: var(--space-6) var(--space-4) var(--space-4);
+}
+
+.sketch-box__line {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+.tape {
+  position: absolute;
+  top: -0.6rem;
+  left: 50%;
+  width: 4.5rem;
+  height: 1.2rem;
+  transform: translateX(-50%) rotate(-3deg);
+  border-radius: 2px;
+}
+
+.tape--mustard {
+  background: color-mix(in srgb, var(--estimated) 45%, transparent);
+}
+
+.tape--green {
+  background: color-mix(in srgb, var(--confirmed) 28%, transparent);
+}
+
+.underlined {
+  position: relative;
+  display: inline-block;
+}
+
+.underlined svg {
+  position: absolute;
+  left: -2%;
+  bottom: -0.4em;
+  width: 104%;
+  height: 0.55em;
+  overflow: visible;
+}
+
+.underlined path {
+  fill: none;
+  stroke: var(--estimated);
+  stroke-width: 3;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Your trips (empty for now) */
+.trips__title {
+  font-size: 1.75rem;
+  margin: var(--space-6) 0 var(--space-6);
+}
+
+.empty {
+  text-align: center;
+}
+
+.empty__title {
+  font-size: 1.25rem;
+  margin-top: var(--space-3);
+}
+
+.empty__note {
+  font-size: 1.3rem;
+  color: var(--ink-soft);
 }

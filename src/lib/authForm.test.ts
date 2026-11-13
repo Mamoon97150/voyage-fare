@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { checkConfirm, checkEmail, checkPassword, explainAuthError, onlyErrors, safeNext } from './authForm'
+import { checkEmail, checkFirstName, checkPassword, explainAuthError, onlyErrors, safeNext } from './authForm'
 
 describe('field checks', () => {
   it('email: required and shaped like an address', () => {
@@ -18,10 +18,10 @@ describe('field checks', () => {
     expect(checkPassword('short', { isNew: false })).toBeUndefined()
   })
 
-  it('confirm: must match', () => {
-    expect(checkConfirm('secret123', '')).toBe('Type your password again.')
-    expect(checkConfirm('secret123', 'secret124')).toMatch(/don’t match/)
-    expect(checkConfirm('secret123', 'secret123')).toBeUndefined()
+  it('first name: required, and not a paragraph', () => {
+    expect(checkFirstName('  ')).toBe('Enter your first name.')
+    expect(checkFirstName('x'.repeat(41))).toMatch(/under 40/)
+    expect(checkFirstName('Ana')).toBeUndefined()
   })
 
   it('keeps only the fields with an error', () => {

@@ -1,7 +1,7 @@
 // Checks and messages for the account forms (cahier des charges §6.6:
 // errors shown per field, and they say what happened and what to do).
 
-export type Field = 'email' | 'password' | 'confirm'
+export type Field = 'firstName' | 'email' | 'password'
 export type FieldErrors = Partial<Record<Field, string>>
 
 export const MIN_PASSWORD = 8
@@ -21,9 +21,9 @@ export function checkPassword(password: string, { isNew }: { isNew: boolean }): 
   return undefined
 }
 
-export function checkConfirm(password: string, confirm: string): string | undefined {
-  if (!confirm) return 'Type your password again.'
-  if (confirm !== password) return 'The two passwords don’t match.'
+export function checkFirstName(name: string): string | undefined {
+  if (!name.trim()) return 'Enter your first name.'
+  if (name.trim().length > 40) return 'Keep it under 40 characters.'
   return undefined
 }
 
