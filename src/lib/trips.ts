@@ -267,3 +267,14 @@ export async function deletePlace(id: string): Promise<void> {
   const { error } = await supabase.rpc('delete_place', { p_place_id: id })
   if (error) throw error
 }
+
+/** Just enough for a trip's other pages: its name and how many travellers (null when not yours). */
+export async function getTripHeader(id: string): Promise<{ name: string; travellers: number } | null> {
+  const { data, error } = await supabase
+    .from('trips')
+    .select('name, travellers!travellers_trip_id_fkey(id)')
+    .eq('id', id)
+    .maybeSingle()
+  if (error) throw error
+  return data ? { name: data.name, travellers: data.travellers.length } : null
+}

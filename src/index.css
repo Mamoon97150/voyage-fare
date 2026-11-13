@@ -155,14 +155,6 @@ a {
   font-size: 0.875rem;
 }
 
-.app-header__email {
-  color: var(--ink-soft);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 12rem;
-}
-
 .hero__actions {
   margin-top: var(--space-6);
 }
@@ -1281,4 +1273,146 @@ select.field__input,
 
 .add-row {
   min-height: 44px;
+}
+
+/* ═════ Navigation (mockups 1 and 5) ═════ */
+
+/* Your initial at the top right of "Your trips": your account, sign out. */
+.account-menu {
+  position: relative;
+}
+
+.account-menu__button {
+  border: 0;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  position: relative;
+}
+
+.account-menu__button::after {
+  content: '';
+  position: absolute;
+  inset: -6px; /* 44 px to the finger */
+}
+
+.account-menu__list {
+  position: absolute;
+  right: 0;
+  top: calc(100% + var(--space-2));
+  z-index: 10;
+  min-width: 12rem;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-2);
+  background: var(--paper-raised);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgb(31 42 36 / 0.14);
+}
+
+.account-menu__who {
+  padding: var(--space-1) var(--space-3) var(--space-2);
+  border-bottom: 1px solid var(--line);
+  margin-bottom: var(--space-1);
+  font-size: 0.8125rem;
+  color: var(--ink-soft);
+}
+
+.account-menu__item {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  font: inherit;
+  color: var(--ink);
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.account-menu__item:hover {
+  background: var(--paper);
+}
+
+/* The bar at the bottom of a trip: Trip · Compare · Budget · Who paid */
+.screen--trip {
+  padding-bottom: calc(5rem + env(safe-area-inset-bottom));
+}
+
+.trip-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  z-index: 6;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 28rem;
+  display: flex;
+  padding: var(--space-1) var(--space-2) calc(var(--space-2) + env(safe-area-inset-bottom));
+  background: var(--paper);
+  border-top: 1.5px solid var(--ink);
+}
+
+.trip-nav a {
+  flex: 1;
+  min-height: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+  text-decoration: none;
+}
+
+.trip-nav a.active {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.trip-nav svg {
+  width: 1.375rem;
+  height: 1.375rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Your account */
+.account__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.account__form .button {
+  align-self: flex-start;
+}
+
+.kv {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--line);
+}
+
+.kv span {
+  color: var(--ink-soft);
+  font-size: 0.875rem;
+}
+
+.kv b {
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

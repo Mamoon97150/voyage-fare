@@ -5,6 +5,7 @@ import { CityField } from '../components/CityField'
 import { FormActions } from '../components/FormActions'
 import { Sketch, SketchBox } from '../components/Sketch'
 import { TripBudget } from '../components/TripBudget'
+import { TripNav } from '../components/TripNav'
 import { AddItem, ItemRow, RouteGap } from '../components/TripItems'
 import { Loading } from '../lib/auth'
 import { hintSeen, markHintSeen } from '../lib/hints'
@@ -280,6 +281,7 @@ export function TripPage() {
           </>
         )}
       </div>
+      <TripNav tripId={trip.id} solo={solo} />
     </div>
   )
 }

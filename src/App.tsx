@@ -1,5 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router'
 import { AuthProvider, RequireAuth, SignedOutOnly } from './lib/auth'
+import { Account } from './pages/Account'
 import { ForgotPassword } from './pages/ForgotPassword'
 import { Home } from './pages/Home'
 import { NewTrip } from './pages/NewTrip'
@@ -7,6 +8,7 @@ import { ResetPassword } from './pages/ResetPassword'
 import { SignIn } from './pages/SignIn'
 import { SignUp } from './pages/SignUp'
 import { TripPage } from './pages/TripPage'
+import { TripSection } from './pages/TripSection'
 import { Trips } from './pages/Trips'
 
 export function AppRoutes() {
@@ -20,6 +22,10 @@ export function AppRoutes() {
       <Route path="/trips" element={<RequireAuth><Trips /></RequireAuth>} />
       <Route path="/trips/new" element={<RequireAuth><NewTrip /></RequireAuth>} />
       <Route path="/trips/:tripId" element={<RequireAuth><TripPage /></RequireAuth>} />
+      <Route path="/trips/:tripId/compare" element={<RequireAuth><TripSection section="compare" /></RequireAuth>} />
+      <Route path="/trips/:tripId/budget" element={<RequireAuth><TripSection section="budget" /></RequireAuth>} />
+      <Route path="/trips/:tripId/who-paid" element={<RequireAuth><TripSection section="who-paid" /></RequireAuth>} />
+      <Route path="/account" element={<RequireAuth><Account /></RequireAuth>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )

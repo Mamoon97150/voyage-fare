@@ -81,7 +81,7 @@ describe('pages that need an account', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Sign in' }))
 
     expect(await screen.findByRole('heading', { name: 'Your trips' })).toBeInTheDocument()
-    expect(screen.getByText('dana@mail.com')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Your account (dana@mail.com)' })).toBeInTheDocument()
   })
 
   it('never shows the page before knowing who is there', () => {
@@ -94,7 +94,8 @@ describe('pages that need an account', () => {
   it('signing out goes back to sign in', async () => {
     fake.state.session = session
     open('/trips')
-    fireEvent.click(await screen.findByRole('button', { name: 'Sign out' }))
+    fireEvent.click(await screen.findByRole('button', { name: /Your account/ }))
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Sign out' }))
     expect(await screen.findByRole('heading', { name: 'Sign in' })).toBeInTheDocument()
   })
 
@@ -225,5 +226,37 @@ describe('forgot password', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save the new password' }))
     expect(await screen.findByRole('heading', { name: 'Your trips' })).toBeInTheDocument()
     expect(fake.auth.updateUser).toHaveBeenCalledWith({ password: 'brand new pass' })
+  })
+})
+
+describe('your account', () => {
+  it('the menu on Your trips leads to your account', async () => {
+    fake.state.session = session
+    open('/trips')
+    fireEvent.click(await screen.findByRole('button', { name: /Your account/ }))
+    expect(screen.getByRole('menuitem', { name: 'Your account' })).toHaveAttribute('href', '/account')
+  })
+
+  it('change your first name, used in new trips', async () => {
+    fake.state.session = { user: { email: 'dana@mail.com', user_metadata: { first_name: 'Dana' } } }
+    fake.auth.updateUser.mockResolvedValue({ data: {}, error: null })
+    open('/account')
+    await screen.findByRole('heading', { name: 'Your account' })
+    expect(screen.getByLabelText('First name')).toHaveValue('Dana')
+    expect(screen.getByText('dana@mail.com')).toBeInTheDocument()
+    type('First name', ' Danielle ')
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    expect(await screen.findByText('Saved. New trips will use this name for you.')).toBeInTheDocument()
+    expect(fake.auth.updateUser).toHaveBeenCalledWith({ data: { first_name: 'Danielle' } })
+  })
+
+  it('a new password needs 8 characters', async () => {
+    fake.state.session = session
+    open('/account')
+    await screen.findByRole('heading', { name: 'Your account' })
+    type('New password', 'short')
+    fireEvent.click(screen.getByRole('button', { name: 'Change password' }))
+    expect(screen.getByLabelText('New password')).toHaveAccessibleDescription('Use at least 8 characters.')
+    expect(fake.auth.updateUser).not.toHaveBeenCalled()
   })
 })

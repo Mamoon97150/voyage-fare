@@ -21,6 +21,7 @@ const data = vi.hoisted(() => ({
   listTrips: vi.fn(),
   getTrip: vi.fn(),
   addPlace: vi.fn(),
+  getTripHeader: vi.fn(),
   addItem: vi.fn(),
   addTicket: vi.fn(),
   updateItem: vi.fn(),
@@ -35,6 +36,7 @@ vi.mock('../lib/trips', () => ({
   listTrips: data.listTrips,
   getTrip: data.getTrip,
   addPlace: data.addPlace,
+  getTripHeader: data.getTripHeader,
   addItem: data.addItem,
   addTicket: data.addTicket,
   updateItem: data.updateItem,
@@ -562,6 +564,35 @@ describe('design review fixes (13 Nov)', () => {
     await screen.findByRole('button', { name: 'Change Casa Lola' })
     expect(screen.queryByText('Chosen')).not.toBeInTheDocument()
     expect(screen.getByText('Booked')).toBeInTheDocument()
+  })
+})
+
+describe('moving around a trip', () => {
+  it('the bottom bar: Trip, Compare, Budget, Who paid', async () => {
+    open('/trips/t1')
+    const nav = await screen.findByRole('navigation', { name: 'Trip' })
+    const links = Array.from(nav.querySelectorAll('a')).map((a) => [a.textContent, a.getAttribute('href')])
+    expect(links).toEqual([
+      ['Trip', '/trips/t1'],
+      ['Compare', '/trips/t1/compare'],
+      ['Budget', '/trips/t1/budget'],
+      ['Who paid', '/trips/t1/who-paid'],
+    ])
+  })
+
+  it('solo: no Who paid', async () => {
+    data.getTrip.mockResolvedValue(detail({ travellers: [travellers[0]] }))
+    open('/trips/t1')
+    const nav = await screen.findByRole('navigation', { name: 'Trip' })
+    expect(nav).not.toHaveTextContent('Who paid')
+  })
+
+  it('a page not built yet says what’s coming, and keeps the bar', async () => {
+    data.getTripHeader.mockResolvedValue({ name: 'Colombia', travellers: 3 })
+    open('/trips/t1/compare')
+    expect(await screen.findByRole('heading', { name: 'Compare', level: 1 })).toBeInTheDocument()
+    expect(screen.getByText(/Coming next/)).toBeInTheDocument()
+    expect(screen.getByRole('navigation', { name: 'Trip' })).toBeInTheDocument()
   })
 })
 
