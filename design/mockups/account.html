@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mockup — Account (v1)</title>
+    <script type="module">
+      import '/src/index.css'
+      import './mockup.css'
+      import './forms.css'
+    </script>
+  </head>
+  <body>
+    <!-- Mockup 9 · Account, phone size. Opened from the avatar at the top of "Your trips". -->
+    <div class="phones">
+      <figure>
+        <div class="phone">
+          <div class="screen-top"><span class="back">‹</span><h1>Your account</h1></div>
+          <div class="fsheet">
+            <h3>You</h3>
+            <div class="kv"><span>First name</span><b>Ana<span class="chev">›</span></b></div>
+            <div class="kv"><span>Email</span><b>ana@mail.com<span class="chev">›</span></b></div>
+            <div class="kv"><span>Password</span><b>Change<span class="chev">›</span></b></div>
+          </div>
+          <div class="fsheet">
+            <h3>New trips</h3>
+            <div class="kv"><span>Main currency</span><b>EUR · Euro<span class="chev">›</span></b></div>
+            <div class="kv"><span>Usually leaving from</span><b>St Martin<span class="chev">›</span></b></div>
+            <p class="hint">Filled in for you each time you create a trip.</p>
+          </div>
+          <div class="btn-main" style="background: var(--paper-raised); color: var(--ink); border: 1px solid var(--line)">Sign out</div>
+          <div class="fsheet fsheet--danger">
+            <h3>Delete your account</h3>
+            <p class="hint">A trip goes with your account only if nobody else on it has an account. Shared trips stay with the others, and you are removed from them.</p>
+            <div style="margin-top: var(--space-3)"><span class="btn-line btn-danger">Delete my account</span></div>
+          </div>
+          <p class="hint" style="text-align:center; margin-top: var(--space-6)">Voyage Fare · <span class="link">Privacy</span> · <span class="link">Contact</span></p>
+        </div>
+        <span class="phone-label">Account</span>
+      </figure>
+
+      <figure>
+        <div class="phone">
+          <div class="screen-top"><span class="back">‹</span><h1>Change password</h1></div>
+          <div class="fsheet">
+            <div class="f"><label>Current password</label><div class="input">••••••••••<span class="end">Show</span></div></div>
+            <div class="f"><label>New password</label><div class="input input--focus">••••••••••••<span class="end">Show</span></div><p class="hint">At least 8 characters.</p></div>
+          </div>
+          <div class="btn-main">Save</div>
+        </div>
+        <span class="phone-label">Change password</span>
+      </figure>
+    </div>
+
+    <div class="questions">
+      <h2>Decided by Djamina (13 Nov)</h2>
+      <ul>
+        <li>✅ <b>Defaults for new trips</b> (currency, leaving from): kept.</li>
+        <li>✅ <b>Delete my account</b> (decided 13 Nov): a trip you created is deleted only if no other member still has an account; otherwise it stays with them (one of them becomes the owner).</li>
+      </ul>
+    </div>
+    <p class="mock-note">Mockup 9 · Account · v1 · content only, look pass after.</p>
+  </body>
+</html>

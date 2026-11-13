@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mockup — Create a trip (v1)</title>
+    <script type="module">
+      import '/src/index.css'
+      import './mockup.css'
+      import './forms.css'
+    </script>
+  </head>
+  <body>
+    <!-- Mockup 7 · Create a trip, phone size. Three short steps, then the empty trip view, which
+         asks for the first place. Only the trip's name is required; everything else can wait. -->
+    <div class="phones">
+      <figure>
+        <div class="phone">
+          <div class="screen-top"><span class="back">✕</span><h1>New trip</h1><span class="steps"><b>1</b> of 3</span></div>
+          <div class="stepbar"><i class="on"></i><i></i><i></i></div>
+          <div class="lead"><h2>Where are you going?</h2></div>
+          <div class="fsheet">
+            <div class="f"><label>Trip name</label><div class="input input--focus">Colombia with my sisters</div></div>
+            <div class="f">
+              <label>Leaving from</label><div class="input">St Mar<span class="ph">|</span></div>
+              <div class="suggest">
+                <div>St Martin <small>· Saint-Martin (French part)</small></div>
+                <div>St Martin's Island <small>· Bangladesh</small></div>
+              </div>
+              <p class="hint">Where the trip starts and ends. Draws the route on the map.</p>
+            </div>
+            <div class="row2">
+              <div class="f"><label>From</label><div class="input"><span class="ph">Day</span></div></div>
+              <div class="f"><label>To</label><div class="input"><span class="ph">Day</span></div></div>
+            </div>
+            <div class="check"><i class="on">✓</i> Dates not decided yet</div>
+          </div>
+          <div class="btn-main">Next</div>
+        </div>
+        <span class="phone-label">Step 1 · the trip</span>
+      </figure>
+
+      <figure>
+        <div class="phone">
+          <div class="screen-top"><span class="back">‹</span><h1>New trip</h1><span class="steps"><b>2</b> of 3</span></div>
+          <div class="stepbar"><i class="on"></i><i class="on"></i><i></i></div>
+          <div class="lead"><h2>Who’s coming?</h2><p>Names only. No account needed: each person gets their own share.</p></div>
+          <div class="fsheet">
+            <ul class="people">
+              <li><span class="avatar avatar--me" style="margin:0">A</span><span class="who-name"><b>Ana</b><small>You</small></span></li>
+              <li><span class="avatar avatar--b" style="margin:0">B</span><span class="who-name"><b>Bea</b></span><span class="act">✕</span></li>
+              <li><span class="avatar avatar--c" style="margin:0">C</span><span class="who-name"><b>Cleo</b></span><span class="act">✕</span></li>
+              <li><span class="avatar" style="margin:0; background: var(--line); color: var(--ink-soft)">?</span><span class="who-name"><div class="input input--focus" style="min-height: 2.25rem">Dan<span class="ph">|</span></div></span></li>
+            </ul>
+            <div class="addrow"><span class="plus">+</span> Add a traveller</div>
+          </div>
+          <p class="hint" style="padding: var(--space-3) var(--space-4) 0">You can invite them to edit the trip later, from its settings.</p>
+          <div class="btn-main">Next</div>
+        </div>
+        <span class="phone-label">Step 2 · travellers</span>
+      </figure>
+
+      <figure>
+        <div class="phone">
+          <div class="screen-top"><span class="back">‹</span><h1>New trip</h1><span class="steps"><b>3</b> of 3</span></div>
+          <div class="stepbar"><i class="on"></i><i class="on"></i><i class="on"></i></div>
+          <div class="lead"><h2>What’s the budget?</h2><p>A target helps you see when you go over. You can change it any time.</p></div>
+          <div class="fsheet">
+            <div class="f"><label>Main currency</label><div class="input">EUR · Euro<span class="end">▾</span></div><p class="hint">Totals and who-owes-whom are in this currency. Prices in pesos or dollars are converted.</p></div>
+            <div class="f">
+              <label>Target</label>
+              <div class="input"><span class="num">2 500</span><span class="end">€</span></div>
+              <div style="margin-top: var(--space-2)"><span class="switch"><span class="on">Per person</span><span>Whole trip</span></span></div>
+            </div>
+          </div>
+          <div class="btn-main">Create the trip</div>
+          <span class="skip">No target for now</span>
+        </div>
+        <span class="phone-label">Step 3 · budget</span>
+      </figure>
+
+      <figure>
+        <div class="phone phone--trip">
+          <div class="screen-top"><span class="back">‹</span><h1>Colombia with my sisters</h1></div>
+          <p class="hint" style="padding: 0 var(--space-4)">Dates not decided · from St Martin · 4 travellers</p>
+          <div class="budget" style="position: static; margin-top: var(--space-3)">
+            <div class="budget__row"><div class="budget__figure num">— <small>your share</small></div><span class="switch"><span class="on">Ana</span><span>Total</span></span></div>
+            <div class="track"><div class="track__target"></div></div>
+            <div class="budget__legend"><span class="key"><i class="dot dot--none"></i> Nothing priced yet</span><span class="num">target 2 500 € pp</span></div>
+          </div>
+          <div class="fsheet" style="margin-top: var(--space-6)">
+            <h3>Add your first place</h3>
+            <div class="f"><label>City or area</label><div class="input"><span class="ph">Cartagena, Medellín…</span></div></div>
+            <div class="f"><label>Nights</label><div class="input" style="max-width: 7rem"><span class="ph">0</span></div></div>
+            <div class="btn-main" style="margin: var(--space-4) 0 0">Add the place</div>
+          </div>
+          <div class="fsheet" style="background: transparent; box-shadow: none; border-style: dashed">
+            <h3>Then</h3>
+            <ul class="people">
+              <li><span class="who-name"><b>✈ Flights and long trips</b><small>Your tickets, round trips counted once</small></span></li>
+              <li><span class="who-name"><b>🏠 Places to stay</b><small>Compare a few, keep your coup de cœur</small></span></li>
+              <li><span class="who-name"><b>✦ Ideas</b><small>Activities and restaurants, with or without a day</small></span></li>
+            </ul>
+          </div>
+        </div>
+        <span class="phone-label">The new trip, empty</span>
+      </figure>
+    </div>
+
+    <div class="questions">
+      <h2>To decide</h2>
+      <ul>
+        <li><b>Only the name is required.</b> Leaving from, dates, travellers and target can all be skipped and set later in the trip settings.</li>
+        <li><b>Places come after</b>, on the trip itself (first place, then the next ones), rather than as a 4th step: the trip view is where the route grows.</li>
+        <li><b>Dates:</b> a start and an end day, or “not decided yet”. Nights per place are set when adding each place.</li>
+      </ul>
+    </div>
+    <p class="mock-note">Mockup 7 · Create a trip · v1 · content only, look pass after.</p>
+  </body>
+</html>

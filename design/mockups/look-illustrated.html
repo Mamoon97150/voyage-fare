@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Look — B · Illustrated carnet, with the real drawings (v1)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&display=swap" rel="stylesheet" />
+    <script type="module">
+      import '/src/index.css'
+      import './mockup.css'
+      import './forms.css'
+    </script>
+    <style>
+      /* B · Illustrated carnet (chosen 13 Nov 2026), with the six Recraft drawings
+         (design/illustrations/, cleaned: palette colours only, no background). */
+      :root { --hand: 'Caveat', 'Segoe Print', cursive; }
+      .hand { font-family: var(--hand); font-weight: 500; }
+      .sketchy { position: relative; border-color: transparent !important; box-shadow: none !important; }
+      .sketchy::before { content: ''; position: absolute; inset: 0; border: 2px solid var(--ink); border-radius: inherit; filter: url(#rough); pointer-events: none; opacity: 0.75; }
+      .tape { position: absolute; width: 4.5rem; height: 1.2rem; background: color-mix(in srgb, var(--estimated) 45%, transparent); top: -0.6rem; left: 50%; transform: translateX(-50%) rotate(-3deg); border-radius: 2px; }
+      .tape--g { background: color-mix(in srgb, var(--confirmed) 28%, transparent); }
+      .underline { display: inline-block; position: relative; }
+      .underline svg { position: absolute; left: -2%; bottom: -0.45em; width: 104%; height: 0.6em; }
+      .illo { display: block; margin: 0 auto; max-width: 100%; height: auto; mix-blend-mode: multiply; } /* the white paper of the sketch melts into the app paper */
+      .brand-mark { display: flex; align-items: center; gap: 0.45rem; }
+      .empty { text-align: center; padding: var(--space-6) var(--space-4); }
+      .fsheet.empty > h3, .empty > h3 { font-size: 1.25rem; margin-top: var(--space-3); justify-content: center; text-align: center; }
+      .empty .hand { font-size: 1.3rem; color: var(--ink-soft); }
+      .tabs-lite { display: flex; gap: var(--space-4); padding: var(--space-2) var(--space-4) 0; font-size: 0.8125rem; color: var(--ink-soft); border-bottom: 1px solid var(--line); }
+      .tabs-lite span { padding-bottom: var(--space-2); }
+      .tabs-lite .on { color: var(--ink); font-weight: 600; border-bottom: 2px solid var(--ink); }
+    </style>
+  </head>
+  <body>
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+      <defs>
+        <filter id="rough" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="3" /><feDisplacementMap in="SourceGraphic" scale="2.2" /></filter>
+        <symbol id="underline" viewBox="0 0 100 10" preserveAspectRatio="none"><path style="fill:none; stroke: var(--estimated); stroke-width: 3; stroke-linecap: round" d="M2 6c20-3 45-4 70-3 9 .4 18 1.3 26 2.4"/></symbol>
+      </defs>
+    </svg>
+
+    <div class="phones">
+      <figure>
+        <div class="phone">
+          <div class="home-top"><span class="brand brand-mark"><img src="/illustrations/compass.svg" width="28" height="28" alt="" />Voyage Fare</span></div>
+          <img class="illo" src="/illustrations/sketch-welcome.webp" width="330" alt="" style="margin-top: var(--space-4)" />
+          <div class="lead" style="padding-top: var(--space-2)">
+            <h2><span class="underline">Sign in<svg><use href="#underline" /></svg></span></h2>
+            <p>Welcome back. Your trips are where you left them.</p>
+          </div>
+          <div class="fsheet sketchy"><span class="tape"></span>
+            <div class="f"><label>Email</label><div class="input">ana@mail.com</div></div>
+            <div class="f"><label>Password</label><div class="input">••••••••••<span class="end">Show</span></div></div>
+            <p class="hint" style="text-align:right; margin-top: var(--space-2)"><span class="link">Forgot your password?</span></p>
+          </div>
+          <div class="btn-main">Sign in</div>
+          <p class="hand" style="text-align:center; margin-top: var(--space-3); font-size: 1.3rem; color: var(--confirmed)">or peek at a demo trip →</p>
+          <p class="skip" style="text-decoration:none">New here? <span class="link">Create an account</span></p>
+        </div>
+        <span class="phone-label">Sign in</span>
+      </figure>
+
+      <figure>
+        <div class="phone">
+          <header class="home-top"><span class="brand brand-mark"><img src="/illustrations/compass.svg" width="28" height="28" alt="" />Voyage Fare</span><span class="avatar avatar--me" style="margin:0">A</span></header>
+          <div class="home-title"><h1>Your trips</h1></div>
+          <div class="fsheet sketchy empty"><span class="tape tape--g"></span>
+            <img class="illo" src="/illustrations/sketch-no-trips.webp" width="230" alt="" />
+            <h3>No trips yet</h3>
+            <p class="hand">the first page is the hardest</p>
+            <div class="btn-main" style="margin: var(--space-4) 0 0">+ New trip</div>
+          </div>
+          <p class="home-demo">Want to look around first? <b>Open the demo trip</b>.</p>
+        </div>
+        <span class="phone-label">Your trips · empty</span>
+      </figure>
+
+      <figure>
+        <div class="phone phone--trip">
+          <div class="screen-top"><span class="back">‹</span><h1>Colombia</h1></div>
+          <div class="budget" style="position: static; margin-top: var(--space-2)">
+            <div class="budget__row"><div class="budget__figure num">— <small>your share</small></div><span class="switch"><span class="on">Ana</span><span>Total</span></span></div>
+            <div class="track"><div class="track__target"></div></div>
+          </div>
+          <div class="fsheet sketchy empty" style="margin-top: var(--space-6)"><span class="tape"></span>
+            <img class="illo" src="/illustrations/sketch-empty-trip.webp" width="190" alt="" />
+            <h3>Add your first place</h3>
+            <p class="hand">where does the trip begin?</p>
+            <div class="input" style="margin-top: var(--space-3); text-align:left"><span class="ph">Cartagena, Medellín…</span></div>
+          </div>
+        </div>
+        <span class="phone-label">A new trip · empty</span>
+      </figure>
+
+      <figure>
+        <div class="phone">
+          <div class="screen-top"><span class="back">‹</span><h1>Compare</h1></div>
+          <div class="tabs-lite"><span>Flights</span><span class="on">Stays</span><span>Ideas</span></div>
+          <div class="empty">
+            <img class="illo" src="/illustrations/sketch-compare-empty.webp" width="270" alt="" />
+            <h3>No places to stay yet in Cartagena</h3>
+            <p class="hand">add a few, keep your coup de cœur</p>
+            <div class="btn-main" style="margin: var(--space-4) 0 0">+ Add an option</div>
+          </div>
+        </div>
+        <span class="phone-label">Compare · empty</span>
+      </figure>
+
+      <figure>
+        <div class="phone">
+          <div class="screen-top"><span class="back">‹</span><h1>Who paid what</h1></div>
+          <div class="fsheet sketchy empty" style="margin-top: var(--space-6)"><span class="tape tape--g"></span>
+            <img class="illo" src="/illustrations/sketch-settled.webp" width="230" alt="" />
+            <h3>All settled up</h3>
+            <p class="hand">nobody owes anybody. cheers!</p>
+          </div>
+          <div class="fsheet">
+            <div class="kv"><span>Paid so far</span><b class="num">5 840 €</b></div>
+            <div class="kv"><span>Paid back</span><b class="num">3 repayments</b></div>
+          </div>
+        </div>
+        <span class="phone-label">Who paid what · settled</span>
+      </figure>
+    </div>
+
+    <div class="questions">
+      <h2>The drawings</h2>
+      <ul>
+        <li>Made with Recraft (13 Nov, v2): detailed pen-and-ink sketches with a light watercolour wash, like pages of a real carnet de voyage. One brief for all five so they share the same hand: ink in dark green-black, washes in forest green and mustard only. The compass logo stays a simple line drawing so it reads at small size.</li>
+        <li>Welcome (palm, rooftops, sea, plane) · no trips yet (notebook and coffee at a café table) · empty trip (suitcase, straw hat, map) · empty compare (three Caribbean houses, the favourite in mustard) · all settled up (two cocktails on a terrace).</li>
+        <li>Working screens (trip view, compare with options, budget, who paid what) stay clean; drawings appear only when a page is empty or welcoming you.</li>
+      </ul>
+    </div>
+    <p class="mock-note">Look · B · Illustrated carnet · v1 · v2 · detailed sketches with watercolour wash.</p>
+  </body>
+</html>

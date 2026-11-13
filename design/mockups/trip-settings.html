@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mockup — Trip settings (v1)</title>
+    <script type="module">
+      import '/src/index.css'
+      import './mockup.css'
+      import './forms.css'
+    </script>
+  </head>
+  <body>
+    <!-- Mockup 8 · Trip settings, phone size. Opened from the trip (the trip name at the top, or ⋯).
+         Everything from "Create a trip", plus who can edit the trip, and leave / delete. -->
+    <div class="phones">
+      <figure>
+        <div class="phone">
+          <div class="screen-top"><span class="back">‹</span><h1>Trip settings</h1></div>
+
+          <div class="fsheet">
+            <h3>The trip</h3>
+            <div class="kv"><span>Name</span><b>Lisbon &amp; Porto<span class="chev">›</span></b></div>
+            <div class="kv"><span>Dates</span><b>Not decided yet<span class="chev">›</span></b></div>
+            <div class="kv"><span>Leaving from</span><b>St Martin<span class="chev">›</span></b></div>
+          </div>
+
+          <div class="fsheet">
+            <h3>Budget</h3>
+            <div class="kv"><span>Target</span><b class="num">700 € per person<span class="chev">›</span></b></div>
+            <div class="kv"><span>Main currency</span><b>EUR · Euro</b></div>
+            <p class="hint">You can change it until the first payment; saved prices are converted at today’s rate. After that, it’s fixed.</p>
+          </div>
+
+          <div class="fsheet">
+            <h3>Travellers <small>each has their own share</small></h3>
+            <ul class="people">
+              <li><span class="avatar avatar--me" style="margin:0">A</span><span class="who-name"><b>Ana</b><small>You</small></span><span class="act">Rename</span></li>
+              <li><span class="avatar avatar--b" style="margin:0">B</span><span class="who-name"><b>Bea</b><small>Can edit · bea@mail.com</small></span><span class="act">⋯</span></li>
+              <li><span class="avatar avatar--c" style="margin:0">C</span><span class="who-name"><b>Cleo</b><small>Invited · waiting</small></span><span class="act">⋯</span></li>
+              <li><span class="avatar avatar--d" style="margin:0">D</span><span class="who-name"><b>Dana</b><small>No account</small></span><span class="act">⋯</span></li>
+            </ul>
+            <div class="addrow"><span class="plus">+</span> Add a traveller</div>
+          </div>
+
+          <div class="fsheet">
+            <h3>Share the trip</h3>
+            <p class="hint" style="margin-bottom: var(--space-3)">People you invite can see and change everything in this trip.</p>
+            <div class="f"><label>Invite by email</label><div class="input"><span class="ph">dana@mail.com</span></div></div>
+            <div class="f"><label class="label">As</label><div class="input">Dana<span class="end">▾</span></div><p class="hint">Links the account to a traveller, so “your share” is theirs.</p></div>
+            <div class="btn-main" style="margin: var(--space-4) 0 0">Send the invitation</div>
+          </div>
+
+          <div class="fsheet fsheet--danger">
+            <h3>Leave or delete</h3>
+            <p class="hint">Only Ana (who created the trip) can delete it. Others can leave it.</p>
+            <div style="display:flex; gap: var(--space-2); margin-top: var(--space-3)"><span class="btn-line btn-danger">Delete the trip</span></div>
+          </div>
+        </div>
+        <span class="phone-label">Trip settings</span>
+      </figure>
+
+      <figure>
+        <div class="phone">
+          <div class="screen-top"><span class="back">‹</span><h1>Dana</h1></div>
+          <div class="fsheet">
+            <div class="f"><label>Name</label><div class="input">Dana</div></div>
+            <div class="kv" style="margin-top: var(--space-4); padding-top: var(--space-3); border-top: 1px solid var(--line)"><span>Account</span><b>None<span class="chev">›</span></b></div>
+            <div class="kv"><span>Her share now</span><b class="num">265 €</b></div>
+            <div class="kv"><span>Paid so far</span><b class="num">0 €</b></div>
+          </div>
+          <div class="fsheet fsheet--danger">
+            <h3>Remove Dana from the trip</h3>
+            <p class="hint">Her share is spread over the others. Items only she was in are kept, with no one in them.</p>
+            <div class="note-box">Not possible while Dana has paid something or owes money: settle up first.</div>
+            <div style="margin-top: var(--space-3)"><span class="btn-line btn-danger">Remove Dana</span></div>
+          </div>
+        </div>
+        <span class="phone-label">One traveller</span>
+      </figure>
+    </div>
+
+    <div class="questions">
+      <h2>Decided by Djamina (13 Nov)</h2>
+      <ul>
+        <li><b>Main currency fixed</b> once a price exists (every saved rate is “trip currency per unit”). Changing it later would mean re-entering rates. ✅ Revised: locked at the <b>first payment</b>; before that, changing it converts every saved rate.</li>
+        <li><b>Removing a traveller</b> who paid or owes: ✅ blocked until settled up, rather than rewriting who-owes-whom silently.</li>
+        <li>✅ <b>Invite = link to a traveller</b>. The invited person picks nothing: the organizer says who they are, so their “your share” is right from the start.</li>
+        <li><b>Delete</b> only by the person who created the trip; others can leave. ✅ If the creator deletes their account, another member takes over and can delete it.</li>
+      </ul>
+    </div>
+    <p class="mock-note">Mockup 8 · Trip settings · v1 · content only, look pass after.</p>
+  </body>
+</html>

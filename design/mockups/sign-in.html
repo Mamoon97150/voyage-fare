@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mockup — Sign in (v1)</title>
+    <script type="module">
+      import '/src/index.css'
+      import './mockup.css'
+      import './forms.css'
+    </script>
+  </head>
+  <body>
+    <!-- Mockup 6 · Sign in and Create an account, phone size. Content only (look pass after).
+         New compared with the coded version: the demo trip, open without an account (spec §6.6),
+         and the person's first name asked at sign-up (it becomes "you" in the travellers of each new trip). -->
+    <div class="phones">
+      <figure>
+        <div class="phone">
+          <div class="home-top"><span class="brand">Voyage Fare</span></div>
+          <div class="lead" style="padding-top: var(--space-8)">
+            <h2>Sign in</h2>
+            <p>Welcome back. Your trips are where you left them.</p>
+          </div>
+          <div class="fsheet">
+            <div class="f"><label>Email</label><div class="input">ana@mail.com</div></div>
+            <div class="f"><label>Password</label><div class="input">••••••••••<span class="end">Show</span></div></div>
+            <p class="hint" style="text-align:right; margin-top: var(--space-2)"><span class="link">Forgot your password?</span></p>
+          </div>
+          <div class="btn-main">Sign in</div>
+          <div class="or">or</div>
+          <div class="demo-card">
+            <div><b>Open the demo trip</b><small>A real trip, 4 travellers, a gift day. No account needed.</small></div>
+          </div>
+          <p class="skip" style="text-decoration:none; margin-top: var(--space-6)">New here? <span class="link">Create an account</span></p>
+        </div>
+        <span class="phone-label">Sign in</span>
+      </figure>
+
+      <figure>
+        <div class="phone">
+          <div class="home-top"><span class="brand">Voyage Fare</span></div>
+          <div class="lead" style="padding-top: var(--space-8)">
+            <h2>Create your account</h2>
+            <p>Plan the trip, and know what it really costs.</p>
+          </div>
+          <div class="fsheet">
+            <div class="f"><label>Your first name</label><div class="input">Ana</div><p class="hint">Your travel partners will see it.</p></div>
+            <div class="f"><label>Email</label><div class="input">ana@mail.com</div></div>
+            <div class="f f--error"><label>Password</label><div class="input">•••••<span class="end">Show</span></div><p class="hint">Use at least 8 characters.</p></div>
+          </div>
+          <div class="btn-main">Create account</div>
+          <p class="skip" style="text-decoration:none; margin-top: var(--space-6)">Already have an account? <span class="link">Sign in</span></p>
+        </div>
+        <span class="phone-label">Create an account (with an error shown)</span>
+      </figure>
+
+      <figure>
+        <div class="phone">
+          <div class="home-top"><span class="brand">Voyage Fare</span></div>
+          <div class="lead" style="padding-top: var(--space-8)">
+            <h2>Check your inbox</h2>
+            <p>We sent a link to <b style="color:var(--ink)">ana@mail.com</b>. Open it to confirm your email, and you’re in.</p>
+          </div>
+          <div class="fsheet">
+            <p class="hint">Nothing after a few minutes? Look in your spam, or <span class="link">send the link again</span>.</p>
+          </div>
+          <p class="skip">Use another email</p>
+        </div>
+        <span class="phone-label">After creating the account</span>
+      </figure>
+    </div>
+
+    <div class="questions">
+      <h2>What changes from the coded version</h2>
+      <ul>
+        <li><b>Demo trip</b> on the sign-in page (no account needed).</li>
+        <li><b>First name</b> at sign-up, used as “you” in every new trip.</li>
+        <li><b>“Show”</b> on the password field instead of typing it twice.</li>
+        <li><b>Send the link again</b> on “Check your inbox”.</li>
+      </ul>
+    </div>
+    <p class="mock-note">Mockup 6 · Sign in · v1 · content only, look pass after.</p>
+  </body>
+</html>
