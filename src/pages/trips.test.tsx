@@ -22,6 +22,12 @@ const data = vi.hoisted(() => ({
   getTrip: vi.fn(),
   addPlace: vi.fn(),
   getTripHeader: vi.fn(),
+  updateTrip: vi.fn(),
+  isTripOwner: vi.fn(),
+  deleteTrip: vi.fn(),
+  addTraveller: vi.fn(),
+  renameTraveller: vi.fn(),
+  removeTraveller: vi.fn(),
   addItem: vi.fn(),
   addTicket: vi.fn(),
   updateItem: vi.fn(),
@@ -37,6 +43,12 @@ vi.mock('../lib/trips', () => ({
   getTrip: data.getTrip,
   addPlace: data.addPlace,
   getTripHeader: data.getTripHeader,
+  updateTrip: data.updateTrip,
+  isTripOwner: data.isTripOwner,
+  deleteTrip: data.deleteTrip,
+  addTraveller: data.addTraveller,
+  renameTraveller: data.renameTraveller,
+  removeTraveller: data.removeTraveller,
   addItem: data.addItem,
   addTicket: data.addTicket,
   updateItem: data.updateItem,
@@ -447,7 +459,7 @@ describe('changing what was added', () => {
     expect(screen.getByLabelText('Name')).toHaveValue('Casa Lola')
     expect(screen.getByLabelText('From')).toHaveValue('1')
     expect(screen.getByLabelText('Until')).toHaveValue('5')
-    expect(screen.getByLabelText('Price')).toHaveValue('1200')
+    expect(screen.getByLabelText('Price')).toHaveValue('1 200')
     type('Price', '1 350')
     click('Save')
     await waitFor(() =>
@@ -484,7 +496,7 @@ describe('changing what was added', () => {
     expect(screen.getByLabelText('From')).toHaveValue('St Martin')
     expect(screen.getByLabelText('Via (optional)')).toHaveValue('Panama')
     expect(screen.getByLabelText('Round trip, one ticket')).toBeChecked()
-    expect(screen.getByLabelText('Price (both ways)')).toHaveValue('1800')
+    expect(screen.getByLabelText('Price (both ways)')).toHaveValue('1 800')
     fireEvent.click(screen.getByLabelText('Round trip, one ticket'))
     type('Price', '1 000')
     click('Save')
@@ -593,6 +605,86 @@ describe('moving around a trip', () => {
     expect(await screen.findByRole('heading', { name: 'Compare', level: 1 })).toBeInTheDocument()
     expect(screen.getByText(/Coming next/)).toBeInTheDocument()
     expect(screen.getByRole('navigation', { name: 'Trip' })).toBeInTheDocument()
+  })
+})
+
+describe('trip settings', () => {
+  it('the initials at the top lead to the settings', async () => {
+    open('/trips/t1')
+    const link = await screen.findByRole('link', { name: 'Trip settings: Ana, Bea' })
+    expect(link).toHaveAttribute('href', '/trips/t1/settings')
+  })
+
+  it('change the name, dates and target, and save', async () => {
+    data.isTripOwner.mockResolvedValue(true)
+    data.updateTrip.mockResolvedValue(undefined)
+    open('/trips/t1/settings')
+    expect(await screen.findByLabelText('Name')).toHaveValue('Colombia')
+    type('Name', 'Colombia with my sisters')
+    fireEvent.click(screen.getByLabelText('Dates not decided yet'))
+    fireEvent.change(screen.getByLabelText('From'), { target: { value: '2027-05-12' } })
+    fireEvent.change(screen.getByLabelText('To'), { target: { value: '2027-05-24' } })
+    type('Target', '3.000')
+    click('Save the trip')
+    await waitFor(() =>
+      expect(data.updateTrip).toHaveBeenCalledWith('t1', {
+        name: 'Colombia with my sisters',
+        startDate: '2027-05-12',
+        endDate: '2027-05-24',
+        homeCity: 'St Martin',
+        homeLatitude: undefined,
+        homeLongitude: undefined,
+        targetAmount: 3000,
+        targetScope: 'per_person',
+      }),
+    )
+    expect(await screen.findByText('Saved.')).toBeInTheDocument()
+  })
+
+  it('removing a traveller who paid says why it can’t', async () => {
+    data.isTripOwner.mockResolvedValue(true)
+    data.removeTraveller.mockRejectedValue({ code: 'P0001', message: 'Bea has paid or owes money on this trip: settle up first.' })
+    open('/trips/t1/settings')
+    await screen.findByText('Travellers')
+    expect(screen.queryByRole('button', { name: 'Remove Ana' })).not.toBeInTheDocument() // that's you
+    click('Remove Bea')
+    click('Yes, remove Bea')
+    expect(await screen.findByText('Bea has paid or owes money on this trip: settle up first.')).toBeInTheDocument()
+  })
+
+  it('rename and add travellers', async () => {
+    data.isTripOwner.mockResolvedValue(true)
+    data.renameTraveller.mockResolvedValue(undefined)
+    data.addTraveller.mockResolvedValue(undefined)
+    open('/trips/t1/settings')
+    await screen.findByText('Travellers')
+    click('Rename Bea')
+    type('New name for Bea', 'Béatrice')
+    click('Save')
+    await waitFor(() => expect(data.renameTraveller).toHaveBeenCalledWith('b', 'Béatrice'))
+    type('New traveller', 'Dana')
+    click('Add')
+    await waitFor(() => expect(data.addTraveller).toHaveBeenCalledWith('t1', 'Dana', expect.any(Number)))
+  })
+
+  it('only the creator can delete the trip', async () => {
+    data.isTripOwner.mockResolvedValue(false)
+    open('/trips/t1/settings')
+    expect(await screen.findByText('Only the person who created this trip can delete it.')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Delete Colombia/ })).not.toBeInTheDocument()
+  })
+
+  it('the creator deletes it after one confirmation, and lands on Your trips', async () => {
+    data.isTripOwner.mockResolvedValue(true)
+    data.deleteTrip.mockResolvedValue(undefined)
+    data.listTrips.mockResolvedValue([])
+    open('/trips/t1/settings')
+    await screen.findByRole('button', { name: 'Delete Colombia' })
+    click('Delete Colombia')
+    expect(screen.getByText(/Everything in Colombia goes/)).toBeInTheDocument()
+    click('Yes, delete Colombia')
+    await waitFor(() => expect(data.deleteTrip).toHaveBeenCalledWith('t1'))
+    expect(await screen.findByText('No trips yet')).toBeInTheDocument()
   })
 })
 

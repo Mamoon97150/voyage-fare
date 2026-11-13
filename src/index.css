@@ -1416,3 +1416,95 @@ select.field__input,
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* Who's on the trip, at the top right: opens the trip settings */
+.avatars {
+  display: flex;
+  flex: none;
+  min-height: 44px;
+  align-items: center;
+  text-decoration: none;
+}
+
+.avatars .avatar {
+  width: 1.75rem;
+  height: 1.75rem;
+  margin-left: -0.45rem;
+  border: 2px solid var(--paper);
+  font-size: 0.6875rem;
+}
+
+.avatars .avatar:first-child {
+  margin-left: 0;
+}
+
+.avatars .avatar--me {
+  box-shadow: 0 0 0 2px var(--estimated);
+}
+
+.avatar--more {
+  background: var(--paper-raised);
+  color: var(--ink-soft);
+}
+
+/* Trip settings (mockup 8) */
+.settings__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.sheet-title__note {
+  font-family: var(--font-text);
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--ink-soft);
+}
+
+.people .people__row {
+  display: block;
+  padding: var(--space-2) 0;
+  border-top: 1px solid var(--line);
+}
+
+.people .people__row:first-child {
+  border-top: 0;
+}
+
+.people__line {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.people__line .people__name {
+  flex: 1;
+}
+
+.people__row .confirm-delete {
+  margin-top: var(--space-2);
+}
+
+.settings__rename,
+.settings__add {
+  flex: 1;
+  display: flex;
+  gap: var(--space-2);
+}
+
+.settings__add {
+  margin-top: var(--space-3);
+}
+
+.settings__add .field__input {
+  flex: 1;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

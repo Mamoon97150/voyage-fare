@@ -44,6 +44,12 @@ describe('server answers, in words', () => {
     expect(explainAuthError({ code: 'same_password' }).field).toBe('password')
   })
 
+  it('our database rules speak for themselves', () => {
+    expect(explainAuthError({ code: 'P0001', message: 'Bea has paid or owes money on this trip: settle up first.' })).toEqual({
+      message: 'Bea has paid or owes money on this trip: settle up first.',
+    })
+  })
+
   it('too many attempts, no connection, anything else', () => {
     expect(explainAuthError({ status: 429 }).message).toMatch(/Too many attempts/)
     expect(explainAuthError({ message: 'Failed to fetch' }).message).toMatch(/connection/)

@@ -9,6 +9,7 @@ import { SignIn } from './pages/SignIn'
 import { SignUp } from './pages/SignUp'
 import { TripPage } from './pages/TripPage'
 import { TripSection } from './pages/TripSection'
+import { TripSettings } from './pages/TripSettings'
 import { Trips } from './pages/Trips'
 
 export function AppRoutes() {
@@ -25,6 +26,7 @@ export function AppRoutes() {
       <Route path="/trips/:tripId/compare" element={<RequireAuth><TripSection section="compare" /></RequireAuth>} />
       <Route path="/trips/:tripId/budget" element={<RequireAuth><TripSection section="budget" /></RequireAuth>} />
       <Route path="/trips/:tripId/who-paid" element={<RequireAuth><TripSection section="who-paid" /></RequireAuth>} />
+      <Route path="/trips/:tripId/settings" element={<RequireAuth><TripSettings /></RequireAuth>} />
       <Route path="/account" element={<RequireAuth><Account /></RequireAuth>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

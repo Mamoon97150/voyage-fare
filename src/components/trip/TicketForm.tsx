@@ -1,10 +1,10 @@
 import { useState, type FormEvent } from 'react'
-import { explainAuthError } from '../lib/authForm'
-import { NO_AMOUNT, parseAmount } from '../lib/money'
-import type { TicketChange, TicketMode, TripDetail } from '../lib/trips'
-import { legsAfter, MODES, suggestedRoute } from '../lib/tripView'
-import { FormMessage } from './AuthForm'
-import { FormActions } from './FormActions'
+import { explainAuthError } from '../../lib/authForm'
+import { amountForInput, NO_AMOUNT, parseAmount } from '../../lib/money'
+import type { TicketChange, TicketMode, TripDetail } from '../../lib/trips'
+import { legsAfter, MODES, suggestedRoute } from '../../lib/tripView'
+import { FormMessage } from '../AuthForm'
+import { FormActions } from '../FormActions'
 
 const START = 'start'
 const gapOf = (placeId: string | null) => placeId ?? START
@@ -48,7 +48,7 @@ export function TicketForm({
   const [roundTrip, setRoundTrip] = useState(initial ? initial.roundTrip : startGap === START && places.length > 0)
   const [returnWhere, setReturnWhere] = useState(initial?.roundTrip ? gapOf(initial.returnAfterPlaceId) : last)
   const [via, setVia] = useState(initial?.via ?? '')
-  const [price, setPrice] = useState(initial?.amount === null || initial?.amount === undefined ? '' : String(initial.amount))
+  const [price, setPrice] = useState(amountForInput(initial?.amount))
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [formError, setFormError] = useState<string>()
   const [busy, setBusy] = useState(false)

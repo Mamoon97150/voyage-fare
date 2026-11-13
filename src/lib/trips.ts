@@ -278,3 +278,66 @@ export async function getTripHeader(id: string): Promise<{ name: string; travell
   if (error) throw error
   return data ? { name: data.name, travellers: data.travellers.length } : null
 }
+
+// ── Trip settings (mockup 8) ───────────────────────────────────────────────────
+
+export type TripChange = {
+  name: string
+  startDate: string | null
+  endDate: string | null
+  homeCity: string | null
+  homeLatitude: number | null
+  homeLongitude: number | null
+  targetAmount: number | null
+  targetScope: 'per_person' | 'total'
+}
+
+export async function updateTrip(id: string, change: TripChange): Promise<void> {
+  const { error } = await supabase
+    .from('trips')
+    .update({
+      name: change.name,
+      start_date: change.startDate,
+      end_date: change.endDate,
+      home_city: change.homeCity,
+      home_latitude: change.homeLatitude,
+      home_longitude: change.homeLongitude,
+      target_amount: change.targetAmount,
+      target_scope: change.targetScope,
+    })
+    .eq('id', id)
+  if (error) throw error
+}
+
+/** Only the person who created a trip can delete it (13 Nov decision). */
+export async function isTripOwner(tripId: string, userId: string): Promise<boolean> {
+  const { data, error } = await supabase
+    .from('trip_members')
+    .select('role')
+    .eq('trip_id', tripId)
+    .eq('user_id', userId)
+    .maybeSingle()
+  if (error) throw error
+  return data?.role === 'owner'
+}
+
+export async function deleteTrip(id: string): Promise<void> {
+  const { error } = await supabase.from('trips').delete().eq('id', id)
+  if (error) throw error
+}
+
+export async function addTraveller(tripId: string, name: string, position: number): Promise<void> {
+  const { error } = await supabase.from('travellers').insert({ trip_id: tripId, name, position })
+  if (error) throw error
+}
+
+export async function renameTraveller(id: string, name: string): Promise<void> {
+  const { error } = await supabase.from('travellers').update({ name }).eq('id', id)
+  if (error) throw error
+}
+
+/** Refused with a reason when they paid or owe, are you, are the last one, or are alone on an item. */
+export async function removeTraveller(id: string): Promise<void> {
+  const { error } = await supabase.rpc('remove_traveller', { p_traveller_id: id })
+  if (error) throw error
+}

@@ -1147,6 +1147,7 @@ export type Database = {
         Returns: string
       }
       delete_place: { Args: { p_place_id: string }; Returns: undefined }
+      remove_traveller: { Args: { p_traveller_id: string }; Returns: undefined }
       item_category: { Args: { p_kind: string; p_place_id: string }; Returns: string }
       trip_settlement: {
         Args: { p_trip_id: string }

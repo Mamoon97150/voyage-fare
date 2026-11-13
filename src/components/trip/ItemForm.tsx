@@ -1,122 +1,13 @@
 import { useState, type FormEvent } from 'react'
-import { explainAuthError } from '../lib/authForm'
-import { formatMoney, NO_AMOUNT, parseAmount } from '../lib/money'
-import {
-  addItem,
-  addTicket,
-  deleteItem,
-  updateItem,
-  updateTicket,
-  type Item,
-  type ItemKind,
-  type TicketMode,
-  type TripDetail,
-} from '../lib/trips'
-import { dayLabel, daysText, itemLine, KINDS, MODES, SPANS_DAYS, ticketOf, type LegLine, type Mode } from '../lib/tripView'
-import { FormMessage } from './AuthForm'
-import { FormActions } from './FormActions'
+import { explainAuthError } from '../../lib/authForm'
+import { NO_AMOUNT, parseAmount } from '../../lib/money'
+import { addItem, addTicket, type ItemKind, type TripDetail } from '../../lib/trips'
+import { dayLabel, KINDS, SPANS_DAYS } from '../../lib/tripView'
+import { FormMessage } from '../AuthForm'
+import { FormActions } from '../FormActions'
 import { TicketForm } from './TicketForm'
 
-// "Chosen" is the default and stays silent: the dot already says estimated or confirmed (review 13 Nov).
-const STATUS: Record<string, string | undefined> = { idea: 'Idea', booked: 'Booked', paid: 'Paid' }
-
-const priceOf = (detail: TripDetail, item: Item) => {
-  const current = detail.amounts.find((a) => a.item_id === item.id)?.current
-  return current === null || current === undefined ? null : Number(current)
-}
-
-/**
- * One line of the notebook: a dot (green confirmed, mustard estimated, hollow no price), the name,
- * the amount. Tapping it opens the same form as when adding, to change or delete it.
- */
-export function ItemRow({
-  detail,
-  item,
-  viewer,
-  mode,
-  kinds,
-  days,
-  showDays = true,
-  onChanged,
-  onOpen,
-}: {
-  detail: TripDetail
-  item: Item
-  viewer: string | null
-  mode: Mode
-  kinds: ItemKind[]
-  days: number
-  showDays?: boolean
-  onChanged: () => void
-  onOpen?: () => void
-}) {
-  const [editing, setEditing] = useState(false)
-  const line = itemLine(detail, item, viewer, mode)
-  const dot = !line.priced ? 'dot--none' : line.confirmed ? 'dot--confirmed' : 'dot--estimated'
-  const meta = [KINDS[item.kind as ItemKind]?.label, showDays ? daysText(item) : null, item.note].filter(Boolean).join(' · ')
-
-  if (editing) {
-    const price = priceOf(detail, item)
-    return (
-      <li className="item-row item-row--editing">
-        <ItemForm
-          detail={detail}
-          formId={`edit-${item.id}`}
-          kinds={kinds.includes(item.kind as ItemKind) ? kinds : [item.kind as ItemKind, ...kinds]}
-          days={days}
-          initial={{
-            kind: item.kind as ItemKind,
-            name: item.name,
-            day: item.day_number ? String(item.day_number) : '',
-            endDay: item.end_day_number ? String(item.end_day_number) : '',
-            price: price === null ? '' : String(price),
-          }}
-          submitLabel="Save"
-          onSubmit={async (v) => {
-            await updateItem({ id: item.id, ...v })
-            setEditing(false)
-            onChanged()
-          }}
-          onDelete={async () => {
-            await deleteItem(item.id)
-            onChanged()
-          }}
-          deleteName={item.name}
-          onCancel={() => setEditing(false)}
-        />
-      </li>
-    )
-  }
-
-  return (
-    <li className="item-row">
-      <button
-        type="button"
-        className="item-row__tap"
-        onClick={() => {
-          setEditing(true)
-          onOpen?.()
-        }}
-        aria-label={`Change ${item.name}`}
-      >
-        <i className={`dot ${dot}`} aria-hidden="true" />
-        <span className="item-row__main">
-          <span className="item-row__name">{item.name}</span>
-          {meta && <span className="item-row__meta">{meta}</span>}
-        </span>
-        <span className="item-row__amount num">
-          <b>{line.concernsViewer ? formatMoney(line.amount, detail.trip.currency) : 'Not yours'}</b>
-          {STATUS[item.status] && <span className="item-row__status">{STATUS[item.status]}</span>}
-        </span>
-        <span className="item-row__chev" aria-hidden="true">
-          ›
-        </span>
-      </button>
-    </li>
-  )
-}
-
-type ItemValues = {
+export type ItemValues = {
   kind: ItemKind
   name: string
   dayNumber: number | null
@@ -179,7 +70,7 @@ export function AddItem({
   )
 }
 
-function KindPicker({ kinds, kind, onKind }: { kinds: ItemKind[]; kind: ItemKind; onKind: (k: ItemKind) => void }) {
+export function KindPicker({ kinds, kind, onKind }: { kinds: ItemKind[]; kind: ItemKind; onKind: (k: ItemKind) => void }) {
   return (
     <div className="kinds" role="radiogroup" aria-label="What is it?">
       {kinds.map((k) => (
@@ -192,7 +83,7 @@ function KindPicker({ kinds, kind, onKind }: { kinds: ItemKind[]; kind: ItemKind
 }
 
 /** The fields of an item, for adding or changing it. */
-function ItemForm({
+export function ItemForm({
   detail,
   formId,
   kinds,
@@ -358,102 +249,5 @@ function ItemForm({
 
       <FormActions busy={busy} submitLabel={submitLabel} onCancel={onCancel} onDelete={onDelete} deleteName={deleteName} />
     </form>
-  )
-}
-
-/**
- * The legs sitting in one gap of the route, drawn on the paper between two place sheets.
- * A round trip shows its price on the way out; the way back says it's included (counted once).
- * Tapping a leg opens its ticket, to change or delete it.
- */
-export function RouteGap({
-  detail,
-  legs,
-  viewer,
-  mode,
-  onChanged,
-  onOpen,
-}: {
-  detail: TripDetail
-  legs: LegLine[]
-  viewer: string | null
-  mode: Mode
-  onChanged: () => void
-  onOpen?: () => void
-}) {
-  const [editing, setEditing] = useState<string | null>(null) // an item id
-  if (legs.length === 0) return null
-  return (
-    <ul className="legs" aria-label="Travel">
-      {legs.map(({ leg, item, roundTrip }) => {
-        // The form opens where the ticket was tapped, in place of its first leg in this gap.
-        if (editing === item.id && legs.find((l) => l.item.id === item.id)?.leg.id === leg.id) {
-          return (
-            <li key={leg.id} className="leg leg--editing">
-              <TicketForm
-                detail={detail}
-                initial={ticketOf(detail, item, priceOf(detail, item))}
-                submitLabel="Save"
-                onSubmit={async (t) => {
-                  await updateTicket(item.id, t)
-                  setEditing(null)
-                  onChanged()
-                }}
-                onDelete={async () => {
-                  await deleteItem(item.id)
-                  onChanged()
-                }}
-                deleteName="this ticket"
-                deleteNote={roundTrip ? 'Both ways go, and its price comes out of the budget.' : undefined}
-                onCancel={() => setEditing(null)}
-              />
-            </li>
-          )
-        }
-        const isReturn = leg.leg_number === 2
-        const line = itemLine(detail, item, viewer, mode)
-        const dot = !line.priced ? 'dot--none' : line.confirmed ? 'dot--confirmed' : 'dot--estimated'
-        const meta = [
-          roundTrip ? (isReturn ? 'Included in the round trip' : '⇄ Round trip') : MODES[leg.mode as TicketMode]?.label,
-          leg.via && `via ${leg.via}`,
-        ]
-          .filter(Boolean)
-          .join(' · ')
-        return (
-          <li key={leg.id} className="leg">
-            <button
-              type="button"
-              className="leg__tap"
-              onClick={() => {
-                setEditing(item.id)
-                onOpen?.()
-              }}
-              aria-label={`Change ${leg.from_name} → ${leg.to_name}`}
-            >
-              <span className="leg__icon" aria-hidden="true">
-                {MODES[leg.mode as TicketMode]?.icon ?? '•'}
-              </span>
-              <span className="item-row__main">
-                <span className="item-row__name">
-                  {leg.from_name} → {leg.to_name}
-                </span>
-                <span className="item-row__meta">{meta}</span>
-              </span>
-              {!isReturn && (
-                <span className="item-row__amount num">
-                  <b>{line.concernsViewer ? formatMoney(line.amount, detail.trip.currency) : 'Not yours'}</b>
-                  <span className="item-row__status">
-                    <i className={`dot ${dot}`} aria-hidden="true" /> {STATUS[item.status]}
-                  </span>
-                </span>
-              )}
-              <span className="item-row__chev" aria-hidden="true">
-                ›
-              </span>
-            </button>
-          </li>
-        )
-      })}
-    </ul>
   )
 }

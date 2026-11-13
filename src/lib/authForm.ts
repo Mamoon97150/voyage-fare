@@ -38,6 +38,8 @@ export function explainAuthError(error: { message?: string; code?: string; statu
   message: string
 } {
   const code = error.code ?? ''
+  // Our own database rules explain themselves ("Bea has paid or owes money…"): show them as they are.
+  if (code === 'P0001' && error.message) return { message: error.message }
   const text = (error.message ?? '').toLowerCase()
 
   if (code === 'invalid_credentials' || text.includes('invalid login credentials')) {

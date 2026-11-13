@@ -74,3 +74,11 @@ export function parseAmount(input: string): number | null {
   const value = Number(cents ? `${whole}.${cents}` : whole)
   return Number.isFinite(value) ? value : null
 }
+
+/** An amount as a form shows it, the way the app writes amounts: "9 000 000", "1 200,50" (parseAmount reads it back). */
+export function amountForInput(amount: number | null | undefined): string {
+  if (amount === null || amount === undefined || Number.isNaN(amount)) return ''
+  const [whole, cents] = Math.abs(amount).toFixed(2).split('.')
+  const grouped = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+  return cents === '00' ? grouped : `${grouped},${cents}`
+}

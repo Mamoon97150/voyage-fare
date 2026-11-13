@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatMoney, NO_AMOUNT, parseAmount } from './money'
+import { amountForInput, formatMoney, NO_AMOUNT, parseAmount } from './money'
 
 // Normalise the non-breaking spaces so the expectations stay readable.
 const plain = (s: string) => s.replace(/[  ]/g, ' ')
@@ -63,5 +63,14 @@ describe('reading a typed amount', () => {
 
   it.each(['', 'a lot', '-5', '12.', '1.2345', '1.20.300', '1.200.50,3', ',50', '1,2,3'])('“%s” is refused', (typed) => {
     expect(parseAmount(typed)).toBeNull()
+  })
+})
+
+describe('an amount in a form', () => {
+  it('is written the way the app writes amounts, and reads back the same', () => {
+    expect(amountForInput(9000000)).toBe('9 000 000')
+    expect(amountForInput(1200.5)).toBe('1 200,50')
+    expect(amountForInput(null)).toBe('')
+    for (const n of [0, 19.99, 1200, 2400000, 1234567.89]) expect(parseAmount(amountForInput(n))).toBe(n)
   })
 })
