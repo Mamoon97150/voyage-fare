@@ -1,4 +1,4 @@
-import type { Tables } from './database.types'
+import type { Json, Tables } from './database.types'
 import { supabase } from './supabase'
 
 export type Trip = Tables<'trips'>
@@ -65,6 +65,7 @@ export async function listTrips(): Promise<TripSummary[]> {
 }
 
 export type Item = Tables<'items'>
+export type TripOption = Tables<'options'>
 export type Leg = Tables<'item_legs'>
 export type ItemAmount = Tables<'v_item_amounts'>
 export type ItemShare = Tables<'v_item_shares'>
@@ -78,6 +79,7 @@ export type TripDetail = {
   travellers: Traveller[]
   places: Place[]
   items: Item[]
+  options: TripOption[]
   legs: Leg[]
   amounts: ItemAmount[]
   shares: ItemShare[]
@@ -89,12 +91,13 @@ export type TripDetail = {
 
 /** null when the trip doesn't exist or isn't shared with this person (privacy hides both the same way). */
 export async function getTrip(id: string): Promise<TripDetail | null> {
-  const [trip, travellers, places, items, legs, amounts, shares, budget, travellerShares, placeTotals, travellerPlaceTotals] =
+  const [trip, travellers, places, items, options, legs, amounts, shares, budget, travellerShares, placeTotals, travellerPlaceTotals] =
     await Promise.all([
       supabase.from('trips').select('*').eq('id', id).maybeSingle(),
       supabase.from('travellers').select('*').eq('trip_id', id).order('position'),
       supabase.from('places').select('*').eq('trip_id', id).order('position'),
       supabase.from('items').select('*').eq('trip_id', id).order('position'),
+      supabase.from('options').select('*').eq('trip_id', id).order('position'),
       supabase.from('item_legs').select('*').eq('trip_id', id).order('position'),
       supabase.from('v_item_amounts').select('*').eq('trip_id', id),
       supabase.from('v_item_shares').select('*').eq('trip_id', id),
@@ -103,7 +106,7 @@ export async function getTrip(id: string): Promise<TripDetail | null> {
       supabase.from('v_budget_by_place').select('*').eq('trip_id', id),
       supabase.from('v_traveller_by_place').select('*').eq('trip_id', id),
     ])
-  for (const r of [trip, travellers, places, items, legs, amounts, shares, budget, travellerShares, placeTotals, travellerPlaceTotals]) {
+  for (const r of [trip, travellers, places, items, options, legs, amounts, shares, budget, travellerShares, placeTotals, travellerPlaceTotals]) {
     if (r.error) throw r.error
   }
   if (!trip.data) return null
@@ -112,6 +115,7 @@ export async function getTrip(id: string): Promise<TripDetail | null> {
     travellers: travellers.data ?? [],
     places: places.data ?? [],
     items: items.data ?? [],
+    options: options.data ?? [],
     legs: legs.data ?? [],
     amounts: amounts.data ?? [],
     shares: shares.data ?? [],
@@ -213,6 +217,8 @@ export async function updateItem(item: {
   dayNumber: number | null
   endDayNumber: number | null
   amount: number | null
+  /** With several options the price is the chosen option's: leave it alone. */
+  keepPrice?: boolean
 }): Promise<void> {
   const { error } = await supabase.rpc('update_item', {
     p_item_id: item.id,
@@ -221,6 +227,7 @@ export async function updateItem(item: {
     p_day_number: item.dayNumber ?? undefined,
     p_end_day_number: item.endDayNumber ?? undefined,
     p_amount: item.amount ?? undefined,
+    p_keep_price: item.keepPrice ?? false,
   })
   if (error) throw error
 }
@@ -339,5 +346,78 @@ export async function renameTraveller(id: string, name: string): Promise<void> {
 /** Refused with a reason when they paid or owe, are you, are the last one, or are alone on an item. */
 export async function removeTraveller(id: string): Promise<void> {
   const { error } = await supabase.rpc('remove_traveller', { p_traveller_id: id })
+  if (error) throw error
+}
+
+// ── Options: compare, choose, coup de cœur (build 3) ───────────────────────────
+
+export type OptionInput = {
+  name: string
+  amount: number | null
+  details: Json
+  link: string | null
+  note: string | null
+}
+
+/**
+ * Add a candidate to an item. The first option of an item is chosen right away (like adding an
+ * item with a price); the next ones wait until you choose. Priced in the trip currency until
+ * currencies arrive (rate 1).
+ */
+export async function addOption(detail: TripDetail, itemId: string, input: OptionInput): Promise<string> {
+  const siblings = detail.options.filter((o) => o.item_id === itemId)
+  const { data, error } = await supabase
+    .from('options')
+    .insert({
+      trip_id: detail.trip.id,
+      item_id: itemId,
+      name: input.name,
+      amount: input.amount,
+      currency: detail.trip.currency,
+      rate: 1,
+      details: input.details,
+      link: input.link,
+      note: input.note,
+      is_chosen: siblings.length === 0,
+      position: Math.max(0, ...siblings.map((o) => o.position)) + 1,
+    })
+    .select('id')
+    .single()
+  if (error) throw error
+  return data.id
+}
+
+/** A page of Compare with nothing yet (no stay in Medellín): the item and its first option together. */
+export async function addItemWithOption(
+  detail: TripDetail,
+  item: { placeId: string | null; kind: ItemKind; name: string },
+  input: OptionInput,
+): Promise<void> {
+  const itemId = await addItem({ tripId: detail.trip.id, ...item, dayNumber: null, endDayNumber: null, amount: null })
+  await addOption({ ...detail, options: [] }, itemId, input)
+}
+
+export async function updateOption(id: string, input: OptionInput): Promise<void> {
+  const { error } = await supabase
+    .from('options')
+    .update({ name: input.name, amount: input.amount, details: input.details, link: input.link, note: input.note })
+    .eq('id', id)
+  if (error) throw error
+}
+
+/** Choosing one un-chooses the others; the item becomes "chosen" (the database keeps that rule). */
+export async function chooseOption(id: string): Promise<void> {
+  const { error } = await supabase.from('options').update({ is_chosen: true }).eq('id', id)
+  if (error) throw error
+}
+
+export async function setFavourite(id: string, favourite: boolean): Promise<void> {
+  const { error } = await supabase.from('options').update({ is_favourite: favourite }).eq('id', id)
+  if (error) throw error
+}
+
+/** Deleting the chosen one leaves nothing chosen: the item is an idea again until you choose. */
+export async function deleteOption(id: string): Promise<void> {
+  const { error } = await supabase.from('options').delete().eq('id', id)
   if (error) throw error
 }

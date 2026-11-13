@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { amountForInput, formatMoney } from '../../lib/money'
 import { deleteItem, updateItem, type Item, type ItemKind, type TripDetail } from '../../lib/trips'
 import { daysText, itemLine, KINDS, type Mode } from '../../lib/tripView'
+import { compareLink, optionCount } from '../../lib/options'
 import { STATUS, priceOf } from './itemShared'
 import { ItemForm } from './ItemForm'
 
@@ -33,7 +34,17 @@ export function ItemRow({
   const [editing, setEditing] = useState(false)
   const line = itemLine(detail, item, viewer, mode)
   const dot = !line.priced ? 'dot--none' : line.confirmed ? 'dot--confirmed' : 'dot--estimated'
-  const meta = [KINDS[item.kind as ItemKind]?.label, showDays ? daysText(item) : null, item.note].filter(Boolean).join(' · ')
+  const meta = [
+    KINDS[item.kind as ItemKind]?.label,
+    showDays ? daysText(item) : null,
+    optionCount(detail, item) >= 2 ? `${optionCount(detail, item)} options compared` : null,
+    item.note,
+  ]
+    .filter(Boolean)
+    .join(' · ')
+
+  const count = optionCount(detail, item)
+  const chosen = detail.options.find((o) => o.item_id === item.id && o.is_chosen)
 
   if (editing) {
     const price = priceOf(detail, item)
@@ -52,8 +63,16 @@ export function ItemRow({
             price: amountForInput(price),
           }}
           submitLabel="Save"
+          options={
+            count >= 2
+              ? {
+                  text: `${count} options compared${chosen ? ` · chosen: ${chosen.name}` : ' · none chosen yet'}`,
+                  link: compareLink(detail, item),
+                }
+              : undefined
+          }
           onSubmit={async (v) => {
-            await updateItem({ id: item.id, ...v })
+            await updateItem({ id: item.id, ...v, keepPrice: count >= 2 })
             setEditing(false)
             onChanged()
           }}

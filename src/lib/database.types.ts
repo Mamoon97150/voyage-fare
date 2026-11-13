@@ -1111,6 +1111,7 @@ export type Database = {
           p_day_number?: number
           p_end_day_number?: number
           p_item_id: string
+          p_keep_price?: boolean
           p_kind: string
           p_name: string
         }

@@ -5,11 +5,14 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { supabase } from '../../src/lib/supabase'
 import {
   addItem,
+  addOption,
   addPlace,
   addTicket,
   addTraveller,
+  chooseOption,
   createTrip,
   deleteItem,
+  deleteOption,
   deletePlace,
   deleteTrip,
   getTrip,
@@ -18,6 +21,7 @@ import {
   listTrips,
   removeTraveller,
   renameTraveller,
+  setFavourite,
   updateItem,
   updatePlace,
   updateTicket,
@@ -39,7 +43,8 @@ beforeAll(async () => {
 afterAll(async () => {
   // Always clean up, even when a step failed.
   if (tripId) await deleteTrip(tripId).catch(() => {})
-  await supabase.auth.signOut()
+  // Only this test's session: the default ('global') would also sign the demo user out of the browser.
+  await supabase.auth.signOut({ scope: 'local' })
 })
 
 describe('the real queries, end to end', () => {
@@ -106,6 +111,34 @@ describe('the real queries, end to end', () => {
     const after = await getTrip(tripId)
     expect(after?.places).toHaveLength(0)
     expect(after?.legs.every((l) => l.after_place_id === null)).toBe(true) // the way back moved up
+  })
+
+  it('options: compare, choose, coup de cœur, and the item keeps its price', async () => {
+    const place = await addPlace({ tripId, name: 'Porto', country: 'Portugal', latitude: 41.1, longitude: -8.6, nights: 2, position: 2 })
+    const stay = await addItem({ tripId, placeId: place.id, kind: 'housing', name: 'Stay in Porto', dayNumber: null, endDayNumber: null, amount: 300 })
+    let detail = (await getTrip(tripId))!
+    const other = await addOption(detail, stay, { name: 'Ribeira hotel', amount: 260, details: { looks: 4 }, link: null, note: 'by the river' })
+    detail = (await getTrip(tripId))!
+    expect(detail.options.filter((o) => o.item_id === stay)).toHaveLength(2)
+    expect(detail.options.find((o) => o.id === other)?.is_chosen).toBe(false) // the second waits to be chosen
+
+    const before = Number(detail.budget?.current_total)
+    await chooseOption(other)
+    await setFavourite(other, true)
+    detail = (await getTrip(tripId))!
+    expect(Number(detail.budget?.current_total)).toBe(before - 40)
+    expect(detail.options.filter((o) => o.item_id === stay && o.is_chosen).map((o) => o.id)).toEqual([other])
+    expect(detail.options.find((o) => o.id === other)?.is_favourite).toBe(true)
+
+    await updateItem({ id: stay, kind: 'housing', name: 'Porto', dayNumber: null, endDayNumber: null, amount: null, keepPrice: true })
+    detail = (await getTrip(tripId))!
+    expect(detail.options.filter((o) => o.item_id === stay)).toHaveLength(2) // nothing lost
+    expect(Number(detail.budget?.current_total)).toBe(before - 40)
+
+    await deleteOption(other)
+    detail = (await getTrip(tripId))!
+    expect(detail.items.find((i) => i.id === stay)?.status).toBe('idea') // the chosen one went
+    await deletePlace(place.id)
   })
 
   it('settings: the trip and its travellers', async () => {

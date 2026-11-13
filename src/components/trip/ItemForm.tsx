@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { Link } from 'react-router'
 import { explainAuthError } from '../../lib/authForm'
 import { NO_AMOUNT, parseAmount } from '../../lib/money'
 import { addItem, addTicket, type ItemKind, type TripDetail } from '../../lib/trips'
@@ -96,6 +97,7 @@ export function ItemForm({
   onCancel,
   onDelete,
   deleteName,
+  options,
 }: {
   detail: TripDetail
   formId: string
@@ -109,6 +111,8 @@ export function ItemForm({
   onCancel: () => void
   onDelete?: () => Promise<void>
   deleteName?: string
+  /** Several options: the price is the chosen one's, changed on Compare (shown instead of the field). */
+  options?: { text: string; link: string | null }
 }) {
   const [ownKind, setOwnKind] = useState<ItemKind>(initial?.kind ?? kinds[0])
   const kind = controlledKind ?? ownKind
@@ -219,6 +223,20 @@ export function ItemForm({
         </div>
       )}
 
+      {options ? (
+        <div className="field">
+          <span className="field__label">Price</span>
+          <p className="options-note">
+            {options.text}
+            {options.link && (
+              <>
+                {' · '}
+                <Link to={options.link}>Open in Compare</Link>
+              </>
+            )}
+          </p>
+        </div>
+      ) : (
       <div className={`field${errors.price ? ' field--error' : ''}`}>
         <label htmlFor={`${id}-price`} className="field__label">
           Price
@@ -246,6 +264,7 @@ export function ItemForm({
           </p>
         )}
       </div>
+      )}
 
       <FormActions busy={busy} submitLabel={submitLabel} onCancel={onCancel} onDelete={onDelete} deleteName={deleteName} />
     </form>

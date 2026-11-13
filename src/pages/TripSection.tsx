@@ -7,15 +7,9 @@ import { Loading } from '../lib/auth'
 import { explainAuthError } from '../lib/authForm'
 import { getTripHeader } from '../lib/trips'
 
-export type Section = 'compare' | 'budget' | 'who-paid'
+export type Section = 'budget' | 'who-paid'
 
 const SECTIONS: Record<Section, { title: string; drawing: Drawing; note: string; soon: string }> = {
-  compare: {
-    title: 'Compare',
-    drawing: 'compare-empty',
-    note: 'a few options side by side',
-    soon: 'Coming next: put your options for a stay or a flight side by side, keep your coup de cœur, choose in one tap.',
-  },
   budget: {
     title: 'Budget',
     drawing: 'no-trips',

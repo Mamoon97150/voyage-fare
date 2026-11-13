@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { Navigate, useLocation } from 'react-router'
 import { AuthContext, useAuth, type AuthState } from './authContext'
+import { safeNext } from './authForm'
 import { supabase } from './supabase'
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -42,10 +43,15 @@ export function RequireAuth({ children }: { children: ReactNode }) {
   return children
 }
 
-/** Sign in / create account: already signed in → straight to the trips. */
+/**
+ * Sign in / create account: already signed in → the page asked for, else the trips.
+ * This also runs the instant sign-in succeeds, so it must honour "next" too (it used to win
+ * the race and always land on Your trips).
+ */
 export function SignedOutOnly({ children }: { children: ReactNode }) {
   const { session } = useAuth()
+  const location = useLocation()
   if (session === undefined) return <Loading />
-  if (session) return <Navigate to="/trips" replace />
+  if (session) return <Navigate to={safeNext(new URLSearchParams(location.search).get('next'))} replace />
   return children
 }

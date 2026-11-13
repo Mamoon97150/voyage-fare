@@ -28,6 +28,12 @@ const data = vi.hoisted(() => ({
   addTraveller: vi.fn(),
   renameTraveller: vi.fn(),
   removeTraveller: vi.fn(),
+  addOption: vi.fn(),
+  addItemWithOption: vi.fn(),
+  updateOption: vi.fn(),
+  chooseOption: vi.fn(),
+  setFavourite: vi.fn(),
+  deleteOption: vi.fn(),
   addItem: vi.fn(),
   addTicket: vi.fn(),
   updateItem: vi.fn(),
@@ -49,6 +55,12 @@ vi.mock('../lib/trips', () => ({
   addTraveller: data.addTraveller,
   renameTraveller: data.renameTraveller,
   removeTraveller: data.removeTraveller,
+  addOption: data.addOption,
+  addItemWithOption: data.addItemWithOption,
+  updateOption: data.updateOption,
+  chooseOption: data.chooseOption,
+  setFavourite: data.setFavourite,
+  deleteOption: data.deleteOption,
   addItem: data.addItem,
   addTicket: data.addTicket,
   updateItem: data.updateItem,
@@ -84,6 +96,7 @@ const detail = (over: Record<string, unknown> = {}) => ({
   travellers,
   places: [],
   items: [],
+  options: [],
   legs: [],
   amounts: [],
   shares: [],
@@ -470,6 +483,7 @@ describe('changing what was added', () => {
         dayNumber: 1,
         endDayNumber: 5,
         amount: 1350,
+        keepPrice: false,
       }),
     )
   })
@@ -601,9 +615,9 @@ describe('moving around a trip', () => {
 
   it('a page not built yet says what’s coming, and keeps the bar', async () => {
     data.getTripHeader.mockResolvedValue({ name: 'Colombia', travellers: 3 })
-    open('/trips/t1/compare')
-    expect(await screen.findByRole('heading', { name: 'Compare', level: 1 })).toBeInTheDocument()
-    expect(screen.getByText(/Coming next/)).toBeInTheDocument()
+    open('/trips/t1/budget')
+    expect(await screen.findByRole('heading', { name: 'Budget', level: 1 })).toBeInTheDocument()
+    expect(screen.getByText(/Coming soon/)).toBeInTheDocument()
     expect(screen.getByRole('navigation', { name: 'Trip' })).toBeInTheDocument()
   })
 })
@@ -688,3 +702,125 @@ describe('trip settings', () => {
   })
 })
 
+describe('Compare', () => {
+  const journey = {
+    places: [cartagena],
+    items: [{ id: 'f', place_id: null, kind: 'transport', name: 'St Martin ⇄ Cartagena', status: 'chosen', day_number: null, end_day_number: null, position: 1 }],
+    legs: [
+      { id: 'l1', item_id: 'f', leg_number: 1, mode: 'plane', from_name: 'St Martin', to_name: 'Cartagena', via: null, after_place_id: null, position: 0 },
+      { id: 'l2', item_id: 'f', leg_number: 2, mode: 'plane', from_name: 'Cartagena', to_name: 'St Martin', via: null, after_place_id: 'p1', position: 1 },
+    ],
+    options: [
+      { id: 'copa', item_id: 'f', name: 'Copa', amount: 1600, rate: 1, currency: 'EUR', is_chosen: true, is_favourite: true, position: 1, note: 'Short stop',
+        details: { mode: 'plane', out: { fromAirport: 'SXM', toAirport: 'CTG', leaves: '13:05', arrives: '19:25', stops: 1, via: 'Panama' }, back: { leaves: '08:40', arrives: '15:45', stops: 1 }, bag: true, refundable: true } },
+      { id: 'avianca', item_id: 'f', name: 'Avianca', amount: 1400, rate: 1, currency: 'EUR', is_chosen: false, is_favourite: false, position: 2, note: null,
+        details: { mode: 'plane', out: { leaves: '07:10', arrives: '16:50', stops: 1, via: 'Bogotá' }, back: { leaves: '11:30', arrives: '20:25' }, bag: false } },
+    ],
+    shares: [
+      { item_id: 'f', traveller_id: 'a', fraction: 0.5 },
+      { item_id: 'f', traveller_id: 'b', fraction: 0.5 },
+    ],
+  }
+
+  it('Travel: the journey, its options by price, your share, the tags', async () => {
+    data.getTrip.mockResolvedValue(detail(journey))
+    open('/trips/t1/compare')
+    expect(await screen.findByRole('heading', { name: 'St Martin ⇄ Cartagena' })).toBeInTheDocument()
+    expect(screen.getByText(/Round trip · 2 options · journey 1 of 1/)).toBeInTheDocument()
+    const names = screen.getAllByRole('button', { name: /^Change / }).map((b) => b.getAttribute('aria-label'))
+    expect(names).toEqual(['Change Avianca', 'Change Copa'])
+    expect(screen.getByText('700 €')).toBeInTheDocument() // your half of Avianca
+    expect(screen.getByText('Cheapest', { selector: '.option__tag' })).toBeInTheDocument()
+    expect(screen.getByText('+100 €')).toBeInTheDocument()
+    expect(screen.getByText('SXM 13:05 → CTG 19:25')).toBeInTheDocument()
+    expect(screen.getByText('6 h 20')).toBeInTheDocument()
+    expect(screen.getByText('✗ No checked bag')).toBeInTheDocument()
+    expect(screen.getByText(/Fastest · 13 h 25 in all/)).toBeInTheDocument()
+  })
+
+  it('choose in one tap; ♥ your coup de cœur', async () => {
+    data.getTrip.mockResolvedValue(detail(journey))
+    data.chooseOption.mockResolvedValue(undefined)
+    data.setFavourite.mockResolvedValue(undefined)
+    open('/trips/t1/compare')
+    await screen.findByRole('heading', { name: 'St Martin ⇄ Cartagena' })
+    click('Choose')
+    await waitFor(() => expect(data.chooseOption).toHaveBeenCalledWith('avianca'))
+    click('My coup de cœur: Avianca')
+    await waitFor(() => expect(data.setFavourite).toHaveBeenCalledWith('avianca', true))
+  })
+
+  it('sort by speed', async () => {
+    data.getTrip.mockResolvedValue(detail(journey))
+    open('/trips/t1/compare')
+    await screen.findByRole('heading', { name: 'St Martin ⇄ Cartagena' })
+    fireEvent.click(screen.getByRole('radio', { name: 'Fastest' }))
+    const names = screen.getAllByRole('button', { name: /^Change / }).map((b) => b.getAttribute('aria-label'))
+    expect(names).toEqual(['Change Copa', 'Change Avianca'])
+  })
+
+  it('add two one-way tickets as one option: two prices, added up', async () => {
+    data.getTrip.mockResolvedValue(detail(journey))
+    data.addOption.mockResolvedValue('new')
+    open('/trips/t1/compare')
+    await screen.findByRole('heading', { name: 'St Martin ⇄ Cartagena' })
+    click('Add a travel option')
+    type('Airline or company', 'JetBlue + Copa')
+    fireEvent.click(screen.getByRole('radio', { name: 'Two one-ways' }))
+    type('Price out', '890')
+    type('Price back', '800')
+    click('Add the option')
+    await waitFor(() =>
+      expect(data.addOption).toHaveBeenCalledWith(
+        expect.anything(),
+        'f',
+        expect.objectContaining({ name: 'JetBlue + Copa', amount: 1690, details: { mode: 'plane', prices: [890, 800] } }),
+      ),
+    )
+  })
+
+  it('Stay: an empty place invites its first place to stay', async () => {
+    data.getTrip.mockResolvedValue(detail(journey))
+    data.addItemWithOption.mockResolvedValue(undefined)
+    open('/trips/t1/compare?tab=stay')
+    expect(await screen.findByText('No place to stay yet in Cartagena')).toBeInTheDocument()
+    click('+ Add a place to stay')
+    type('Name of the place', 'Casa Lola')
+    type('Price', '1.200')
+    fireEvent.click(screen.getByRole('radio', { name: '4 out of 5' }))
+    click('Add the option')
+    await waitFor(() =>
+      expect(data.addItemWithOption).toHaveBeenCalledWith(
+        expect.anything(),
+        { placeId: 'p1', kind: 'housing', name: 'Casa Lola' },
+        expect.objectContaining({ amount: 1200, details: { looks: 4 } }),
+      ),
+    )
+  })
+
+  it('on the trip page, an item with options says so, sends to Compare, and keeps its price', async () => {
+    data.getTrip.mockResolvedValue(
+      detail({
+        places: [cartagena],
+        items: [{ id: 'i1', place_id: 'p1', kind: 'housing', name: 'Casa Lola', status: 'chosen', day_number: null, end_day_number: null }],
+        options: [
+          { id: 'o1', item_id: 'i1', name: 'Casa Lola', amount: 1200, rate: 1, is_chosen: true, position: 1, details: {} },
+          { id: 'o2', item_id: 'i1', name: 'Hotel Sofitel', amount: 2000, rate: 1, is_chosen: false, position: 2, details: {} },
+        ],
+        amounts: [{ item_id: 'i1', current: 1200, is_confirmed: false }],
+      }),
+    )
+    data.updateItem.mockResolvedValue(undefined)
+    open('/trips/t1')
+    expect(await screen.findByText(/2 options compared/)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Change Casa Lola' }))
+    expect(screen.getByText(/2 options compared · chosen: Casa Lola/)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Open in Compare' })).toHaveAttribute('href', '/trips/t1/compare?tab=stay&page=p1')
+    expect(screen.queryByLabelText('Price')).not.toBeInTheDocument()
+    type('Name', 'Stay in Cartagena')
+    click('Save')
+    await waitFor(() =>
+      expect(data.updateItem).toHaveBeenCalledWith(expect.objectContaining({ name: 'Stay in Cartagena', keepPrice: true })),
+    )
+  })
+})

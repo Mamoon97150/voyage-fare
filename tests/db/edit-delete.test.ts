@@ -117,3 +117,25 @@ describe('only members change a trip', () => {
     expect(await total()).toBe(100)
   })
 })
+
+describe('an item with several options (build 3)', () => {
+  it('changing its name or days keeps every option and the chosen price', async () => {
+    const item = await id(`add_item(p_trip_id => $1, p_kind => 'housing', p_name => 'Stay', p_place_id => $2, p_amount => 400)`, [trip, cartagena])
+    await db.query(`insert into options (trip_id, item_id, name, amount, currency) values ($1, $2, 'Other flat', 350, 'EUR')`, [trip, item])
+    await db.query(`select update_item(p_item_id => $1, p_kind => 'housing', p_name => 'Stay in Cartagena', p_day_number => 1, p_keep_price => true)`, [item])
+    expect(await rows(db, 'select name from options where item_id = $1 order by name', [item])).toHaveLength(2)
+    expect((await one<{ name: string }>(db, 'select name from items where id = $1', [item])).name).toBe('Stay in Cartagena')
+    expect(await total()).toBe(400)
+  })
+
+  it('choosing another option moves the budget; deleting the chosen one makes it an idea', async () => {
+    const item = await id(`add_item(p_trip_id => $1, p_kind => 'housing', p_name => 'Stay', p_place_id => $2, p_amount => 400)`, [trip, cartagena])
+    const other = (await one<{ id: string }>(db, `insert into options (trip_id, item_id, name, amount, currency) values ($1, $2, 'Other flat', 350, 'EUR') returning id`, [trip, item])).id
+    await db.query('update options set is_chosen = true where id = $1', [other])
+    expect(await total()).toBe(350)
+    expect((await rows(db, 'select 1 from options where item_id = $1 and is_chosen', [item]))).toHaveLength(1)
+    await db.query('delete from options where id = $1', [other])
+    expect((await one<{ status: string }>(db, 'select status from items where id = $1', [item])).status).toBe('idea')
+    expect(await total()).toBeNull()
+  })
+})

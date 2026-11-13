@@ -84,6 +84,19 @@ describe('pages that need an account', () => {
     expect(screen.getByRole('button', { name: 'Your account (dana@mail.com)' })).toBeInTheDocument()
   })
 
+  it('after signing in, back to the exact page asked for (not just Your trips)', async () => {
+    fake.auth.signInWithPassword.mockImplementation(async () => {
+      fake.emit('SIGNED_IN', session)
+      return { data: { session }, error: null }
+    })
+    open('/account')
+    expect(await screen.findByRole('heading', { name: 'Sign in' })).toBeInTheDocument()
+    type('Email', 'dana@mail.com')
+    type('Password', 'anything')
+    fireEvent.click(screen.getByRole('button', { name: 'Sign in' }))
+    expect(await screen.findByRole('heading', { name: 'Your account' })).toBeInTheDocument()
+  })
+
   it('never shows the page before knowing who is there', () => {
     fake.auth.getSession.mockImplementationOnce(() => new Promise(() => {}))
     open('/trips')
