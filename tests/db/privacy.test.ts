@@ -104,3 +104,25 @@ describe('the demo trip is public and read-only', () => {
     await db.exec('rollback')
   })
 })
+
+describe('who created a trip is locked (review 13 Nov)', () => {
+  it('a member can rename the trip but not change its creator or make it the demo', async () => {
+    await db.exec('begin')
+    await actAs(db, owner)
+    await db.exec(`update trips set name = 'Lisbon, Porto & more' where id = '${ids.trip}'`)
+    expect(await refused(db, `update trips set created_by = '${ids.stranger}' where id = '${ids.trip}'`)).toBe(true)
+    expect(await refused(db, `update trips set is_demo = true where id = '${ids.trip}'`)).toBe(true)
+    await actAs(db, 'owner')
+    const trip = await one<Record<string, unknown>>(db, 'select name, created_by, is_demo from trips where id = $1', [ids.trip])
+    expect(trip).toEqual({ name: 'Lisbon, Porto & more', created_by: ids.owner, is_demo: false })
+    await db.exec('rollback')
+  })
+
+  it('the server itself can still hand a trip over', async () => {
+    await db.exec('begin')
+    await actAs(db, 'owner')
+    await db.exec(`update trips set created_by = '${ids.stranger}' where id = '${ids.trip}'`)
+    expect((await one<{ created_by: string }>(db, 'select created_by from trips where id = $1', [ids.trip])).created_by).toBe(ids.stranger)
+    await db.exec('rollback')
+  })
+})

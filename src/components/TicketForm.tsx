@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { explainAuthError } from '../lib/authForm'
-import { NO_AMOUNT } from '../lib/money'
+import { NO_AMOUNT, parseAmount } from '../lib/money'
 import type { TicketChange, TicketMode, TripDetail } from '../lib/trips'
 import { legsAfter, MODES, suggestedRoute } from '../lib/tripView'
 import { FormMessage } from './AuthForm'
@@ -76,8 +76,8 @@ export function TicketForm({
     const found: Record<string, string> = {}
     if (!from.trim()) found.from = 'Where does it leave from?'
     if (!to.trim()) found.to = 'Where does it go?'
-    const amount = price.trim() ? Number(price.replace(/\s/g, '').replace(',', '.')) : null
-    if (amount !== null && (!Number.isFinite(amount) || amount < 0)) found.price = 'Enter an amount, like 900.'
+    const amount = price.trim() ? parseAmount(price) : null
+    if (price.trim() && amount === null) found.price = 'Enter an amount, like 900 or 1 200,50.'
     setErrors(found)
     if (Object.keys(found).length) return
 

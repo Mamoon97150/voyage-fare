@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatMoney, NO_AMOUNT } from './money'
+import { formatMoney, NO_AMOUNT, parseAmount } from './money'
 
 // Normalise the non-breaking spaces so the expectations stay readable.
 const plain = (s: string) => s.replace(/[  ]/g, ' ')
@@ -36,5 +36,32 @@ describe('formatMoney', () => {
 
   it('keeps the minus sign for negative amounts', () => {
     expect(plain(formatMoney(-230))).toBe('−230 €')
+  })
+})
+
+describe('reading a typed amount', () => {
+  it.each([
+    ['1200', 1200],
+    ['1 200', 1200],
+    ['1 200', 1200], // a thin space, as phones type it
+    ["1'200", 1200],
+    ['1.200', 1200], // French thousands: this used to be read as 1.2
+    ['1,200', 1200],
+    ['2.400.000', 2400000],
+    ['2,400,000', 2400000],
+    ['2 400 000', 2400000],
+    ['1200,50', 1200.5],
+    ['1200.5', 1200.5],
+    ['19,99', 19.99],
+    ['1.200,50', 1200.5],
+    ['1,200.50', 1200.5],
+    ['1 200,50', 1200.5],
+    ['0', 0],
+  ])('%s → %s', (typed, expected) => {
+    expect(parseAmount(typed)).toBe(expected)
+  })
+
+  it.each(['', 'a lot', '-5', '12.', '1.2345', '1.20.300', '1.200.50,3', ',50', '1,2,3'])('“%s” is refused', (typed) => {
+    expect(parseAmount(typed)).toBeNull()
   })
 })

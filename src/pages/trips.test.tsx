@@ -274,6 +274,18 @@ describe('inside a trip', () => {
     )
   })
 
+  it('a price typed the French way is read right (2.400.000, not 2.4)', async () => {
+    data.getTrip.mockResolvedValue(detail({ places: [cartagena] }))
+    data.addItem.mockResolvedValue('i1')
+    open('/trips/t1')
+    await screen.findByRole('button', { name: 'Add to Cartagena' })
+    click('Add to Cartagena')
+    type('Name', 'Casa Lola')
+    type('Price', '2.400.000')
+    click('Add')
+    await waitFor(() => expect(data.addItem).toHaveBeenCalledWith(expect.objectContaining({ amount: 2400000 })))
+  })
+
   it('a last day before the first one is said on the field', async () => {
     data.getTrip.mockResolvedValue(detail({ places: [cartagena] }))
     open('/trips/t1')

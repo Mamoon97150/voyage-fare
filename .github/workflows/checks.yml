@@ -1,0 +1,23 @@
+# Runs on every push and pull request: the same checks as before a commit.
+# No secrets needed: the database tests use an in-memory Postgres (PGlite),
+# and the screen tests use a fake Supabase.
+name: Checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build

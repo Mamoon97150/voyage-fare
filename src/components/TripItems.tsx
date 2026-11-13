@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { explainAuthError } from '../lib/authForm'
-import { formatMoney, NO_AMOUNT } from '../lib/money'
+import { formatMoney, NO_AMOUNT, parseAmount } from '../lib/money'
 import {
   addItem,
   addTicket,
@@ -238,8 +238,8 @@ function ItemForm({
     setFormError(undefined)
     const found: Record<string, string> = {}
     if (!name.trim()) found.name = 'Give it a name.'
-    const amount = price.trim() ? Number(price.replace(/\s/g, '').replace(',', '.')) : null
-    if (amount !== null && (!Number.isFinite(amount) || amount < 0)) found.price = 'Enter an amount, like 120.'
+    const amount = price.trim() ? parseAmount(price) : null
+    if (price.trim() && amount === null) found.price = 'Enter an amount, like 120 or 1 200,50.'
     const start = day ? Number(day) : null
     const end = spans && endDay ? Number(endDay) : null
     if (end !== null && (start === null || end < start)) found.endDay = 'Pick a last day after the first one.'

@@ -7,6 +7,7 @@ import { SketchBox } from '../components/Sketch'
 import { useAuth } from '../lib/authContext'
 import { explainAuthError } from '../lib/authForm'
 import { createTrip } from '../lib/trips'
+import { parseAmount } from '../lib/money'
 import { CURRENCIES, currencyLabel } from '../lib/tripText'
 
 type Step = 1 | 2 | 3
@@ -44,8 +45,7 @@ export function NewTrip() {
 
   function checkTarget() {
     if (!target.trim()) return true
-    const value = Number(target.replace(/\s/g, '').replace(',', '.'))
-    if (!Number.isFinite(value) || value < 0) {
+    if (parseAmount(target) === null) {
       setErrors({ target: 'Enter an amount, like 2500.' })
       return false
     }
@@ -57,7 +57,7 @@ export function NewTrip() {
     if (withTarget && !checkTarget()) return
     setBusy(true)
     try {
-      const amount = withTarget && target.trim() ? Number(target.replace(/\s/g, '').replace(',', '.')) : null
+      const amount = withTarget && target.trim() ? parseAmount(target) : null
       const id = await createTrip({
         name: name.trim(),
         me,
