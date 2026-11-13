@@ -1,27 +1,32 @@
-import { BudgetBar } from './components/BudgetBar'
-import { Logo } from './components/Logo'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router'
+import { AuthProvider, RequireAuth, SignedOutOnly } from './lib/auth'
+import { ForgotPassword } from './pages/ForgotPassword'
+import { Home } from './pages/Home'
+import { ResetPassword } from './pages/ResetPassword'
+import { SignIn } from './pages/SignIn'
+import { SignUp } from './pages/SignUp'
+import { Trips } from './pages/Trips'
+
+export function AppRoutes() {
+  return (
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/sign-in" element={<SignedOutOnly><SignIn /></SignedOutOnly>} />
+      <Route path="/sign-up" element={<SignedOutOnly><SignUp /></SignedOutOnly>} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/trips" element={<RequireAuth><Trips /></RequireAuth>} />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  )
+}
 
 export default function App() {
   return (
-    <div className="page">
-      <header className="app-header">
-        <Logo />
-        <span className="app-header__name">Voyage Fare</span>
-      </header>
-
-      <main>
-        <section className="hero">
-          <h1>See your whole trip, and know exactly what it really costs.</h1>
-          <p>
-            A trip planner built around the budget: compare your options, follow your coup de
-            cœur, and always know what it costs per person and who paid what.
-          </p>
-        </section>
-
-        <BudgetBar label="Sample trip · per person" confirmed={1259} estimated={640} />
-
-        <p className="note">In the making. Sample numbers, not a real trip.</p>
-      </main>
-    </div>
+    <AuthProvider>
+      <BrowserRouter>
+        <AppRoutes />
+      </BrowserRouter>
+    </AuthProvider>
   )
 }

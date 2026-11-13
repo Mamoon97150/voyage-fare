@@ -140,3 +140,202 @@ p {
   font-size: 0.875rem;
   color: var(--ink-soft);
 }
+
+a {
+  color: var(--confirmed);
+  text-underline-offset: 0.15em;
+}
+
+.app-header__account {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: 0.875rem;
+}
+
+.app-header__email {
+  color: var(--ink-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 12rem;
+}
+
+.hero__actions {
+  margin-top: var(--space-6);
+}
+
+.loading {
+  padding: var(--space-12) var(--space-4);
+  text-align: center;
+  color: var(--ink-soft);
+}
+
+/* A sheet of the notebook, as in the mockups (each place is its own sheet). */
+.sheet {
+  background: var(--paper-raised);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 3px 10px rgb(31 42 36 / 0.07);
+}
+
+/* Buttons */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0 var(--space-6);
+  border-radius: var(--radius-pill);
+  border: 1px solid transparent;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.button--primary {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.button--quiet {
+  min-height: 2.25rem;
+  padding: 0 var(--space-4);
+  background: var(--paper-raised);
+  border-color: var(--line);
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.button:focus-visible,
+.field__input:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--estimated);
+  outline-offset: 2px;
+}
+
+/* Account pages */
+.auth {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-6) var(--space-4) var(--space-12);
+}
+
+.auth__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--ink);
+  text-decoration: none;
+  font-family: var(--font-title);
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: var(--space-8);
+}
+
+.auth__sheet {
+  width: 100%;
+  max-width: 24rem;
+  padding: var(--space-8) var(--space-6);
+}
+
+.auth__title {
+  font-size: 1.75rem;
+}
+
+.auth__intro {
+  margin-top: var(--space-2);
+  color: var(--ink-soft);
+}
+
+.auth__switch {
+  margin-top: var(--space-6);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--line);
+  font-size: 0.875rem;
+  color: var(--ink-soft);
+}
+
+/* Forms */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+}
+
+.form .button--primary {
+  width: 100%;
+  margin-top: var(--space-2);
+}
+
+.form__aside {
+  margin-top: calc(var(--space-2) * -1);
+  font-size: 0.875rem;
+  text-align: right;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.field__label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.field__input {
+  min-height: 2.75rem;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: 1rem; /* 16px or more: phones don't zoom in */
+}
+
+.field--error .field__input {
+  border-color: var(--over);
+}
+
+.field__hint {
+  font-size: 0.8125rem;
+  color: var(--ink-soft);
+}
+
+.field__error {
+  font-size: 0.8125rem;
+  color: var(--over);
+}
+
+.form-message {
+  padding: var(--space-3);
+  border-radius: 10px;
+  font-size: 0.875rem;
+  border-left: 3px solid;
+}
+
+.form-message--error {
+  border-color: var(--over);
+  background: rgb(194 81 63 / 0.07);
+}
+
+.form-message--info {
+  border-color: var(--confirmed);
+  background: rgb(47 107 79 / 0.07);
+}
