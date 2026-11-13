@@ -64,18 +64,83 @@ export async function listTrips(): Promise<TripSummary[]> {
   }))
 }
 
-export type TripDetail = { trip: Trip; travellers: Traveller[]; places: Place[] }
+export type Item = Tables<'items'>
+export type ItemAmount = Tables<'v_item_amounts'>
+export type ItemShare = Tables<'v_item_shares'>
+export type TripBudget = Tables<'v_trip_budget'>
+export type TravellerShare = Tables<'v_traveller_shares'>
+export type PlaceTotal = Tables<'v_budget_by_place'>
+export type TravellerPlaceTotal = Tables<'v_traveller_by_place'>
+
+export type TripDetail = {
+  trip: Trip
+  travellers: Traveller[]
+  places: Place[]
+  items: Item[]
+  amounts: ItemAmount[]
+  shares: ItemShare[]
+  budget: TripBudget | null
+  travellerShares: TravellerShare[]
+  placeTotals: PlaceTotal[]
+  travellerPlaceTotals: TravellerPlaceTotal[]
+}
 
 /** null when the trip doesn't exist or isn't shared with this person (privacy hides both the same way). */
 export async function getTrip(id: string): Promise<TripDetail | null> {
-  const [trip, travellers, places] = await Promise.all([
-    supabase.from('trips').select('*').eq('id', id).maybeSingle(),
-    supabase.from('travellers').select('*').eq('trip_id', id).order('position'),
-    supabase.from('places').select('*').eq('trip_id', id).order('position'),
-  ])
-  for (const r of [trip, travellers, places]) if (r.error) throw r.error
+  const [trip, travellers, places, items, amounts, shares, budget, travellerShares, placeTotals, travellerPlaceTotals] =
+    await Promise.all([
+      supabase.from('trips').select('*').eq('id', id).maybeSingle(),
+      supabase.from('travellers').select('*').eq('trip_id', id).order('position'),
+      supabase.from('places').select('*').eq('trip_id', id).order('position'),
+      supabase.from('items').select('*').eq('trip_id', id).order('position'),
+      supabase.from('v_item_amounts').select('*').eq('trip_id', id),
+      supabase.from('v_item_shares').select('*').eq('trip_id', id),
+      supabase.from('v_trip_budget').select('*').eq('trip_id', id).maybeSingle(),
+      supabase.from('v_traveller_shares').select('*').eq('trip_id', id),
+      supabase.from('v_budget_by_place').select('*').eq('trip_id', id),
+      supabase.from('v_traveller_by_place').select('*').eq('trip_id', id),
+    ])
+  for (const r of [trip, travellers, places, items, amounts, shares, budget, travellerShares, placeTotals, travellerPlaceTotals]) {
+    if (r.error) throw r.error
+  }
   if (!trip.data) return null
-  return { trip: trip.data, travellers: travellers.data ?? [], places: places.data ?? [] }
+  return {
+    trip: trip.data,
+    travellers: travellers.data ?? [],
+    places: places.data ?? [],
+    items: items.data ?? [],
+    amounts: amounts.data ?? [],
+    shares: shares.data ?? [],
+    budget: budget.data,
+    travellerShares: travellerShares.data ?? [],
+    placeTotals: placeTotals.data ?? [],
+    travellerPlaceTotals: travellerPlaceTotals.data ?? [],
+  }
+}
+
+export type ItemKind = 'transport' | 'housing' | 'activity' | 'restaurant' | 'car_rental' | 'insurance' | 'other'
+
+/** One step in the database: the item, and with a price its single chosen option. */
+export async function addItem(item: {
+  tripId: string
+  placeId: string | null
+  kind: ItemKind
+  name: string
+  dayNumber: number | null
+  endDayNumber: number | null
+  amount: number | null
+}): Promise<string> {
+  const { data, error } = await supabase.rpc('add_item', {
+    p_trip_id: item.tripId,
+    p_kind: item.kind,
+    p_name: item.name,
+    p_place_id: item.placeId ?? undefined,
+    p_day_number: item.dayNumber ?? undefined,
+    p_end_day_number: item.endDayNumber ?? undefined,
+    p_amount: item.amount ?? undefined,
+  })
+  if (error) throw error
+  return data
 }
 
 export async function addPlace(place: {

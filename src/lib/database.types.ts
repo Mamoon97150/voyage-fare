@@ -1077,6 +1077,19 @@ export type Database = {
       }
     }
     Functions: {
+      add_item: {
+        Args: {
+          p_amount?: number
+          p_day_number?: number
+          p_end_day_number?: number
+          p_kind: string
+          p_name: string
+          p_note?: string
+          p_place_id?: string
+          p_trip_id: string
+        }
+        Returns: string
+      }
       create_trip: {
         Args: {
           p_currency?: string
