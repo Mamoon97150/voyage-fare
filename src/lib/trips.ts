@@ -238,6 +238,12 @@ export async function changeTripCurrency(tripId: string, currency: string, rate:
   if (error) throw error
 }
 
+/** Dropped: kept for the record, out of the budget and the dots. Choosing an option brings it back. */
+export async function setItemDropped(id: string, dropped: boolean): Promise<void> {
+  const { error } = await supabase.rpc('set_item_dropped', { p_item_id: id, p_dropped: dropped })
+  if (error) throw error
+}
+
 export type ItemStatus = 'chosen' | 'booked' | 'paid'
 
 /** Booked or paid, with what was really paid; paid also says who paid (BR-2, BR-3). */
@@ -274,7 +280,8 @@ export type TicketChange = {
   amount: number | null
 }
 
-export async function updateTicket(itemId: string, ticket: TicketChange): Promise<void> {
+/** keepPrice: the price lives in Compare (several options, or one in another currency). */
+export async function updateTicket(itemId: string, ticket: TicketChange, keepPrice = false): Promise<void> {
   const { error } = await supabase.rpc('update_ticket', {
     p_item_id: itemId,
     p_from: ticket.from,
@@ -285,6 +292,7 @@ export async function updateTicket(itemId: string, ticket: TicketChange): Promis
     p_round_trip: ticket.roundTrip,
     p_return_after_place_id: ticket.returnAfterPlaceId ?? undefined,
     p_amount: ticket.amount ?? undefined,
+    p_keep_price: keepPrice,
   })
   if (error) throw error
 }

@@ -81,3 +81,39 @@ describe('statuses', () => {
     await expect(status(`p_item_id => $1, p_status => 'booked'`, [item])).rejects.toThrow()
   })
 })
+
+describe('review fixes (13 Nov)', () => {
+  it('a price from the trip page lands in the main currency, even in a dollar option', async () => {
+    await db.query(`update options set currency = 'USD', rate = 0.9, amount = 230 where item_id = $1`, [item])
+    await db.query(`select update_item(p_item_id => $1, p_kind => 'housing', p_name => 'Casona', p_amount => 207)`, [item])
+    const o = await one<Record<string, unknown>>(db, 'select amount, currency, rate from options where item_id = $1', [item])
+    expect([num(o.amount), o.currency, num(o.rate)]).toEqual([207, 'EUR', 1])
+  })
+
+  it('a ticket keeps its options’ prices when asked', async () => {
+    const t = (await one<{ id: string }>(db, `select add_ticket(p_trip_id => $1, p_from => 'Bogotá', p_to => 'Medellín', p_amount => 300) as id`, [trip])).id
+    await db.query(`select update_ticket(p_item_id => $1, p_from => 'Bogotá', p_to => 'Medellín', p_via => 'Cali', p_keep_price => true)`, [t])
+    expect(num((await one<{ amount: unknown }>(db, 'select amount from options where item_id = $1', [t])).amount)).toBe(300)
+  })
+
+  it('dropped: nothing chosen, out of the budget; choosing brings it back', async () => {
+    await db.query(`select set_item_dropped($1, true)`, [item])
+    expect((await line()).status).toBe('dropped')
+    const b = await budget()
+    expect(b.estimated_total).toBeNull()
+    await db.query(`update options set is_chosen = true where item_id = $1`, [item])
+    expect((await line()).status).toBe('chosen')
+  })
+
+  it('bring it back: its only option is chosen again', async () => {
+    await db.query(`select set_item_dropped($1, true)`, [item])
+    await db.query(`select set_item_dropped($1, false)`, [item])
+    expect((await line()).status).toBe('chosen')
+    expect(num((await budget()).estimated_total)).toBe(1000)
+  })
+
+  it('booked can’t be dropped', async () => {
+    await status(`p_item_id => $1, p_status => 'booked'`, [item])
+    await expect(db.query(`select set_item_dropped($1, true)`, [item])).rejects.toThrow('set it back to Chosen')
+  })
+})

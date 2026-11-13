@@ -202,7 +202,9 @@ export function subjectsFor(detail: TripDetail, tab: Tab): Subject[] {
 
 /** A tab gets a mustard dot when something in it is still to decide: an item with no chosen option. */
 export function tabToDecide(detail: TripDetail, tab: Tab): boolean {
-  return detail.items.some((i) => tabOf(i) === tab && !detail.options.some((o) => o.item_id === i.id && o.is_chosen))
+  return detail.items.some(
+    (i) => i.status !== 'dropped' && tabOf(i) === tab && !detail.options.some((o) => o.item_id === i.id && o.is_chosen),
+  )
 }
 
 export const optionCount = (detail: Pick<TripDetail, 'options'>, item: Item) =>

@@ -9,6 +9,7 @@ import {
   wayMinutes,
 } from './options'
 import type { Item, TripDetail, TripOption } from './trips'
+import { parseRate } from './rates'
 import { itemTitle } from './tripView'
 
 const option = (over: Partial<TripOption>): TripOption =>
@@ -151,5 +152,26 @@ describe('what a line is called', () => {
     const t = item({ id: 'f', name: 'Bogotá → Medellín' })
     const d = trip({ legs: [{ item_id: 'f', leg_number: 1 }] as TripDetail['legs'], options: [option({ item_id: 'f', name: 'Avianca', is_chosen: true })] })
     expect(itemTitle(d, t).title).toBe('Bogotá → Medellín')
+  })
+})
+
+describe('reading a rate as typed (review 13 Nov)', () => {
+  it('any number of decimals', () => {
+    expect(parseRate('1.1531')).toBe(1.1531)
+    expect(parseRate('1,1531')).toBe(1.1531)
+    expect(parseRate('115,13')).toBe(115.13)
+    expect(parseRate('3 645')).toBe(3645)
+  })
+
+  it('“1.153”: the one closer to the rate shown', () => {
+    expect(parseRate('1.153', 1.1068)).toBe(1.153)
+    expect(parseRate('3.645', 3645)).toBe(3645)
+    expect(parseRate('1.153')).toBe(1.153)
+  })
+
+  it('not a rate', () => {
+    expect(parseRate('abc')).toBeNull()
+    expect(parseRate('0')).toBeNull()
+    expect(parseRate('1.')).toBeNull()
   })
 })

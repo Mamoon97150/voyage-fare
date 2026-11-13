@@ -42,7 +42,7 @@ export function StatusForm({
   const [status, setStatus] = useState<ItemStatus>(initial)
   const [amount, setAmount] = useState(amountForInput(start === null ? null : Number(start)))
   const [paidBy, setPaidBy] = useState(item.paid_by ?? viewer ?? detail.travellers[0]?.id ?? '')
-  const [paidOn, setPaidOn] = useState(() => item.paid_on ?? new Date().toISOString().slice(0, 10))
+  const [paidOn, setPaidOn] = useState(() => item.paid_on ?? localToday())
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string>()
   const solo = isSolo(detail)
@@ -62,7 +62,7 @@ export function StatusForm({
     }
     const foreign = status !== 'chosen' && actual !== null && rate.currency !== trip
     if (foreign && rate.rate === null) {
-      setError(`What’s the rate? 1 ${rate.currency} is how many ${trip}?`)
+      setError(rate.unreadable ? 'That rate doesn’t look right: type it like 1,1531.' : `What’s the rate? 1 ${rate.currency} is how many ${trip}?`)
       return
     }
     setBusy(true)
@@ -153,4 +153,10 @@ export function StatusForm({
       </button>
     </form>
   )
+}
+
+/** Today where you are (review 13 Nov: UTC said tomorrow after 20:00 in St Martin). */
+function localToday(): string {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }

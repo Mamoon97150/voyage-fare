@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { formatMoney } from '../lib/money'
+import { formatWhole as formatMoney } from '../lib/money'
 import type { BudgetView, Mode } from '../lib/tripView'
 
 /**

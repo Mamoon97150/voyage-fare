@@ -1,6 +1,7 @@
 // The real Colombia & Panama trip (4–18 Sept 2026), rebuilt from Alizé's notes because the paper
 // notebook is lost. It goes into the demo account and replaces any earlier "Colombia & Panama"
 // there; nothing else is touched. Run: npm run seed:colombia
+// ⚠ Re-running it starts the trip over: what was changed in the app since (a payment…) is lost.
 //
 // How it's modelled:
 // - The agency package (2 560 € a person: flights, hotels with breakfast, most transfers) is one
@@ -34,6 +35,8 @@ type Line = {
   split?: string[]
   /** Booked at this amount. */
   booked?: number
+  /** Decided against: kept for the record. */
+  dropped?: boolean
 }
 
 // Day 1 = Fri 4 Sept.
@@ -198,6 +201,7 @@ const PLACES: { name: string; country: string; lat: number; lon: number; nights:
         name: 'Perfume workshop',
         day: 8,
         chosen: null,
+        dropped: true,
         split: ['Djamina', 'Danielle'],
         note: 'Dropped: no perfume this time',
         options: [{ name: 'Iris Alta Perfumería', amount: 580000, currency: 'COP', note: '~290 000 COP each, your own 50 ml' }],
@@ -371,6 +375,7 @@ it('rebuilds the Colombia & Panama trip in the demo account', async () => {
     if (line.split) {
       must(await supabase.from('item_split_travellers').insert(line.split.map((n) => ({ item_id: itemId, traveller_id: who(n), trip_id: tripId }))))
     }
+    if (line.dropped) must(await supabase.rpc('set_item_dropped', { p_item_id: itemId, p_dropped: true }))
     if (line.booked !== undefined) await setItemStatus({ id: itemId, status: 'booked', actualAmount: line.booked, paidBy: null })
   }
 

@@ -94,7 +94,8 @@ export function OptionForm({
       if (price.trim() && amount === null) found.price = 'Enter an amount, like 1 200 or 1 200,50.'
     }
     const foreign = rate.currency !== currency
-    if (foreign && amount !== null && rate.rate === null) found.rate = `What’s the rate? 1 ${rate.currency} is how many ${currency}?`
+    if (foreign && amount !== null && rate.rate === null)
+      found.rate = rate.unreadable ? 'That rate doesn’t look right: type it like 1,1531.' : `What’s the rate? 1 ${rate.currency} is how many ${currency}?`
     setErrors(found)
     if (Object.keys(found).length) return
 

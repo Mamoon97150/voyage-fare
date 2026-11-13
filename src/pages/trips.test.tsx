@@ -40,6 +40,7 @@ const data = vi.hoisted(() => ({
   updateTicket: vi.fn(),
   setItemStatus: vi.fn(),
   changeTripCurrency: vi.fn(),
+  setItemDropped: vi.fn(),
   deleteItem: vi.fn(),
   updatePlace: vi.fn(),
   deletePlace: vi.fn(),
@@ -69,6 +70,7 @@ vi.mock('../lib/trips', () => ({
   updateTicket: data.updateTicket,
   setItemStatus: data.setItemStatus,
   changeTripCurrency: data.changeTripCurrency,
+  setItemDropped: data.setItemDropped,
   deleteItem: data.deleteItem,
   updatePlace: data.updatePlace,
   deletePlace: data.deletePlace,
@@ -528,7 +530,7 @@ describe('changing what was added', () => {
         roundTrip: false,
         returnAfterPlaceId: null,
         amount: 1000,
-      }),
+      }, false),
     )
   })
 
@@ -1003,5 +1005,80 @@ describe('currencies', () => {
     open('/trips/t1/settings')
     expect(await screen.findByText(/Fixed since the first payment/)).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Change the main currency' })).not.toBeInTheDocument()
+  })
+})
+
+describe('review fixes (13 Nov)', () => {
+  const nails = (over: Record<string, unknown> = {}) =>
+    detail({
+      places: [cartagena],
+      items: [{ id: 'i1', place_id: 'p1', kind: 'activity', name: 'Nails', status: 'chosen', day_number: null, end_day_number: null, ...over }],
+      options: [{ id: 'o1', item_id: 'i1', name: 'Momo Beauty Bar', amount: 615000, currency: 'COP', rate: 0.00027435, is_chosen: true, position: 1, details: {} }],
+      amounts: [{ item_id: 'i1', current: 168.73, is_confirmed: false }],
+      shares: [
+        { item_id: 'i1', traveller_id: 'a', fraction: 0.5 },
+        { item_id: 'i1', traveller_id: 'b', fraction: 0.5 },
+      ],
+    })
+
+  it('a line in pesos: its form shows the price from Compare and leaves it alone', async () => {
+    data.getTrip.mockResolvedValue(nails())
+    data.updateItem.mockResolvedValue(undefined)
+    open('/trips/t1')
+    fireEvent.click(await screen.findByRole('button', { name: 'Change Momo Beauty Bar' }))
+    expect(screen.getByText(/615 000 COP ≈ 169 €/)).toBeInTheDocument()
+    expect(screen.queryByLabelText('Price')).not.toBeInTheDocument()
+    expect(screen.getByLabelText('What you’re deciding')).toHaveValue('Nails')
+    click('Save')
+    await waitFor(() => expect(data.updateItem).toHaveBeenCalledWith(expect.objectContaining({ keepPrice: true })))
+  })
+
+  it('lines in whole units; 0 is Included when booked, Free otherwise', async () => {
+    data.getTrip.mockResolvedValue(
+      detail({
+        places: [cartagena],
+        items: [
+          { id: 'h', place_id: 'p1', kind: 'housing', name: 'Hotel', status: 'booked', day_number: null, end_day_number: null },
+          { id: 'm', place_id: 'p1', kind: 'activity', name: 'Museum', status: 'chosen', day_number: null, end_day_number: null },
+          { id: 'n', place_id: 'p1', kind: 'activity', name: 'Nails', status: 'chosen', day_number: null, end_day_number: null },
+        ],
+        amounts: [
+          { item_id: 'h', current: 0, is_confirmed: true },
+          { item_id: 'm', current: 0, is_confirmed: false },
+          { item_id: 'n', current: 84.36, is_confirmed: false },
+        ],
+      }),
+    )
+    open('/trips/t1')
+    fireEvent.click(await screen.findByRole('radio', { name: 'Total' }))
+    expect(await screen.findByText('Included')).toBeInTheDocument()
+    expect(screen.getByText('Free')).toBeInTheDocument()
+    expect(screen.getByText('84 €')).toBeInTheDocument()
+  })
+
+  it('drop a line, then bring it back', async () => {
+    data.getTrip.mockResolvedValue(nails())
+    data.setItemDropped.mockResolvedValue(undefined)
+    open('/trips/t1')
+    fireEvent.click(await screen.findByRole('button', { name: 'Change Momo Beauty Bar' }))
+    click('Drop it')
+    await waitFor(() => expect(data.setItemDropped).toHaveBeenCalledWith('i1', true))
+  })
+
+  it('a dropped line: greyed, not counted, and it can come back', async () => {
+    data.getTrip.mockResolvedValue({ ...nails({ status: 'dropped' }), options: (nails().options as Record<string, unknown>[]).map((o) => ({ ...o, is_chosen: false })), amounts: [] })
+    data.setItemDropped.mockResolvedValue(undefined)
+    open('/trips/t1')
+    expect(await screen.findByText('Dropped')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Change Nails' }))
+    click('Bring it back')
+    await waitFor(() => expect(data.setItemDropped).toHaveBeenCalledWith('i1', false))
+  })
+
+  it('a dropped line doesn’t leave a “to decide” dot', async () => {
+    data.getTrip.mockResolvedValue({ ...nails({ status: 'dropped' }), options: (nails().options as Record<string, unknown>[]).map((o) => ({ ...o, is_chosen: false })) })
+    open('/trips/t1/compare?tab=activities&page=p1')
+    expect(await screen.findByText(/Dropped: kept for the record/)).toBeInTheDocument()
+    expect(screen.queryByText('(something to decide)')).not.toBeInTheDocument()
   })
 })

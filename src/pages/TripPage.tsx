@@ -14,7 +14,7 @@ import { Loading } from '../lib/auth'
 import { hintSeen, markHintSeen } from '../lib/hints'
 import { useAuth } from '../lib/authContext'
 import { explainAuthError } from '../lib/authForm'
-import { formatMoney } from '../lib/money'
+import { formatWhole } from '../lib/money'
 import { getTrip, type TripDetail } from '../lib/trips'
 import { formatDates, plural } from '../lib/tripText'
 import {
@@ -159,7 +159,7 @@ export function TripPage() {
                           <small>{place.nights ? plural(place.nights, 'night') : 'nights not set'}</small>
                         </h2>
                         <span className="place__total num">
-                          {formatMoney(placeTotal(detail, place, viewer, shownMode), trip.currency)}
+                          {formatWhole(placeTotal(detail, place, viewer, shownMode), trip.currency)}
                         </span>
                         {editingPlace !== place.id && (
                           <button

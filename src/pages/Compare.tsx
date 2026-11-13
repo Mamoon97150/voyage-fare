@@ -293,6 +293,9 @@ function ItemOptions({
           )}
         </div>
       )}
+      {item.status === 'dropped' && (
+        <p className="field__hint compare-item__dropped">Dropped: kept for the record. Choose one to bring it back.</p>
+      )}
       {error && <FormMessage tone="error">{error}</FormMessage>}
       <ul className="options">
         {lines.map((line) =>

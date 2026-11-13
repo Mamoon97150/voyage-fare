@@ -1984,3 +1984,27 @@ select.field__input,
   flex-direction: column;
   gap: var(--space-3);
 }
+
+/* Dropped (review 13 Nov): kept for the record, greyed and struck through, out of the budget. */
+.item-row--dropped .item-row__name {
+  color: var(--ink-soft);
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+
+.item-row--dropped .item-row__amount,
+.item-row--dropped .item-row__meta {
+  opacity: 0.6;
+}
+
+.drop-control {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.compare-item__dropped {
+  margin: 0 0 var(--space-2);
+}

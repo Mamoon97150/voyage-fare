@@ -1105,6 +1105,10 @@ export type Database = {
         }
         Returns: string
       }
+      set_item_dropped: {
+        Args: { p_dropped: boolean; p_item_id: string }
+        Returns: undefined
+      }
       set_item_status: {
         Args: {
           p_actual_amount?: number
@@ -1135,6 +1139,7 @@ export type Database = {
           p_amount?: number
           p_from: string
           p_item_id: string
+          p_keep_price?: boolean
           p_mode?: string
           p_return_after_place_id?: string
           p_round_trip?: boolean

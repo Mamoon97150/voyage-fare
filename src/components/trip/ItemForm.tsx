@@ -98,6 +98,7 @@ export function ItemForm({
   onDelete,
   deleteName,
   options,
+  nameLabel = 'Name',
 }: {
   detail: TripDetail
   formId: string
@@ -113,6 +114,8 @@ export function ItemForm({
   deleteName?: string
   /** Several options: the price is the chosen one's, changed on Compare (shown instead of the field). */
   options?: { text: string; link: string | null }
+  /** "What you're deciding" once the line shows the chosen option's name instead. */
+  nameLabel?: string
 }) {
   const [ownKind, setOwnKind] = useState<ItemKind>(initial?.kind ?? kinds[0])
   const kind = controlledKind ?? ownKind
@@ -159,7 +162,7 @@ export function ItemForm({
 
       <div className={`field${errors.name ? ' field--error' : ''}`}>
         <label htmlFor={`${id}-name`} className="field__label">
-          Name
+          {nameLabel}
         </label>
         <input
           id={`${id}-name`}

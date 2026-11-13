@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { amountForInput, formatMoney } from '../../lib/money'
+import { amountForInput } from '../../lib/money'
 import { deleteItem, updateItem, type Item, type ItemKind, type TripDetail } from '../../lib/trips'
 import { daysText, itemLine, itemTitle, KINDS, type Mode } from '../../lib/tripView'
-import { compareLink, optionCount } from '../../lib/options'
-import { STATUS, priceOf } from './itemShared'
+import { optionCount } from '../../lib/options'
+import { amountText, priceInCompare, STATUS, priceOf } from './itemShared'
+import { DropControl } from './DropControl'
 import { ItemForm } from './ItemForm'
 import { StatusForm } from './StatusForm'
 
@@ -34,7 +35,7 @@ export function ItemRow({
 }) {
   const [editing, setEditing] = useState(false)
   const line = itemLine(detail, item, viewer, mode)
-  const dot = !line.priced ? 'dot--none' : line.confirmed ? 'dot--confirmed' : 'dot--estimated'
+  const dot = item.status === 'dropped' ? 'dot--none' : !line.priced ? 'dot--none' : line.confirmed ? 'dot--confirmed' : 'dot--estimated'
   const { title, decision } = itemTitle(detail, item)
   const meta = [
     decision ?? KINDS[item.kind as ItemKind]?.label,
@@ -45,8 +46,9 @@ export function ItemRow({
     .filter(Boolean)
     .join(' · ')
 
-  const count = optionCount(detail, item)
   const chosen = detail.options.find((o) => o.item_id === item.id && o.is_chosen)
+  const inCompare = priceInCompare(detail, item)
+  const dropped = item.status === 'dropped'
 
   if (editing) {
     const price = priceOf(detail, item)
@@ -65,16 +67,10 @@ export function ItemRow({
             price: amountForInput(price),
           }}
           submitLabel="Save"
-          options={
-            count >= 2
-              ? {
-                  text: `${count} options compared${chosen ? ` · chosen: ${chosen.name}` : ' · none chosen yet'}`,
-                  link: compareLink(detail, item),
-                }
-              : undefined
-          }
+          options={inCompare}
+          nameLabel={decision ? 'What you’re deciding' : 'Name'}
           onSubmit={async (v) => {
-            await updateItem({ id: item.id, ...v, keepPrice: count >= 2 })
+            await updateItem({ id: item.id, ...v, keepPrice: inCompare !== undefined })
             setEditing(false)
             onChanged()
           }}
@@ -84,6 +80,13 @@ export function ItemRow({
           }}
           deleteName={item.name}
           onCancel={() => setEditing(false)}
+        />
+        <DropControl
+          item={item}
+          onChanged={() => {
+            setEditing(false)
+            onChanged()
+          }}
         />
         {chosen && (
           <StatusForm
@@ -101,7 +104,7 @@ export function ItemRow({
   }
 
   return (
-    <li className="item-row">
+    <li className={dropped ? 'item-row item-row--dropped' : 'item-row'}>
       <button
         type="button"
         className="item-row__tap"
@@ -117,7 +120,7 @@ export function ItemRow({
           {meta && <span className="item-row__meta">{meta}</span>}
         </span>
         <span className="item-row__amount num">
-          <b>{line.concernsViewer ? formatMoney(line.amount, detail.trip.currency) : 'Not yours'}</b>
+          <b>{amountText(line, item, detail.trip.currency)}</b>
           {STATUS[item.status] && <span className="item-row__status">{STATUS[item.status]}</span>}
         </span>
         <span className="item-row__chev" aria-hidden="true">

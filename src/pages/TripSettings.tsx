@@ -7,7 +7,7 @@ import { Loading } from '../lib/auth'
 import { useAuth } from '../lib/authContext'
 import { explainAuthError } from '../lib/authForm'
 import { amountForInput, formatMoney, parseAmount } from '../lib/money'
-import { fetchRate, formatRate } from '../lib/rates'
+import { fetchRate, formatRate, parseRate } from '../lib/rates'
 import type { CityValue } from '../lib/places'
 import {
   addTraveller,
@@ -280,17 +280,19 @@ function MainCurrency({ detail, onChanged }: { detail: TripDetail; onChanged: ()
     }
     setInverted(r < 1)
     setText(formatRate(r < 1 ? 1 / r : r))
+    setShown(r < 1 ? 1 / r : r)
     setState('idle')
   }
 
-  const typed = text.trim() ? parseAmount(text) : null
+  const [shown, setShown] = useState<number | null>(null)
+  const typed = text.trim() ? parseRate(text, shown) : null
   // What 1 of the current currency is worth in the new one.
-  const rate = typed !== null && typed > 0 ? (inverted ? 1 / typed : typed) : null
+  const rate = typed !== null ? (inverted ? 1 / typed : typed) : null
   const target = detail.trip.target_amount === null ? null : Number(detail.trip.target_amount)
 
   async function change() {
     if (!to || rate === null) {
-      setError(`What’s the rate? 1 ${from} is how many ${to}?`)
+      setError(text.trim() ? 'That rate doesn’t look right: type it like 1,1531.' : `What’s the rate? 1 ${from} is how many ${to}?`)
       return
     }
     setBusy(true)

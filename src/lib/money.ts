@@ -28,6 +28,10 @@ export function formatMoney(
   return `${sign}${number} ${unit}${suffix}`
 }
 
+/** Summaries (budget bar, place totals, lines) in whole units: cents are noise there (review 13 Nov). */
+export const formatWhole = (amount: number | null | undefined, currency = 'EUR', scope?: MoneyScope) =>
+  formatMoney(amount === null || amount === undefined ? amount : Math.round(amount), currency, scope)
+
 /**
  * Read an amount the way people type it, in any common style (review 13 Nov: "1.200" was read as 1.2).
  * Spaces and apostrophes group thousands. A dot or comma followed by exactly 3 digits groups thousands

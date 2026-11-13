@@ -1,8 +1,7 @@
 import { useState } from 'react'
-import { formatMoney } from '../../lib/money'
 import { deleteItem, updateTicket, type TicketMode, type TripDetail } from '../../lib/trips'
 import { itemLine, MODES, ticketOf, type LegLine, type Mode } from '../../lib/tripView'
-import { STATUS, priceOf } from './itemShared'
+import { amountText, priceInCompare, STATUS, priceOf } from './itemShared'
 import { StatusForm } from './StatusForm'
 import { TicketForm } from './TicketForm'
 
@@ -39,8 +38,9 @@ export function RouteGap({
                 detail={detail}
                 initial={ticketOf(detail, item, priceOf(detail, item))}
                 submitLabel="Save"
+                options={priceInCompare(detail, item)}
                 onSubmit={async (t) => {
-                  await updateTicket(item.id, t)
+                  await updateTicket(item.id, t, priceInCompare(detail, item) !== undefined)
                   setEditing(null)
                   onChanged()
                 }}
@@ -97,7 +97,7 @@ export function RouteGap({
               </span>
               {!isReturn && (
                 <span className="item-row__amount num">
-                  <b>{line.concernsViewer ? formatMoney(line.amount, detail.trip.currency) : 'Not yours'}</b>
+                  <b>{amountText(line, item, detail.trip.currency)}</b>
                   <span className="item-row__status">
                     <i className={`dot ${dot}`} aria-hidden="true" /> {STATUS[item.status]}
                   </span>
