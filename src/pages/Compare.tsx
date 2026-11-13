@@ -305,7 +305,7 @@ function ItemOptions({
               item={item}
               place={subject.place}
               currency={detail.trip.currency}
-              travellers={detail.travellers.length}
+              travellers={detail.shares.filter((s) => s.item_id === item.id).length || detail.travellers.length}
               roundTrip={roundTrip}
               busy={busy}
               onEdit={() => setEditing(line.option.id)}

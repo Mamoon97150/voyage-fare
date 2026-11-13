@@ -5,6 +5,7 @@ import { daysText, itemLine, KINDS, type Mode } from '../../lib/tripView'
 import { compareLink, optionCount } from '../../lib/options'
 import { STATUS, priceOf } from './itemShared'
 import { ItemForm } from './ItemForm'
+import { StatusForm } from './StatusForm'
 
 /**
  * One line of the notebook: a dot (green confirmed, mustard estimated, hollow no price), the name,
@@ -83,6 +84,17 @@ export function ItemRow({
           deleteName={item.name}
           onCancel={() => setEditing(false)}
         />
+        {chosen && (
+          <StatusForm
+            detail={detail}
+            item={item}
+            viewer={viewer}
+            onSaved={() => {
+              setEditing(false)
+              onChanged()
+            }}
+          />
+        )}
       </li>
     )
   }

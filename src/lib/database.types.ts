@@ -1105,6 +1105,16 @@ export type Database = {
         }
         Returns: string
       }
+      set_item_status: {
+        Args: {
+          p_actual_amount?: number
+          p_item_id: string
+          p_paid_by?: string
+          p_paid_on?: string
+          p_status: string
+        }
+        Returns: undefined
+      }
       update_item: {
         Args: {
           p_amount?: number

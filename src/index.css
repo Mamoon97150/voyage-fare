@@ -1899,3 +1899,49 @@ select.field__input,
 .options-note {
   font-size: 0.9375rem;
 }
+
+/* Where it stands (build 3): chosen → booked → paid, under the edit form, on a dashed fold. */
+.status-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1.5px dashed var(--line);
+}
+
+.status-form .sheet-title {
+  margin: 0;
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.steps button {
+  min-height: 2.5rem;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 0.875rem;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.steps button + button {
+  border-left: 1.5px solid var(--ink);
+}
+
+.steps button[aria-checked='true'] {
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 600;
+}
+
+.status-form .button {
+  align-self: flex-start;
+}

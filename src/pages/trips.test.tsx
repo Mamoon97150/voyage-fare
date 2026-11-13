@@ -38,6 +38,7 @@ const data = vi.hoisted(() => ({
   addTicket: vi.fn(),
   updateItem: vi.fn(),
   updateTicket: vi.fn(),
+  setItemStatus: vi.fn(),
   deleteItem: vi.fn(),
   updatePlace: vi.fn(),
   deletePlace: vi.fn(),
@@ -65,6 +66,7 @@ vi.mock('../lib/trips', () => ({
   addTicket: data.addTicket,
   updateItem: data.updateItem,
   updateTicket: data.updateTicket,
+  setItemStatus: data.setItemStatus,
   deleteItem: data.deleteItem,
   updatePlace: data.updatePlace,
   deletePlace: data.deletePlace,
@@ -822,5 +824,82 @@ describe('Compare', () => {
     await waitFor(() =>
       expect(data.updateItem).toHaveBeenCalledWith(expect.objectContaining({ name: 'Stay in Cartagena', keepPrice: true })),
     )
+  })
+})
+
+describe('where it stands', () => {
+  const stay = (over: Record<string, unknown> = {}) =>
+    detail({
+      places: [cartagena],
+      items: [{ id: 'i1', place_id: 'p1', kind: 'housing', name: 'Casa Lola', status: 'chosen', day_number: null, end_day_number: null, actual_amount: null, paid_by: null, paid_on: null, ...over }],
+      options: [{ id: 'o1', item_id: 'i1', name: 'Casa Lola', amount: 1200, rate: 1, is_chosen: true, position: 1, details: {} }],
+      amounts: [{ item_id: 'i1', current: 1200, is_confirmed: false }],
+    })
+
+  it('booked, for what it really costs', async () => {
+    data.getTrip.mockResolvedValue(stay())
+    data.setItemStatus.mockResolvedValue(undefined)
+    open('/trips/t1')
+    fireEvent.click(await screen.findByRole('button', { name: 'Change Casa Lola' }))
+    expect(screen.getByRole('radio', { name: 'Chosen' })).toHaveAttribute('aria-checked', 'true')
+    fireEvent.click(screen.getByRole('radio', { name: 'Booked' }))
+    expect(screen.getByLabelText('Booked for')).toHaveValue('1 200')
+    type('Booked for', '1 150')
+    click('Save where it stands')
+    await waitFor(() =>
+      expect(data.setItemStatus).toHaveBeenCalledWith({ id: 'i1', status: 'booked', actualAmount: 1150, paidBy: null, paidOn: null }),
+    )
+  })
+
+  it('paid: by whom, you by default', async () => {
+    data.getTrip.mockResolvedValue(stay({ status: 'booked', actual_amount: 1150 }))
+    data.setItemStatus.mockResolvedValue(undefined)
+    open('/trips/t1')
+    fireEvent.click(await screen.findByRole('button', { name: 'Change Casa Lola' }))
+    fireEvent.click(screen.getByRole('radio', { name: 'Paid' }))
+    expect(screen.getByLabelText('Really paid')).toHaveValue('1 150')
+    expect(screen.getByLabelText('Paid by')).toHaveValue('a')
+    fireEvent.change(screen.getByLabelText('Paid by'), { target: { value: 'b' } })
+    click('Save where it stands')
+    await waitFor(() =>
+      expect(data.setItemStatus).toHaveBeenCalledWith(expect.objectContaining({ status: 'paid', actualAmount: 1150, paidBy: 'b' })),
+    )
+  })
+
+  it('paid needs the amount', async () => {
+    data.getTrip.mockResolvedValue(stay())
+    open('/trips/t1')
+    fireEvent.click(await screen.findByRole('button', { name: 'Change Casa Lola' }))
+    fireEvent.click(screen.getByRole('radio', { name: 'Paid' }))
+    type('Really paid', '')
+    click('Save where it stands')
+    expect(await screen.findByText('How much was really paid?')).toBeInTheDocument()
+    expect(data.setItemStatus).not.toHaveBeenCalled()
+  })
+
+  it('an idea has nothing to book yet', async () => {
+    data.getTrip.mockResolvedValue(detail({ ...stay(), options: [] }))
+    open('/trips/t1')
+    fireEvent.click(await screen.findByRole('button', { name: 'Change Casa Lola' }))
+    expect(screen.queryByRole('radio', { name: 'Booked' })).not.toBeInTheDocument()
+  })
+})
+
+describe('Compare: a line shared by some', () => {
+  it('says the whole price for the people who share it, not the whole group', async () => {
+    data.getTrip.mockResolvedValue(
+      detail({
+        travellers: [...travellers, { id: 'c', name: 'Cleo', user_id: null }],
+        places: [cartagena],
+        items: [{ id: 'i1', place_id: 'p1', kind: 'activity', name: 'Photoshoot', status: 'chosen', day_number: null, end_day_number: null }],
+        options: [{ id: 'o1', item_id: 'i1', name: 'Fly Dress', amount: 210, rate: 1, is_chosen: true, position: 1, details: {} }],
+        shares: [
+          { item_id: 'i1', traveller_id: 'a', fraction: 1 / 2 },
+          { item_id: 'i1', traveller_id: 'b', fraction: 1 / 2 },
+        ],
+      }),
+    )
+    open('/trips/t1/compare?tab=activities&page=p1')
+    expect(await screen.findByText(/210,00 € for 2|210 € for 2/)).toBeInTheDocument()
   })
 })

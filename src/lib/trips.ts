@@ -232,6 +232,26 @@ export async function updateItem(item: {
   if (error) throw error
 }
 
+export type ItemStatus = 'chosen' | 'booked' | 'paid'
+
+/** Booked or paid, with what was really paid; paid also says who paid (BR-2, BR-3). */
+export async function setItemStatus(change: {
+  id: string
+  status: ItemStatus
+  actualAmount: number | null
+  paidBy: string | null
+  paidOn?: string | null
+}): Promise<void> {
+  const { error } = await supabase.rpc('set_item_status', {
+    p_item_id: change.id,
+    p_status: change.status,
+    p_actual_amount: change.actualAmount ?? undefined,
+    p_paid_by: change.paidBy ?? undefined,
+    p_paid_on: change.paidOn ?? undefined,
+  })
+  if (error) throw error
+}
+
 export type TicketChange = {
   from: string
   to: string
