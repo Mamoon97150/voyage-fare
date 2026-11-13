@@ -125,88 +125,92 @@ export function TripPage() {
             {places.map((place, i) => {
               const placeItems = items.filter((it) => it.place_id === place.id)
               return (
-                <section key={place.id} className="place" aria-labelledby={`place-${place.id}`}>
-                  <header className="place__head">
-                    <span className="place__pin" aria-hidden="true">
-                      {i + 1}
-                    </span>
-                    <h2 id={`place-${place.id}`} className="place__name">
-                      {place.name}
-                      <small>{place.nights ? plural(place.nights, 'night') : 'nights not set'}</small>
-                    </h2>
-                    <span className="place__total num">
-                      {formatMoney(placeTotal(detail, place, viewer, shownMode), trip.currency)}
-                    </span>
-                  </header>
-                  {groupPlaceItems(placeItems).map((group) => (
-                    <div key={group.key} className="item-group">
-                      <p className="item-group__label">{group.label}</p>
-                      <ul className="item-list">
-                        {group.items.map((it) => (
-                          <ItemRow
-                            key={it.id}
-                            detail={detail}
-                            item={it}
-                            viewer={viewer}
-                            mode={shownMode}
-                            showDays={group.key === 'stay' || group.key === 'ideas'}
-                          />
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
-                  {adding === place.id ? (
-                    <AddItem
-                      detail={detail}
-                      placeId={place.id}
-                      kinds={KINDS_FOR_PLACE}
-                      days={days}
-                      onAdded={added}
-                      onCancel={() => setAdding(null)}
-                    />
-                  ) : (
-                    <button type="button" className="add-row place__add" onClick={() => setAdding(place.id)}>
-                      <span className="add-row__plus" aria-hidden="true">
-                        +
+                <section key={place.id} aria-labelledby={`place-${place.id}`}>
+                  <SketchBox weight="light" className="place" seed={31 + i}>
+                    <header className="place__head">
+                      <span className="place__pin" aria-hidden="true">
+                        {i + 1}
                       </span>
-                      Add to {place.name}
-                    </button>
-                  )}
+                      <h2 id={`place-${place.id}`} className="place__name">
+                        {place.name}
+                        <small>{place.nights ? plural(place.nights, 'night') : 'nights not set'}</small>
+                      </h2>
+                      <span className="place__total num">
+                        {formatMoney(placeTotal(detail, place, viewer, shownMode), trip.currency)}
+                      </span>
+                    </header>
+                    {groupPlaceItems(placeItems).map((group) => (
+                      <div key={group.key} className="item-group">
+                        <p className="item-group__label">{group.label}</p>
+                        <ul className="item-list">
+                          {group.items.map((it) => (
+                            <ItemRow
+                              key={it.id}
+                              detail={detail}
+                              item={it}
+                              viewer={viewer}
+                              mode={shownMode}
+                              showDays={group.key === 'stay' || group.key === 'ideas'}
+                            />
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                    {adding === place.id ? (
+                      <AddItem
+                        detail={detail}
+                        placeId={place.id}
+                        kinds={KINDS_FOR_PLACE}
+                        days={days}
+                        onAdded={added}
+                        onCancel={() => setAdding(null)}
+                      />
+                    ) : (
+                      <button type="button" className="add-row place__add" onClick={() => setAdding(place.id)}>
+                        <span className="add-row__plus" aria-hidden="true">
+                          +
+                        </span>
+                        Add to {place.name}
+                      </button>
+                    )}
+                  </SketchBox>
                 </section>
               )
             })}
 
-            <section className="place place--trip" aria-labelledby="whole-trip">
-              <header className="place__head">
-                <h2 id="whole-trip" className="place__name">
-                  Whole trip
-                  <small>flights, insurance, car…</small>
-                </h2>
-              </header>
-              {wholeTrip.length > 0 && (
-                <ul className="item-list">
-                  {wholeTrip.map((it) => (
-                    <ItemRow key={it.id} detail={detail} item={it} viewer={viewer} mode={shownMode} />
-                  ))}
-                </ul>
-              )}
-              {adding === 'trip' ? (
-                <AddItem
-                  detail={detail}
-                  placeId={null}
-                  kinds={KINDS_FOR_TRIP}
-                  days={days}
-                  onAdded={added}
-                  onCancel={() => setAdding(null)}
-                />
-              ) : (
-                <button type="button" className="add-row place__add" onClick={() => setAdding('trip')}>
-                  <span className="add-row__plus" aria-hidden="true">
-                    +
-                  </span>
-                  Add to the whole trip
-                </button>
-              )}
+            <section aria-labelledby="whole-trip">
+              <SketchBox weight="light" dashed className="place place--trip" seed={29}>
+                <header className="place__head">
+                  <h2 id="whole-trip" className="place__name">
+                    Whole trip
+                    <small>flights, insurance, car…</small>
+                  </h2>
+                </header>
+                {wholeTrip.length > 0 && (
+                  <ul className="item-list">
+                    {wholeTrip.map((it) => (
+                      <ItemRow key={it.id} detail={detail} item={it} viewer={viewer} mode={shownMode} />
+                    ))}
+                  </ul>
+                )}
+                {adding === 'trip' ? (
+                  <AddItem
+                    detail={detail}
+                    placeId={null}
+                    kinds={KINDS_FOR_TRIP}
+                    days={days}
+                    onAdded={added}
+                    onCancel={() => setAdding(null)}
+                  />
+                ) : (
+                  <button type="button" className="add-row place__add" onClick={() => setAdding('trip')}>
+                    <span className="add-row__plus" aria-hidden="true">
+                      +
+                    </span>
+                    Add to the whole trip
+                  </button>
+                )}
+              </SketchBox>
             </section>
 
             <SketchBox className="form__sheet" seed={22 + places.length}>

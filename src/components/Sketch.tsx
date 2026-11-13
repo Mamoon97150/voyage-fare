@@ -5,17 +5,31 @@ import rough from 'roughjs'
  * A sheet of the notebook, outlined by hand (look B, "illustrated carnet").
  * The outline is redrawn as a pen sketch at the card's real size, so it never stretches.
  * The same seed always gives the same line: it doesn't wobble from one render to the next.
+ *
+ * One style, two weights (decided 13 Nov 2026):
+ * - strong: moments (welcome, empty pages, forms), with tape;
+ * - light: working sheets (places, trip cards) that stack in long lists.
+ * dashed: for what isn't a place (the whole-trip sheet).
  */
+const WEIGHTS = {
+  strong: { roughness: 1.3, bowing: 1.4, strokeWidth: 1.4 },
+  light: { roughness: 1, bowing: 1, strokeWidth: 1 },
+} as const
+
 export function SketchBox({
   children,
   className = '',
   tape,
   seed = 7,
+  weight = 'strong',
+  dashed = false,
 }: {
   children: ReactNode
   className?: string
   tape?: 'mustard' | 'green'
   seed?: number
+  weight?: keyof typeof WEIGHTS
+  dashed?: boolean
 }) {
   const box = useRef<HTMLDivElement>(null)
   const line = useRef<SVGSVGElement>(null)
@@ -31,10 +45,10 @@ export function SketchBox({
       svg.replaceChildren(
         rough.svg(svg).rectangle(2, 2, width - 4, height - 4, {
           seed,
-          roughness: 1.3,
-          bowing: 1.4,
+          ...WEIGHTS[weight],
           stroke: 'currentColor',
-          strokeWidth: 1.4,
+          strokeLineDash: dashed ? [7, 6] : undefined,
+          disableMultiStroke: dashed, // a dashed double line looks like a mistake
         }),
       )
     }
@@ -43,10 +57,10 @@ export function SketchBox({
     const watcher = new ResizeObserver(draw)
     watcher.observe(el)
     return () => watcher.disconnect()
-  }, [seed])
+  }, [seed, weight, dashed])
 
   return (
-    <div ref={box} className={`sketch-box ${className}`}>
+    <div ref={box} className={`sketch-box sketch-box--${weight} ${className}`}>
       <svg ref={line} className="sketch-box__line" aria-hidden="true" />
       {tape && <span className={`tape tape--${tape}`} aria-hidden="true" />}
       {children}

@@ -68,20 +68,22 @@ export function Trips() {
         )}
         {trips && trips.length > 0 && (
           <ul className="tripcards">
-            {trips.map((t) => (
+            {trips.map((t, i) => (
               <li key={t.id}>
-                <Link to={`/trips/${t.id}`} className="tripcard">
-                  <b className="tripcard__name">{t.name}</b>
-                  <span className="tripcard__meta">
-                    {[
-                      formatDates(t.start_date, t.end_date) ?? 'Planning · no dates yet',
-                      t.places ? plural(t.places, 'place') : null,
-                      t.nights ? plural(t.nights, 'night') : null,
-                      plural(t.travellers, 'traveller'),
-                    ]
-                      .filter(Boolean)
-                      .join(' · ')}
-                  </span>
+                <Link to={`/trips/${t.id}`} className="tripcard-link">
+                  <SketchBox weight="light" className="tripcard" seed={41 + i}>
+                    <b className="tripcard__name">{t.name}</b>
+                    <span className="tripcard__meta">
+                      {[
+                        formatDates(t.start_date, t.end_date) ?? 'Planning · no dates yet',
+                        t.places ? plural(t.places, 'place') : null,
+                        t.nights ? plural(t.nights, 'night') : null,
+                        plural(t.travellers, 'traveller'),
+                      ]
+                        .filter(Boolean)
+                        .join(' · ')}
+                    </span>
+                  </SketchBox>
                 </Link>
               </li>
             ))}
