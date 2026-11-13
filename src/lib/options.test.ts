@@ -9,6 +9,7 @@ import {
   wayMinutes,
 } from './options'
 import type { Item, TripDetail, TripOption } from './trips'
+import { itemTitle } from './tripView'
 
 const option = (over: Partial<TripOption>): TripOption =>
   ({ id: 'o', item_id: 'f', trip_id: 't', name: 'x', amount: 100, currency: 'EUR', rate: 1, is_chosen: false, is_favourite: false, details: {}, position: 0, ...over }) as TripOption
@@ -130,5 +131,25 @@ describe('Compare’s pages', () => {
   it('a dot where something is still to decide', () => {
     expect(tabToDecide(detail, 'travel')).toBe(true) // no option chosen for the tickets
     expect(tabToDecide(detail, 'stay')).toBe(false) // Casa Lola is chosen
+  })
+})
+
+describe('what a line is called', () => {
+  const spa = item({ id: 's', kind: 'activity', name: 'Spa' })
+  const base = trip({ items: [spa] })
+
+  it('once chosen, what was chosen; the decision underneath', () => {
+    expect(itemTitle({ ...base, options: [option({ item_id: 's', name: 'Spa Bonanova', is_chosen: true })] }, spa)).toEqual({ title: 'Spa Bonanova', decision: 'Spa' })
+  })
+
+  it('nothing chosen, or the same name: unchanged', () => {
+    expect(itemTitle({ ...base, options: [option({ item_id: 's', name: 'Spa Bonanova' })] }, spa)).toEqual({ title: 'Spa', decision: null })
+    expect(itemTitle({ ...base, options: [option({ item_id: 's', name: 'spa ', is_chosen: true })] }, spa)).toEqual({ title: 'Spa', decision: null })
+  })
+
+  it('a ticket keeps its route', () => {
+    const t = item({ id: 'f', name: 'Bogotá → Medellín' })
+    const d = trip({ legs: [{ item_id: 'f', leg_number: 1 }] as TripDetail['legs'], options: [option({ item_id: 'f', name: 'Avianca', is_chosen: true })] })
+    expect(itemTitle(d, t).title).toBe('Bogotá → Medellín')
   })
 })

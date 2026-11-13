@@ -34,6 +34,9 @@ export function OptionCard({
   const { option, details, share, more, cheapest, fastest, minutes } = line
   const chosen = option.is_chosen
   const whole = option.amount === null ? null : Number(option.amount) * Number(option.rate)
+  // A price in another currency shows as typed, then what it comes to in the trip's (mockup 10).
+  const own = option.currency
+  const foreign = own !== currency
   const tag = cheapest ? 'Cheapest' : more ? `+${formatMoney(more, currency)}` : null
   const mode = (details.mode ?? 'plane') as TicketMode
 
@@ -65,10 +68,11 @@ export function OptionCard({
         <span className="option__sub num">
           {[
             details.prices
-              ? `${formatMoney(details.prices[0], currency)} + ${formatMoney(details.prices[1], currency)}`
+              ? `${formatMoney(details.prices[0], own)} + ${formatMoney(details.prices[1], own)}`
               : whole !== null
-                ? `${formatMoney(whole, currency)} for ${travellers}`
+                ? `${formatMoney(foreign ? Number(option.amount) : whole, own)} for ${travellers}`
                 : 'No price yet',
+            foreign && whole !== null ? `≈ ${formatMoney(Math.round(whole), currency)}` : null,
             item.kind === 'transport' ? `${MODES[mode].icon} ${MODES[mode].label}` : null,
             item.kind === 'housing' && details.type ? details.type : null,
             item.kind === 'housing' && whole !== null && place?.nights

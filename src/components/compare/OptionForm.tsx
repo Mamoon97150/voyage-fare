@@ -3,9 +3,11 @@ import { explainAuthError } from '../../lib/authForm'
 import { amountForInput, NO_AMOUNT, parseAmount } from '../../lib/money'
 import { detailsOf, type OptionDetails, type Way } from '../../lib/options'
 import type { ItemKind, OptionInput, TicketMode, TripOption } from '../../lib/trips'
+import { useRate } from '../../lib/rates'
 import { MODES } from '../../lib/tripView'
 import { FormMessage } from '../AuthForm'
 import { FormActions } from '../FormActions'
+import { CurrencyPicker, RateField } from '../RateField'
 
 const STAY_TYPES = ['Hotel', 'Apartment', 'House', 'Guesthouse', 'Hostel', 'Room']
 
@@ -58,7 +60,18 @@ export function OptionForm({
   const [formError, setFormError] = useState<string>()
   const [busy, setBusy] = useState(false)
   const id = initial?.id ?? 'new'
+  const rate = useRate(currency, initial?.currency ?? currency, initial ? Number(initial.rate) : 1)
   const plane = journey && mode === 'plane'
+
+  /** What's typed so far, for the "≈ in the trip's currency" line. */
+  const typedAmount = () => {
+    if (journey && roundTrip && two) {
+      const a = parseAmount(priceOut)
+      const b = parseAmount(priceBack)
+      return a !== null && b !== null ? a + b : null
+    }
+    return parseAmount(price)
+  }
 
   async function submit(event: FormEvent) {
     event.preventDefault()
@@ -80,6 +93,8 @@ export function OptionForm({
       amount = price.trim() ? parseAmount(price) : null
       if (price.trim() && amount === null) found.price = 'Enter an amount, like 1 200 or 1 200,50.'
     }
+    const foreign = rate.currency !== currency
+    if (foreign && amount !== null && rate.rate === null) found.rate = `What’s the rate? 1 ${rate.currency} is how many ${currency}?`
     setErrors(found)
     if (Object.keys(found).length) return
 
@@ -109,7 +124,15 @@ export function OptionForm({
 
     setBusy(true)
     try {
-      await onSubmit({ name: name.trim(), amount, details, link: link.trim() || null, note: note.trim() || null })
+      await onSubmit({
+        name: name.trim(),
+        amount,
+        currency: foreign && rate.rate !== null ? rate.currency : currency,
+        rate: foreign && rate.rate !== null ? rate.rate : 1,
+        details,
+        link: link.trim() || null,
+        note: note.trim() || null,
+      })
     } catch (error) {
       setBusy(false)
       setFormError(explainAuthError(error as { message?: string }).message)
@@ -154,7 +177,7 @@ export function OptionForm({
           aria-invalid={errors[key] ? true : undefined}
           aria-describedby={errors[key] ? `${id}-${key}-error` : undefined}
         />
-        <span className="field__unit">{currency}</span>
+        <CurrencyPicker id={`${id}-${key}-currency`} rate={rate} label={`${label}: currency`} />
       </div>
       {errors[key] && (
         <p id={`${id}-${key}-error`} className="field__error">
@@ -261,6 +284,7 @@ export function OptionForm({
       ) : (
         money('price', journey ? 'Price for everyone' : 'Price', price, setPrice)
       )}
+      <RateField id={`${id}-rate`} rate={rate} amount={typedAmount()} error={errors.rate} />
 
       {journey && (
         <>

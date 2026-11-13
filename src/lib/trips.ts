@@ -232,6 +232,12 @@ export async function updateItem(item: {
   if (error) throw error
 }
 
+/** Until the first payment (decision 12 Nov). rate: what 1 unit of the current currency is worth in the new one. */
+export async function changeTripCurrency(tripId: string, currency: string, rate: number): Promise<void> {
+  const { error } = await supabase.rpc('change_trip_currency', { p_trip_id: tripId, p_currency: currency, p_rate: rate })
+  if (error) throw error
+}
+
 export type ItemStatus = 'chosen' | 'booked' | 'paid'
 
 /** Booked or paid, with what was really paid; paid also says who paid (BR-2, BR-3). */
@@ -241,8 +247,13 @@ export async function setItemStatus(change: {
   actualAmount: number | null
   paidBy: string | null
   paidOn?: string | null
+  /** Another currency than the trip's, with the rate saved now (trip currency per 1 unit). */
+  actualCurrency?: string
+  actualRate?: number
 }): Promise<void> {
   const { error } = await supabase.rpc('set_item_status', {
+    p_actual_currency: change.actualCurrency,
+    p_actual_rate: change.actualRate,
     p_item_id: change.id,
     p_status: change.status,
     p_actual_amount: change.actualAmount ?? undefined,
@@ -374,6 +385,9 @@ export async function removeTraveller(id: string): Promise<void> {
 export type OptionInput = {
   name: string
   amount: number | null
+  /** The price's own currency and the rate saved when it was typed (BR-10). Default: the trip's, 1. */
+  currency?: string
+  rate?: number
   details: Json
   link: string | null
   note: string | null
@@ -393,8 +407,8 @@ export async function addOption(detail: TripDetail, itemId: string, input: Optio
       item_id: itemId,
       name: input.name,
       amount: input.amount,
-      currency: detail.trip.currency,
-      rate: 1,
+      currency: input.currency ?? detail.trip.currency,
+      rate: input.rate ?? 1,
       details: input.details,
       link: input.link,
       note: input.note,
@@ -420,7 +434,14 @@ export async function addItemWithOption(
 export async function updateOption(id: string, input: OptionInput): Promise<void> {
   const { error } = await supabase
     .from('options')
-    .update({ name: input.name, amount: input.amount, details: input.details, link: input.link, note: input.note })
+    .update({
+      name: input.name,
+      amount: input.amount,
+      details: input.details,
+      link: input.link,
+      note: input.note,
+      ...(input.currency ? { currency: input.currency, rate: input.rate ?? 1 } : {}),
+    })
     .eq('id', id)
   if (error) throw error
 }

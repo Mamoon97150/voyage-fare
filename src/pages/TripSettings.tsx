@@ -6,10 +6,12 @@ import { SketchBox } from '../components/Sketch'
 import { Loading } from '../lib/auth'
 import { useAuth } from '../lib/authContext'
 import { explainAuthError } from '../lib/authForm'
-import { amountForInput, parseAmount } from '../lib/money'
+import { amountForInput, formatMoney, parseAmount } from '../lib/money'
+import { fetchRate, formatRate } from '../lib/rates'
 import type { CityValue } from '../lib/places'
 import {
   addTraveller,
+  changeTripCurrency,
   deleteTrip,
   getTrip,
   isTripOwner,
@@ -19,11 +21,11 @@ import {
   type Traveller,
   type TripDetail,
 } from '../lib/trips'
-import { currencyLabel } from '../lib/tripText'
+import { CURRENCIES, currencyLabel } from '../lib/tripText'
 
 /**
  * Trip settings (mockup 8): the trip, its budget, its travellers, and deleting it.
- * Changing the main currency comes with currencies (build 3); inviting with invitations.
+ * The main currency changes until the first payment (build 3); inviting comes with invitations.
  */
 export function TripSettings() {
   const { tripId = '' } = useParams()
@@ -78,7 +80,9 @@ export function TripSettings() {
 
   return (
     <Screen tripId={tripId} name={detail.trip.name}>
-      <TripForm detail={detail} onSaved={reload} />
+      {/* Keyed on the currency: a change converts the target, so the form starts again from it. */}
+      <TripForm key={detail.trip.currency} detail={detail} onSaved={reload} />
+      <MainCurrency detail={detail} onChanged={reload} />
       <Travellers detail={detail} userId={session?.user.id} onChanged={reload} />
       <DeleteTrip detail={detail} owner={owner} />
     </Screen>
@@ -238,13 +242,6 @@ function TripForm({ detail, onSaved }: { detail: TripDetail; onSaved: () => void
             </button>
           </div>
         </div>
-        <div className="kv">
-          <span>Main currency</span>
-          <b>{currencyLabel(trip.currency)}</b>
-        </div>
-        <p className="field__hint">
-          Changing it comes with currencies, soon. It can change until the first payment; after that it’s fixed.
-        </p>
       </SketchBox>
 
       {message && <FormMessage tone={message.tone}>{message.text}</FormMessage>}
@@ -252,6 +249,136 @@ function TripForm({ detail, onSaved }: { detail: TripDetail; onSaved: () => void
         {busy ? 'Saving…' : 'Save the trip'}
       </button>
     </form>
+  )
+}
+
+/**
+ * The main currency: totals, the target and who-owes-whom are in it. It can change until the
+ * first payment (decision 12 Nov); every price keeps its own currency and its rate is converted.
+ */
+function MainCurrency({ detail, onChanged }: { detail: TripDetail; onChanged: () => void }) {
+  const from = detail.trip.currency
+  const [open, setOpen] = useState(false)
+  const [to, setTo] = useState('')
+  const [text, setText] = useState('')
+  const [inverted, setInverted] = useState(false)
+  const [state, setState] = useState<'idle' | 'loading' | 'failed'>('idle')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string>()
+  const fixed = detail.items.some((i) => i.status === 'paid')
+
+  async function pick(next: string) {
+    setTo(next)
+    setError(undefined)
+    if (!next) return
+    setState('loading')
+    const r = await fetchRate(from, next)
+    if (r === null) {
+      setText('')
+      setState('failed')
+      return
+    }
+    setInverted(r < 1)
+    setText(formatRate(r < 1 ? 1 / r : r))
+    setState('idle')
+  }
+
+  const typed = text.trim() ? parseAmount(text) : null
+  // What 1 of the current currency is worth in the new one.
+  const rate = typed !== null && typed > 0 ? (inverted ? 1 / typed : typed) : null
+  const target = detail.trip.target_amount === null ? null : Number(detail.trip.target_amount)
+
+  async function change() {
+    if (!to || rate === null) {
+      setError(`What’s the rate? 1 ${from} is how many ${to}?`)
+      return
+    }
+    setBusy(true)
+    setError(undefined)
+    try {
+      await changeTripCurrency(detail.trip.id, to, Math.round(rate * 1e8) / 1e8)
+      setOpen(false)
+      setTo('')
+      onChanged()
+    } catch (e) {
+      setError(explainAuthError(e as { message?: string }).message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <SketchBox weight="light" className="form__sheet" seed={73}>
+      <h2 className="sheet-title">Main currency</h2>
+      <div className="kv">
+        <span>Totals and shares in</span>
+        <b>{currencyLabel(from)}</b>
+      </div>
+      {fixed ? (
+        <p className="field__hint">Fixed since the first payment: who owes whom is counted in it.</p>
+      ) : !open ? (
+        <>
+          <p className="field__hint">It can change until the first payment; after that it’s fixed.</p>
+          <button type="button" className="button button--quiet" onClick={() => setOpen(true)}>
+            Change the main currency
+          </button>
+        </>
+      ) : (
+        <div className="currency-change">
+          <div className="field">
+            <label htmlFor="new-currency" className="field__label">
+              New main currency
+            </label>
+            <select id="new-currency" className="field__input" value={to} onChange={(e) => void pick(e.target.value)}>
+              <option value="">Pick one</option>
+              {CURRENCIES.filter((c) => c !== from).map((c) => (
+                <option key={c} value={c}>
+                  {currencyLabel(c)}
+                </option>
+              ))}
+            </select>
+          </div>
+          {to && (
+            <div className="field">
+              <label htmlFor="new-currency-rate" className="field__label">
+                Rate
+              </label>
+              <div className="field__box rate">
+                <span className="rate__left num">1 {inverted ? to : from} =</span>
+                <input
+                  id="new-currency-rate"
+                  className="field__input num"
+                  inputMode="decimal"
+                  value={text}
+                  placeholder={state === 'loading' ? '…' : ''}
+                  onChange={(e) => setText(e.target.value)}
+                />
+                <span className="field__unit">{inverted ? from : to}</span>
+              </div>
+              <p className="field__hint">
+                {state === 'loading'
+                  ? 'Getting today’s rate…'
+                  : state === 'failed'
+                    ? 'Couldn’t get today’s rate: type it.'
+                    : 'Today’s rate. Every price keeps its own currency; the ones in ' + from + ' are converted with it.'}
+                {target !== null && rate !== null && (
+                  <b className="num"> Your target becomes {formatMoney(Math.round(target * rate), to)}.</b>
+                )}
+              </p>
+            </div>
+          )}
+          {error && <FormMessage tone="error">{error}</FormMessage>}
+          <div className="add-item__actions">
+            <button type="button" className="button button--quiet" onClick={() => setOpen(false)}>
+              Cancel
+            </button>
+            <button type="button" className="button button--primary" disabled={busy || !to} onClick={() => void change()}>
+              {busy ? 'Changing…' : to ? `Change to ${to}` : 'Change'}
+            </button>
+          </div>
+        </div>
+      )}
+    </SketchBox>
   )
 }
 

@@ -7,8 +7,8 @@
 //   whole-trip line, booked at 10 240 €. Flights and hotels are booked lines at 0 €, "in the package".
 // - Extras: the locked day-by-day plan is the chosen option; the alternatives from the shortlist
 //   shown to the sisters sit beside it. Prices are the notes' estimates, for the group of four
-//   unless a line says otherwise. Dollars and pesos are converted at 1 $ = 0.90 €, 1 € = 4 550 COP
-//   (other currencies come with build 3's currencies).
+//   unless a line says otherwise. Prices quoted in dollars or pesos stay in them, at the rates of
+//   13 Nov 2026 (1 € = 1,1068 $ = 3 645 COP).
 // - Peggy's photoshoot is a gift: split between the other three. The jet-ski is Djamina's.
 import { afterAll, expect, it } from 'vitest'
 import type { Json } from '../../src/lib/database.types'
@@ -17,8 +17,10 @@ import { supabase } from '../../src/lib/supabase'
 import { setItemStatus } from '../../src/lib/trips'
 
 const NAME = 'Colombia & Panama'
+/** Euros per 1 unit, 13 Nov 2026 (open.er-api.com: 1 € = 1,106822 $ = 3 645,03 COP). */
+const RATES = { USD: Math.round((1 / 1.106822) * 1e8) / 1e8, COP: Math.round((1 / 3645.029563) * 1e8) / 1e8 }
 
-type Opt = { name: string; amount: number | null; note?: string; link?: string; details?: OptionDetails; favourite?: boolean }
+type Opt = { name: string; amount: number | null; currency?: 'USD' | 'COP'; note?: string; link?: string; details?: OptionDetails; favourite?: boolean }
 type Line = {
   kind: 'transport' | 'housing' | 'activity' | 'restaurant' | 'other'
   name: string
@@ -183,14 +185,14 @@ const PLACES: { name: string; country: string; lat: number; lon: number; nights:
         day: 7,
         chosen: 1,
         options: [
-          { name: 'Paragliding, GTOPIK', amount: 290, note: '20 min ~70 $ each + transport 35 $ · dropped' },
+          { name: 'Paragliding, GTOPIK', amount: 315, currency: 'USD', note: '20 min, 70 $ each + transport 35 $ · dropped' },
           { name: 'Sabaneta, Pueblito Paisa, Laureles', amount: 0, note: 'Neighbourhoods day' },
-          { name: 'Coffee finca, half day', amount: 281, note: '~78 $ each · dropped' },
+          { name: 'Coffee finca, half day', amount: 312, currency: 'USD', note: '~78 $ each · dropped' },
         ],
       },
       { kind: 'restaurant', name: 'Dinner on La 70 + salsa', day: 7, options: [{ name: 'La 70, then Son Havana', amount: null }] },
       { kind: 'activity', name: 'Spa', day: 8, options: [{ name: 'Spa Bonanova', amount: null }] },
-      { kind: 'activity', name: 'Nails, the four of us', day: 8, options: [{ name: 'Momo Beauty Bar, Lalinde', amount: 135, note: '615 000 COP ≈ 150 $' }] },
+      { kind: 'activity', name: 'Nails, the four of us', day: 8, options: [{ name: 'Momo Beauty Bar, Lalinde', amount: 615000, currency: 'COP', note: 'Gel X, pedi spa, pedicures' }] },
       {
         kind: 'activity',
         name: 'Perfume workshop',
@@ -198,7 +200,7 @@ const PLACES: { name: string; country: string; lat: number; lon: number; nights:
         chosen: null,
         split: ['Djamina', 'Danielle'],
         note: 'Dropped: no perfume this time',
-        options: [{ name: 'Iris Alta Perfumería', amount: 130, note: '~290 000 COP each, your own 50 ml' }],
+        options: [{ name: 'Iris Alta Perfumería', amount: 580000, currency: 'COP', note: '~290 000 COP each, your own 50 ml' }],
       },
       { kind: 'restaurant', name: 'Dinner at RITWAL', day: 8, options: [{ name: 'RITWAL', amount: null, note: 'Mirador Los Balsos · book' }] },
       { kind: 'transport', name: 'Transfer to the airport', day: 9, note: 'Not in the package', options: [{ name: 'Taxi or van', amount: null, details: { mode: 'car' } }] },
@@ -230,10 +232,10 @@ const PLACES: { name: string; country: string; lat: number; lon: number; nights:
         split: ['Djamina', 'Danielle', 'Gabriel'],
         note: 'A surprise for her 50th · golden hour, ~16:45',
         options: [
-          { name: 'Fly Dress Colombia', amount: 207, note: '230 $', favourite: true },
-          { name: 'Fly Dress Colombia, bigger package', amount: 279, note: '310 $' },
-          { name: 'Flytographer', amount: 383, note: 'From 425 $ for 60 min', link: 'https://www.flytographer.com/destinations/cartagena' },
-          { name: 'Private photo shoot (Viator)', amount: 81, note: 'From 90 $ a person, 1 h 30' },
+          { name: 'Fly Dress Colombia', amount: 230, currency: 'USD', favourite: true },
+          { name: 'Fly Dress Colombia, bigger package', amount: 310, currency: 'USD' },
+          { name: 'Flytographer', amount: 425, currency: 'USD', note: 'From, for 60 min', link: 'https://www.flytographer.com/destinations/cartagena' },
+          { name: 'Private photo shoot (Viator)', amount: 90, currency: 'USD', note: 'From, a person, 1 h 30' },
         ],
       },
       { kind: 'restaurant', name: 'Birthday dinner', day: 11, note: '21:00, with the surprise cake', options: [{ name: 'Morena Orígenes', amount: null, note: 'Getsemaní' }] },
@@ -242,7 +244,7 @@ const PLACES: { name: string; country: string; lat: number; lon: number; nights:
         name: 'Day trip',
         day: 13,
         options: [
-          { name: 'San Basilio de Palenque', amount: 396, note: 'Black Legacy Experience · 110 $ each' },
+          { name: 'San Basilio de Palenque', amount: 440, currency: 'USD', note: 'Black Legacy Experience · 110 $ each' },
           { name: 'Rosario Islands', amount: 260, note: '~65 € each · dropped' },
           { name: 'Volcán del Totumo', amount: 140, note: 'Mud bath · ~35 € each · cancelled' },
         ],
@@ -262,7 +264,7 @@ const PLACES: { name: string; country: string; lat: number; lon: number; nights:
         name: 'The afternoon',
         day: 14,
         options: [
-          { name: 'Casco Viejo', amount: 18, note: 'Taxi ~20 $ · molas, Geisha coffee, Tántalo rooftop' },
+          { name: 'Casco Viejo', amount: 20, currency: 'USD', note: 'Taxi · molas, Geisha coffee, Tántalo rooftop' },
           { name: 'Miraflores locks', amount: 80, note: '~20 € each' },
           { name: 'Albrook mall', amount: 0 },
           { name: 'Rest at the hotel', amount: 0 },
@@ -355,8 +357,8 @@ it('rebuilds the Colombia & Panama trip in the demo account', async () => {
           item_id: itemId,
           name: o.name,
           amount: o.amount,
-          currency: 'EUR',
-          rate: 1,
+          currency: o.currency ?? 'EUR',
+          rate: o.currency ? RATES[o.currency] : 1,
           details: (o.details ?? {}) as Json,
           link: o.link ?? null,
           note: o.note ?? null,

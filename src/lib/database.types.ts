@@ -1108,6 +1108,8 @@ export type Database = {
       set_item_status: {
         Args: {
           p_actual_amount?: number
+          p_actual_currency?: string
+          p_actual_rate?: number
           p_item_id: string
           p_paid_by?: string
           p_paid_on?: string
@@ -1139,6 +1141,10 @@ export type Database = {
           p_to: string
           p_via?: string
         }
+        Returns: undefined
+      }
+      change_trip_currency: {
+        Args: { p_currency: string; p_rate: number; p_trip_id: string }
         Returns: undefined
       }
       create_trip: {

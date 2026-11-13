@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { amountForInput, formatMoney } from '../../lib/money'
 import { deleteItem, updateItem, type Item, type ItemKind, type TripDetail } from '../../lib/trips'
-import { daysText, itemLine, KINDS, type Mode } from '../../lib/tripView'
+import { daysText, itemLine, itemTitle, KINDS, type Mode } from '../../lib/tripView'
 import { compareLink, optionCount } from '../../lib/options'
 import { STATUS, priceOf } from './itemShared'
 import { ItemForm } from './ItemForm'
@@ -35,8 +35,9 @@ export function ItemRow({
   const [editing, setEditing] = useState(false)
   const line = itemLine(detail, item, viewer, mode)
   const dot = !line.priced ? 'dot--none' : line.confirmed ? 'dot--confirmed' : 'dot--estimated'
+  const { title, decision } = itemTitle(detail, item)
   const meta = [
-    KINDS[item.kind as ItemKind]?.label,
+    decision ?? KINDS[item.kind as ItemKind]?.label,
     showDays ? daysText(item) : null,
     optionCount(detail, item) >= 2 ? `${optionCount(detail, item)} options compared` : null,
     item.note,
@@ -108,11 +109,11 @@ export function ItemRow({
           setEditing(true)
           onOpen?.()
         }}
-        aria-label={`Change ${item.name}`}
+        aria-label={`Change ${title}`}
       >
         <i className={`dot ${dot}`} aria-hidden="true" />
         <span className="item-row__main">
-          <span className="item-row__name">{item.name}</span>
+          <span className="item-row__name">{title}</span>
           {meta && <span className="item-row__meta">{meta}</span>}
         </span>
         <span className="item-row__amount num">

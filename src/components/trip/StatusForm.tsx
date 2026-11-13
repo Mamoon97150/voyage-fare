@@ -4,7 +4,8 @@ import { amountForInput, parseAmount } from '../../lib/money'
 import { setItemStatus, type Item, type ItemStatus, type TripDetail } from '../../lib/trips'
 import { isSolo } from '../../lib/tripView'
 import { FormMessage } from '../AuthForm'
-import { priceOf } from './itemShared'
+import { useRate } from '../../lib/rates'
+import { CurrencyPicker, RateField } from '../RateField'
 
 const STEPS: { key: ItemStatus; label: string }[] = [
   { key: 'chosen', label: 'Chosen' },
@@ -29,9 +30,17 @@ export function StatusForm({
   onSaved: () => void
 }) {
   const initial = (item.status === 'booked' || item.status === 'paid' ? item.status : 'chosen') as ItemStatus
-  const estimate = priceOf(detail, item)
+  // What was really paid starts as the chosen option's price, in its own currency and saved rate.
+  const chosen = detail.options.find((o) => o.item_id === item.id && o.is_chosen)
+  const trip = detail.trip.currency
+  const rate = useRate(
+    trip,
+    item.actual_currency ?? chosen?.currency ?? trip,
+    item.actual_currency ? Number(item.actual_rate) : chosen ? Number(chosen.rate) : 1,
+  )
+  const start = item.actual_amount ?? chosen?.amount ?? null
   const [status, setStatus] = useState<ItemStatus>(initial)
-  const [amount, setAmount] = useState(amountForInput(item.actual_amount ?? estimate))
+  const [amount, setAmount] = useState(amountForInput(start === null ? null : Number(start)))
   const [paidBy, setPaidBy] = useState(item.paid_by ?? viewer ?? detail.travellers[0]?.id ?? '')
   const [paidOn, setPaidOn] = useState(() => item.paid_on ?? new Date().toISOString().slice(0, 10))
   const [busy, setBusy] = useState(false)
@@ -51,6 +60,11 @@ export function StatusForm({
       setError('How much was really paid?')
       return
     }
+    const foreign = status !== 'chosen' && actual !== null && rate.currency !== trip
+    if (foreign && rate.rate === null) {
+      setError(`What’s the rate? 1 ${rate.currency} is how many ${trip}?`)
+      return
+    }
     setBusy(true)
     setError(undefined)
     try {
@@ -60,6 +74,7 @@ export function StatusForm({
         actualAmount: status === 'chosen' ? null : actual,
         paidBy: status === 'paid' ? paidBy : null,
         paidOn: status === 'paid' ? paidOn : null,
+        ...(foreign ? { actualCurrency: rate.currency, actualRate: rate.rate ?? undefined } : {}),
       })
       onSaved()
     } catch (err) {
@@ -86,14 +101,17 @@ export function StatusForm({
             <label className="field__label" htmlFor={`${id}-amount`}>
               {status === 'paid' ? 'Really paid' : 'Booked for'}
             </label>
-            <input
-              id={`${id}-amount`}
-              className="field__input num"
-              inputMode="decimal"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder={status === 'booked' ? 'when you know' : ''}
-            />
+            <div className="field__box">
+              <input
+                id={`${id}-amount`}
+                className="field__input num"
+                inputMode="decimal"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder={status === 'booked' ? 'when you know' : ''}
+              />
+              <CurrencyPicker id={`${id}-currency`} rate={rate} label="Currency paid in" />
+            </div>
           </div>
           {status === 'paid' && (
             <div className="field">
@@ -105,6 +123,7 @@ export function StatusForm({
           )}
         </div>
       )}
+      {status !== 'chosen' && <RateField id={`${id}-rate`} rate={rate} amount={amount.trim() ? parseAmount(amount) : null} />}
       {status === 'paid' && !solo && (
         <div className="field">
           <label className="field__label" htmlFor={`${id}-by`}>

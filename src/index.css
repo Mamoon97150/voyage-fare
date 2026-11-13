@@ -1945,3 +1945,42 @@ select.field__input,
 .status-form .button {
   align-self: flex-start;
 }
+
+/* Currencies (build 3): the unit beside a price is a small picker; the rate reads "1 EUR = 3 645 COP". */
+.field__unit--pick {
+  pointer-events: auto;
+  right: 0.25rem;
+  min-height: 2.25rem;
+  padding: 0 0.25rem;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 0.875rem;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.field__box:has(.field__unit--pick) .field__input {
+  padding-right: 4.25rem;
+}
+
+.rate {
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.rate__left {
+  flex: none;
+  font-size: 0.875rem;
+  color: var(--ink-soft);
+}
+
+.rate .field__input {
+  padding-right: 3.5rem;
+}
+
+.currency-change {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}

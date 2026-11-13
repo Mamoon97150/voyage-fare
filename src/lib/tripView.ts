@@ -52,6 +52,19 @@ export function itemLine(detail: TripDetail, item: Item, viewer: string | null, 
   return { amount, confirmed, priced: current !== null, concernsViewer: true }
 }
 
+/**
+ * What a line is called: once an option is chosen, what was chosen ("Spa Bonanova"), with the
+ * name of the decision underneath ("Spa"). A ticket keeps its route: that's what it is (13 Nov).
+ */
+export function itemTitle(detail: Pick<TripDetail, 'options' | 'legs'>, item: Item): { title: string; decision: string | null } {
+  const chosen = detail.options.find((o) => o.item_id === item.id && o.is_chosen)
+  const ticket = detail.legs.some((l) => l.item_id === item.id)
+  if (!chosen || ticket || chosen.name.trim().toLowerCase() === item.name.trim().toLowerCase()) {
+    return { title: item.name, decision: null }
+  }
+  return { title: chosen.name, decision: item.name }
+}
+
 /** How many days the trip has: from its dates, else from its nights (N nights = N + 1 days). */
 export function tripDays(detail: Pick<TripDetail, 'trip' | 'places'>): number {
   const { start_date, end_date } = detail.trip
