@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mockup — Compare flights (v2)</title>
+    <script type="module">
+      import '/src/index.css'
+      import './mockup.css'
+      import './forms.css'
+      import rough from 'roughjs'
+      // The app's hand-drawn sheets (look B): outline anything marked data-sketch.
+      for (const el of document.querySelectorAll('[data-sketch]')) {
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+        svg.setAttribute('class', 'sk-line')
+        el.prepend(svg)
+        const { width, height } = el.getBoundingClientRect()
+        svg.setAttribute('viewBox', `0 0 ${width} ${height}`)
+        svg.appendChild(rough.svg(svg).rectangle(2, 2, width - 4, height - 4, {
+          seed: Number(el.dataset.sketch) || 7, roughness: 1, bowing: 1, strokeWidth: 1, stroke: '#55615A',
+        }))
+      }
+    </script>
+    <style>
+      /* Mockup 10 · Compare flights. Same look as the validated stays Compare (look v2 + carnet). */
+      .sk { position: relative; background: var(--paper-raised); }
+      .sk-line { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; opacity: 0.7; overflow: visible; }
+      .sort { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem var(--space-4); font-size: 0.75rem; color: var(--ink-soft); }
+      .flight { padding: 0.65rem var(--space-4) 0.7rem; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 1fr auto; gap: 0.15rem 0.8rem; }
+      .flight h3 { font-size: 1.05rem; font-weight: 600; }
+      .flight .orig { grid-column: 1 / -1; font-size: 0.75rem; color: var(--ink-soft); margin-top: -0.1rem; }
+      .way { grid-column: 1 / -1; display: grid; grid-template-columns: 2.6rem 1fr auto; gap: 0 0.5rem; align-items: baseline; margin-top: 0.35rem; font-size: 0.8125rem; }
+      .way .lbl { font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-soft); }
+      .way .times { font-variant-numeric: tabular-nums; }
+      .way .dur { font-variant-numeric: tabular-nums; color: var(--ink); font-weight: 600; }
+      .way .stop { grid-column: 2 / -1; font-size: 0.75rem; color: var(--ink-soft); }
+      .flight .wide { grid-column: 1 / -1; font-size: 0.75rem; color: var(--ink-soft); margin-top: 0.3rem; }
+      .flight .q { font-family: var(--font-title); font-style: italic; color: var(--ink); }
+      .no { color: var(--over); }
+      .fast { color: var(--confirmed); }
+      .flight--chosen { background: var(--wash); box-shadow: inset 4px 0 0 var(--confirmed); }
+      .flight--chosen h3::before { content: '✓'; display: inline-grid; place-items: center; width: 1.1rem; height: 1.1rem; margin-right: 0.4rem; border-radius: 50%; background: var(--confirmed); color: var(--paper); font-size: 0.7rem; vertical-align: 0.1em; }
+      .two-tickets { display: inline-block; margin-left: 0.3rem; padding: 0 0.4rem; border: 1px solid var(--line); border-radius: 999px; font-family: var(--font-text); font-size: 0.6875rem; font-weight: 500; color: var(--ink-soft); vertical-align: 0.15em; }
+      .legform { border-top: 1px dashed var(--line); padding-top: var(--space-3); margin-top: var(--space-3); }
+      .legform h4 { font-size: 0.9375rem; margin-bottom: var(--space-1); }
+      .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--space-2); }
+      .row3 .f, .row2 .f { margin-top: var(--space-2); }
+      .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; padding: 2px; font-size: 0.8125rem; }
+      .seg span { padding: 0.25rem 0.65rem; border-radius: 6px; color: var(--ink-soft); }
+      .seg .on { background: var(--ink); color: var(--paper); }
+      .phones .phone { padding-bottom: 6rem; }
+      /* Side by side, the bar sits inside its phone instead of on the screen. */
+      .phones .nav { position: absolute; left: 0; transform: none; }
+    </style>
+  </head>
+  <body>
+    <!--
+      Colombia, 3 travellers (Ana = you, Bea, Cleo), trip currency COP. Flights priced in dollars,
+      converted at the rate saved when the price was typed (1 $ ≈ 3 900 COP, BR-10).
+      Journey 1 of 2: St Martin ⇄ Cartagena, round trip, for the 3 of us.
+
+        Option                        Price      ≈ COP        Ana's share   Out     Back    Bag
+        Avianca, via Bogotá           1 470 $   5 733 000     1 911 000     9 h 40  8 h 55  ✗
+        Copa, via Panama              1 560 $   6 084 000     2 028 000     6 h 20  7 h 05  ✓   coup de cœur, chosen
+        JetBlue out + Copa back       1 690 $   6 591 000     2 197 000     5 h 50  7 h 05  ✓   two one-way tickets
+        American, via Miami           1 920 $   7 488 000     2 496 000     7 h 15  7 h 50  ✓
+    -->
+    <div class="phones">
+      <figure>
+        <div class="phone">
+          <header class="top top--compact">
+            <span class="top__back">‹</span>
+            <div class="top__title"><h1>Colombia</h1></div>
+            <div class="avatars" aria-label="Ana (you), Bea, Cleo">
+              <span class="avatar avatar--me">A</span><span class="avatar avatar--b">B</span><span class="avatar avatar--c">C</span>
+            </div>
+          </header>
+
+          <section class="budget budget--compact" aria-label="Budget" style="border-bottom: 0">
+            <div class="budget__row">
+              <p class="budget__figure num" style="font-size: 1.25rem">4 128 000 COP <small>your share</small></p>
+              <p class="budget__target num">4 872 000 under</p>
+            </div>
+            <div class="track" aria-hidden="true"><div class="track__confirmed" style="width: 22%"></div><div class="track__estimated" style="width: 24%"></div><div class="track__target"></div></div>
+          </section>
+
+          <div class="tabs" aria-label="Categories">
+            <span class="on">Travel</span><span>Stay</span><span>Around</span><span class="todo">Activities</span><span>Food</span>
+          </div>
+
+          <div class="step" aria-label="Journey">
+            <i class="off">‹</i>
+            <div><h2>St Martin ⇄ Cartagena</h2><p>Round trip · 3 of you · 4 options · journey 1 of 2</p></div>
+            <i>›</i>
+          </div>
+
+          <div class="sort">
+            <span>Prices: your share · times: door to door</span>
+            <span class="seg"><span class="on">Cheapest</span><span>Fastest</span></span>
+          </div>
+
+          <div class="flight">
+            <h3>Avianca</h3>
+            <div class="opt__price num"><b>1 911 000</b><span class="caps best">Cheapest</span></div>
+            <p class="orig num">1 470 $ for 3 · ≈ 5 733 000 COP</p>
+            <div class="way num"><span class="lbl">Out</span><span class="times">SXM 07:10 → CTG 16:50</span><span class="dur">9 h 40</span><span class="stop">1 stop · Bogotá, 4 h 05</span></div>
+            <div class="way num"><span class="lbl">Back</span><span class="times">CTG 11:30 → SXM 20:25</span><span class="dur">8 h 55</span><span class="stop">1 stop · Bogotá, 3 h 20</span></div>
+            <p class="wide"><span class="no">✗ No checked bag</span> · <span class="no">✗ Not refundable</span> · <span class="q">“Long wait in Bogotá”</span></p>
+          </div>
+
+          <div class="flight flight--chosen">
+            <h3>Copa <span class="heart">♥</span></h3>
+            <div class="opt__price num"><b>2 028 000</b><span class="caps">+117 000</span></div>
+            <p class="orig num">1 560 $ for 3 · ≈ 6 084 000 COP</p>
+            <div class="way num"><span class="lbl">Out</span><span class="times">SXM 13:05 → CTG 19:25</span><span class="dur fast">6 h 20</span><span class="stop">1 stop · Panama, 1 h 50</span></div>
+            <div class="way num"><span class="lbl">Back</span><span class="times">CTG 08:40 → SXM 15:45</span><span class="dur">7 h 05</span><span class="stop">1 stop · Panama, 2 h 10</span></div>
+            <p class="wide"><span class="yes">✓ Checked bag</span> · <span class="yes">✓ Refundable</span> · <span class="q">“Short stop, good times”</span></p>
+            <p class="wide option-note"><span class="heart">♥</span> Coup de cœur · Chosen</p>
+          </div>
+
+          <div class="flight">
+            <h3>JetBlue + Copa <span class="two-tickets">2 one-way tickets</span></h3>
+            <div class="opt__price num"><b>2 197 000</b><span class="caps">+286 000</span></div>
+            <p class="orig num">890 $ + 800 $ for 3 · ≈ 6 591 000 COP</p>
+            <div class="way num"><span class="lbl">Out</span><span class="times">SXM 06:00 → CTG 11:50</span><span class="dur fast">5 h 50</span><span class="stop">JetBlue · 1 stop · San Juan, 1 h 15</span></div>
+            <div class="way num"><span class="lbl">Back</span><span class="times">CTG 08:40 → SXM 15:45</span><span class="dur">7 h 05</span><span class="stop">Copa · 1 stop · Panama, 2 h 10</span></div>
+            <p class="wide"><span class="yes">✓ Checked bag</span> · <span class="no">✗ Not refundable</span> · <span class="caps fast" style="font-size:0.6875rem;font-weight:600;letter-spacing:.06em">Fastest</span></p>
+          </div>
+
+          <div class="flight">
+            <h3>American</h3>
+            <div class="opt__price num"><b>2 496 000</b><span class="caps">+585 000</span></div>
+            <p class="orig num">1 920 $ for 3 · ≈ 7 488 000 COP</p>
+            <div class="way num"><span class="lbl">Out</span><span class="times">SFG 10:20 → CTG 17:35</span><span class="dur">7 h 15</span><span class="stop">1 stop · Miami, 2 h 30</span></div>
+            <div class="way num"><span class="lbl">Back</span><span class="times">CTG 12:15 → SFG 20:05</span><span class="dur">7 h 50</span><span class="stop">1 stop · Miami, 2 h 45</span></div>
+            <p class="wide"><span class="yes">✓ Checked bag</span> · <span class="yes">✓ Refundable</span> · <span class="q">“From Grand Case, US transit visa for all”</span></p>
+          </div>
+
+          <p class="add-option">+ Add a flight option</p>
+
+          <nav class="nav" aria-label="Trip">
+            <a><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 18h7a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h7"/></svg>Trip</a>
+            <a class="on"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="6" height="14" rx="1.5"/><rect x="14" y="5" width="6" height="14" rx="1.5"/></svg>Compare</a>
+            <a><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4v8l6 5"/></svg>Budget</a>
+            <a><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h14l-3-3M20 15H6l3 3"/></svg>Who paid</a>
+          </nav>
+        </div>
+        <span class="phone-label">Compare · Travel · a round trip, 4 options</span>
+      </figure>
+
+      <figure>
+        <div class="phone">
+          <div class="screen-top"><span class="back">✕</span><h1>Add a flight option</h1></div>
+          <p class="hint" style="padding: 0 var(--space-4)">St Martin ⇄ Cartagena · round trip · for 3</p>
+
+          <div class="fsheet sk" data-sketch="11" style="border-color: transparent; box-shadow: none">
+            <div class="f"><label>Airline</label><div class="input">Copa</div></div>
+            <div class="row2">
+              <div class="f"><label>Price for 3</label><div class="input num">1 560<span class="end">USD ▾</span></div></div>
+              <div class="f"><label>In COP</label><div class="input num" style="background: transparent">≈ 6 084 000</div></div>
+            </div>
+            <p class="hint">At 1 $ = 3 900 COP, today’s rate, saved with the price. <span class="link">Set it by hand</span></p>
+            <div class="f"><label>Tickets</label><div><span class="seg"><span class="on">One round trip</span><span>Two one-ways</span></span></div><p class="hint">Two one-ways: a price for each, added up. Still one choice.</p></div>
+
+            <div class="legform">
+              <h4>Out · Sat 12 Sep</h4>
+              <div class="row2">
+                <div class="f"><label>From airport</label><div class="input">SXM <span class="end">Princess Juliana</span></div></div>
+                <div class="f"><label>To airport</label><div class="input">CTG</div></div>
+              </div>
+              <div class="row3">
+                <div class="f"><label>Leaves</label><div class="input num">13:05</div></div>
+                <div class="f"><label>Arrives</label><div class="input num">19:25</div></div>
+                <div class="f"><label>Stops</label><div class="input num">1<span class="end">▾</span></div></div>
+              </div>
+              <div class="f"><label>Via</label><div class="input">Panama<span class="end">1 h 50</span></div></div>
+            </div>
+
+            <div class="legform">
+              <h4>Back · Sat 26 Sep</h4>
+              <p class="hint">Airports: the same, the other way round. <span class="link">Change</span></p>
+              <div class="row3">
+                <div class="f"><label>Leaves</label><div class="input num">08:40</div></div>
+                <div class="f"><label>Arrives</label><div class="input num">15:45</div></div>
+                <div class="f"><label>Stops</label><div class="input num">1<span class="end">▾</span></div></div>
+              </div>
+              <div class="f"><label>Via</label><div class="input">Panama<span class="end">2 h 10</span></div></div>
+            </div>
+
+            <div class="legform">
+              <div class="check" style="margin-top: 0"><i class="on">✓</i> Checked bag included</div>
+              <div class="check"><i class="on">✓</i> Refundable</div>
+              <div class="f" style="margin-top: var(--space-3)"><label>Note</label><div class="input">Short stop, good times</div></div>
+              <div class="f"><label>Link</label><div class="input"><span class="ph">copaair.com/…</span></div></div>
+            </div>
+          </div>
+          <div class="btn-main">Add the option</div>
+          <p class="skip">Only the airline and the price are needed. Times can come later.</p>
+        </div>
+        <span class="phone-label">Add a flight option</span>
+      </figure>
+      <figure>
+        <div class="phone">
+          <div class="tabs" aria-label="Categories" style="margin-top: var(--space-4)">
+            <span class="on">Travel</span><span>Stay</span><span>Around</span><span>Activities</span><span>Food</span>
+          </div>
+          <div class="step" aria-label="Journey">
+            <i>‹</i>
+            <div><h2>Cartagena → Medellín</h2><p>One way · 3 of you · 3 options · journey 2 of 2</p></div>
+            <i class="off">›</i>
+          </div>
+          <div class="flight">
+            <h3>Brasilia night bus</h3>
+            <div class="opt__price num"><b>180 000</b><span class="caps best">Cheapest</span></div>
+            <p class="orig num">540 000 COP for 3 · 🚌 Bus</p>
+            <div class="way num"><span class="lbl">Go</span><span class="times">19:00 → 08:30 +1</span><span class="dur">13 h 30</span><span class="stop">2 stops</span></div>
+            <p class="wide"><span class="no">✗ Not refundable</span> · <span class="q">“Saves a night of hotel”</span></p>
+          </div>
+          <div class="flight flight--chosen">
+            <h3>Avianca <span class="heart">♥</span></h3>
+            <div class="opt__price num"><b>420 000</b><span class="caps">+240 000</span></div>
+            <p class="orig num">1 260 000 COP for 3 · ✈ Plane</p>
+            <div class="way num"><span class="lbl">Go</span><span class="times">CTG 09:15 → MDE 10:25</span><span class="dur fast">1 h 10</span><span class="stop">Direct</span></div>
+            <p class="wide"><span class="yes">✓ Checked bag</span> · <span class="no">✗ Not refundable</span></p>
+            <p class="wide option-note"><span class="heart">♥</span> Coup de cœur · Chosen</p>
+          </div>
+          <div class="flight">
+            <h3>Expreso Brasilia day bus</h3>
+            <div class="opt__price num"><b>195 000</b><span class="caps">+15 000</span></div>
+            <p class="orig num">585 000 COP for 3 · 🚌 Bus</p>
+            <div class="way num"><span class="lbl">Go</span><span class="times">07:30 → 19:45</span><span class="dur">12 h 15</span><span class="stop">Direct</span></div>
+            <p class="wide"><span class="yes">✓ Refundable</span></p>
+          </div>
+          <p class="add-option">+ Add an option</p>
+        </div>
+        <span class="phone-label">A bus journey: stops as a number, no bag field</span>
+      </figure>
+    </div>
+
+    <div class="questions">
+      <h2>Decided by Djamina (13 Nov)</h2>
+      <ul>
+        <li>✅ <b>Journeys instead of places</b> on the Travel tab, in route order.</li>
+        <li>✅ <b>Two one-way tickets can be one option</b> (Alizé's recommendation, from St Martin it's often the cheapest): a price per ticket, added up; one choice, booked and paid as one.</li>
+        <li>✅ <b>Durations worked out from the times</b>, for now. Arrival the next day shows “+1”. Known limit: times are local, so a time difference (St Martin UTC−4, Colombia UTC−5) makes the duration off by an hour — airport time zones later.</li>
+        <li>✅ <b>Fastest</b> = shortest total, way out + way back. A tag and a sort.</li>
+        <li>✅ <b>Airport</b> on each leg (SXM Princess Juliana or SFG Grand Case…) and <b>refundable</b> yes/no.</li>
+        <li>✅ <b>Train, bus, ferry:</b> the same card; stops as a number (direct, 1, 2…); no bag field (luggage is almost always included).</li>
+      </ul>
+    </div>
+    <p class="mock-note">Mockup 10 · Compare flights · v2 · with Djamina's answers.</p>
+  </body>
+</html>
