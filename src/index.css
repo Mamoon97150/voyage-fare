@@ -1508,3 +1508,26 @@ select.field__input,
   clip-path: inset(50%);
   white-space: nowrap;
 }
+
+/* Once you scroll into the trip, the budget bar keeps one line: figure, switch, track (review #9). */
+.trip-budget--compact {
+  padding-block: var(--space-2);
+}
+
+.trip-budget--compact .trip-budget__figure {
+  font-size: 1.25rem;
+}
+
+.trip-budget--compact .trip-budget__figure small {
+  font-size: 0.75rem;
+}
+
+.trip-budget--compact .trip-budget__track {
+  margin-top: var(--space-2);
+}
+
+.trip-budget--compact .trip-budget__legend,
+.trip-budget--compact .trip-budget__target-text,
+.trip-budget--compact .trip-budget__missing {
+  display: none;
+}

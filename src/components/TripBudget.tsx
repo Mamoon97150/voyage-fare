@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { formatMoney } from '../lib/money'
 import type { BudgetView, Mode } from '../lib/tripView'
 
@@ -26,8 +27,18 @@ export function TripBudget({
   const label = solo ? 'the trip' : mode === 'mine' ? 'your share' : 'whole trip'
   const figure = formatMoney(view.figure, currency)
 
+  // Full at the top; once you scroll into the trip, one line: figure, track, target (review 13 Nov, #9).
+  const [compact, setCompact] = useState(false)
+  useEffect(() => {
+    // Two thresholds: shrinking moves the page up a little, so one threshold would make it flicker.
+    const onScroll = () => setCompact((was) => (was ? window.scrollY > 40 : window.scrollY > 160))
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
   return (
-    <section className="trip-budget" aria-label="Budget">
+    <section className={`trip-budget${compact ? ' trip-budget--compact' : ''}`} aria-label="Budget">
       <div className="trip-budget__row">
         {/* Pesos and other big currencies make long figures: keep them on one line. */}
         <p className={`trip-budget__figure num${figure.length > 9 ? ' trip-budget__figure--long' : ''}`}>

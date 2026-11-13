@@ -276,10 +276,23 @@ export function TripPage() {
               </SketchBox>
             </section>
 
-            <SketchBox className="form__sheet" seed={22 + places.length}>
-              <h2 className="sheet-title">Add the next place</h2>
-              <AddPlace tripId={trip.id} position={places.length + 1} onAdded={() => void load()} />
-            </SketchBox>
+            {/* One pattern for every "add" on the page: a row that opens the form (review 13 Nov, #4). */}
+            {adding === 'place' ? (
+              <SketchBox weight="light" className="form__sheet" seed={22 + places.length}>
+                <h2 className="sheet-title">Add a place</h2>
+                <AddPlace tripId={trip.id} position={places.length + 1} onAdded={added} first />
+                <button type="button" className="link-button screen__skip" onClick={() => setAdding(null)}>
+                  Cancel
+                </button>
+              </SketchBox>
+            ) : (
+              <button type="button" className="add-row" onClick={() => setAdding('place')}>
+                <span className="add-row__plus" aria-hidden="true">
+                  +
+                </span>
+                Add a place
+              </button>
+            )}
           </>
         )}
       </div>

@@ -35,6 +35,14 @@ npm run build
 The same three checks run on GitHub on every push (`.github/workflows/checks.yml`). They need no
 secrets: the database tests use an in-memory Postgres, the screen tests a fake Supabase.
 
+```bash
+npm run test:smoke   # the app's real queries against the Supabase project, as the demo user
+```
+
+The smoke test signs in with `DEMO_USER_EMAIL` / `DEMO_USER_PASSWORD` from `.env.local`, walks through
+creating a trip, places, items, tickets and settings, then deletes everything it made. Run it by hand
+before a commit that touches data; it doesn't run on GitHub (it needs the account).
+
 ## The budget engine
 
 Every budget and split calculation lives in the database (`supabase/migrations/`), not in the

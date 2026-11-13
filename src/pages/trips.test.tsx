@@ -259,7 +259,7 @@ describe('inside a trip', () => {
     click('Add the place')
     expect(await screen.findByRole('heading', { name: /Cartagena/ })).toBeInTheDocument()
     expect(screen.getByText('4 nights')).toBeInTheDocument()
-    expect(screen.getByText('Add the next place')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Add a place' })).toBeInTheDocument()
     expect(data.addPlace).toHaveBeenCalledWith(expect.objectContaining({ tripId: 't1', name: 'Cartagena', nights: 4, position: 1 }))
   })
 
@@ -532,7 +532,7 @@ describe('changing what was added', () => {
     open('/trips/t1')
     fireEvent.click(await screen.findByRole('button', { name: 'Change Cartagena' }))
     expect(screen.getByLabelText('Name')).toHaveValue('Cartagena')
-    // The "Add the next place" form below has its own Nights field: use the edit form's.
+    // Only the edit form has a Nights field now: the add-place form is closed until asked for.
     fireEvent.change(document.getElementById('place-edit-p1-nights')!, { target: { value: '5' } })
     click('Save')
     await waitFor(() => expect(data.updatePlace).toHaveBeenCalledWith('p1', { name: 'Cartagena', nights: 5 }))
