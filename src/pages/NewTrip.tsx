@@ -218,6 +218,16 @@ export function NewTrip() {
               </button>
             </SketchBox>
             <p className="screen__note">You can invite them to edit the trip later, from its settings.</p>
+            <button
+              type="button"
+              className="link-button screen__skip"
+              onClick={() => {
+                setOthers([''])
+                setStep(3)
+              }}
+            >
+              It’s just me
+            </button>
           </>
         )}
 

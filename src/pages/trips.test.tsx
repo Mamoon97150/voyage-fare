@@ -165,6 +165,19 @@ describe('create a trip', () => {
     )
   })
 
+  it('“It’s just me”: a solo trip, with no one else', async () => {
+    data.createTrip.mockResolvedValue('t1')
+    open('/trips/new')
+    await screen.findByText('Where are you going?')
+    type('Trip name', 'Tokyo alone')
+    click('Next')
+    type('Traveller 2', 'Typo')
+    click('It’s just me')
+    expect(await screen.findByText('What’s the budget?')).toBeInTheDocument()
+    click('No target for now')
+    await waitFor(() => expect(data.createTrip).toHaveBeenCalledWith(expect.objectContaining({ me: 'Ana', travellers: [] })))
+  })
+
   it('a target that isn’t an amount is said on the field', async () => {
     open('/trips/new')
     await screen.findByText('Where are you going?')
