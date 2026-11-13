@@ -474,3 +474,454 @@ a:focus-visible {
   font-size: 1.3rem;
   color: var(--ink-soft);
 }
+
+/* ═════ Inside the app: phone-first screens (mockup 7) ═════ */
+.screen {
+  max-width: 28rem;
+  margin: 0 auto;
+  min-height: 100dvh;
+  padding-bottom: var(--space-12);
+}
+
+.screen__top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-4) var(--space-2);
+}
+
+.screen__title {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-title);
+  font-size: 1.375rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.screen__title--trip {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.round-button {
+  width: 2.5rem;
+  height: 2.5rem;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--paper-raised);
+  color: var(--ink);
+  font: inherit;
+  font-size: 1.1rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.steps {
+  font-size: 0.8125rem;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.steps b {
+  color: var(--ink);
+}
+
+.stepbar {
+  display: flex;
+  gap: 4px;
+  padding: 0 var(--space-4);
+}
+
+.stepbar i {
+  flex: 1;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--line);
+}
+
+.stepbar i.on {
+  background: var(--ink);
+}
+
+.screen__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4);
+}
+
+.screen__lead {
+  font-size: 1.5rem;
+}
+
+.screen__intro,
+.screen__meta,
+.screen__note {
+  color: var(--ink-soft);
+  font-size: 0.9375rem;
+}
+
+.screen__intro {
+  margin-top: calc(var(--space-3) * -1);
+}
+
+.screen__meta {
+  padding: 0 var(--space-4);
+  font-size: 0.875rem;
+}
+
+.screen__skip {
+  align-self: center;
+  color: var(--ink-soft);
+  font-size: 0.875rem;
+}
+
+.dates {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.row2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.9375rem;
+  cursor: pointer;
+}
+
+.check input {
+  width: 1.15rem;
+  height: 1.15rem;
+  accent-color: var(--ink);
+}
+
+/* City suggestions */
+.suggest {
+  list-style: none;
+  margin: 2px 0 0;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--paper-raised);
+  overflow: hidden;
+  box-shadow: 0 6px 16px rgb(31 42 36 / 0.08);
+}
+
+.suggest__item {
+  padding: 0.6rem var(--space-3);
+  border-top: 1px solid var(--line);
+  cursor: pointer;
+}
+
+.suggest__item:first-child {
+  border-top: 0;
+}
+
+.suggest__item--on,
+.suggest__item:hover {
+  background: color-mix(in srgb, var(--confirmed) 8%, var(--paper-raised));
+}
+
+.suggest__item small {
+  color: var(--ink-soft);
+}
+
+.field__pin,
+.field__unit {
+  position: absolute;
+  right: var(--space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ink-soft);
+  font-size: 0.875rem;
+  pointer-events: none;
+}
+
+.field__pin {
+  color: var(--confirmed);
+}
+
+.field--short {
+  max-width: 8rem;
+}
+
+/* Two-way switch (per person / whole trip) */
+.switch {
+  display: inline-flex;
+  align-self: flex-start;
+  margin-top: var(--space-2);
+  padding: 2px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper-raised);
+}
+
+.switch button {
+  padding: 0.3rem 0.75rem;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.switch button[aria-checked='true'] {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* Travellers */
+.people {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.people li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-top: 1px solid var(--line);
+}
+
+.people li:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.avatar {
+  width: 2rem;
+  height: 2rem;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--line);
+  color: var(--ink);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.avatar--me {
+  background: var(--ink);
+  color: var(--paper);
+  box-shadow: 0 0 0 2px var(--estimated);
+}
+
+.people__name {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.people__name b {
+  font-weight: 500;
+}
+
+.people__name small {
+  font-size: 0.8125rem;
+  color: var(--ink-soft);
+}
+
+.people__input {
+  flex: 1;
+  min-width: 0;
+  min-height: 2.5rem;
+}
+
+.people__remove {
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 0;
+  background: none;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.add-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: 500;
+  color: var(--confirmed);
+  cursor: pointer;
+}
+
+.add-row__plus {
+  width: 1.75rem;
+  height: 1.75rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1.5px dashed var(--confirmed);
+}
+
+/* Inside a trip */
+.budget-line {
+  margin: var(--space-3) 0 0;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--line);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: var(--space-1) var(--space-3);
+}
+
+.budget-line__figure {
+  font-family: var(--font-title);
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.budget-line__figure small {
+  font-family: var(--font-text);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+.budget-line__target {
+  font-size: 0.8125rem;
+  color: var(--ink-soft);
+}
+
+.budget-line__track {
+  grid-column: 1 / -1;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--line);
+}
+
+.places {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.place-sheet {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--paper-raised);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 3px 10px rgb(31 42 36 / 0.07);
+}
+
+.place-sheet__pin {
+  width: 1.75rem;
+  height: 1.75rem;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--confirmed);
+  color: var(--paper);
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.place-sheet__name {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.place-sheet__name b {
+  font-family: var(--font-title);
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.place-sheet__name small,
+.place-sheet__nights {
+  font-size: 0.8125rem;
+  color: var(--ink-soft);
+}
+
+.sheet-title {
+  font-size: 1.0625rem;
+}
+
+.add-place {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+  text-align: left;
+}
+
+/* Your trips */
+.trips__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.button--small {
+  min-height: 2.25rem;
+  padding: 0 var(--space-4);
+  font-size: 0.875rem;
+}
+
+.tripcards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.tripcard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  background: var(--paper-raised);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 3px 10px rgb(31 42 36 / 0.07);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.tripcard__name {
+  font-family: var(--font-title);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.tripcard__meta {
+  font-size: 0.875rem;
+  color: var(--ink-soft);
+}

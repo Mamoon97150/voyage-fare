@@ -1,13 +1,31 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router'
+import { FormMessage } from '../components/AuthForm'
 import { Sketch, SketchBox } from '../components/Sketch'
+import { Loading } from '../lib/auth'
 import { useAuth } from '../lib/authContext'
+import { explainAuthError } from '../lib/authForm'
 import { supabase } from '../lib/supabase'
+import { listTrips, type TripSummary } from '../lib/trips'
+import { formatDates, plural } from '../lib/tripText'
 
-/** "Your trips". For now: the empty state, who is signed in, and a way out. The list comes with the trip view. */
+/** "Your trips": every trip you're on, newest first. Amounts come with the budget bar. */
 export function Trips() {
   const { session } = useAuth()
+  const [trips, setTrips] = useState<TripSummary[]>()
+  const [error, setError] = useState<string>()
   const [busy, setBusy] = useState(false)
   const firstName = session?.user.user_metadata?.first_name as string | undefined
+
+  useEffect(() => {
+    let active = true
+    listTrips()
+      .then((t) => active && setTrips(t))
+      .catch((e) => active && setError(explainAuthError(e).message))
+    return () => {
+      active = false
+    }
+  }, [])
 
   async function signOut() {
     setBusy(true)
@@ -28,13 +46,47 @@ export function Trips() {
         </span>
       </header>
       <main className="trips">
-        <h1 className="trips__title">Your trips</h1>
-        <SketchBox tape="green" className="empty">
-          <Sketch name="no-trips" width={240} />
-          <h2 className="empty__title">No trips yet</h2>
-          <p className="hand empty__note">the first page is the hardest</p>
-          <p className="field__hint">Creating a trip comes next.</p>
-        </SketchBox>
+        <div className="trips__head">
+          <h1 className="trips__title">Your trips</h1>
+          {trips && trips.length > 0 && (
+            <Link to="/trips/new" className="button button--primary button--small">
+              + New trip
+            </Link>
+          )}
+        </div>
+        {error && <FormMessage tone="error">{error}</FormMessage>}
+        {!error && trips === undefined && <Loading />}
+        {trips?.length === 0 && (
+          <SketchBox tape="green" className="empty">
+            <Sketch name="no-trips" width={240} />
+            <h2 className="empty__title">No trips yet</h2>
+            <p className="hand empty__note">the first page is the hardest</p>
+            <Link to="/trips/new" className="button button--primary button--wide">
+              + New trip
+            </Link>
+          </SketchBox>
+        )}
+        {trips && trips.length > 0 && (
+          <ul className="tripcards">
+            {trips.map((t) => (
+              <li key={t.id}>
+                <Link to={`/trips/${t.id}`} className="tripcard">
+                  <b className="tripcard__name">{t.name}</b>
+                  <span className="tripcard__meta">
+                    {[
+                      formatDates(t.start_date, t.end_date) ?? 'Planning · no dates yet',
+                      t.places ? plural(t.places, 'place') : null,
+                      t.nights ? plural(t.nights, 'night') : null,
+                      plural(t.travellers, 'traveller'),
+                    ]
+                      .filter(Boolean)
+                      .join(' · ')}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
       </main>
     </div>
   )

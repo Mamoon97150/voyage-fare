@@ -1077,6 +1077,22 @@ export type Database = {
       }
     }
     Functions: {
+      create_trip: {
+        Args: {
+          p_currency?: string
+          p_end_date?: string
+          p_home_city?: string
+          p_home_latitude?: number
+          p_home_longitude?: number
+          p_me: string
+          p_name: string
+          p_start_date?: string
+          p_target_amount?: number
+          p_target_scope?: string
+          p_travellers?: string[]
+        }
+        Returns: string
+      }
       trip_settlement: {
         Args: { p_trip_id: string }
         Returns: {
