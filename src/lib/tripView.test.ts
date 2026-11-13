@@ -1,6 +1,18 @@
 import { describe, expect, it } from 'vitest'
 import type { Item, TripDetail } from './trips'
-import { budgetView, dayLabel, daysText, groupPlaceItems, isSolo, itemLine, tripDays, viewerOf } from './tripView'
+import {
+  budgetView,
+  dayLabel,
+  daysText,
+  groupPlaceItems,
+  hasLegs,
+  isSolo,
+  itemLine,
+  legsAfter,
+  suggestedRoute,
+  tripDays,
+  viewerOf,
+} from './tripView'
 
 const item = (over: Partial<Item>): Item =>
   ({ id: 'i', trip_id: 't', place_id: 'p', kind: 'activity', name: 'x', day_number: null, end_day_number: null, ...over }) as Item
@@ -120,5 +132,42 @@ describe('the budget bar', () => {
     const v = budgetView(detail({ budget: { current_total: null, target_total: null, missing_amount_count: 0 } as TripDetail['budget'] }), null, 'total')
     expect(v.figure).toBeNull()
     expect(v.difference).toBeNull()
+  })
+})
+
+describe('tickets in the route', () => {
+  const places = [
+    { id: 'c', name: 'Cartagena' },
+    { id: 'm', name: 'Medellín' },
+  ] as TripDetail['places']
+  const route = {
+    trip: { home_city: 'St Martin' },
+    places,
+  } as unknown as Pick<TripDetail, 'trip' | 'places'>
+
+  it('suggests where a new ticket goes', () => {
+    expect(suggestedRoute(route, null)).toEqual({ from: 'St Martin', to: 'Cartagena' })
+    expect(suggestedRoute(route, 'c')).toEqual({ from: 'Cartagena', to: 'Medellín' })
+    expect(suggestedRoute(route, 'm')).toEqual({ from: 'Medellín', to: 'St Martin' })
+  })
+
+  const flights = item({ id: 'f', kind: 'transport', place_id: null })
+  const bus = item({ id: 'b', kind: 'transport', place_id: null })
+  const legs = [
+    { item_id: 'f', leg_number: 1, after_place_id: null, position: 0 },
+    { item_id: 'f', leg_number: 2, after_place_id: 'm', position: 1 },
+    { item_id: 'b', leg_number: 1, after_place_id: 'c', position: 0 },
+  ] as TripDetail['legs']
+  const d = { legs, items: [flights, bus] }
+
+  it('places each leg in its gap, and knows a round trip', () => {
+    expect(legsAfter(d, null).map((l) => [l.item.id, l.leg.leg_number, l.roundTrip])).toEqual([['f', 1, true]])
+    expect(legsAfter(d, 'c').map((l) => [l.item.id, l.roundTrip])).toEqual([['b', false]])
+    expect(legsAfter(d, 'm').map((l) => [l.item.id, l.leg.leg_number])).toEqual([['f', 2]])
+  })
+
+  it('a ticket in the route is not listed twice', () => {
+    expect(hasLegs(d, flights)).toBe(true)
+    expect(hasLegs(d, item({ id: 'insurance' }))).toBe(false)
   })
 })

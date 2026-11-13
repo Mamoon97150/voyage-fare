@@ -22,6 +22,12 @@ const data = vi.hoisted(() => ({
   getTrip: vi.fn(),
   addPlace: vi.fn(),
   addItem: vi.fn(),
+  addTicket: vi.fn(),
+  updateItem: vi.fn(),
+  updateTicket: vi.fn(),
+  deleteItem: vi.fn(),
+  updatePlace: vi.fn(),
+  deletePlace: vi.fn(),
   searchPlaces: vi.fn(),
 }))
 vi.mock('../lib/trips', () => ({
@@ -30,6 +36,12 @@ vi.mock('../lib/trips', () => ({
   getTrip: data.getTrip,
   addPlace: data.addPlace,
   addItem: data.addItem,
+  addTicket: data.addTicket,
+  updateItem: data.updateItem,
+  updateTicket: data.updateTicket,
+  deleteItem: data.deleteItem,
+  updatePlace: data.updatePlace,
+  deletePlace: data.deletePlace,
 }))
 vi.mock('../lib/places', async (original) => ({
   ...(await original<typeof import('../lib/places')>()),
@@ -58,6 +70,7 @@ const detail = (over: Record<string, unknown> = {}) => ({
   travellers,
   places: [],
   items: [],
+  legs: [],
   amounts: [],
   shares: [],
   budget: { current_total: null, confirmed_total: null, estimated_total: null, target_total: 5000, missing_amount_count: 0 },
@@ -318,9 +331,190 @@ describe('inside a trip', () => {
     expect(screen.queryByRole('radio', { name: 'Total' })).not.toBeInTheDocument()
   })
 
+  it('a ticket: cities suggested from the route, a round trip by default from home', async () => {
+    const medellin = { id: 'p2', name: 'Medellín', country: 'Colombia', nights: 3, position: 2 }
+    data.getTrip.mockResolvedValue(detail({ places: [cartagena, medellin] }))
+    data.addTicket.mockResolvedValue('t9')
+    open('/trips/t1')
+    await screen.findByRole('button', { name: 'Add to the whole trip' })
+    click('Add to the whole trip')
+    expect(screen.getByRole('radio', { name: /Transport/ })).toHaveAttribute('aria-checked', 'true')
+    expect(screen.getByLabelText('From')).toHaveValue('St Martin')
+    expect(screen.getByLabelText('To')).toHaveValue('Cartagena')
+    expect(screen.getByLabelText('Round trip, one ticket')).toBeChecked()
+    expect(screen.getByLabelText('The way back')).toHaveValue('p2') // after the last place
+    type('Via (optional)', 'Panama')
+    type('Price (both ways)', '1 800 000')
+    click('Add the ticket')
+    await waitFor(() =>
+      expect(data.addTicket).toHaveBeenCalledWith({
+        tripId: 't1',
+        from: 'St Martin',
+        to: 'Cartagena',
+        mode: 'plane',
+        name: null,
+        via: 'Panama',
+        afterPlaceId: null,
+        roundTrip: true,
+        returnAfterPlaceId: 'p2',
+        amount: 1800000,
+      }),
+    )
+  })
+
+  it('moving a ticket in the route suggests the next cities', async () => {
+    const medellin = { id: 'p2', name: 'Medellín', country: 'Colombia', nights: 3, position: 2 }
+    data.getTrip.mockResolvedValue(detail({ places: [cartagena, medellin] }))
+    open('/trips/t1')
+    await screen.findByRole('button', { name: 'Add to the whole trip' })
+    click('Add to the whole trip')
+    fireEvent.change(screen.getByLabelText('In the route'), { target: { value: 'p1' } })
+    expect(screen.getByLabelText('From')).toHaveValue('Cartagena')
+    expect(screen.getByLabelText('To')).toHaveValue('Medellín')
+    expect(screen.getByLabelText('Round trip, one ticket')).not.toBeChecked()
+  })
+
+  it('draws a round trip in the route: priced on the way out, included on the way back', async () => {
+    data.getTrip.mockResolvedValue(
+      detail({
+        places: [cartagena],
+        items: [{ id: 'f', place_id: null, kind: 'transport', name: 'St Martin ⇄ Cartagena', status: 'chosen' }],
+        legs: [
+          { id: 'l1', item_id: 'f', leg_number: 1, mode: 'plane', from_name: 'St Martin', to_name: 'Cartagena', via: null, after_place_id: null, position: 0 },
+          { id: 'l2', item_id: 'f', leg_number: 2, mode: 'plane', from_name: 'Cartagena', to_name: 'St Martin', via: null, after_place_id: 'p1', position: 1 },
+        ],
+        amounts: [{ item_id: 'f', current: 1800, is_confirmed: false }],
+        shares: [
+          { item_id: 'f', traveller_id: 'a', fraction: 0.5 },
+          { item_id: 'f', traveller_id: 'b', fraction: 0.5 },
+        ],
+      }),
+    )
+    open('/trips/t1')
+    expect(await screen.findByText('St Martin → Cartagena')).toBeInTheDocument()
+    expect(screen.getByText('Cartagena → St Martin')).toBeInTheDocument()
+    expect(screen.getByText('⇄ Round trip')).toBeInTheDocument()
+    expect(screen.getByText('Included in the round trip')).toBeInTheDocument()
+    expect(screen.getAllByText('900 €')).toHaveLength(1) // counted once, your half
+    // Not listed again in the whole-trip sheet.
+    expect(screen.queryByText('St Martin ⇄ Cartagena')).not.toBeInTheDocument()
+  })
+
   it('a trip that isn’t shared with you says so', async () => {
     data.getTrip.mockResolvedValue(null)
     open('/trips/nope')
     expect(await screen.findByText('This trip isn’t here')).toBeInTheDocument()
   })
 })
+
+describe('changing what was added', () => {
+  const roundTrip = {
+    places: [cartagena],
+    items: [
+      { id: 'i1', place_id: 'p1', kind: 'housing', name: 'Casa Lola', status: 'chosen', day_number: 1, end_day_number: 5 },
+      { id: 'f', place_id: null, kind: 'transport', name: 'St Martin ⇄ Cartagena', status: 'chosen', day_number: null, end_day_number: null },
+    ],
+    legs: [
+      { id: 'l1', item_id: 'f', leg_number: 1, mode: 'plane', from_name: 'St Martin', to_name: 'Cartagena', via: 'Panama', after_place_id: null, position: 0 },
+      { id: 'l2', item_id: 'f', leg_number: 2, mode: 'plane', from_name: 'Cartagena', to_name: 'St Martin', via: 'Panama', after_place_id: 'p1', position: 1 },
+    ],
+    amounts: [
+      { item_id: 'i1', current: 1200, is_confirmed: false },
+      { item_id: 'f', current: 1800, is_confirmed: false },
+    ],
+  }
+
+  it('tap an item: the same form, filled in; save the new price', async () => {
+    data.getTrip.mockResolvedValue(detail(roundTrip))
+    data.updateItem.mockResolvedValue(undefined)
+    open('/trips/t1')
+    fireEvent.click(await screen.findByRole('button', { name: 'Change Casa Lola' }))
+    expect(screen.getByLabelText('Name')).toHaveValue('Casa Lola')
+    expect(screen.getByLabelText('From')).toHaveValue('1')
+    expect(screen.getByLabelText('Until')).toHaveValue('5')
+    expect(screen.getByLabelText('Price')).toHaveValue('1200')
+    type('Price', '1 350')
+    click('Save')
+    await waitFor(() =>
+      expect(data.updateItem).toHaveBeenCalledWith({
+        id: 'i1',
+        kind: 'housing',
+        name: 'Casa Lola',
+        dayNumber: 1,
+        endDayNumber: 5,
+        amount: 1350,
+      }),
+    )
+  })
+
+  it('delete asks once, and says it can’t be undone', async () => {
+    data.getTrip.mockResolvedValue(detail(roundTrip))
+    data.deleteItem.mockResolvedValue(undefined)
+    open('/trips/t1')
+    fireEvent.click(await screen.findByRole('button', { name: 'Change Casa Lola' }))
+    click('Delete')
+    expect(screen.getByText('This can’t be undone.')).toBeInTheDocument()
+    expect(data.deleteItem).not.toHaveBeenCalled()
+    click('Keep it')
+    click('Delete')
+    click('Yes, delete Casa Lola')
+    await waitFor(() => expect(data.deleteItem).toHaveBeenCalledWith('i1'))
+  })
+
+  it('tap a ticket leg: its route comes back; make it one way', async () => {
+    data.getTrip.mockResolvedValue(detail(roundTrip))
+    data.updateTicket.mockResolvedValue(undefined)
+    open('/trips/t1')
+    fireEvent.click(await screen.findByRole('button', { name: 'Change Cartagena → St Martin' }))
+    expect(screen.getByLabelText('From')).toHaveValue('St Martin')
+    expect(screen.getByLabelText('Via (optional)')).toHaveValue('Panama')
+    expect(screen.getByLabelText('Round trip, one ticket')).toBeChecked()
+    expect(screen.getByLabelText('Price (both ways)')).toHaveValue('1800')
+    fireEvent.click(screen.getByLabelText('Round trip, one ticket'))
+    type('Price', '1 000')
+    click('Save')
+    await waitFor(() =>
+      expect(data.updateTicket).toHaveBeenCalledWith('f', {
+        from: 'St Martin',
+        to: 'Cartagena',
+        mode: 'plane',
+        via: 'Panama',
+        afterPlaceId: null,
+        roundTrip: false,
+        returnAfterPlaceId: null,
+        amount: 1000,
+      }),
+    )
+  })
+
+  it('deleting a round trip says both ways go', async () => {
+    data.getTrip.mockResolvedValue(detail(roundTrip))
+    data.deleteItem.mockResolvedValue(undefined)
+    open('/trips/t1')
+    fireEvent.click(await screen.findByRole('button', { name: 'Change St Martin → Cartagena' }))
+    click('Delete')
+    expect(screen.getByText('Both ways go, and its price comes out of the budget.')).toBeInTheDocument()
+    click('Yes, delete this ticket')
+    await waitFor(() => expect(data.deleteItem).toHaveBeenCalledWith('f'))
+  })
+
+  it('a place: rename it, change its nights, or delete it with what’s in it', async () => {
+    data.getTrip.mockResolvedValue(detail(roundTrip))
+    data.updatePlace.mockResolvedValue(undefined)
+    data.deletePlace.mockResolvedValue(undefined)
+    open('/trips/t1')
+    fireEvent.click(await screen.findByRole('button', { name: 'Change Cartagena' }))
+    expect(screen.getByLabelText('Name')).toHaveValue('Cartagena')
+    // The "Add the next place" form below has its own Nights field: use the edit form's.
+    fireEvent.change(document.getElementById('place-edit-p1-nights')!, { target: { value: '5' } })
+    click('Save')
+    await waitFor(() => expect(data.updatePlace).toHaveBeenCalledWith('p1', { name: 'Cartagena', nights: 5 }))
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Change Cartagena' }))
+    click('Delete')
+    expect(screen.getByText(/Cartagena and the 1 thing in it go. Tickets after it move up in the route./)).toBeInTheDocument()
+    click('Yes, delete Cartagena')
+    await waitFor(() => expect(data.deletePlace).toHaveBeenCalledWith('p1'))
+  })
+})
+

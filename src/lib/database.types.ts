@@ -1090,6 +1090,46 @@ export type Database = {
         }
         Returns: string
       }
+      add_ticket: {
+        Args: {
+          p_after_place_id?: string
+          p_amount?: number
+          p_from: string
+          p_mode?: string
+          p_name?: string
+          p_return_after_place_id?: string
+          p_round_trip?: boolean
+          p_to: string
+          p_trip_id: string
+          p_via?: string
+        }
+        Returns: string
+      }
+      update_item: {
+        Args: {
+          p_amount?: number
+          p_day_number?: number
+          p_end_day_number?: number
+          p_item_id: string
+          p_kind: string
+          p_name: string
+        }
+        Returns: undefined
+      }
+      update_ticket: {
+        Args: {
+          p_after_place_id?: string
+          p_amount?: number
+          p_from: string
+          p_item_id: string
+          p_mode?: string
+          p_return_after_place_id?: string
+          p_round_trip?: boolean
+          p_to: string
+          p_via?: string
+        }
+        Returns: undefined
+      }
       create_trip: {
         Args: {
           p_currency?: string
@@ -1106,6 +1146,8 @@ export type Database = {
         }
         Returns: string
       }
+      delete_place: { Args: { p_place_id: string }; Returns: undefined }
+      item_category: { Args: { p_kind: string; p_place_id: string }; Returns: string }
       trip_settlement: {
         Args: { p_trip_id: string }
         Returns: {

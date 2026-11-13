@@ -597,8 +597,19 @@ a:focus-visible {
 
 .row2 {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: var(--space-3);
+}
+
+/* Fields shrink with their column instead of pushing out of the card on a phone. */
+.row2 > *,
+.field__input {
+  min-width: 0;
+}
+
+select.field__input,
+.row2 .field__input {
+  width: 100%;
 }
 
 .check {
@@ -1009,11 +1020,34 @@ a:focus-visible {
 }
 
 .item-row {
+  border-bottom: 1px solid var(--line);
+}
+
+/* A row is a button: tapping it opens the same form as when adding, to change or delete. */
+.item-row__tap,
+.leg__tap {
   display: flex;
   align-items: flex-start;
   gap: var(--space-3);
+  width: 100%;
   padding: var(--space-3) 0;
-  border-bottom: 1px solid var(--line);
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.item-row__tap:hover .item-row__name,
+.leg__tap:hover .item-row__name {
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+  text-underline-offset: 0.2em;
+}
+
+.item-row--editing {
+  padding-bottom: var(--space-3);
 }
 
 .item-row .dot {
@@ -1098,4 +1132,114 @@ a:focus-visible {
   display: flex;
   justify-content: flex-end;
   gap: var(--space-2);
+}
+
+/* Tickets between the places: on the paper, joined by a dotted line like a route */
+.legs {
+  list-style: none;
+  margin: calc(var(--space-1) * -1) 0;
+  padding: 0 var(--space-2);
+}
+
+.leg {
+  position: relative;
+}
+
+.leg__tap {
+  padding: var(--space-2) var(--space-2) var(--space-2) 0;
+}
+
+.leg--editing {
+  padding: var(--space-3);
+  margin: var(--space-2) 0;
+  background: var(--paper-raised);
+  border-radius: 10px;
+}
+
+.leg--editing::before {
+  display: none;
+}
+
+.leg::before {
+  content: '';
+  position: absolute;
+  left: 0.875rem;
+  top: 0;
+  bottom: 0;
+  border-left: 1.5px dotted var(--ink-soft);
+  z-index: 0;
+}
+
+.leg__icon {
+  position: relative;
+  z-index: 1;
+  width: 1.75rem;
+  height: 1.75rem;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  font-size: 0.8125rem;
+}
+
+.leg .item-row__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.add-ticket {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* Editing and deleting */
+.place__edit {
+  padding: 0.2rem 0.5rem;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 0.8125rem;
+  color: var(--ink-soft);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  cursor: pointer;
+}
+
+.add-item__delete {
+  margin-right: auto;
+  color: var(--over);
+}
+
+.button--danger {
+  background: var(--over);
+  color: var(--paper);
+}
+
+.confirm-delete {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--over) 6%, var(--paper-raised));
+}
+
+.button {
+  white-space: nowrap;
+}
+
+.confirm-delete .add-item__actions {
+  flex-wrap: wrap;
+}
+
+/* The confirm button names what goes; a long name may wrap rather than squeeze "Keep it". */
+.confirm-delete .button--danger {
+  flex: 1;
+  white-space: normal;
+  line-height: 1.25;
+  padding-block: var(--space-2);
 }

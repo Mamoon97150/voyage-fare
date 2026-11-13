@@ -1,21 +1,24 @@
-import { useCallback, useEffect, useState, type FormEvent } from 'react'
+import { Fragment, useCallback, useEffect, useState, type FormEvent } from 'react'
 import { Link, useParams } from 'react-router'
 import { FormMessage } from '../components/AuthForm'
 import { CityField } from '../components/CityField'
+import { FormActions } from '../components/FormActions'
 import { Sketch, SketchBox } from '../components/Sketch'
 import { TripBudget } from '../components/TripBudget'
-import { AddItem, ItemRow } from '../components/TripItems'
+import { AddItem, ItemRow, RouteGap } from '../components/TripItems'
 import { Loading } from '../lib/auth'
 import { useAuth } from '../lib/authContext'
 import { explainAuthError } from '../lib/authForm'
 import { formatMoney } from '../lib/money'
 import { emptyCity, type CityValue } from '../lib/places'
-import { addPlace, getTrip, type Place, type TripDetail } from '../lib/trips'
+import { addPlace, deletePlace, getTrip, updatePlace, type Place, type TripDetail } from '../lib/trips'
 import { formatDates, plural } from '../lib/tripText'
 import {
   budgetView,
   groupPlaceItems,
+  hasLegs,
   isSolo,
+  legsAfter,
   KINDS_FOR_PLACE,
   KINDS_FOR_TRIP,
   placeTotal,
@@ -35,6 +38,7 @@ export function TripPage() {
   const [loadError, setLoadError] = useState<string>()
   const [mode, setMode] = useState<Mode>('mine')
   const [adding, setAdding] = useState<string | null>(null) // a place id, 'trip', or nothing
+  const [editingPlace, setEditingPlace] = useState<string | null>(null)
 
   const load = useCallback(
     () =>
@@ -91,11 +95,13 @@ export function TripPage() {
   ]
     .filter(Boolean)
     .join(' · ')
-  const wholeTrip = items.filter((i) => !i.place_id)
+  // Tickets with a route are drawn between the places, not listed again here.
+  const wholeTrip = items.filter((i) => !i.place_id && !hasLegs(detail, i))
 
+  const reload = () => void load()
   const added = () => {
     setAdding(null)
-    void load()
+    reload()
   }
 
   return (
@@ -122,59 +128,87 @@ export function TripPage() {
           </SketchBox>
         ) : (
           <>
+            <RouteGap detail={detail} legs={legsAfter(detail, null)} viewer={viewer} mode={shownMode} onChanged={reload} />
             {places.map((place, i) => {
               const placeItems = items.filter((it) => it.place_id === place.id)
               return (
-                <section key={place.id} aria-labelledby={`place-${place.id}`}>
-                  <SketchBox weight="light" className="place" seed={31 + i}>
-                    <header className="place__head">
-                      <span className="place__pin" aria-hidden="true">
-                        {i + 1}
-                      </span>
-                      <h2 id={`place-${place.id}`} className="place__name">
-                        {place.name}
-                        <small>{place.nights ? plural(place.nights, 'night') : 'nights not set'}</small>
-                      </h2>
-                      <span className="place__total num">
-                        {formatMoney(placeTotal(detail, place, viewer, shownMode), trip.currency)}
-                      </span>
-                    </header>
-                    {groupPlaceItems(placeItems).map((group) => (
-                      <div key={group.key} className="item-group">
-                        <p className="item-group__label">{group.label}</p>
-                        <ul className="item-list">
-                          {group.items.map((it) => (
-                            <ItemRow
-                              key={it.id}
-                              detail={detail}
-                              item={it}
-                              viewer={viewer}
-                              mode={shownMode}
-                              showDays={group.key === 'stay' || group.key === 'ideas'}
-                            />
-                          ))}
-                        </ul>
-                      </div>
-                    ))}
-                    {adding === place.id ? (
-                      <AddItem
-                        detail={detail}
-                        placeId={place.id}
-                        kinds={KINDS_FOR_PLACE}
-                        days={days}
-                        onAdded={added}
-                        onCancel={() => setAdding(null)}
-                      />
-                    ) : (
-                      <button type="button" className="add-row place__add" onClick={() => setAdding(place.id)}>
-                        <span className="add-row__plus" aria-hidden="true">
-                          +
+                <Fragment key={place.id}>
+                  <section aria-labelledby={`place-${place.id}`}>
+                    <SketchBox weight="light" className="place" seed={31 + i}>
+                      <header className="place__head">
+                        <span className="place__pin" aria-hidden="true">
+                          {i + 1}
                         </span>
-                        Add to {place.name}
-                      </button>
-                    )}
-                  </SketchBox>
-                </section>
+                        <h2 id={`place-${place.id}`} className="place__name">
+                          {place.name}
+                          <small>{place.nights ? plural(place.nights, 'night') : 'nights not set'}</small>
+                        </h2>
+                        <span className="place__total num">
+                          {formatMoney(placeTotal(detail, place, viewer, shownMode), trip.currency)}
+                        </span>
+                        {editingPlace !== place.id && (
+                          <button
+                            type="button"
+                            className="place__edit"
+                            onClick={() => setEditingPlace(place.id)}
+                            aria-label={`Change ${place.name}`}
+                          >
+                            Edit
+                          </button>
+                        )}
+                      </header>
+                      {editingPlace === place.id && (
+                        <PlaceForm
+                          place={place}
+                          itemCount={placeItems.length}
+                          onDone={() => {
+                            setEditingPlace(null)
+                            reload()
+                          }}
+                          onCancel={() => setEditingPlace(null)}
+                        />
+                      )}
+                      {groupPlaceItems(placeItems).map((group) => (
+                        <div key={group.key} className="item-group">
+                          <p className="item-group__label">{group.label}</p>
+                          <ul className="item-list">
+                            {group.items.map((it) => (
+                              <ItemRow
+                                key={it.id}
+                                detail={detail}
+                                item={it}
+                                viewer={viewer}
+                                mode={shownMode}
+                                kinds={KINDS_FOR_PLACE}
+                                days={days}
+                                onChanged={reload}
+                                showDays={group.key === 'stay' || group.key === 'ideas'}
+                              />
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                      {adding === place.id ? (
+                        <AddItem
+                          detail={detail}
+                          placeId={place.id}
+                          kinds={KINDS_FOR_PLACE}
+                          days={days}
+                          onAdded={added}
+                          onCancel={() => setAdding(null)}
+                        />
+                      ) : (
+                        <button type="button" className="add-row place__add" onClick={() => setAdding(place.id)}>
+                          <span className="add-row__plus" aria-hidden="true">
+                            +
+                          </span>
+                          Add to {place.name}
+                        </button>
+                      )}
+                    </SketchBox>
+                  </section>
+                  <RouteGap detail={detail} legs={legsAfter(detail, place.id)} viewer={viewer} mode={shownMode} onChanged={reload} />
+                </Fragment>
               )
             })}
 
@@ -183,13 +217,22 @@ export function TripPage() {
                 <header className="place__head">
                   <h2 id="whole-trip" className="place__name">
                     Whole trip
-                    <small>flights, insurance, car…</small>
+                    <small>tickets, insurance, car…</small>
                   </h2>
                 </header>
                 {wholeTrip.length > 0 && (
                   <ul className="item-list">
                     {wholeTrip.map((it) => (
-                      <ItemRow key={it.id} detail={detail} item={it} viewer={viewer} mode={shownMode} />
+                      <ItemRow
+                        key={it.id}
+                        detail={detail}
+                        item={it}
+                        viewer={viewer}
+                        mode={shownMode}
+                        kinds={KINDS_FOR_TRIP}
+                        days={days}
+                        onChanged={reload}
+                      />
                     ))}
                   </ul>
                 )}
@@ -318,6 +361,104 @@ function AddPlace({
       <button type="submit" className="button button--primary button--wide" disabled={busy} aria-busy={busy || undefined}>
         {busy ? 'Adding…' : 'Add the place'}
       </button>
+    </form>
+  )
+}
+
+/** Change a place's name and nights, or delete it with what's in it. */
+function PlaceForm({
+  place,
+  itemCount,
+  onDone,
+  onCancel,
+}: {
+  place: Place
+  itemCount: number
+  onDone: () => void
+  onCancel: () => void
+}) {
+  const [name, setName] = useState(place.name)
+  const [nights, setNights] = useState(String(place.nights))
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [formError, setFormError] = useState<string>()
+  const [busy, setBusy] = useState(false)
+  const id = `place-edit-${place.id}`
+
+  async function submit(event: FormEvent) {
+    event.preventDefault()
+    setFormError(undefined)
+    const found: Record<string, string> = {}
+    if (!name.trim()) found.name = 'Give the place a name.'
+    const n = nights.trim() ? Number(nights) : 0
+    if (!Number.isInteger(n) || n < 0 || n > 365) found.nights = 'A whole number of nights, like 3.'
+    setErrors(found)
+    if (Object.keys(found).length) return
+    setBusy(true)
+    try {
+      await updatePlace(place.id, { name: name.trim(), nights: n })
+      onDone()
+    } catch (error) {
+      setBusy(false)
+      setFormError(explainAuthError(error as { message?: string }).message)
+    }
+  }
+
+  const goesWith =
+    itemCount === 0 ? 'nothing else' : itemCount === 1 ? 'the 1 thing in it' : `the ${itemCount} things in it`
+
+  return (
+    <form onSubmit={submit} noValidate className="add-item">
+      {formError && <FormMessage tone="error">{formError}</FormMessage>}
+      <div className="row2">
+        <div className={`field${errors.name ? ' field--error' : ''}`}>
+          <label htmlFor={`${id}-name`} className="field__label">
+            Name
+          </label>
+          <input
+            id={`${id}-name`}
+            className="field__input"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            aria-invalid={errors.name ? true : undefined}
+            aria-describedby={errors.name ? `${id}-name-error` : undefined}
+          />
+          {errors.name && (
+            <p id={`${id}-name-error`} className="field__error">
+              {errors.name}
+            </p>
+          )}
+        </div>
+        <div className={`field${errors.nights ? ' field--error' : ''}`}>
+          <label htmlFor={`${id}-nights`} className="field__label">
+            Nights
+          </label>
+          <input
+            id={`${id}-nights`}
+            className="field__input num"
+            inputMode="numeric"
+            value={nights}
+            onChange={(e) => setNights(e.target.value)}
+            aria-invalid={errors.nights ? true : undefined}
+            aria-describedby={errors.nights ? `${id}-nights-error` : undefined}
+          />
+          {errors.nights && (
+            <p id={`${id}-nights-error`} className="field__error">
+              {errors.nights}
+            </p>
+          )}
+        </div>
+      </div>
+      <FormActions
+        busy={busy}
+        submitLabel="Save"
+        onCancel={onCancel}
+        onDelete={async () => {
+          await deletePlace(place.id)
+          onDone()
+        }}
+        deleteName={place.name}
+        deleteNote={`${place.name} and ${goesWith} go. Tickets after it move up in the route. This can’t be undone.`}
+      />
     </form>
   )
 }

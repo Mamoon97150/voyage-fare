@@ -1,6 +1,6 @@
 // What the trip view shows, worked out from the database's numbers.
 // No budget arithmetic here beyond picking the right figure: the database does the sums (BR-13).
-import type { Item, ItemKind, Place, TripDetail } from './trips'
+import type { Item, ItemKind, Leg, Place, TicketChange, TicketMode, TripDetail } from './trips'
 
 export type Mode = 'mine' | 'total'
 
@@ -142,5 +142,69 @@ export function budgetView(detail: TripDetail, viewer: string | null, mode: Mode
     target,
     difference: figure !== null && target !== null ? Math.round((figure - target) * 100) / 100 : null,
     missing,
+  }
+}
+
+// ── Tickets and their legs, between the places ────────────────────────────────
+
+
+export const MODES: Record<TicketMode, { label: string; icon: string }> = {
+  plane: { label: 'Plane', icon: '✈' },
+  train: { label: 'Train', icon: '🚆' },
+  bus: { label: 'Bus', icon: '🚌' },
+  car: { label: 'Car', icon: '🚗' },
+  boat: { label: 'Boat', icon: '⛴' },
+  other: { label: 'Other', icon: '•' },
+}
+
+export type LegLine = { leg: Leg; item: Item; roundTrip: boolean }
+
+/** The legs sitting in one gap of the route: before the first place (null) or after a place. */
+export function legsAfter(detail: Pick<TripDetail, 'legs' | 'items'>, afterPlaceId: string | null): LegLine[] {
+  return detail.legs
+    .filter((l) => l.after_place_id === afterPlaceId)
+    .sort((a, b) => a.position - b.position || a.leg_number - b.leg_number)
+    .flatMap((leg) => {
+      const item = detail.items.find((i) => i.id === leg.item_id)
+      if (!item) return []
+      const roundTrip = detail.legs.some((l) => l.item_id === leg.item_id && l.leg_number === 2)
+      return [{ leg, item, roundTrip }]
+    })
+}
+
+/** Tickets drawn in the route are not listed again in the whole-trip sheet. */
+export function hasLegs(detail: Pick<TripDetail, 'legs'>, item: Item): boolean {
+  return detail.legs.some((l) => l.item_id === item.id)
+}
+
+/**
+ * Where a new ticket most likely goes, so the form is often just a price to type:
+ * before the first place it leaves home; after a place it goes to the next one, or home.
+ */
+export function suggestedRoute(
+  detail: Pick<TripDetail, 'trip' | 'places'>,
+  afterPlaceId: string | null,
+): { from: string; to: string } {
+  const home = detail.trip.home_city ?? ''
+  const { places } = detail
+  if (afterPlaceId === null) return { from: home, to: places[0]?.name ?? '' }
+  const i = places.findIndex((p) => p.id === afterPlaceId)
+  return { from: places[i]?.name ?? '', to: places[i + 1]?.name ?? home }
+}
+
+/** A ticket as its form shows it, read back from its legs. */
+export function ticketOf(detail: Pick<TripDetail, 'legs'>, item: Item, amount: number | null): TicketChange {
+  const legs = detail.legs.filter((l) => l.item_id === item.id).sort((a, b) => a.leg_number - b.leg_number)
+  const out = legs[0]
+  const back = legs.find((l) => l.leg_number === 2)
+  return {
+    from: out?.from_name ?? '',
+    to: out?.to_name ?? '',
+    mode: (out?.mode as TicketMode) ?? 'plane',
+    via: out?.via ?? null,
+    afterPlaceId: out?.after_place_id ?? null,
+    roundTrip: Boolean(back),
+    returnAfterPlaceId: back?.after_place_id ?? null,
+    amount,
   }
 }

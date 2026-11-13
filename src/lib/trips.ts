@@ -65,6 +65,7 @@ export async function listTrips(): Promise<TripSummary[]> {
 }
 
 export type Item = Tables<'items'>
+export type Leg = Tables<'item_legs'>
 export type ItemAmount = Tables<'v_item_amounts'>
 export type ItemShare = Tables<'v_item_shares'>
 export type TripBudget = Tables<'v_trip_budget'>
@@ -77,6 +78,7 @@ export type TripDetail = {
   travellers: Traveller[]
   places: Place[]
   items: Item[]
+  legs: Leg[]
   amounts: ItemAmount[]
   shares: ItemShare[]
   budget: TripBudget | null
@@ -87,12 +89,13 @@ export type TripDetail = {
 
 /** null when the trip doesn't exist or isn't shared with this person (privacy hides both the same way). */
 export async function getTrip(id: string): Promise<TripDetail | null> {
-  const [trip, travellers, places, items, amounts, shares, budget, travellerShares, placeTotals, travellerPlaceTotals] =
+  const [trip, travellers, places, items, legs, amounts, shares, budget, travellerShares, placeTotals, travellerPlaceTotals] =
     await Promise.all([
       supabase.from('trips').select('*').eq('id', id).maybeSingle(),
       supabase.from('travellers').select('*').eq('trip_id', id).order('position'),
       supabase.from('places').select('*').eq('trip_id', id).order('position'),
       supabase.from('items').select('*').eq('trip_id', id).order('position'),
+      supabase.from('item_legs').select('*').eq('trip_id', id).order('position'),
       supabase.from('v_item_amounts').select('*').eq('trip_id', id),
       supabase.from('v_item_shares').select('*').eq('trip_id', id),
       supabase.from('v_trip_budget').select('*').eq('trip_id', id).maybeSingle(),
@@ -100,7 +103,7 @@ export async function getTrip(id: string): Promise<TripDetail | null> {
       supabase.from('v_budget_by_place').select('*').eq('trip_id', id),
       supabase.from('v_traveller_by_place').select('*').eq('trip_id', id),
     ])
-  for (const r of [trip, travellers, places, items, amounts, shares, budget, travellerShares, placeTotals, travellerPlaceTotals]) {
+  for (const r of [trip, travellers, places, items, legs, amounts, shares, budget, travellerShares, placeTotals, travellerPlaceTotals]) {
     if (r.error) throw r.error
   }
   if (!trip.data) return null
@@ -109,6 +112,7 @@ export async function getTrip(id: string): Promise<TripDetail | null> {
     travellers: travellers.data ?? [],
     places: places.data ?? [],
     items: items.data ?? [],
+    legs: legs.data ?? [],
     amounts: amounts.data ?? [],
     shares: shares.data ?? [],
     budget: budget.data,
@@ -143,6 +147,37 @@ export async function addItem(item: {
   return data
 }
 
+export type TicketMode = 'plane' | 'train' | 'bus' | 'car' | 'boat' | 'other'
+
+/** One step in the database: one transport item, one price, 1 or 2 legs placed in the route. */
+export async function addTicket(ticket: {
+  tripId: string
+  from: string
+  to: string
+  mode: TicketMode
+  name: string | null
+  via: string | null
+  afterPlaceId: string | null
+  roundTrip: boolean
+  returnAfterPlaceId: string | null
+  amount: number | null
+}): Promise<string> {
+  const { data, error } = await supabase.rpc('add_ticket', {
+    p_trip_id: ticket.tripId,
+    p_from: ticket.from,
+    p_to: ticket.to,
+    p_mode: ticket.mode,
+    p_name: ticket.name ?? undefined,
+    p_via: ticket.via ?? undefined,
+    p_after_place_id: ticket.afterPlaceId ?? undefined,
+    p_round_trip: ticket.roundTrip,
+    p_return_after_place_id: ticket.returnAfterPlaceId ?? undefined,
+    p_amount: ticket.amount ?? undefined,
+  })
+  if (error) throw error
+  return data
+}
+
 export async function addPlace(place: {
   tripId: string
   name: string
@@ -167,4 +202,68 @@ export async function addPlace(place: {
     .single()
   if (error) throw error
   return data
+}
+
+// ── Changing and removing (each one step in the database) ─────────────────────
+
+export async function updateItem(item: {
+  id: string
+  kind: ItemKind
+  name: string
+  dayNumber: number | null
+  endDayNumber: number | null
+  amount: number | null
+}): Promise<void> {
+  const { error } = await supabase.rpc('update_item', {
+    p_item_id: item.id,
+    p_kind: item.kind,
+    p_name: item.name,
+    p_day_number: item.dayNumber ?? undefined,
+    p_end_day_number: item.endDayNumber ?? undefined,
+    p_amount: item.amount ?? undefined,
+  })
+  if (error) throw error
+}
+
+export type TicketChange = {
+  from: string
+  to: string
+  mode: TicketMode
+  via: string | null
+  afterPlaceId: string | null
+  roundTrip: boolean
+  returnAfterPlaceId: string | null
+  amount: number | null
+}
+
+export async function updateTicket(itemId: string, ticket: TicketChange): Promise<void> {
+  const { error } = await supabase.rpc('update_ticket', {
+    p_item_id: itemId,
+    p_from: ticket.from,
+    p_to: ticket.to,
+    p_mode: ticket.mode,
+    p_via: ticket.via ?? undefined,
+    p_after_place_id: ticket.afterPlaceId ?? undefined,
+    p_round_trip: ticket.roundTrip,
+    p_return_after_place_id: ticket.returnAfterPlaceId ?? undefined,
+    p_amount: ticket.amount ?? undefined,
+  })
+  if (error) throw error
+}
+
+/** An item (or a ticket, with its legs) and its price go together. */
+export async function deleteItem(id: string): Promise<void> {
+  const { error } = await supabase.from('items').delete().eq('id', id)
+  if (error) throw error
+}
+
+export async function updatePlace(id: string, change: { name: string; nights: number }): Promise<void> {
+  const { error } = await supabase.from('places').update(change).eq('id', id)
+  if (error) throw error
+}
+
+/** The place and its items; tickets after it move up in the route. */
+export async function deletePlace(id: string): Promise<void> {
+  const { error } = await supabase.rpc('delete_place', { p_place_id: id })
+  if (error) throw error
 }
