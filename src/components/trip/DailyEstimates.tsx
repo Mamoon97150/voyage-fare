@@ -247,7 +247,6 @@ export function EstimateForm({
               type="button"
               role="radio"
               aria-checked={category === c.key}
-              aria-pressed={category === c.key}
               className="chip chip--pick"
               onClick={() => pickCategory(c.key)}
             >

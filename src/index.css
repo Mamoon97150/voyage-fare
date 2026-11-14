@@ -965,7 +965,7 @@ select.field__input,
 }
 
 .trip-budget__estimated-figure {
-  color: var(--estimated-ink);
+  color: var(--estimated-text);
 }
 
 .trip-budget__target-text,
@@ -1707,7 +1707,7 @@ select.field__input,
 }
 
 .compare-item__todo {
-  color: var(--estimated-ink);
+  color: var(--estimated-text);
 }
 
 .compare-item__dropped {
@@ -1923,7 +1923,7 @@ select.field__input,
 }
 
 .stars {
-  color: var(--estimated-ink);
+  color: var(--estimated-text);
   letter-spacing: 0.05em;
 }
 
@@ -2006,7 +2006,7 @@ select.field__input,
 }
 
 .looks__star--on {
-  color: var(--estimated-ink);
+  color: var(--estimated-text);
 }
 
 .options-note {
@@ -2197,7 +2197,7 @@ select.field__input,
 }
 
 .card--hero b.card--hero__owe {
-  color: var(--estimated-ink);
+  color: var(--estimated-text);
 }
 
 .card--hero span {
@@ -2270,7 +2270,7 @@ select.field__input,
 }
 
 .line__tag--owe {
-  color: var(--estimated-ink);
+  color: var(--estimated-text);
 }
 
 .line__bar {
@@ -2301,7 +2301,7 @@ select.field__input,
 }
 
 .minus {
-  color: var(--estimated-ink);
+  color: var(--estimated-text);
 }
 
 .small-button {
@@ -2370,14 +2370,16 @@ select.field__input,
   cursor: pointer;
 }
 
-.chip[aria-pressed='true'] {
+.chip[aria-pressed='true'],
+.chip[role='radio'][aria-checked='true'] {
   border-color: var(--chosen);
   background: var(--paper-raised);
   color: var(--chosen);
   font-weight: 600;
 }
 
-.chip[aria-pressed='true']::before {
+.chip[aria-pressed='true']::before,
+.chip[role='radio'][aria-checked='true']::before {
   content: '✓ ';
 }
 
@@ -2433,22 +2435,22 @@ select.field__input,
   margin-top: var(--space-2);
 }
 
-.people__state {
+.people__name .people__state {
   display: block;
   margin-top: 0.15rem;
-  font-size: var(--text-2xs) !important;
+  font-size: var(--text-2xs);
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--ink-soft);
 }
 
-.people__state--in {
-  color: var(--confirmed) !important;
+.people__name .people__state--in {
+  color: var(--confirmed);
 }
 
-.people__state--wait {
-  color: var(--estimated-ink) !important;
+.people__name .people__state--wait {
+  color: var(--estimated-text);
 }
 
 .people__hand {
@@ -2622,9 +2624,9 @@ select.field__input,
   color: var(--ink);
 }
 
-.welcome-note__sign {
+.welcome-note p.welcome-note__sign {
   text-align: right;
-  color: var(--ink-soft) !important;
+  color: var(--ink-soft);
   margin-top: var(--space-1);
 }
 
@@ -2652,7 +2654,7 @@ select.field__input,
 }
 
 .estimate-row__approx {
-  color: var(--estimated-ink);
+  color: var(--estimated-text);
 }
 
 .estimate-row__calc {
@@ -2664,7 +2666,7 @@ select.field__input,
 }
 
 .item-row__status--estimated {
-  color: var(--estimated-ink);
+  color: var(--estimated-text);
 }
 
 /* A number to look at again: circled in mustard pen (no side bars: 14 Nov). */
@@ -2686,7 +2688,7 @@ select.field__input,
   font-family: var(--font-hand);
   font-size: var(--text-note-l);
   line-height: 1.2;
-  color: var(--estimated-ink);
+  color: var(--estimated-text);
   transform: rotate(-1.5deg);
   transform-origin: left;
   margin-left: var(--space-6);
@@ -2778,7 +2780,7 @@ select.field__input,
 }
 
 /* Chosen: the tick takes the icon's place. */
-.chip--pick[aria-pressed='true'] .chip__icon {
+.chip--pick[aria-checked='true'] .chip__icon {
   display: none;
 }
 
@@ -2889,7 +2891,7 @@ select.field__input,
   font-family: var(--font-hand);
   font-size: var(--text-note);
   line-height: 1.2;
-  color: var(--estimated-ink);
+  color: var(--estimated-text);
   padding: var(--space-1) var(--space-1) 0;
 }
 
@@ -3047,7 +3049,7 @@ select.field__input,
   margin-top: 0.15rem;
   font-size: var(--text-xs);
   font-weight: 600;
-  color: var(--estimated-ink);
+  color: var(--estimated-text);
   text-align: right;
 }
 
@@ -3056,7 +3058,7 @@ select.field__input,
   font-family: var(--font-hand);
   font-size: var(--text-note);
   line-height: 1.15;
-  color: var(--estimated-ink);
+  color: var(--estimated-text);
 }
 
 .payments {
@@ -3143,7 +3145,7 @@ select.field__input,
 .payments__due .hand {
   display: block;
   font-size: var(--text-note-l);
-  color: var(--estimated-ink);
+  color: var(--estimated-text);
 }
 
 .payments__due input {
@@ -3175,7 +3177,7 @@ select.field__input,
   font-family: var(--font-title);
   font-size: var(--text-4xl);
   font-weight: 600;
-  color: var(--estimated-ink);
+  color: var(--estimated-text);
   line-height: 1.15;
 }
 
@@ -3188,5 +3190,5 @@ select.field__input,
   display: block;
   font-family: var(--font-hand);
   font-size: var(--text-note);
-  color: var(--estimated-ink);
+  color: var(--estimated-text);
 }

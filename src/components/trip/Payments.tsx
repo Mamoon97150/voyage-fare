@@ -203,7 +203,7 @@ function PaymentForm({
         </span>
         <div className="chip-grid" role="radiogroup" aria-label="Kind of payment">
           {KINDS.map((k) => (
-            <button key={k.key} type="button" role="radio" aria-checked={kind === k.key} aria-pressed={kind === k.key} className="chip chip--pick" onClick={() => setKind(k.key)}>
+            <button key={k.key} type="button" role="radio" aria-checked={kind === k.key} className="chip chip--pick" onClick={() => setKind(k.key)}>
               {k.label}
             </button>
           ))}

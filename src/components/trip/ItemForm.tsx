@@ -94,7 +94,6 @@ export function KindPicker({ kinds, kind, onKind }: { kinds: ItemKind[]; kind: I
             type="button"
             role="radio"
             aria-checked={kind === k}
-            aria-pressed={kind === k}
             className="chip chip--pick"
             onClick={() => onKind(k)}
           >

@@ -9,6 +9,7 @@
   --confirmed: #2f6b4f; /* forest green: booked or paid, with an actual amount */
   --estimated: #e2a93b; /* mustard: everything still estimated */
   --estimated-ink: #b07d1a; /* mustard for small marks (dots): 3.4:1 on paper, readable outdoors */
+  --estimated-text: #8f6412; /* mustard for words: 4.9:1 on paper (WCAG AA, review 14 Nov) */
   --over: #c2513f; /* red: over budget only */
   --chosen: #2c4a7a; /* blue ink: the option you chose on Compare, like circling it with a pen (13 Nov) */
   --paper-note: #fffdf6; /* a note slipped into the notebook (the welcome note) */
