@@ -12,7 +12,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:smoke": "vitest run --config vitest.smoke.config.ts",
-    "seed:colombia": "vitest run --config vitest.seed.config.ts"
+    "seed:colombia": "vitest run --config vitest.seed.config.ts",
+    "types": "npx supabase gen types typescript --project-id pvfraoarogagrobqvpzo > src/lib/database.types.ts"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.3.0",

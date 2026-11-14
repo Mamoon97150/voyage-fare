@@ -1,6 +1,12 @@
 import type { Json, Tables } from './database.types'
 import { supabase } from './supabase'
 
+/**
+ * The generated types don't know a function argument can be SQL null (they only see its type).
+ * Our functions do take null on purpose (no place, no package, no date): say so in one place.
+ */
+const sqlNull = <T,>(value: T | null) => value as T
+
 export type Trip = Tables<'trips'>
 export type Traveller = Tables<'travellers'>
 export type Place = Tables<'places'>
@@ -663,9 +669,9 @@ export type EstimateInput = {
 
 export async function saveDailyEstimate(e: EstimateInput): Promise<string> {
   const { data, error } = await supabase.rpc('save_daily_estimate', {
-    p_id: e.id ?? null,
+    p_id: sqlNull(e.id ?? null),
     p_trip_id: e.tripId,
-    p_place_id: e.placeId,
+    p_place_id: sqlNull(e.placeId),
     p_category: e.category,
     p_label: e.label,
     p_amount: e.amount,
@@ -699,7 +705,7 @@ export async function setPackageCover(packageId: string, items: string[]): Promi
 
 /** One line in a package, or out of it (null). */
 export async function setItemPackage(itemId: string, packageId: string | null): Promise<void> {
-  const { error } = await supabase.rpc('set_item_package', { p_item_id: itemId, p_package_id: packageId })
+  const { error } = await supabase.rpc('set_item_package', { p_item_id: itemId, p_package_id: sqlNull(packageId) })
   if (error) throw error
 }
 
@@ -740,6 +746,6 @@ export async function deletePayment(id: string): Promise<void> {
 
 /** When the balance is due; null = no date. */
 export async function setItemDue(itemId: string, dueOn: string | null): Promise<void> {
-  const { error } = await supabase.rpc('set_item_due', { p_item_id: itemId, p_due_on: dueOn })
+  const { error } = await supabase.rpc('set_item_due', { p_item_id: itemId, p_due_on: sqlNull(dueOn) })
   if (error) throw error
 }

@@ -1,3 +1,4 @@
+// Generated from the Supabase project (voyage-fare). Do not edit by hand: regenerate after each migration.
 export type Json =
   | string
   | number
@@ -233,11 +234,32 @@ export type Database = {
             referencedColumns: ["id", "trip_id"]
           },
           {
+            foreignKeyName: "invitations_traveller_id_trip_id_fkey"
+            columns: ["traveller_id", "trip_id"]
+            isOneToOne: false
+            referencedRelation: "v_traveller_balances"
+            referencedColumns: ["traveller_id", "trip_id"]
+          },
+          {
+            foreignKeyName: "invitations_traveller_id_trip_id_fkey"
+            columns: ["traveller_id", "trip_id"]
+            isOneToOne: false
+            referencedRelation: "v_traveller_shares"
+            referencedColumns: ["traveller_id", "trip_id"]
+          },
+          {
             foreignKeyName: "invitations_trip_id_fkey"
             columns: ["trip_id"]
             isOneToOne: false
             referencedRelation: "trips"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invitations_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "v_trip_budget"
+            referencedColumns: ["trip_id"]
           },
         ]
       }
@@ -306,6 +328,13 @@ export type Database = {
             referencedRelation: "v_item_amounts"
             referencedColumns: ["item_id", "trip_id"]
           },
+          {
+            foreignKeyName: "item_legs_item_id_trip_id_fkey"
+            columns: ["item_id", "trip_id"]
+            isOneToOne: false
+            referencedRelation: "v_item_left"
+            referencedColumns: ["item_id", "trip_id"]
+          },
         ]
       }
       item_split_travellers: {
@@ -337,6 +366,13 @@ export type Database = {
             columns: ["item_id", "trip_id"]
             isOneToOne: false
             referencedRelation: "v_item_amounts"
+            referencedColumns: ["item_id", "trip_id"]
+          },
+          {
+            foreignKeyName: "item_split_travellers_item_id_trip_id_fkey"
+            columns: ["item_id", "trip_id"]
+            isOneToOne: false
+            referencedRelation: "v_item_left"
             referencedColumns: ["item_id", "trip_id"]
           },
           {
@@ -439,6 +475,27 @@ export type Database = {
           trip_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "items_package_fk"
+            columns: ["package_id", "trip_id"]
+            isOneToOne: false
+            referencedRelation: "items"
+            referencedColumns: ["id", "trip_id"]
+          },
+          {
+            foreignKeyName: "items_package_fk"
+            columns: ["package_id", "trip_id"]
+            isOneToOne: false
+            referencedRelation: "v_item_amounts"
+            referencedColumns: ["item_id", "trip_id"]
+          },
+          {
+            foreignKeyName: "items_package_fk"
+            columns: ["package_id", "trip_id"]
+            isOneToOne: false
+            referencedRelation: "v_item_left"
+            referencedColumns: ["item_id", "trip_id"]
+          },
           {
             foreignKeyName: "items_paid_by_trip_id_fkey"
             columns: ["paid_by", "trip_id"]
@@ -559,6 +616,13 @@ export type Database = {
             referencedRelation: "v_item_amounts"
             referencedColumns: ["item_id", "trip_id"]
           },
+          {
+            foreignKeyName: "options_item_id_trip_id_fkey"
+            columns: ["item_id", "trip_id"]
+            isOneToOne: false
+            referencedRelation: "v_item_left"
+            referencedColumns: ["item_id", "trip_id"]
+          },
         ]
       }
       payments: {
@@ -604,7 +668,64 @@ export type Database = {
           rate?: number
           trip_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "payments_item_id_trip_id_fkey"
+            columns: ["item_id", "trip_id"]
+            isOneToOne: false
+            referencedRelation: "items"
+            referencedColumns: ["id", "trip_id"]
+          },
+          {
+            foreignKeyName: "payments_item_id_trip_id_fkey"
+            columns: ["item_id", "trip_id"]
+            isOneToOne: false
+            referencedRelation: "v_item_amounts"
+            referencedColumns: ["item_id", "trip_id"]
+          },
+          {
+            foreignKeyName: "payments_item_id_trip_id_fkey"
+            columns: ["item_id", "trip_id"]
+            isOneToOne: false
+            referencedRelation: "v_item_left"
+            referencedColumns: ["item_id", "trip_id"]
+          },
+          {
+            foreignKeyName: "payments_paid_by_trip_id_fkey"
+            columns: ["paid_by", "trip_id"]
+            isOneToOne: false
+            referencedRelation: "travellers"
+            referencedColumns: ["id", "trip_id"]
+          },
+          {
+            foreignKeyName: "payments_paid_by_trip_id_fkey"
+            columns: ["paid_by", "trip_id"]
+            isOneToOne: false
+            referencedRelation: "v_traveller_balances"
+            referencedColumns: ["traveller_id", "trip_id"]
+          },
+          {
+            foreignKeyName: "payments_paid_by_trip_id_fkey"
+            columns: ["paid_by", "trip_id"]
+            isOneToOne: false
+            referencedRelation: "v_traveller_shares"
+            referencedColumns: ["traveller_id", "trip_id"]
+          },
+          {
+            foreignKeyName: "payments_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "v_trip_budget"
+            referencedColumns: ["trip_id"]
+          },
+        ]
       }
       places: {
         Row: {
@@ -1080,7 +1201,29 @@ export type Database = {
           price: number | null
           trip_id: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "items_place_id_trip_id_fkey"
+            columns: ["place_id", "trip_id"]
+            isOneToOne: false
+            referencedRelation: "places"
+            referencedColumns: ["id", "trip_id"]
+          },
+          {
+            foreignKeyName: "items_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "items_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "v_trip_budget"
+            referencedColumns: ["trip_id"]
+          },
+        ]
       }
       v_item_payments: {
         Row: {
@@ -1210,20 +1353,6 @@ export type Database = {
       }
     }
     Functions: {
-      add_payment: {
-        Args: {
-          p_amount: number
-          p_currency?: string
-          p_item_id: string
-          p_kind: string
-          p_note?: string
-          p_paid_by?: string
-          p_paid_each?: boolean
-          p_paid_on?: string
-          p_rate?: number
-        }
-        Returns: string
-      }
       accept_invitation: { Args: { p_token: string }; Returns: string }
       add_item: {
         Args: {
@@ -1235,6 +1364,20 @@ export type Database = {
           p_note?: string
           p_place_id?: string
           p_trip_id: string
+        }
+        Returns: string
+      }
+      add_payment: {
+        Args: {
+          p_amount: number
+          p_currency?: string
+          p_item_id: string
+          p_kind: string
+          p_note?: string
+          p_paid_by?: string
+          p_paid_each?: boolean
+          p_paid_on?: string
+          p_rate?: number
         }
         Returns: string
       }
@@ -1252,82 +1395,6 @@ export type Database = {
           p_via?: string
         }
         Returns: string
-      }
-      save_daily_estimate: {
-        Args: {
-          p_amount: number
-          p_category: string
-          p_currency: string
-          p_days: number
-          p_id: string | null
-          p_label: string
-          p_place_id: string | null
-          p_rate: number | null
-          p_travellers?: string[]
-          p_trip_id: string
-        }
-        Returns: string
-      }
-      set_item_package: {
-        Args: { p_item_id: string; p_package_id: string | null }
-        Returns: undefined
-      }
-      set_item_due: { Args: { p_due_on: string | null; p_item_id: string }; Returns: undefined }
-      set_item_dropped: {
-        Args: { p_dropped: boolean; p_item_id: string }
-        Returns: undefined
-      }
-      set_package_cover: {
-        Args: { p_items: string[]; p_package_id: string }
-        Returns: undefined
-      }
-      set_option_rooms: {
-        Args: { p_option_id: string; p_rooms: Json }
-        Returns: undefined
-      }
-      set_item_split: {
-        Args: { p_item_id: string; p_travellers: string[] }
-        Returns: undefined
-      }
-      set_item_status: {
-        Args: {
-          p_actual_amount?: number
-          p_actual_currency?: string
-          p_actual_rate?: number
-          p_item_id: string
-          p_paid_by?: string
-          p_paid_each?: boolean
-          p_paid_on?: string
-          p_status: string
-        }
-        Returns: undefined
-      }
-      update_item: {
-        Args: {
-          p_amount?: number
-          p_day_number?: number
-          p_end_day_number?: number
-          p_item_id: string
-          p_keep_price?: boolean
-          p_kind: string
-          p_name: string
-        }
-        Returns: undefined
-      }
-      update_ticket: {
-        Args: {
-          p_after_place_id?: string
-          p_amount?: number
-          p_from: string
-          p_item_id: string
-          p_keep_price?: boolean
-          p_mode?: string
-          p_return_after_place_id?: string
-          p_round_trip?: boolean
-          p_to: string
-          p_via?: string
-        }
-        Returns: undefined
       }
       cancel_invitation: {
         Args: { p_traveller_id: string }
@@ -1355,8 +1422,6 @@ export type Database = {
       }
       delete_payment: { Args: { p_payment_id: string }; Returns: undefined }
       delete_place: { Args: { p_place_id: string }; Returns: undefined }
-      leave_trip: { Args: { p_trip_id: string }; Returns: undefined }
-      remove_traveller: { Args: { p_traveller_id: string }; Returns: undefined }
       invitation_preview: {
         Args: { p_token: string }
         Returns: {
@@ -1377,7 +1442,64 @@ export type Database = {
           token: string
         }[]
       }
-      item_category: { Args: { p_kind: string; p_place_id: string }; Returns: string }
+      item_category: {
+        Args: { p_kind: string; p_place_id: string }
+        Returns: string
+      }
+      leave_trip: { Args: { p_trip_id: string }; Returns: undefined }
+      remove_traveller: { Args: { p_traveller_id: string }; Returns: undefined }
+      save_daily_estimate: {
+        Args: {
+          p_amount: number
+          p_category: string
+          p_currency: string
+          p_days: number
+          p_id: string
+          p_label: string
+          p_place_id: string
+          p_rate: number
+          p_travellers?: string[]
+          p_trip_id: string
+        }
+        Returns: string
+      }
+      set_item_dropped: {
+        Args: { p_dropped: boolean; p_item_id: string }
+        Returns: undefined
+      }
+      set_item_due: {
+        Args: { p_due_on: string; p_item_id: string }
+        Returns: undefined
+      }
+      set_item_package: {
+        Args: { p_item_id: string; p_package_id: string }
+        Returns: undefined
+      }
+      set_item_split: {
+        Args: { p_item_id: string; p_travellers: string[] }
+        Returns: undefined
+      }
+      set_item_status: {
+        Args: {
+          p_actual_amount?: number
+          p_actual_currency?: string
+          p_actual_rate?: number
+          p_item_id: string
+          p_paid_by?: string
+          p_paid_each?: boolean
+          p_paid_on?: string
+          p_status: string
+        }
+        Returns: undefined
+      }
+      set_option_rooms: {
+        Args: { p_option_id: string; p_rooms: Json }
+        Returns: undefined
+      }
+      set_package_cover: {
+        Args: { p_items: string[]; p_package_id: string }
+        Returns: undefined
+      }
       trip_settlement: {
         Args: { p_trip_id: string }
         Returns: {
@@ -1385,6 +1507,33 @@ export type Database = {
           from_traveller: string
           to_traveller: string
         }[]
+      }
+      update_item: {
+        Args: {
+          p_amount?: number
+          p_day_number?: number
+          p_end_day_number?: number
+          p_item_id: string
+          p_keep_price?: boolean
+          p_kind: string
+          p_name: string
+        }
+        Returns: undefined
+      }
+      update_ticket: {
+        Args: {
+          p_after_place_id?: string
+          p_amount?: number
+          p_from: string
+          p_item_id: string
+          p_keep_price?: boolean
+          p_mode?: string
+          p_return_after_place_id?: string
+          p_round_trip?: boolean
+          p_to: string
+          p_via?: string
+        }
+        Returns: undefined
       }
     }
     Enums: {
