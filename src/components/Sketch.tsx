@@ -1,5 +1,5 @@
-import { useLayoutEffect, useRef, type ReactNode } from 'react'
-import rough from 'roughjs'
+import type { ReactNode } from 'react'
+import { useHandDrawn } from '../lib/useHandDrawn'
 
 /**
  * A sheet of the notebook, outlined by hand (look B, "illustrated carnet").
@@ -31,33 +31,18 @@ export function SketchBox({
   weight?: keyof typeof WEIGHTS
   dashed?: boolean
 }) {
-  const box = useRef<HTMLDivElement>(null)
-  const line = useRef<SVGSVGElement>(null)
-
-  useLayoutEffect(() => {
-    const el = box.current
-    const svg = line.current
-    if (!el || !svg) return
-    const draw = () => {
-      const { width, height } = el.getBoundingClientRect()
-      if (width < 12 || height < 12) return
-      svg.setAttribute('viewBox', `0 0 ${width} ${height}`)
-      svg.replaceChildren(
-        rough.svg(svg).rectangle(2, 2, width - 4, height - 4, {
-          seed,
-          ...WEIGHTS[weight],
-          stroke: 'currentColor',
-          strokeLineDash: dashed ? [7, 6] : undefined,
-          disableMultiStroke: dashed, // a dashed double line looks like a mistake
-        }),
-      )
-    }
-    draw()
-    if (typeof ResizeObserver === 'undefined') return
-    const watcher = new ResizeObserver(draw)
-    watcher.observe(el)
-    return () => watcher.disconnect()
-  }, [seed, weight, dashed])
+  const { box, line } = useHandDrawn<HTMLDivElement>(
+    (pen, width, height) => [
+      pen.rectangle(2, 2, width - 4, height - 4, {
+        seed,
+        ...WEIGHTS[weight],
+        stroke: 'currentColor',
+        strokeLineDash: dashed ? [7, 6] : undefined,
+        disableMultiStroke: dashed, // a dashed double line looks like a mistake
+      }),
+    ],
+    [seed, weight, dashed],
+  )
 
   return (
     <div ref={box} className={`sketch-box sketch-box--${weight} ${className}`}>

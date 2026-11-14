@@ -1,5 +1,4 @@
-import { useLayoutEffect, useRef } from 'react'
-import rough from 'roughjs'
+import { useHandDrawn } from '../../lib/useHandDrawn'
 import { TABS, type Tab } from '../../lib/options'
 
 /**
@@ -18,21 +17,12 @@ export function FolderTabs({ tab, todo, onTab }: { tab: Tab; todo: (t: Tab) => b
 }
 
 function FolderTab({ on, todo, label, onClick }: { on: boolean; todo: boolean; label: string; onClick: () => void }) {
-  const button = useRef<HTMLButtonElement>(null)
-  const line = useRef<SVGSVGElement>(null)
-
-  useLayoutEffect(() => {
-    const el = button.current
-    const svg = line.current
-    if (!el || !svg) return
-    const draw = () => {
-      const { width, height } = el.getBoundingClientRect()
-      if (width < 12 || height < 12) return
-      svg.setAttribute('viewBox', `0 0 ${width} ${height}`)
-      // Open at the bottom: the open tab runs into its sheet.
+  // Open at the bottom: the open tab runs into its sheet.
+  const { box: button, line } = useHandDrawn<HTMLButtonElement>(
+    (pen, width, height) => {
       const foot = height + (on ? 2 : 0)
-      svg.replaceChildren(
-        rough.svg(svg).linearPath(
+      return [
+        pen.linearPath(
           [
             [2, foot],
             [5, 3],
@@ -41,14 +31,10 @@ function FolderTab({ on, todo, label, onClick }: { on: boolean; todo: boolean; l
           ],
           { seed: label.length * 7, roughness: 0.9, bowing: 0.6, strokeWidth: 1.1, stroke: 'currentColor' },
         ),
-      )
-    }
-    draw()
-    if (typeof ResizeObserver === 'undefined') return
-    const watcher = new ResizeObserver(draw)
-    watcher.observe(el)
-    return () => watcher.disconnect()
-  }, [on, label])
+      ]
+    },
+    [on, label],
+  )
 
   return (
     <button
