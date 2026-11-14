@@ -10,6 +10,7 @@ import { ItemRow } from '../components/trip/ItemRow'
 import { PlaceForm } from '../components/trip/PlaceForm'
 import { RouteGap } from '../components/trip/RouteGap'
 import { TripTopBar } from '../components/trip/TripTopBar'
+import { WelcomeNote } from '../components/trip/WelcomeNote'
 import { Loading } from '../lib/auth'
 import { hintSeen, markHintSeen } from '../lib/hints'
 import { useAuth } from '../lib/authContext'
@@ -111,6 +112,7 @@ export function TripPage() {
   return (
     <div className="screen screen--trip">
       <TripTopBar title={trip.name} subtitle={meta} tripId={trip.id} travellers={travellers} userId={session?.user.id} />
+      <WelcomeNote tripId={trip.id} userId={session?.user.id} createdBy={trip.created_by} travellers={travellers} />
 
       <TripBudget
         view={budgetView(detail, viewer, shownMode)}

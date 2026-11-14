@@ -2422,3 +2422,219 @@ select.field__input,
   border-top: 1.5px solid var(--ink);
   font-weight: 600;
 }
+
+/* ── Invitations (build 6, mockup invitations-v4) ─────────────────────────────── */
+.sheet-title__note.hand-note {
+  font-family: var(--font-hand);
+  font-size: 1.15rem;
+}
+
+.settings__travellers {
+  margin-top: var(--space-2);
+}
+
+.people__state {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.6875rem !important;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.people__state--in {
+  color: var(--confirmed) !important;
+}
+
+.people__state--wait {
+  color: var(--estimated-ink) !important;
+}
+
+.people__hand {
+  display: block;
+  font-family: var(--font-hand);
+  font-size: 1.15rem;
+  line-height: 1.2;
+  color: var(--ink-soft);
+}
+
+.invite {
+  padding-left: calc(2rem + var(--space-3));
+}
+
+.invite__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+.invite__open {
+  border-color: var(--ink);
+}
+
+.invite__box {
+  margin: var(--space-2) 0 var(--space-1);
+  padding: var(--space-3);
+  border: 1.5px dashed var(--line);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.invite__box p {
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.invite__box .people__hand {
+  font-size: 1.15rem;
+  line-height: 1.2;
+}
+
+.invite__link {
+  width: 100%;
+  min-width: 0;
+  padding: 0.45rem 0.6rem;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font: inherit;
+  font-size: 0.8125rem;
+  color: var(--ink-soft);
+}
+
+.invite__row {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.invite__row .button {
+  flex: 1;
+}
+
+.invite__arrow {
+  font-family: var(--font-hand);
+  font-size: 1.1rem;
+  color: var(--confirmed);
+  transform: rotate(-2deg);
+  transform-origin: left;
+}
+
+.settings__margin-note {
+  font-family: var(--font-hand);
+  font-size: 1.15rem;
+  line-height: 1.2;
+  color: var(--ink-soft);
+  padding: 0 var(--space-2);
+  transform: rotate(-1deg);
+}
+
+/* The invitation page: a welcome sheet, like the first page of someone else's notebook. */
+.join {
+  max-width: 24rem;
+  margin: var(--space-6) auto 0;
+}
+
+.sketch-box.join__sheet {
+  padding: 2.25rem 1.25rem 1.5rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.join__kicker {
+  font-size: 0.875rem;
+  color: var(--ink-soft);
+}
+
+.join__title {
+  font-family: var(--font-title);
+  font-size: 1.75rem;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+.join__title--small {
+  font-size: 1.4rem;
+}
+
+.join__meta {
+  font-size: 0.875rem;
+  color: var(--ink-soft);
+  line-height: 1.4;
+}
+
+.join__you {
+  margin: var(--space-3) 0;
+  padding: var(--space-3);
+  border-top: 1px dashed var(--line);
+  border-bottom: 1px dashed var(--line);
+}
+
+.join__you .avatar {
+  margin: 0 auto var(--space-2);
+  width: 2.5rem;
+  height: 2.5rem;
+  font-size: 1rem;
+}
+
+.join__you b {
+  display: block;
+  font-family: var(--font-title);
+  font-size: 1.3rem;
+}
+
+.join__hand {
+  font-family: var(--font-hand);
+  font-size: 1.2rem;
+  color: var(--ink-soft);
+}
+
+.join__small {
+  font-size: 0.8125rem;
+  color: var(--ink-soft);
+  margin-top: var(--space-2);
+}
+
+/* A note slipped into the notebook (welcome after an invitation): paper, tape, handwriting. */
+.welcome-note {
+  position: relative;
+  margin: var(--space-4) var(--space-4) var(--space-2);
+  padding: var(--space-4) var(--space-4) var(--space-3);
+  background: #fffdf6;
+  transform: rotate(-1.2deg);
+  box-shadow: 0 1px 0 var(--line), 0 2px 6px rgb(31 42 36 / 0.08);
+}
+
+.welcome-note .tape {
+  top: -0.55rem;
+}
+
+.welcome-note p {
+  font-family: var(--font-hand);
+  font-size: 1.3rem;
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+.welcome-note__sign {
+  text-align: right;
+  color: var(--ink-soft) !important;
+  margin-top: var(--space-1);
+}
+
+.welcome-note__got {
+  margin-top: var(--space-1);
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: var(--font-hand);
+  font-size: 1.15rem;
+  color: var(--confirmed);
+  cursor: pointer;
+}

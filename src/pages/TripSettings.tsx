@@ -11,6 +11,11 @@ import { fetchRate, formatRate, parseRate } from '../lib/rates'
 import type { CityValue } from '../lib/places'
 import {
   addTraveller,
+  cancelInvitation,
+  inviteTraveller,
+  joinLink,
+  leaveTrip,
+  listOpenInvitations,
   changeTripCurrency,
   deleteTrip,
   getTrip,
@@ -18,14 +23,16 @@ import {
   removeTraveller,
   renameTraveller,
   updateTrip,
+  type Invitation,
   type Traveller,
   type TripDetail,
 } from '../lib/trips'
-import { CURRENCIES, currencyLabel } from '../lib/tripText'
+import { CURRENCIES, currencyLabel, sentAgo } from '../lib/tripText'
 
 /**
  * Trip settings (mockup 8): the trip, its budget, its travellers, and deleting it.
- * The main currency changes until the first payment (build 3); inviting comes with invitations.
+ * The main currency changes until the first payment (build 3). Invitations (build 6): each traveller
+ * says where they stand, and "Invite" gives a link tied to that name.
  */
 export function TripSettings() {
   const { tripId = '' } = useParams()
@@ -83,8 +90,8 @@ export function TripSettings() {
       {/* Keyed on the currency: a change converts the target, so the form starts again from it. */}
       <TripForm key={detail.trip.currency} detail={detail} onSaved={reload} />
       <MainCurrency detail={detail} onChanged={reload} />
-      <Travellers detail={detail} userId={session?.user.id} onChanged={reload} />
-      <DeleteTrip detail={detail} owner={owner} />
+      <Travellers detail={detail} userId={session?.user.id} owner={owner} onChanged={reload} />
+      {owner ? <DeleteTrip detail={detail} owner={owner} /> : <LeaveTrip detail={detail} />}
     </Screen>
   )
 }
@@ -385,11 +392,39 @@ function MainCurrency({ detail, onChanged }: { detail: TripDetail; onChanged: ()
 }
 
 /** Each traveller has their own share. Rename, add, or remove (when it's safe). */
-function Travellers({ detail, userId, onChanged }: { detail: TripDetail; userId?: string; onChanged: () => void }) {
+function Travellers({
+  detail,
+  userId,
+  owner,
+  onChanged,
+}: {
+  detail: TripDetail
+  userId?: string
+  owner: boolean
+  onChanged: () => void
+}) {
   const [newName, setNewName] = useState('')
   const [error, setError] = useState<string>()
   const [busy, setBusy] = useState(false)
+  const [invites, setInvites] = useState<Invitation[]>([])
   const travellers = detail.travellers
+  const tripId = detail.trip.id
+  const canInvite = !detail.trip.is_demo
+
+  const loadInvites = useCallback(() => {
+    listOpenInvitations(tripId)
+      .then(setInvites)
+      .catch(() => setInvites([]))
+  }, [tripId])
+  useEffect(() => {
+    let active = true
+    listOpenInvitations(tripId)
+      .then((list) => active && setInvites(list))
+      .catch(() => active && setInvites([]))
+    return () => {
+      active = false
+    }
+  }, [tripId, travellers.length])
 
   async function add(event: FormEvent) {
     event.preventDefault()
@@ -411,13 +446,24 @@ function Travellers({ detail, userId, onChanged }: { detail: TripDetail; userId?
   }
 
   return (
-    <SketchBox weight="light" className="form__sheet" seed={73}>
+    <>
+    <SketchBox weight="strong" tape="green" className="form__sheet settings__travellers" seed={73}>
       <h2 className="sheet-title">
-        Travellers <small className="sheet-title__note">each has their own share</small>
+        Travellers <small className="sheet-title__note hand-note">each has their own share</small>
       </h2>
       <ul className="people">
         {travellers.map((t) => (
-          <TravellerRow key={t.id} traveller={t} isYou={Boolean(t.user_id && t.user_id === userId)} onChanged={onChanged} />
+          <TravellerRow
+            key={t.id}
+            traveller={t}
+            isYou={Boolean(t.user_id && t.user_id === userId)}
+            isCreator={Boolean(t.user_id && t.user_id === detail.trip.created_by)}
+            amOwner={owner}
+            canInvite={canInvite && travellers.length > 1}
+            invite={invites.find((i) => i.traveller_id === t.id)}
+            onChanged={onChanged}
+            onInvitesChanged={loadInvites}
+          />
         ))}
       </ul>
       <form onSubmit={add} noValidate className="settings__add">
@@ -437,11 +483,37 @@ function Travellers({ detail, userId, onChanged }: { detail: TripDetail; userId?
       </form>
       {error && <FormMessage tone="error">{error}</FormMessage>}
     </SketchBox>
+    {canInvite && travellers.length > 1 && (
+      <p className="settings__margin-note">No need to invite everyone: a name is enough to count their share.</p>
+    )}
+    </>
   )
 }
 
-function TravellerRow({ traveller, isYou, onChanged }: { traveller: Traveller; isYou: boolean; onChanged: () => void }) {
+function TravellerRow({
+  traveller,
+  isYou,
+  isCreator,
+  amOwner,
+  canInvite,
+  invite,
+  onChanged,
+  onInvitesChanged,
+}: {
+  traveller: Traveller
+  isYou: boolean
+  isCreator: boolean
+  amOwner: boolean
+  canInvite: boolean
+  invite?: Invitation
+  onChanged: () => void
+  onInvitesChanged: () => void
+}) {
   const [mode, setMode] = useState<'view' | 'rename' | 'remove'>('view')
+  const [showLink, setShowLink] = useState(false)
+  const onTrip = Boolean(traveller.user_id)
+  // Someone who opens the trip with their own account: only the creator removes them.
+  const removable = !isYou && (!onTrip || amOwner)
   const [name, setName] = useState(traveller.name)
   const [error, setError] = useState<string>()
   const [busy, setBusy] = useState(false)
@@ -488,7 +560,7 @@ function TravellerRow({ traveller, isYou, onChanged }: { traveller: Traveller; i
         ) : (
           <span className="people__name">
             <b>{traveller.name}</b>
-            {isYou && <small>You</small>}
+            <TravellerState isYou={isYou} isCreator={isCreator} onTrip={onTrip} invite={invite} canInvite={canInvite} />
           </span>
         )}
         {mode === 'view' && (
@@ -496,7 +568,7 @@ function TravellerRow({ traveller, isYou, onChanged }: { traveller: Traveller; i
             <button type="button" className="place__edit" onClick={() => setMode('rename')} aria-label={`Rename ${traveller.name}`}>
               Rename
             </button>
-            {!isYou && (
+            {removable && (
               <button
                 type="button"
                 className="people__remove"
@@ -514,9 +586,20 @@ function TravellerRow({ traveller, isYou, onChanged }: { traveller: Traveller; i
           </button>
         )}
       </div>
+      {mode === 'view' && canInvite && !onTrip && (
+        <InviteActions
+          traveller={traveller}
+          invite={invite}
+          open={showLink}
+          onOpen={setShowLink}
+          onInvitesChanged={onInvitesChanged}
+        />
+      )}
       {mode === 'remove' && (
         <div className="confirm-delete">
-          <p className="field__hint">Their share is spread over the others.</p>
+          <p className="field__hint">
+            Their share is spread over the others.{onTrip ? ` ${traveller.name} won’t see the trip any more.` : ''}
+          </p>
           <div className="add-item__actions">
             <button type="button" className="button button--quiet" onClick={() => setMode('view')} disabled={busy}>
               Keep {traveller.name}
@@ -580,6 +663,219 @@ function DeleteTrip({ detail, owner }: { detail: TripDetail; owner: boolean }) {
       ) : (
         <button type="button" className="link-button add-item__delete" onClick={() => setConfirming(true)}>
           Delete {name}
+        </button>
+      )}
+    </SketchBox>
+  )
+}
+
+/** Where a traveller stands: small caps for the status, handwriting for the detail. */
+function TravellerState({
+  isYou,
+  isCreator,
+  onTrip,
+  invite,
+  canInvite,
+}: {
+  isYou: boolean
+  isCreator: boolean
+  onTrip: boolean
+  invite?: Invitation
+  canInvite: boolean
+}) {
+  if (isYou) return <small className="people__state">{isCreator ? 'You · created the trip' : 'You'}</small>
+  if (onTrip)
+    return (
+      <>
+        <small className="people__state people__state--in">On the trip</small>
+        <span className="people__hand">opens it on their phone</span>
+      </>
+    )
+  if (invite)
+    return (
+      <>
+        <small className="people__state people__state--wait">Invited</small>
+        <span className="people__hand">{sentAgo(invite.created_at)}, not opened yet</span>
+      </>
+    )
+  if (!canInvite) return null
+  return <small className="people__state">Not invited yet</small>
+}
+
+/** "Invite" opens the link right there; an invited name can get it again or cancel it. */
+function InviteActions({
+  traveller,
+  invite,
+  open,
+  onOpen,
+  onInvitesChanged,
+}: {
+  traveller: Traveller
+  invite?: Invitation
+  open: boolean
+  onOpen: (open: boolean) => void
+  onInvitesChanged: () => void
+}) {
+  const [link, setLink] = useState<string>()
+  const [busy, setBusy] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const [error, setError] = useState<string>()
+
+  async function getLink() {
+    setBusy(true)
+    setError(undefined)
+    try {
+      const { token } = await inviteTraveller(traveller.id)
+      setLink(joinLink(token))
+      onOpen(true)
+      onInvitesChanged()
+    } catch (e) {
+      setError(explainAuthError(e as { message?: string }).message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function cancel() {
+    setBusy(true)
+    setError(undefined)
+    try {
+      await cancelInvitation(traveller.id)
+      setLink(undefined)
+      onOpen(false)
+      onInvitesChanged()
+    } catch (e) {
+      setError(explainAuthError(e as { message?: string }).message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function share() {
+    if (!link) return
+    const text = `Join our trip on Voyage Fare: you’re ${traveller.name} on it.`
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'Voyage Fare', text, url: link })
+        return
+      } catch (e) {
+        if ((e as Error).name === 'AbortError') return
+      }
+    }
+    await copy()
+  }
+
+  async function copy() {
+    if (!link) return
+    try {
+      await navigator.clipboard.writeText(link)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      setError('Couldn’t copy it: select the link and copy it by hand.')
+    }
+  }
+
+  return (
+    <div className="invite">
+      {!open && (
+        <div className="invite__buttons">
+          {invite ? (
+            <>
+              <button type="button" className="button button--small" onClick={getLink} disabled={busy}>
+                Send the link again
+              </button>
+              <button type="button" className="button button--small" onClick={cancel} disabled={busy}>
+                Cancel the invite
+              </button>
+            </>
+          ) : (
+            <button type="button" className="button button--small invite__open" onClick={getLink} disabled={busy}>
+              {busy ? 'Making the link…' : 'Invite'}
+            </button>
+          )}
+        </div>
+      )}
+      {open && link && (
+        <div className="invite__box">
+          <p>
+            Send {traveller.name} this link. When they open it and sign in, they join the trip{' '}
+            <b>as {traveller.name}</b>, and see their own share.
+          </p>
+          <input
+            className="invite__link"
+            readOnly
+            value={link}
+            aria-label={`Link for ${traveller.name}`}
+            onFocus={(e) => e.currentTarget.select()}
+          />
+          <div className="invite__row">
+            <button type="button" className="button button--primary" onClick={share}>
+              Share…
+            </button>
+            <button type="button" className="button button--quiet" onClick={copy}>
+              {copied ? 'Copied ✓' : 'Copy'}
+            </button>
+          </div>
+          <span className="invite__arrow">↑ WhatsApp, Messages, mail…</span>
+          <p className="people__hand">works once · for 14 days · you can cancel it</p>
+          <div className="invite__buttons">
+            <button type="button" className="link-button" onClick={() => onOpen(false)}>
+              Done
+            </button>
+            <span aria-hidden="true"> · </span>
+            <button type="button" className="link-button" onClick={cancel} disabled={busy}>
+              Cancel the invite
+            </button>
+          </div>
+        </div>
+      )}
+      {error && <FormMessage tone="error">{error}</FormMessage>}
+    </div>
+  )
+}
+
+/** For someone invited: leave the trip, and go back to being a name on the notebook. */
+function LeaveTrip({ detail }: { detail: TripDetail }) {
+  const navigate = useNavigate()
+  const [confirming, setConfirming] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string>()
+
+  async function leave() {
+    setBusy(true)
+    setError(undefined)
+    try {
+      await leaveTrip(detail.trip.id)
+      navigate('/trips', { replace: true })
+    } catch (e) {
+      setBusy(false)
+      setError(explainAuthError(e as { message?: string }).message)
+    }
+  }
+
+  return (
+    <SketchBox weight="light" dashed className="form__sheet settings__danger" seed={75}>
+      <h2 className="sheet-title">Leave the trip</h2>
+      {confirming ? (
+        <div className="confirm-delete">
+          {error && <FormMessage tone="error">{error}</FormMessage>}
+          <p className="field__hint">
+            You won’t see {detail.trip.name} any more. You stay a name on the trip: your share and what you paid don’t
+            change. To come back, ask for a new link.
+          </p>
+          <div className="add-item__actions">
+            <button type="button" className="button button--quiet" onClick={() => setConfirming(false)} disabled={busy}>
+              Stay
+            </button>
+            <button type="button" className="button button--danger" onClick={leave} disabled={busy}>
+              {busy ? 'Leaving…' : 'Yes, leave the trip'}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button type="button" className="link-button add-item__delete" onClick={() => setConfirming(true)}>
+          Leave {detail.trip.name}
         </button>
       )}
     </SketchBox>

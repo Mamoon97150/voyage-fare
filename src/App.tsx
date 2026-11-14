@@ -4,6 +4,7 @@ import { Account } from './pages/Account'
 import { Compare } from './pages/Compare'
 import { ForgotPassword } from './pages/ForgotPassword'
 import { Home } from './pages/Home'
+import { JoinTrip } from './pages/JoinTrip'
 import { NewTrip } from './pages/NewTrip'
 import { ResetPassword } from './pages/ResetPassword'
 import { SignIn } from './pages/SignIn'
@@ -22,6 +23,7 @@ export function AppRoutes() {
       <Route path="/sign-up" element={<SignedOutOnly><SignUp /></SignedOutOnly>} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/join/:token" element={<JoinTrip />} />
       <Route path="/trips" element={<RequireAuth><Trips /></RequireAuth>} />
       <Route path="/trips/new" element={<RequireAuth><NewTrip /></RequireAuth>} />
       <Route path="/trips/:tripId" element={<RequireAuth><TripPage /></RequireAuth>} />

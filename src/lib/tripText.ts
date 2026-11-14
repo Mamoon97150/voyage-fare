@@ -48,3 +48,12 @@ export function localToday(): string {
   const d = new Date()
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
+
+/** "sent today", "sent yesterday", "sent 3 days ago". */
+export function sentAgo(createdAt: string, now = new Date()): string {
+  const start = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()
+  const days = Math.round((start(now) - start(new Date(createdAt))) / 86_400_000)
+  if (days <= 0) return 'sent today'
+  if (days === 1) return 'sent yesterday'
+  return `sent ${days} days ago`
+}

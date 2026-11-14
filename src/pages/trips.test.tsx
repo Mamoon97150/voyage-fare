@@ -49,6 +49,13 @@ const data = vi.hoisted(() => ({
   updatePlace: vi.fn(),
   deletePlace: vi.fn(),
   searchPlaces: vi.fn(),
+  listOpenInvitations: vi.fn(),
+  inviteTraveller: vi.fn(),
+  cancelInvitation: vi.fn(),
+  getInvitationPreview: vi.fn(),
+  acceptInvitation: vi.fn(),
+  getMyWelcome: vi.fn(),
+  leaveTrip: vi.fn(),
 }))
 vi.mock('../lib/trips', () => ({
   createTrip: data.createTrip,
@@ -82,6 +89,14 @@ vi.mock('../lib/trips', () => ({
   deleteItem: data.deleteItem,
   updatePlace: data.updatePlace,
   deletePlace: data.deletePlace,
+  listOpenInvitations: data.listOpenInvitations,
+  inviteTraveller: data.inviteTraveller,
+  cancelInvitation: data.cancelInvitation,
+  getInvitationPreview: data.getInvitationPreview,
+  acceptInvitation: data.acceptInvitation,
+  getMyWelcome: data.getMyWelcome,
+  leaveTrip: data.leaveTrip,
+  joinLink: (token: string) => `https://voyagefare.test/join/${token}`,
 }))
 vi.mock('../lib/places', async (original) => ({
   ...(await original<typeof import('../lib/places')>()),
@@ -97,6 +112,8 @@ const trip = {
   currency: 'EUR',
   target_amount: 2500,
   target_scope: 'per_person',
+  created_by: 'u-ana',
+  is_demo: false,
 }
 const travellers = [
   { id: 'a', name: 'Ana', user_id: 'u-ana' },
@@ -128,6 +145,8 @@ beforeEach(() => {
   Object.values(data).forEach((fn) => fn.mockReset())
   data.searchPlaces.mockResolvedValue([])
   data.getTrip.mockResolvedValue(detail())
+  data.listOpenInvitations.mockResolvedValue([])
+  data.getMyWelcome.mockResolvedValue(null)
 })
 
 function open(path: string) {
@@ -689,10 +708,10 @@ describe('trip settings', () => {
     await waitFor(() => expect(data.addTraveller).toHaveBeenCalledWith('t1', 'Dana', expect.any(Number)))
   })
 
-  it('only the creator can delete the trip', async () => {
+  it('only the creator can delete the trip; the others can leave it', async () => {
     data.isTripOwner.mockResolvedValue(false)
     open('/trips/t1/settings')
-    expect(await screen.findByText('Only the person who created this trip can delete it.')).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: 'Leave Colombia' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /Delete Colombia/ })).not.toBeInTheDocument()
   })
 
@@ -1294,5 +1313,113 @@ describe('rooms (a stay by room)', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Change Casona' }))
     expect(screen.getByText(/Split by room: Ana · Bea & Cleo/)).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Bea' })).not.toBeInTheDocument()
+  })
+})
+
+describe('invitations (build 6)', () => {
+  const withGabriel = () =>
+    detail({
+      travellers: [
+        { id: 'a', name: 'Ana', user_id: 'u-ana' },
+        { id: 'd', name: 'Danielle', user_id: 'u-dan' },
+        { id: 'p', name: 'Peggy', user_id: null },
+        { id: 'g', name: 'Gabriel', user_id: null },
+      ],
+    })
+
+  it('each traveller says where they stand', async () => {
+    data.isTripOwner.mockResolvedValue(true)
+    data.getTrip.mockResolvedValue(withGabriel())
+    data.listOpenInvitations.mockResolvedValue([{ traveller_id: 'p', created_at: new Date().toISOString() }])
+    open('/trips/t1/settings')
+    expect(await screen.findByText('You · created the trip')).toBeInTheDocument()
+    expect(screen.getByText('On the trip')).toBeInTheDocument()
+    expect(await screen.findByText('sent today, not opened yet')).toBeInTheDocument()
+    expect(screen.getByText('Not invited yet')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Send the link again' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Remove Danielle' })).toBeInTheDocument() // the creator can
+  })
+
+  it('“Invite” gives the link tied to that name', async () => {
+    data.isTripOwner.mockResolvedValue(true)
+    data.getTrip.mockResolvedValue(withGabriel())
+    data.inviteTraveller.mockResolvedValue({ token: 'k7q2', expiresAt: '2026-11-28' })
+    open('/trips/t1/settings')
+    const invites = await screen.findAllByRole('button', { name: 'Invite' })
+    fireEvent.click(invites[1]) // Peggy, then Gabriel
+    expect(await screen.findByLabelText('Link for Gabriel')).toHaveValue('https://voyagefare.test/join/k7q2')
+    expect(data.inviteTraveller).toHaveBeenCalledWith('g')
+    expect(screen.getByRole('button', { name: 'Share…' })).toBeInTheDocument()
+  })
+
+  it('cancel an invite', async () => {
+    data.isTripOwner.mockResolvedValue(true)
+    data.getTrip.mockResolvedValue(withGabriel())
+    data.listOpenInvitations.mockResolvedValue([{ traveller_id: 'p', created_at: new Date().toISOString() }])
+    data.cancelInvitation.mockResolvedValue(undefined)
+    open('/trips/t1/settings')
+    fireEvent.click(await screen.findByRole('button', { name: 'Cancel the invite' }))
+    await waitFor(() => expect(data.cancelInvitation).toHaveBeenCalledWith('p'))
+  })
+
+  it('someone on the trip with an account: only the creator removes them', async () => {
+    data.isTripOwner.mockResolvedValue(false)
+    data.getTrip.mockResolvedValue(withGabriel())
+    open('/trips/t1/settings')
+    await screen.findByText('On the trip')
+    expect(screen.queryByRole('button', { name: 'Remove Danielle' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Remove Gabriel' })).toBeInTheDocument()
+  })
+
+  it('the link: whose trip, who you are, then join', async () => {
+    data.getInvitationPreview.mockResolvedValue({
+      trip_id: 't1',
+      trip_name: 'Colombia',
+      start_date: null,
+      end_date: null,
+      places: ['Bogotá', 'Medellín'],
+      traveller_name: 'Gabriel',
+      invited_by_name: 'Djamina',
+      state: 'open',
+    })
+    data.acceptInvitation.mockResolvedValue('t1')
+    open('/join/k7q2')
+    expect(await screen.findByText('Djamina invited you to')).toBeInTheDocument()
+    expect(screen.getByText('Gabriel')).toBeInTheDocument()
+    click('Join as Gabriel')
+    await waitFor(() => expect(data.acceptInvitation).toHaveBeenCalledWith('k7q2'))
+    expect(await screen.findByRole('link', { name: 'Trip settings: Ana, Bea' })).toBeInTheDocument()
+  })
+
+  it('a link that doesn’t work any more says to ask for a new one', async () => {
+    data.getInvitationPreview.mockResolvedValue({
+      trip_id: 't1', trip_name: 'Colombia', start_date: null, end_date: null, places: [],
+      traveller_name: 'Gabriel', invited_by_name: 'Djamina', state: 'expired',
+    })
+    open('/join/old')
+    expect(await screen.findByText('This invitation doesn’t work any more')).toBeInTheDocument()
+    expect(screen.getByText(/Ask Djamina for a new one/)).toBeInTheDocument()
+  })
+
+  it('a welcome note from whoever invited you, shown once', async () => {
+    data.getTrip.mockResolvedValue(
+      detail({
+        trip: { ...trip, created_by: 'u-dj' },
+        travellers: [
+          { id: 'dj', name: 'Djamina', user_id: 'u-dj' },
+          { id: 'a', name: 'Ana', user_id: 'u-ana' },
+        ],
+      }),
+    )
+    data.getMyWelcome.mockResolvedValue({ invitedBy: 'u-dj' })
+    const first = open('/trips/t1')
+    expect(await screen.findByText(/Welcome aboard, Ana!/)).toBeInTheDocument()
+    expect(screen.getByText('— Djamina')).toBeInTheDocument()
+    click('got it ✓')
+    expect(screen.queryByText(/Welcome aboard/)).not.toBeInTheDocument()
+    first.unmount()
+    open('/trips/t1')
+    await screen.findByRole('link', { name: /Trip settings/ })
+    expect(screen.queryByText(/Welcome aboard/)).not.toBeInTheDocument()
   })
 })

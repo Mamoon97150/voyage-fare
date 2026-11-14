@@ -9,7 +9,9 @@ import {
   addRepayment,
   addPlace,
   addTicket,
+  acceptInvitation,
   addTraveller,
+  cancelInvitation,
   chooseOption,
   createTrip,
   deleteItem,
@@ -17,9 +19,13 @@ import {
   deleteRepayment,
   deletePlace,
   deleteTrip,
+  getInvitationPreview,
   getMoney,
   getTrip,
+  inviteTraveller,
   isTripOwner,
+  leaveTrip,
+  listOpenInvitations,
   listTrips,
   removeTraveller,
   renameTraveller,
@@ -172,6 +178,23 @@ describe('the real queries, end to end', () => {
     detail = await getTrip(tripId)
     expect(detail?.trip).toEqual(expect.objectContaining({ name: 'Smoke test (renamed)', target_scope: 'total' }))
     expect(detail?.travellers.map((t) => t.name)).toEqual(['Demo', 'Bea'])
+  })
+
+  it('invitations: a link for Bea, the same again, then cancelled', async () => {
+    const bea = (await getTrip(tripId))!.travellers.find((t) => t.name === 'Bea')!
+    const { token } = await inviteTraveller(bea.id)
+    expect((await inviteTraveller(bea.id)).token).toBe(token)
+    expect((await listOpenInvitations(tripId)).map((i) => i.traveller_id)).toEqual([bea.id])
+    expect(await getInvitationPreview(token)).toEqual(
+      expect.objectContaining({ trip_id: tripId, traveller_name: 'Bea', invited_by_name: 'Demo', state: 'open' }),
+    )
+    // The demo user is already Demo on this trip.
+    await expect(acceptInvitation(token)).rejects.toMatchObject({ code: 'P0001' })
+    await expect(leaveTrip(tripId)).rejects.toMatchObject({ code: 'P0001' }) // the creator can't leave
+    await cancelInvitation(bea.id)
+    expect((await getInvitationPreview(token))?.state).toBe('cancelled')
+    expect(await listOpenInvitations(tripId)).toEqual([])
+    expect(await getInvitationPreview('nope')).toBeNull()
   })
 
   it('deleting the trip removes it from the list', async () => {

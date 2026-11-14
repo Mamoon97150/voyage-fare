@@ -187,6 +187,60 @@ export type Database = {
           },
         ]
       }
+      invitations: {
+        Row: {
+          accepted_at: string | null
+          accepted_by: string | null
+          cancelled_at: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          invited_by: string | null
+          token: string
+          traveller_id: string
+          trip_id: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          cancelled_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string | null
+          token?: string
+          traveller_id: string
+          trip_id: string
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          cancelled_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string | null
+          token?: string
+          traveller_id?: string
+          trip_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invitations_traveller_id_trip_id_fkey"
+            columns: ["traveller_id", "trip_id"]
+            isOneToOne: false
+            referencedRelation: "travellers"
+            referencedColumns: ["id", "trip_id"]
+          },
+          {
+            foreignKeyName: "invitations_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       item_legs: {
         Row: {
           after_place_id: string | null
@@ -1080,6 +1134,7 @@ export type Database = {
       }
     }
     Functions: {
+      accept_invitation: { Args: { p_token: string }; Returns: string }
       add_item: {
         Args: {
           p_amount?: number
@@ -1160,6 +1215,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      cancel_invitation: {
+        Args: { p_traveller_id: string }
+        Returns: undefined
+      }
       change_trip_currency: {
         Args: { p_currency: string; p_rate: number; p_trip_id: string }
         Returns: undefined
@@ -1181,7 +1240,28 @@ export type Database = {
         Returns: string
       }
       delete_place: { Args: { p_place_id: string }; Returns: undefined }
+      leave_trip: { Args: { p_trip_id: string }; Returns: undefined }
       remove_traveller: { Args: { p_traveller_id: string }; Returns: undefined }
+      invitation_preview: {
+        Args: { p_token: string }
+        Returns: {
+          end_date: string
+          invited_by_name: string
+          places: string[]
+          start_date: string
+          state: string
+          traveller_name: string
+          trip_id: string
+          trip_name: string
+        }[]
+      }
+      invite_traveller: {
+        Args: { p_traveller_id: string }
+        Returns: {
+          expires_at: string
+          token: string
+        }[]
+      }
       item_category: { Args: { p_kind: string; p_place_id: string }; Returns: string }
       trip_settlement: {
         Args: { p_trip_id: string }

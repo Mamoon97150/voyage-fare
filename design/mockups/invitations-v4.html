@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mockup — Invitations (v4 look)</title>
+    <script type="module">
+      import '/src/index.css'
+      import './forms.css'
+      import './v4.css'
+      import './v4.js'
+    </script>
+    <style>
+      .phone .screen__body { padding: 0 var(--space-3) var(--space-6); }
+      .who { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 0 var(--space-3); align-items: start; padding: 0.7rem 0; border-top: 1px solid var(--line); }
+      .who:first-of-type { border-top: 0; }
+      .who__name { font-weight: 600; }
+      .who__state { display: block; font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); margin-top: 0.15rem; }
+      .who__state--in { color: var(--confirmed); }
+      .who__state--wait { color: var(--estimated-ink); }
+      .who__acts { display: flex; gap: var(--space-2); flex-wrap: wrap; margin-top: 0.35rem; }
+      .who__side { font-size: 0.8125rem; color: var(--ink-soft); }
+      .invite-box { margin: var(--space-2) 0 var(--space-1); padding: var(--space-3); border: 1.5px dashed var(--line); border-radius: 10px; display: flex; flex-direction: column; gap: var(--space-2); }
+      .invite-box p { font-size: 0.875rem; line-height: 1.4; }
+      .link-field { display: flex; align-items: center; gap: var(--space-2); padding: 0.45rem 0.6rem; background: var(--paper); border: 1px solid var(--line); border-radius: 8px; font-size: 0.8125rem; color: var(--ink-soft); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+      .invite-box .row { display: flex; gap: var(--space-2); }
+      .invite-box .row .button { flex: 1; }
+      .welcome { padding: var(--space-6) var(--space-3); }
+      .welcome__sheet { text-align: center; }
+      .welcome__in { padding: 2.25rem 1.25rem 1.5rem; }
+      .welcome__sheet .kicker { font-size: 0.875rem; color: var(--ink-soft); }
+      .welcome__sheet h1 { font-family: var(--font-title); font-size: 1.75rem; font-weight: 600; line-height: 1.15; margin: var(--space-1) 0; }
+      .welcome__sheet .dates { font-size: 0.875rem; color: var(--ink-soft); }
+      .you-are { margin: var(--space-5) 0 var(--space-4); padding: var(--space-3); border-top: 1px dashed var(--line); border-bottom: 1px dashed var(--line); }
+      .you-are .avatar { margin: 0 auto var(--space-2); width: 2.5rem; height: 2.5rem; font-size: 1rem; }
+      .you-are b { display: block; font-family: var(--font-title); font-size: 1.3rem; }
+      .welcome__sheet .button { width: 100%; margin-top: var(--space-2); }
+      .small-print { font-size: 0.8125rem; color: var(--ink-soft); margin-top: var(--space-4); line-height: 1.4; }
+      .note-strip { margin: var(--space-3) var(--space-3) 0; padding: var(--space-3); border-left: 3px solid var(--confirmed); background: rgb(47 107 79 / 0.06); font-size: 0.875rem; line-height: 1.4; }
+      .note-strip b { display: block; }
+      .note-strip button { margin-top: var(--space-1); background: none; border: 0; padding: 0; color: var(--confirmed); font-weight: 600; font-size: 0.8125rem; }
+      .states h4 { font-size: 0.75rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); margin: var(--space-3) 0 var(--space-1); }
+      .states h4:first-of-type { margin-top: var(--space-2); }
+      .states p { font-size: 0.875rem; line-height: 1.4; }
+      .leave { margin-top: var(--space-4); }
+      .hand { font-family: var(--font-hand); color: var(--ink-soft); line-height: 1.2; }
+      .card__head h2 small.hand { font-family: var(--font-hand); font-size: 1.2rem; font-weight: 400; }
+      .who .hand { font-size: 1.2rem; display: block; margin-top: 0.1rem; }
+      .invite-box .hand { font-size: 1.2rem; }
+      .phone .screen__body > .card:first-child { margin-top: var(--space-4); }
+      .arrow-note { font-family: var(--font-hand); font-size: 1.1rem; color: var(--confirmed); transform: rotate(-3deg); display: inline-block; margin-left: 0.2rem; }
+      .margin-note { font-family: var(--font-hand); font-size: 1.15rem; color: var(--ink-soft); line-height: 1.2; padding: var(--space-3) var(--space-2) 0; transform: rotate(-1deg); }
+      .slip { position: relative; margin: var(--space-4) var(--space-4) var(--space-1); padding: var(--space-4) var(--space-4) var(--space-3); background: #fffdf6; transform: rotate(-1.5deg); box-shadow: 0 1px 0 var(--line), 0 2px 6px rgb(31 42 36 / 0.08); }
+      .slip .tape { top: -0.55rem; }
+      .slip p { font-family: var(--font-hand); font-size: 1.3rem; line-height: 1.2; color: var(--ink); }
+      .slip .sign { text-align: right; color: var(--ink-soft); margin-top: var(--space-1); }
+      .slip .got { display: inline-block; margin-top: var(--space-1); font-family: var(--font-hand); font-size: 1.15rem; color: var(--confirmed); }
+    </style>
+  </head>
+  <body>
+    <div class="phones">
+
+      <!-- 1. The organizer: Trip settings → Travellers -->
+      <figure>
+        <div class="phone">
+          <div class="screen">
+            <header class="screen__top"><span class="round-button">‹</span><h1 class="screen__title">Trip settings</h1></header>
+            <p class="screen__meta">Colombia &amp; Panama</p>
+            <div class="screen__body">
+              <div class="sketch-box sketch-box--strong card" data-seed="73">
+                <svg class="sketch-box__line" aria-hidden="true"></svg>
+                <span class="tape tape--green" aria-hidden="true"></span>
+                <header class="card__head"><h2>Travellers<small class="hand">each has their own share</small></h2></header>
+
+                <div class="who"><span class="avatar avatar--me">D</span><span><span class="who__name">Djamina</span><span class="who__state">You · created the trip</span></span><span class="who__side">Rename</span></div>
+
+                <div class="who"><span class="avatar">D</span><span><span class="who__name">Danielle</span><span class="who__state who__state--in">On the trip</span><span class="hand">opens it on her phone</span></span><span class="who__side">Rename</span></div>
+
+                <div class="who"><span class="avatar">P</span><span><span class="who__name">Peggy</span><span class="who__state who__state--wait">Invited</span><span class="hand">sent 2 days ago, not opened yet</span>
+                  <span class="who__acts"><span class="small-button">Send the link again</span><span class="small-button">Cancel the invite</span></span></span><span class="who__side">Rename</span></div>
+
+                <div class="who"><span class="avatar">G</span><span><span class="who__name">Gabriel</span><span class="who__state">Not invited yet</span>
+                  <span class="who__acts"><span class="small-button" style="border-color:var(--ink)">Invite ▾</span></span>
+                  <div class="invite-box">
+                    <p>Send Gabriel this link. When he opens it and signs in, he joins the trip <b>as Gabriel</b>, and sees his own share.</p>
+                    <span class="link-field">voyagefare.app/join/k7Q2-mX9p</span>
+                    <div class="row"><button class="button button--primary">Share…</button><button class="button button--quiet">Copy</button></div>
+                    <span class="arrow-note">↑ WhatsApp, Messages, mail…</span>
+                    <p class="hand">works once · for 14 days · you can cancel it</p>
+                  </div>
+                  </span><span class="who__side">✕</span></div>
+
+                <form class="settings__add" style="margin-top:var(--space-2)"><input class="field__input" placeholder="Add someone: Dana" /><button type="button" class="button button--quiet">Add</button></form>
+              </div>
+              <p class="margin-note">No need to invite everyone: a name is enough to count their share.</p>
+            </div>
+          </div>
+        </div>
+        <figcaption><b>1 · You invite from the travellers list.</b> Each name says where it stands: <i>You</i> · <i>On the trip</i> · <i>Invited, not opened yet</i> · <i>Not invited</i> (the default: they stay names on your notebook, no account needed). “Invite” opens the link right there; <b>Share…</b> opens the phone’s own menu (WhatsApp, Messages, mail). The link is tied to that name, so Gabriel can’t end up as Peggy.</figcaption>
+      </figure>
+
+      <!-- 2. The invited person opens the link -->
+      <figure>
+        <div class="phone">
+          <div class="welcome">
+            <div class="sketch-box sketch-box--strong welcome__sheet" data-seed="41">
+              <svg class="sketch-box__line" aria-hidden="true"></svg>
+              <span class="tape tape--mustard" aria-hidden="true"></span>
+              <div class="welcome__in">
+              <p class="kicker">Djamina invited you to</p>
+              <h1>Colombia &amp; Panama</h1>
+              <p class="dates">4 – 18 Sept 2026 · Bogotá, Medellín, Cartagena, Panama</p>
+              <div class="you-are"><span class="avatar">G</span><p class="hand-note">on this trip, you are</p><b>Gabriel</b></div>
+              <button class="button button--primary">Create my account</button>
+              <button class="button button--quiet">I already have an account</button>
+              <p class="small-print">Not Gabriel? Ask Djamina for your own link.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <figcaption><b>2 · Gabriel opens the link.</b> No account yet: a welcome page that says whose trip it is and <b>who he is on it</b>, then the usual sign-up (or sign-in). The link is used up once he’s in. No list of the trip before he signs in: the trip stays private.</figcaption>
+      </figure>
+
+      <!-- 3. He lands on the trip -->
+      <figure>
+        <div class="phone">
+          <div class="screen screen--trip">
+            <header class="screen__top"><span class="screen__back">‹</span><div class="screen__heading"><h1 class="screen__title screen__title--trip">Colombia &amp; Panama</h1><p class="screen__sub">4 – 18 Sept 2026 · 4 travellers</p></div><span class="avatars"><span class="avatar">D</span><span class="avatar">P</span><span class="avatar">D</span><span class="avatar avatar--me">G</span></span></header>
+            <div class="slip"><span class="tape tape--mustard" aria-hidden="true"></span><p>Welcome aboard, Gabriel! Every amount here is <u>your</u> share. Add or change things like everyone, I’ll see it.</p><p class="sign">— Djamina</p><span class="got">got it ✓</span></div>
+            <section class="trip-budget"><div class="trip-budget__row"><p class="trip-budget__figure num">2 846 €</p><div class="words-switch"><button><span class="u">your share</span></button><span> · </span><button>total</button></div></div><div class="hand-bar" data-confirmed="0.991" data-estimated="0.009" style="height:16px;margin-top:var(--space-2)"><svg></svg></div><div class="trip-budget__legend num"><span><b class="trip-budget__confirmed-figure">2 821 €</b> confirmed</span><span><b class="trip-budget__estimated-figure">25 €</b> still estimated</span></div></section>
+            <div class="cards">
+              <section class="sketch-box sketch-box--light card states" data-seed="77">
+                <svg class="sketch-box__line" aria-hidden="true"></svg>
+                <header class="card__head"><h2>Who paid what</h2></header>
+                <div class="line line--who"><span class="avatar">D</span><span><span class="line__name">You pay Djamina</span><span class="line__meta">photoshoot + your quarter of the Ubers</span><span class="small-button">Paid back</span></span><span class="line__amount">69 €</span></div>
+              </section>
+              <section class="sketch-box sketch-box--light card states" data-seed="78">
+                <svg class="sketch-box__line" aria-hidden="true"></svg>
+                <h4>A link that doesn’t work any more</h4>
+                <p>“This invitation was cancelled or has expired. Ask Djamina for a new one.”</p>
+                <h4>Already on the trip</h4>
+                <p>Opening the link again just opens the trip.</p>
+                <h4>Leaving a trip (settings, for him)</h4>
+                <p>“Leave this trip” → he goes back to being a name on Djamina’s notebook; his share and what he paid stay.</p>
+              </section>
+            </div>
+          </div>
+        </div>
+        <figcaption><b>3 · He lands on the trip, as himself.</b> His avatar is the ringed one, “your share” is his (2 846 €), and Who paid says what <i>he</i> owes. A welcome note slipped into the notebook, signed by whoever invited him, shown once (“got it” puts it away). Everyone on the trip can edit (as today); only you can delete the trip or remove a traveller.</figcaption>
+      </figure>
+    </div>
+  </body>
+</html>

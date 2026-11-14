@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { currencyLabel, formatDates, plural } from './tripText'
+import { currencyLabel, formatDates, plural, sentAgo } from './tripText'
 
 describe('trip dates in words', () => {
   it('no dates yet', () => expect(formatDates(null, null)).toBeNull())
@@ -15,4 +15,13 @@ describe('small words', () => {
     expect(plural(4, 'traveller')).toBe('4 travellers')
   })
   it('currency names', () => expect(currencyLabel('COP')).toBe('COP · Colombian Peso'))
+})
+
+describe('sentAgo (invitations)', () => {
+  const now = new Date(2026, 10, 14, 10, 0)
+  it('counts calendar days', () => {
+    expect(sentAgo(new Date(2026, 10, 14, 8, 0).toISOString(), now)).toBe('sent today')
+    expect(sentAgo(new Date(2026, 10, 13, 23, 0).toISOString(), now)).toBe('sent yesterday')
+    expect(sentAgo(new Date(2026, 10, 12, 9, 0).toISOString(), now)).toBe('sent 2 days ago')
+  })
 })
