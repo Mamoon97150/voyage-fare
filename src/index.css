@@ -501,6 +501,38 @@ a {
   white-space: nowrap;
 }
 
+/* On the cover the trip's name may take two lines rather than be cut. */
+.screen__heading .screen__title--trip {
+  white-space: normal;
+  line-height: 1.2;
+}
+
+/* The trip's cover: a plain chevron back, the name, its dates by hand (Compare v4, 13 Nov). */
+.screen__back {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  min-height: 2.5rem;
+  margin-left: -0.35rem;
+  font-size: 1.6rem;
+  line-height: 1;
+  color: var(--ink-soft);
+  text-decoration: none;
+}
+
+.screen__heading {
+  flex: 1;
+  min-width: 0;
+}
+
+.screen__sub {
+  font-family: var(--font-hand);
+  font-size: 1.15rem;
+  line-height: 1.15;
+  color: var(--ink-soft);
+}
+
 .round-button {
   width: 2.5rem;
   height: 2.5rem;
@@ -846,25 +878,20 @@ select.field__input,
   color: var(--ink-soft);
 }
 
-/* The budget bar: always visible at the top of a trip */
+/* The budget, always visible at the top of a trip: the notebook's cover (Compare v4, 13 Nov). */
 .trip-budget {
   position: sticky;
   top: 0;
   z-index: 5;
   background: var(--paper);
-  padding: var(--space-3) var(--space-4);
-  border-bottom: 1px solid var(--line);
+  padding: var(--space-2) var(--space-4) var(--space-3);
 }
 
 .trip-budget__row {
   display: flex;
-  align-items: flex-end;
+  align-items: baseline;
   justify-content: space-between;
   gap: var(--space-3);
-}
-
-.trip-budget__row .switch {
-  margin-top: 0;
 }
 
 .trip-budget__figure {
@@ -872,6 +899,7 @@ select.field__input,
   font-size: 2rem;
   font-weight: 600;
   line-height: 1.1;
+  white-space: nowrap;
 }
 
 .trip-budget__figure--long {
@@ -885,31 +913,41 @@ select.field__input,
   color: var(--ink-soft);
 }
 
-.trip-budget__track {
+/* "your share · total": words, the active one underlined by hand. */
+.words-switch {
+  flex: none;
+  font-size: 0.875rem;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.words-switch button {
+  min-height: 2.25rem;
+  padding: 0 0.15rem;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.words-switch button[aria-checked='true'] {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.hand-bar {
   position: relative;
-  display: flex;
-  height: 8px;
-  margin-top: var(--space-3);
-  border-radius: var(--radius-pill);
-  background: var(--line);
+  height: 16px;
+  margin-top: var(--space-2);
 }
 
-.trip-budget__confirmed {
-  background: var(--confirmed);
-  border-radius: var(--radius-pill) 0 0 var(--radius-pill);
-}
-
-.trip-budget__estimated {
-  background: var(--estimated);
-}
-
-.trip-budget__target {
+.hand-bar svg {
   position: absolute;
-  top: -4px;
-  bottom: -4px;
-  width: 2px;
-  border-radius: 2px;
-  background: var(--ink);
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
 }
 
 .trip-budget__legend {
@@ -917,14 +955,17 @@ select.field__input,
   flex-wrap: wrap;
   justify-content: space-between;
   gap: var(--space-1) var(--space-3);
-  margin-top: var(--space-2);
+  margin-top: 0.35rem;
   font-size: 0.8125rem;
+  color: var(--ink-soft);
 }
 
-.trip-budget__legend span {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
+.trip-budget__confirmed-figure {
+  color: var(--confirmed);
+}
+
+.trip-budget__estimated-figure {
+  color: var(--estimated-ink);
 }
 
 .trip-budget__target-text,
@@ -1522,8 +1563,9 @@ select.field__input,
   font-size: 0.75rem;
 }
 
-.trip-budget--compact .trip-budget__track {
-  margin-top: var(--space-2);
+.trip-budget--compact .hand-bar {
+  height: 12px;
+  margin-top: var(--space-1);
 }
 
 .trip-budget--compact .trip-budget__legend,
@@ -1534,132 +1576,226 @@ select.field__input,
 
 /* ═════ Compare (mockups 2 and 10) ═════ */
 
-/* Folder tabs (look v2, validated 12 Nov): palette colours, no dark outline, a mustard dot = to decide */
+/* Compare v4 (13 Nov): the same notebook as the trip page. Folder tabs drawn with the sheets' pen,
+   one sheet per page with a calm head, the decisions labelled like "DAY 1", the options as lines. */
 .folder-tabs {
   display: flex;
-  align-items: flex-end;
-  gap: 0;
-  margin-top: var(--space-3);
-  padding: 0 0.7rem;
+  gap: 2px;
+  padding: var(--space-3) var(--space-4) 0;
+  margin-bottom: -2px;
+  position: relative;
+  z-index: 1;
   overflow-x: auto;
-  background: linear-gradient(var(--paper), var(--paper)) top / 100% calc(100% - 1px) no-repeat, var(--line);
   scrollbar-width: none;
 }
 
 .folder-tab {
   position: relative;
   flex: none;
-  min-height: 44px;
-  padding: 0.35rem 0.7rem 0.3rem;
-  margin-right: -1px;
-  border: 1px solid var(--line);
-  border-bottom: 0;
-  border-radius: 10px 10px 0 0;
+  min-height: 2.5rem;
+  padding: 0.45rem 0.6rem 0.4rem;
+  border: 0;
   background: var(--paper);
-  font-family: var(--font-title);
-  font-size: 0.875rem;
+  font: inherit;
+  font-size: 0.8125rem;
   color: var(--ink-soft);
   cursor: pointer;
-  align-self: flex-end;
 }
 
-.folder-tab[aria-selected='true'] {
-  z-index: 1;
-  padding: 0.5rem 0.9rem 0.45rem;
-  margin-bottom: -1px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--ink);
+.folder-tab--on {
   background: var(--paper-raised);
-  box-shadow: 0 -3px 8px rgb(31 42 36 / 0.07);
+  color: var(--ink);
+  font-weight: 600;
 }
 
-.folder-tab--todo {
-  padding-right: 0.95rem;
+.folder-tab__line {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  color: var(--ink-soft);
+  opacity: 0.7;
 }
 
 .folder-tab--todo::after {
   content: '';
   position: absolute;
-  top: 6px;
-  right: 6px;
-  width: 6px;
-  height: 6px;
+  top: 0.35rem;
+  right: 0.25rem;
+  width: 0.4rem;
+  height: 0.4rem;
   border-radius: 50%;
-  background: var(--estimated-ink);
+  background: var(--estimated);
 }
 
-/* "Turn the page" between journeys or places */
-.turn-page {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.compare-page {
+  padding: 0 var(--space-3) var(--space-6);
+}
+
+.sketch-box.compare-sheet {
+  padding: 0 var(--space-4) var(--space-3);
+}
+
+/* The page head: the place, its dates by hand; the neighbours in the corners turn the page. */
+.page-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: start;
   gap: var(--space-2);
-  padding: var(--space-3) var(--space-4);
-  background: var(--paper-raised);
-  border-bottom: 1px solid var(--line);
+  padding: var(--space-4) 0 var(--space-2);
 }
 
-.turn-page .round-button:disabled {
-  color: var(--line);
-  border-color: var(--line);
-  cursor: default;
-}
-
-.turn-page__title {
-  flex: 1;
-  min-width: 0;
+.page-head__mid {
   text-align: center;
+  max-width: 13rem;
 }
 
-.turn-page__title h2 {
-  font-size: 1.3rem;
+.page-head__mid h2 {
+  font-family: var(--font-title);
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.15;
 }
 
-.turn-page__title p {
-  font-size: 0.75rem;
+.page-head__mid p {
+  font-family: var(--font-hand);
+  font-size: 1.15rem;
+  line-height: 1.15;
   color: var(--ink-soft);
 }
 
-/* One item's options */
+.page-head__turn {
+  min-height: 2.5rem;
+  padding: 0.35rem 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.page-head__turn--next {
+  text-align: right;
+}
+
+/* One decision: a group labelled like the trip page's days. */
+.compare-item + .compare-item {
+  margin-top: var(--space-4);
+}
+
 .compare-item__head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-3);
+  gap: var(--space-2);
 }
 
 .compare-item__head .switch {
-  margin-top: 0;
+  margin: 0;
+  flex: none;
 }
 
-.compare-item__name {
-  font-size: 1.0625rem;
+.compare-item__what {
+  color: var(--ink);
 }
 
-.options {
+.compare-item__todo {
+  color: var(--estimated-ink);
+}
+
+.compare-item__dropped {
+  text-decoration: line-through;
+}
+
+.compare-item__note {
+  margin: 0 0 var(--space-2);
+}
+
+.compare-empty {
+  padding: var(--space-2) 0 var(--space-3);
+}
+
+/* An option: the trip page's line with the choose circle in front. */
+.opts {
   list-style: none;
-  margin: var(--space-2) 0 0;
+  margin: 0;
   padding: 0;
+}
+
+.opt {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0 var(--space-3);
+  align-items: start;
+  padding: 0.65rem 0;
   border-top: 1px solid var(--line);
 }
 
-.option {
-  border-bottom: 1px solid var(--line);
+.opt:first-child {
+  border-top: 0;
 }
 
-/* The chosen one: a pale green wash, a green rule on the left, a tick (look-mix, 12 Nov). */
-.option--chosen {
-  background: color-mix(in srgb, var(--confirmed) 7%, var(--paper-raised));
-  box-shadow: inset 4px 0 0 var(--confirmed);
+/* The circle is the Choose button (44px to tap, 24px to see). Chosen: filled, in blue ink. */
+.opt__pick {
+  width: 2.75rem;
+  height: 2.75rem;
+  margin: -0.6rem -0.6rem -0.6rem -0.6rem;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: none;
+  font-size: 0.8rem;
+  color: var(--paper);
+  cursor: pointer;
 }
 
-.option__tap {
+.opt__pick::before {
+  content: '';
+  grid-area: 1 / 1;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 1.5px solid var(--ink-soft);
+  border-radius: 50%;
+}
+
+.opt--chosen .opt__pick {
+  cursor: default;
+}
+
+.opt--chosen .opt__pick::before {
+  background: var(--chosen);
+  border-color: var(--chosen);
+}
+
+.opt__pick:not(:disabled):hover::before {
+  border-color: var(--chosen);
+}
+
+.opt__pick {
+  position: relative;
+}
+
+.opt__pick > * {
+  grid-area: 1 / 1;
+}
+
+.opt--chosen .opt__pick {
+  font-weight: 700;
+}
+
+.opt__tap {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  width: 100%;
-  padding: var(--space-3) var(--space-3) var(--space-1);
+  align-items: flex-start;
+  min-width: 0;
+  padding: 0;
   border: 0;
   background: none;
   font: inherit;
@@ -1668,106 +1804,114 @@ select.field__input,
   cursor: pointer;
 }
 
-.option__head {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--space-3);
-}
-
-.option__name {
-  font-family: var(--font-title);
-  font-size: 1.0625rem;
+.opt__name {
   font-weight: 600;
 }
 
-.option__tick {
-  display: inline-grid;
-  place-items: center;
-  width: 1.1rem;
-  height: 1.1rem;
-  margin-right: 0.4rem;
-  border-radius: 50%;
-  background: var(--confirmed);
-  color: var(--paper);
-  font-family: var(--font-text);
-  font-size: 0.7rem;
-  vertical-align: 0.1em;
+.opt--chosen .opt__name {
+  color: var(--chosen);
 }
 
-.option__pill {
+.opt--chosen .opt__name .underlined path {
+  stroke: var(--chosen);
+  stroke-width: 2;
+}
+
+.opt--chosen .opt__name + .opt__meta {
+  margin-top: 0.4rem;
+}
+
+.opt__pill {
   display: inline-block;
   margin-left: 0.35rem;
-  padding: 0 0.45rem;
+  padding: 0 0.4rem;
   border: 1px solid var(--line);
   border-radius: 999px;
-  font-family: var(--font-text);
   font-size: 0.6875rem;
   font-weight: 500;
   color: var(--ink-soft);
-  vertical-align: 0.15em;
+  vertical-align: 0.1em;
 }
 
-.option__price {
+.opt__meta {
+  font-size: 0.8125rem;
+  color: var(--ink-soft);
+  margin-top: 0.1rem;
+}
+
+.opt__way {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  white-space: nowrap;
-}
-
-.option__price b {
-  font-family: var(--font-title);
-  font-size: 1.15rem;
-  font-weight: 600;
-}
-
-.option__tag {
-  font-size: 0.75rem;
-  color: var(--ink-soft);
-}
-
-.option__tag--best,
-.option__fast {
-  color: var(--confirmed);
-  font-weight: 600;
-}
-
-.option__sub,
-.option__line {
-  font-size: 0.8125rem;
-  color: var(--ink-soft);
-}
-
-.option__quote {
-  font-family: var(--font-title);
-  font-style: italic;
-  color: var(--ink);
-}
-
-.option__way {
-  display: grid;
-  grid-template-columns: 2.6rem 1fr auto;
-  gap: 0 var(--space-2);
-  align-items: baseline;
-  margin-top: 0.3rem;
+  flex-wrap: wrap;
+  gap: 0 0.4rem;
+  margin-top: 0.2rem;
   font-size: 0.8125rem;
 }
 
-.option__way-label {
+.opt__way-label {
+  min-width: 2.2rem;
   font-size: 0.6875rem;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--ink-soft);
+  line-height: 1.6;
 }
 
-.option__dur {
+.opt__dur {
   font-weight: 600;
 }
 
-.option__stops {
-  grid-column: 2 / -1;
+.opt__stops {
+  flex-basis: 100%;
+  padding-left: 2.6rem;
   font-size: 0.75rem;
   color: var(--ink-soft);
+}
+
+.opt__fast {
+  color: var(--confirmed);
+}
+
+.opt__side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+}
+
+.opt__amount {
+  font-weight: 700;
+}
+
+.opt__tag {
+  margin-top: 0.15rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.opt__tag--best,
+.opt__tag--settled {
+  color: var(--confirmed);
+}
+
+.opt__heart {
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+  margin-right: -0.5rem;
+  border: 0;
+  background: none;
+  font-size: 1.05rem;
+  color: var(--ink-soft);
+  opacity: 0.55;
+  cursor: pointer;
+}
+
+.opt__heart--on {
+  color: var(--estimated);
+  opacity: 1;
 }
 
 .flag--yes {
@@ -1779,44 +1923,13 @@ select.field__input,
 }
 
 .stars {
+  color: var(--estimated-ink);
   letter-spacing: 0.05em;
-  color: var(--ink);
 }
 
 .stars i {
   font-style: normal;
   color: var(--line);
-}
-
-.option__actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: var(--space-2);
-  padding: 0 var(--space-3) var(--space-2);
-}
-
-.option__heart {
-  min-width: 44px;
-  min-height: 44px;
-  border: 0;
-  background: none;
-  font-size: 1.15rem;
-  color: var(--line);
-  cursor: pointer;
-}
-
-.option__heart--on {
-  color: var(--over);
-}
-
-.option__chosen {
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--confirmed);
-  padding-right: var(--space-2);
 }
 
 /* The option form */
@@ -2005,6 +2118,11 @@ select.field__input,
   margin-top: var(--space-3);
 }
 
-.compare-item__dropped {
-  margin: 0 0 var(--space-2);
+
+.screen__top:has(.screen__heading) {
+  align-items: flex-start;
+}
+
+.screen__top:has(.screen__heading) .avatars {
+  margin-top: 0.3rem;
 }

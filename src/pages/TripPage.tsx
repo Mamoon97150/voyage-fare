@@ -16,7 +16,7 @@ import { useAuth } from '../lib/authContext'
 import { explainAuthError } from '../lib/authForm'
 import { formatWhole } from '../lib/money'
 import { getTrip, type TripDetail } from '../lib/trips'
-import { formatDates, plural } from '../lib/tripText'
+import { plural, tripSubtitle } from '../lib/tripText'
 import {
   budgetView,
   groupPlaceItems,
@@ -94,13 +94,7 @@ export function TripPage() {
   const shownMode: Mode = solo ? 'total' : mode
   const viewerName = travellers.find((t) => t.id === viewer)?.name ?? null
   const days = tripDays(detail)
-  const meta = [
-    formatDates(trip.start_date, trip.end_date) ?? 'Dates not decided',
-    trip.home_city && `from ${trip.home_city}`,
-    plural(travellers.length, 'traveller'),
-  ]
-    .filter(Boolean)
-    .join(' · ')
+  const meta = tripSubtitle(trip, travellers.length)
   // Tickets with a route are drawn between the places, not listed again here.
   const wholeTrip = items.filter((i) => !i.place_id && !hasLegs(detail, i))
 
@@ -116,8 +110,7 @@ export function TripPage() {
 
   return (
     <div className="screen screen--trip">
-      <TripTopBar title={trip.name} tripId={trip.id} travellers={travellers} userId={session?.user.id} />
-      <p className="screen__meta">{meta}</p>
+      <TripTopBar title={trip.name} subtitle={meta} tripId={trip.id} travellers={travellers} userId={session?.user.id} />
 
       <TripBudget
         view={budgetView(detail, viewer, shownMode)}

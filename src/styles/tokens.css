@@ -10,6 +10,7 @@
   --estimated: #e2a93b; /* mustard: everything still estimated */
   --estimated-ink: #b07d1a; /* mustard for small marks (dots): 3.4:1 on paper, readable outdoors */
   --over: #c2513f; /* red: over budget only */
+  --chosen: #2c4a7a; /* blue ink: the option you chose on Compare, like circling it with a pen (13 Nov) */
 
   /* Type */
   --font-title: 'Lora Variable', Georgia, serif;

@@ -2,6 +2,7 @@
 // The database keeps their kind-specific details in options.details; this file reads them,
 // works out durations, shares and the order, and groups items into Compare's pages.
 import type { Item, ItemKind, Place, TicketMode, TripDetail, TripOption } from './trips'
+import { addDays, formatShortDates } from './tripText'
 import { legsAfter, type Mode } from './tripView'
 
 /** One way of a journey, as typed: times as printed on the ticket ("13:05"). */
@@ -188,10 +189,20 @@ export function subjectsFor(detail: TripDetail, tab: Tab): Subject[] {
       return { key: item.id, title: item.name, note: roundTrip ? 'Round trip' : 'One way', items: [item], place: null }
     })
   }
+  // Each place's dates, from the trip's start and the nights before it.
+  const ordered = [...detail.places].sort((a, b) => a.position - b.position)
+  const offset = new Map<string, number>()
+  ordered.reduce((n, p) => (offset.set(p.id, n), n + (p.nights ?? 0)), 0)
+  const start = detail.trip.start_date
   const pages: Subject[] = detail.places.map((place) => ({
     key: place.id,
     title: place.name,
-    note: place.nights ? `${place.nights} ${place.nights === 1 ? 'night' : 'nights'}` : 'nights not set',
+    note: [
+      place.nights ? `${place.nights} ${place.nights === 1 ? 'night' : 'nights'}` : 'nights not set',
+      start && place.nights ? formatShortDates(addDays(start, offset.get(place.id) ?? 0), addDays(start, (offset.get(place.id) ?? 0) + place.nights)) : null,
+    ]
+      .filter(Boolean)
+      .join(' · '),
     items: items.filter((i) => i.place_id === place.id),
     place,
   }))

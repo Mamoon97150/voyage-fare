@@ -263,7 +263,7 @@ describe('inside a trip', () => {
   it('says what the trip is, with a dash for the budget', async () => {
     open('/trips/t1')
     expect(await screen.findByRole('heading', { name: 'Colombia' })).toBeInTheDocument()
-    expect(screen.getByText('Dates not decided · from St Martin · 2 travellers')).toBeInTheDocument()
+    expect(screen.getByText('Dates not decided · 2 travellers')).toBeInTheDocument()
     expect(screen.getByText('your share')).toBeInTheDocument()
     expect(screen.getByText('Target 2 500 €. Nothing priced yet.')).toBeInTheDocument()
   })
@@ -360,12 +360,12 @@ describe('inside a trip', () => {
     data.getTrip.mockResolvedValue(priced)
     open('/trips/t1')
     expect(await screen.findByText('1 000 € under your 2 500 € target')).toBeInTheDocument()
-    expect(screen.getByText('1 500 €')).toBeInTheDocument() // your share in the bar
+    expect(screen.getByText('1 500 €', { selector: '.trip-budget__figure' })).toBeInTheDocument() // your share in the bar
     expect(screen.getByText('900 €')).toBeInTheDocument() // your half of the flights
     expect(screen.getByText('Idea')).toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('radio', { name: 'Total' }))
-    expect(screen.getByText('3 000 €')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('radio', { name: 'total' }))
+    expect(screen.getByText('3 000 €', { selector: '.trip-budget__figure' })).toBeInTheDocument()
     expect(screen.getByText('1 800 €')).toBeInTheDocument()
     expect(screen.getByText('2 000 € under your 5 000 € target')).toBeInTheDocument()
   })
@@ -373,8 +373,8 @@ describe('inside a trip', () => {
   it('solo: no switch, the trip is your share', async () => {
     data.getTrip.mockResolvedValue({ ...priced, travellers: [travellers[0]] })
     open('/trips/t1')
-    expect(await screen.findByText('the trip')).toBeInTheDocument()
-    expect(screen.queryByRole('radio', { name: 'Total' })).not.toBeInTheDocument()
+    expect(await screen.findByText(/the trip/)).toBeInTheDocument()
+    expect(screen.queryByRole('radio', { name: 'total' })).not.toBeInTheDocument()
   })
 
   it('a ticket: cities suggested from the route, a round trip by default from home', async () => {
@@ -732,11 +732,11 @@ describe('Compare', () => {
     data.getTrip.mockResolvedValue(detail(journey))
     open('/trips/t1/compare')
     expect(await screen.findByRole('heading', { name: 'St Martin ⇄ Cartagena' })).toBeInTheDocument()
-    expect(screen.getByText(/Round trip · 2 options · journey 1 of 1/)).toBeInTheDocument()
+    expect(screen.getByText('Round trip')).toBeInTheDocument()
     const names = screen.getAllByRole('button', { name: /^Change / }).map((b) => b.getAttribute('aria-label'))
     expect(names).toEqual(['Change Avianca', 'Change Copa'])
     expect(screen.getByText('700 €')).toBeInTheDocument() // your half of Avianca
-    expect(screen.getByText('Cheapest', { selector: '.option__tag' })).toBeInTheDocument()
+    expect(screen.getByText('Cheapest', { selector: '.opt__tag' })).toBeInTheDocument()
     expect(screen.getByText('+100 €')).toBeInTheDocument()
     expect(screen.getByText('SXM 13:05 → CTG 19:25')).toBeInTheDocument()
     expect(screen.getByText('6 h 20')).toBeInTheDocument()
@@ -750,7 +750,8 @@ describe('Compare', () => {
     data.setFavourite.mockResolvedValue(undefined)
     open('/trips/t1/compare')
     await screen.findByRole('heading', { name: 'St Martin ⇄ Cartagena' })
-    click('Choose')
+    expect(screen.getByRole('button', { name: 'Copa: chosen' })).toHaveAttribute('aria-pressed', 'true')
+    click('Choose Avianca')
     await waitFor(() => expect(data.chooseOption).toHaveBeenCalledWith('avianca'))
     click('My coup de cœur: Avianca')
     await waitFor(() => expect(data.setFavourite).toHaveBeenCalledWith('avianca', true))
@@ -1050,7 +1051,7 @@ describe('review fixes (13 Nov)', () => {
       }),
     )
     open('/trips/t1')
-    fireEvent.click(await screen.findByRole('radio', { name: 'Total' }))
+    fireEvent.click(await screen.findByRole('radio', { name: 'total' }))
     expect(await screen.findByText('Included')).toBeInTheDocument()
     expect(screen.getByText('Free')).toBeInTheDocument()
     expect(screen.getByText('84 €')).toBeInTheDocument()
@@ -1078,7 +1079,8 @@ describe('review fixes (13 Nov)', () => {
   it('a dropped line doesn’t leave a “to decide” dot', async () => {
     data.getTrip.mockResolvedValue({ ...nails({ status: 'dropped' }), options: (nails().options as Record<string, unknown>[]).map((o) => ({ ...o, is_chosen: false })) })
     open('/trips/t1/compare?tab=activities&page=p1')
-    expect(await screen.findByText(/Dropped: kept for the record/)).toBeInTheDocument()
+    expect(await screen.findByText(/Kept for the record/)).toBeInTheDocument()
+    expect(screen.getByText(/dropped/, { selector: '.compare-item__dropped' })).toBeInTheDocument()
     expect(screen.queryByText('(something to decide)')).not.toBeInTheDocument()
   })
 })

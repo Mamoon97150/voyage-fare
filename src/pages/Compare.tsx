@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router'
 import { FormMessage } from '../components/AuthForm'
+import { FolderTabs } from '../components/compare/FolderTabs'
 import { OptionCard } from '../components/compare/OptionCard'
 import { OptionForm } from '../components/compare/OptionForm'
 import { Sketch, SketchBox } from '../components/Sketch'
@@ -11,6 +12,7 @@ import { Loading } from '../lib/auth'
 import { useAuth } from '../lib/authContext'
 import { explainAuthError } from '../lib/authForm'
 import { optionLines, subjectsFor, TABS, tabToDecide, type Sort, type Subject, type Tab } from '../lib/options'
+import { tripSubtitle } from '../lib/tripText'
 import {
   addItemWithOption,
   addOption,
@@ -24,7 +26,7 @@ import {
   type TicketMode,
   type TripDetail,
 } from '../lib/trips'
-import { budgetView, isSolo, viewerOf, type Mode } from '../lib/tripView'
+import { budgetView, daysText, isSolo, viewerOf, type Mode } from '../lib/tripView'
 
 const EMPTY: Record<Tab, { kind: ItemKind; add: string; none: (where: string) => string }> = {
   travel: { kind: 'transport', add: '', none: () => '' },
@@ -104,65 +106,52 @@ export function Compare() {
 
   return (
     <div className="screen screen--trip">
-      <TripTopBar title={detail.trip.name} tripId={detail.trip.id} travellers={detail.travellers} userId={session?.user.id} />
+      <TripTopBar
+        title={detail.trip.name}
+        subtitle={tripSubtitle(detail.trip, detail.travellers.length)}
+        tripId={detail.trip.id}
+        travellers={detail.travellers}
+        userId={session?.user.id}
+      />
       <TripBudget
         view={budgetView(detail, viewer, shownMode)}
         currency={detail.trip.currency}
         mode={shownMode}
         onMode={setMode}
-        viewerName={detail.travellers.find((t) => t.id === viewer)?.name ?? null}
         solo={solo}
       />
 
-      <div className="folder-tabs" role="tablist" aria-label="Categories">
-        {TABS.map((t) => (
-          <button
-            key={t.key}
-            type="button"
-            role="tab"
-            aria-selected={t.key === tab}
-            className={tabToDecide(detail, t.key) ? 'folder-tab folder-tab--todo' : 'folder-tab'}
-            onClick={() => go({ tab: t.key })}
-          >
-            {t.label}
-            {tabToDecide(detail, t.key) && <span className="visually-hidden"> (something to decide)</span>}
-          </button>
-        ))}
-      </div>
+      <FolderTabs tab={tab} todo={(t) => tabToDecide(detail, t)} onTab={(t) => go({ tab: t })} />
 
       {subject ? (
-        <>
-          <div className="turn-page" aria-label={tab === 'travel' ? 'Journey' : 'Place'}>
-            <button
-              type="button"
-              className="round-button"
-              disabled={index === 0}
-              onClick={() => go({ page: subjects[index - 1].key })}
-              aria-label="Previous page"
-            >
-              ‹
-            </button>
-            <div className="turn-page__title">
-              <h2>{subject.title}</h2>
-              <p>
-                {[
-                  subject.note,
-                  plural(subject.items.reduce((n, i) => n + detail.options.filter((o) => o.item_id === i.id).length, 0), 'option'),
-                  `${tab === 'travel' ? 'journey' : 'page'} ${index + 1} of ${subjects.length}`,
-                ].join(' · ')}
-              </p>
-            </div>
-            <button
-              type="button"
-              className="round-button"
-              disabled={index === subjects.length - 1}
-              onClick={() => go({ page: subjects[index + 1].key })}
-              aria-label="Next page"
-            >
-              ›
-            </button>
-          </div>
-          <div className="screen__body">
+        <div className="compare-page">
+          <SketchBox weight="light" className="compare-sheet" seed={41 + index}>
+            {/* The page head (Compare v4): the place and its dates by hand; the neighbours turn the page. */}
+            <header className="page-head">
+              {index > 0 ? (
+                <button type="button" className="page-head__turn" onClick={() => go({ page: subjects[index - 1].key })} aria-label="Previous page">
+                  ‹ {subjects[index - 1].title}
+                </button>
+              ) : (
+                <span />
+              )}
+              <div className="page-head__mid">
+                <h2>{subject.title}</h2>
+                <p>{subject.note}</p>
+              </div>
+              {index < subjects.length - 1 ? (
+                <button
+                  type="button"
+                  className="page-head__turn page-head__turn--next"
+                  onClick={() => go({ page: subjects[index + 1].key })}
+                  aria-label="Next page"
+                >
+                  {subjects[index + 1].title} ›
+                </button>
+              ) : (
+                <span />
+              )}
+            </header>
             {subject.items.length === 0 ? (
               <EmptyPage detail={detail} tab={tab} subject={subject} onChanged={() => void load()} />
             ) : (
@@ -172,15 +161,15 @@ export function Compare() {
                   detail={detail}
                   item={item}
                   subject={subject}
-                  showName={subject.items.length > 1}
+                  showName={tab !== 'travel'}
                   viewer={viewer}
                   mode={shownMode}
                   onChanged={() => void load()}
                 />
               ))
             )}
-          </div>
-        </>
+          </SketchBox>
+        </div>
       ) : (
         <div className="screen__body">
           <SketchBox tape="mustard" className="empty" seed={81}>
@@ -204,7 +193,6 @@ export function Compare() {
   )
 }
 
-const plural = (n: number, one: string) => `${n} ${n === 1 ? one : `${one}s`}`
 
 /** One item's options, side by side, with Choose, ♥ and "+ Add an option". */
 function ItemOptions({
@@ -232,6 +220,18 @@ function ItemOptions({
   const lines = optionLines(detail, item, viewer, mode, sort)
   const defaultMode = (detail.legs.find((l) => l.item_id === item.id)?.mode ?? 'plane') as TicketMode
   const timed = lines.filter((l) => l.minutes !== null).length > 1
+  // The group's label, like the trip page's "DAY 1": its day, the decision, who it's for, what's left.
+  const sharedBy = detail.shares.filter((x) => x.item_id === item.id).length
+  const label: { text: string; tone?: 'what' | 'todo' | 'dropped' }[] = [
+    daysText(item) ? { text: daysText(item) as string } : null,
+    showName ? { text: item.name, tone: 'what' as const } : null,
+    sharedBy > 0 && sharedBy < detail.travellers.length ? { text: `for ${sharedBy}` } : null,
+    item.status === 'dropped'
+      ? { text: 'dropped', tone: 'dropped' as const }
+      : !detail.options.some((o) => o.item_id === item.id && o.is_chosen)
+        ? { text: 'to decide', tone: 'todo' as const }
+        : null,
+  ].filter((p): p is { text: string; tone?: 'what' | 'todo' | 'dropped' } => p !== null)
 
   async function act(action: () => Promise<void>) {
     setBusy(true)
@@ -278,9 +278,16 @@ function ItemOptions({
 
   return (
     <section className="compare-item" aria-label={item.name}>
-      {(showName || timed) && (
+      {(label.length > 0 || timed) && (
         <div className="compare-item__head">
-          {showName && <h3 className="compare-item__name">{item.name}</h3>}
+          <p className="item-group__label">
+            {label.map((part, i) => (
+              <span key={part.text} className={part.tone ? `compare-item__${part.tone}` : undefined}>
+                {i > 0 && ' · '}
+                {part.text}
+              </span>
+            ))}
+          </p>
           {timed && (
             <div className="switch" role="radiogroup" aria-label="Sort">
               <button type="button" role="radio" aria-checked={sort === 'cheapest'} onClick={() => setSort('cheapest')}>
@@ -293,11 +300,9 @@ function ItemOptions({
           )}
         </div>
       )}
-      {item.status === 'dropped' && (
-        <p className="field__hint compare-item__dropped">Dropped: kept for the record. Choose one to bring it back.</p>
-      )}
+      {item.status === 'dropped' && <p className="field__hint compare-item__note">Kept for the record. Choose one to bring it back.</p>}
       {error && <FormMessage tone="error">{error}</FormMessage>}
-      <ul className="options">
+      <ul className="opts">
         {lines.map((line) =>
           editing === line.option.id ? (
             <li key={line.option.id}>{form(line.option)}</li>
@@ -338,8 +343,8 @@ function EmptyPage({ detail, tab, subject, onChanged }: { detail: TripDetail; ta
   const empty = EMPTY[tab]
   const where = subject.place?.name ?? 'the trip'
   return (
-    <SketchBox tape="mustard" className="empty" seed={82}>
-      {!adding && <Sketch name="compare-empty" width={220} />}
+    <div className="empty compare-empty">
+      {!adding && <Sketch name="compare-empty" width={200} />}
       <h2 className="empty__title">{empty.none(where)}</h2>
       {adding ? (
         <OptionForm
@@ -363,6 +368,6 @@ function EmptyPage({ detail, tab, subject, onChanged }: { detail: TripDetail; ta
           </button>
         </>
       )}
-    </SketchBox>
+    </div>
   )
 }

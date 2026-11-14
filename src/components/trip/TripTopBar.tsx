@@ -4,16 +4,20 @@ import type { Traveller } from '../../lib/trips'
 const SHOWN = 4
 
 /**
- * The top of a trip: back to all trips, the trip's name, and who's on it (mockup 1).
+ * The top of a trip, its notebook cover: back to all trips, the trip's name with its dates by hand,
+ * and who's on it (mockup 1, Compare v4).
  * The initials open the trip settings (review 13 Nov: "3 travellers, but who?").
  */
 export function TripTopBar({
   title,
+  subtitle,
   tripId,
   travellers,
   userId,
 }: {
   title: string
+  /** By hand under the name: dates, where from, how many (Compare v4: the notebook's cover). */
+  subtitle?: string
   tripId?: string
   travellers?: Traveller[]
   userId?: string
@@ -22,10 +26,13 @@ export function TripTopBar({
   const more = (travellers?.length ?? 0) - shown.length
   return (
     <header className="screen__top">
-      <Link to="/trips" className="round-button" aria-label="All trips">
+      <Link to="/trips" className="screen__back" aria-label="All trips">
         ‹
       </Link>
-      <h1 className="screen__title screen__title--trip">{title}</h1>
+      <div className="screen__heading">
+        <h1 className="screen__title screen__title--trip">{title}</h1>
+        {subtitle && <p className="screen__sub">{subtitle}</p>}
+      </div>
       {tripId && travellers && (
         <Link
           to={`/trips/${tripId}/settings`}
