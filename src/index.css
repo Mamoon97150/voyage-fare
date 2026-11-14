@@ -2738,3 +2738,46 @@ select.field__input,
   font-size: 1.1rem;
   color: var(--ink-soft);
 }
+
+/* Picking what something is (14 Nov): pills like everywhere else, two per row (2-2), three
+   on top when there are five (3-2), never one alone on its line. */
+.chip-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+.chip-grid > .chip {
+  grid-column: span 3;
+}
+
+.chip-grid:has(> :nth-child(5):last-child) > .chip:nth-child(-n + 3),
+.chip-grid:has(> :nth-child(3):last-child) > .chip {
+  grid-column: span 2;
+}
+
+.chip--pick {
+  padding: 0 0.6rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chip__icon {
+  opacity: 0.7;
+}
+
+.form-title {
+  margin: 0;
+}
+
+.add-item .form-title .hand-note {
+  display: block;
+  margin-top: 0.1rem;
+}
+
+/* Chosen: the tick takes the icon's place. */
+.chip--pick[aria-pressed='true'] .chip__icon {
+  display: none;
+}

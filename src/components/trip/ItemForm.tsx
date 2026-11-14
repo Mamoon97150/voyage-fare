@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useState, type FormEvent, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import { explainAuthError } from '../../lib/authForm'
 import { NO_AMOUNT, parseAmount } from '../../lib/money'
@@ -34,11 +34,14 @@ export function AddItem({
 }) {
   const [kind, setKind] = useState<ItemKind>(kinds[0])
   const id = placeId ?? 'trip'
+  const place = placeId ? detail.places.find((p) => p.id === placeId) : null
+  const title = <FormTitle title={place ? `Add to ${place.name}` : 'Add to the whole trip'} note="no price yet? it stays an idea" />
 
   // A ticket on the whole trip goes somewhere: it gets its own form, with its route.
   if (kind === 'transport' && placeId === null) {
     return (
       <div className="add-item">
+        {title}
         <KindPicker kinds={kinds} kind={kind} onKind={setKind} />
         <TicketForm
           detail={detail}
@@ -61,6 +64,7 @@ export function AddItem({
       days={days}
       kind={kind}
       onKind={setKind}
+      title={title}
       submitLabel="Add"
       onSubmit={async (v) => {
         await addItem({ tripId: detail.trip.id, placeId, ...v })
@@ -75,13 +79,38 @@ export function KindPicker({ kinds, kind, onKind }: { kinds: ItemKind[]; kind: I
   // The place's list has stays; the whole trip's doesn't (its transport is a ticket: "Travel").
   const inPlace = kinds.includes('housing')
   return (
-    <div className="kinds" role="radiogroup" aria-label="What is it?">
-      {kinds.map((k) => (
-        <button key={k} type="button" role="radio" aria-checked={kind === k} className="kind" onClick={() => onKind(k)}>
-          <span aria-hidden="true">{kindLabel(k, inPlace).icon}</span> {kindLabel(k, inPlace).label}
-        </button>
-      ))}
+    <div className="field">
+      <span className="field__label" aria-hidden="true">
+        What is it?
+      </span>
+      <div className="chip-grid" role="radiogroup" aria-label="What is it?">
+        {kinds.map((k) => (
+          <button
+            key={k}
+            type="button"
+            role="radio"
+            aria-checked={kind === k}
+            aria-pressed={kind === k}
+            className="chip chip--pick"
+            onClick={() => onKind(k)}
+          >
+            <span className="chip__icon" aria-hidden="true">
+              {kindLabel(k, inPlace).icon}
+            </span>{' '}
+            {kindLabel(k, inPlace).label}
+          </button>
+        ))}
+      </div>
     </div>
+  )
+}
+
+/** A form's title, like the estimate form's: the title, and a word in handwriting. */
+export function FormTitle({ title, note }: { title: string; note?: string }) {
+  return (
+    <h3 className="sheet-title form-title">
+      {title} {note && <small className="sheet-title__note hand-note">{note}</small>}
+    </h3>
   )
 }
 
@@ -101,6 +130,7 @@ export function ItemForm({
   deleteName,
   options,
   nameLabel = 'Name',
+  title,
 }: {
   detail: TripDetail
   formId: string
@@ -118,6 +148,8 @@ export function ItemForm({
   options?: { text: string; link: string | null }
   /** "What you're deciding" once the line shows the chosen option's name instead. */
   nameLabel?: string
+  /** Shown at the top (adding: "Add to Cartagena"). */
+  title?: ReactNode
 }) {
   const [ownKind, setOwnKind] = useState<ItemKind>(initial?.kind ?? kinds[0])
   const kind = controlledKind ?? ownKind
@@ -159,6 +191,7 @@ export function ItemForm({
 
   return (
     <form onSubmit={submit} noValidate className="add-item">
+      {title}
       {formError && <FormMessage tone="error">{formError}</FormMessage>}
       <KindPicker kinds={kinds} kind={kind} onKind={setKind} />
 

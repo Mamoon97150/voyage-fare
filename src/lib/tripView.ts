@@ -236,11 +236,11 @@ export function ticketOf(detail: Pick<TripDetail, 'legs'>, item: Item, amount: n
 // ── Daily estimates (build 6) ───────────────────────────────────────────────────
 
 /** What a daily estimate can be for: the budget's words (14 Nov), with a name to start from. */
-export const ESTIMATE_CATEGORIES: { key: string; label: string; suggestion: string }[] = [
-  { key: 'food', label: 'Food', suggestion: 'Food & drinks' },
-  { key: 'local_transport', label: 'Getting around', suggestion: 'Getting around' },
-  { key: 'activities', label: 'Activities', suggestion: 'Activities' },
-  { key: 'buffer', label: 'Other', suggestion: 'Extras' },
+export const ESTIMATE_CATEGORIES: { key: string; label: string; icon: string; suggestion: string }[] = [
+  { key: 'food', label: 'Food', icon: KINDS.restaurant.icon, suggestion: 'Food & drinks' },
+  { key: 'local_transport', label: 'Getting around', icon: KINDS.car_rental.icon, suggestion: 'Getting around' },
+  { key: 'activities', label: 'Activities', icon: KINDS.activity.icon, suggestion: 'Activities' },
+  { key: 'buffer', label: 'Other', icon: KINDS.other.icon, suggestion: 'Extras' },
 ]
 
 /** Days by default: the place's nights, or the trip's days for the whole trip. */

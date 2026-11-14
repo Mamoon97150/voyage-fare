@@ -14,6 +14,7 @@ import { estimateDefaultDays, estimateLine, ESTIMATE_CATEGORIES, type Mode } fro
 import { plural } from '../../lib/tripText'
 import { FormMessage } from '../AuthForm'
 import { FormActions } from '../FormActions'
+import { FormTitle } from './ItemForm'
 import { CurrencyPicker, RateField } from '../RateField'
 
 /**
@@ -232,18 +233,27 @@ export function EstimateForm({
   }
 
   return (
-    <form onSubmit={submit} noValidate className="estimate-form">
-      <h3 className="sheet-title">
-        Daily estimate <small className="sheet-title__note">{place ? place.name : 'whole trip'}</small>
-      </h3>
+    <form onSubmit={submit} noValidate className="add-item estimate-form">
+      <FormTitle title={estimate ? 'Daily estimate' : `Daily estimate · ${place ? place.name : 'whole trip'}`} note="for what you won’t plan line by line" />
       {formError && <FormMessage tone="error">{formError}</FormMessage>}
       <div className="field" role="radiogroup" aria-labelledby={`${id}-for`}>
         <span id={`${id}-for`} className="field__label">
           For
         </span>
-        <div className="chips">
+        <div className="chip-grid">
           {ESTIMATE_CATEGORIES.map((c) => (
-            <button key={c.key} type="button" role="radio" aria-checked={category === c.key} aria-pressed={category === c.key} className="chip" onClick={() => pickCategory(c.key)}>
+            <button
+              key={c.key}
+              type="button"
+              role="radio"
+              aria-checked={category === c.key}
+              aria-pressed={category === c.key}
+              className="chip chip--pick"
+              onClick={() => pickCategory(c.key)}
+            >
+              <span className="chip__icon" aria-hidden="true">
+                {c.icon}
+              </span>{' '}
               {c.label}
             </button>
           ))}
