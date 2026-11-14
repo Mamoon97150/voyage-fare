@@ -92,7 +92,7 @@ export function StatusForm({
   return (
     <form className="status-form" onSubmit={submit} aria-label={`Where ${item.name} stands`}>
       <h3 className="sheet-title">Where it stands</h3>
-      <div className="steps" role="radiogroup" aria-label="Status">
+      <div className="status-steps" role="radiogroup" aria-label="Status">
         {STEPS.map((s) => (
           <button key={s.key} type="button" role="radio" aria-checked={status === s.key} onClick={() => setStatus(s.key)}>
             {s.label}

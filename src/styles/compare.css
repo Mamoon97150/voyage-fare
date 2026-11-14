@@ -447,7 +447,7 @@
   margin: 0;
 }
 
-.steps {
+.status-steps {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   border: 1.5px solid var(--ink);
@@ -455,7 +455,7 @@
   overflow: hidden;
 }
 
-.steps button {
+.status-steps button {
   min-height: 2.5rem;
   border: 0;
   background: none;
@@ -465,11 +465,11 @@
   cursor: pointer;
 }
 
-.steps button + button {
+.status-steps button + button {
   border-left: 1.5px solid var(--ink);
 }
 
-.steps button[aria-checked='true'] {
+.status-steps button[aria-checked='true'] {
   background: var(--ink);
   color: var(--paper);
   font-weight: 600;
