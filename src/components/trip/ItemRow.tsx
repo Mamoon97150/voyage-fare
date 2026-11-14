@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { amountForInput } from '../../lib/money'
 import { deleteItem, setPackageCover, updateItem, type Item, type ItemKind, type TripDetail } from '../../lib/trips'
-import { coversText, daysText, itemLine, itemTitle, kindLabel, type Mode } from '../../lib/tripView'
+import { coversText, daysText, itemLine, itemTitle, kindLabel, leftLine, type Mode } from '../../lib/tripView'
+import { LeftWords } from './LeftWords'
 import { PartOfPackage } from './Packages'
+import { PaymentsPanel } from './Payments'
 import { optionCount } from '../../lib/options'
 import { amountText, priceInCompare, priceOf, statusWord } from './itemShared'
 import { DropControl } from './DropControl'
@@ -94,7 +96,8 @@ export function ItemRow({
             onChanged()
           }}
         />
-        {chosen && (
+        {/* Paid in parts (build 6): payments take over from "Where it stands" once there are some. */}
+        {chosen && !(detail.payments ?? []).some((p) => p.item_id === item.id) && (
           <StatusForm
             detail={detail}
             item={item}
@@ -105,6 +108,7 @@ export function ItemRow({
             }}
           />
         )}
+        <PaymentsPanel detail={detail} item={item} viewer={viewer} onChanged={onChanged} />
       </li>
     )
   }
@@ -125,10 +129,12 @@ export function ItemRow({
           <span className="item-row__name">{title}</span>
           {meta && <span className="item-row__meta">{meta}</span>}
           {item.kind === 'package' && coversText(detail, item) && <span className="item-row__hand">{coversText(detail, item)}</span>}
+          <LeftWords line={leftLine(detail, item, viewer, mode)} part="reminder" />
         </span>
         <span className="item-row__amount num">
           <b>{amountText(line, item, detail.trip.currency)}</b>
           {statusWord(item) && <span className={statusWord(item)!.className}>{statusWord(item)!.text}</span>}
+          <LeftWords line={leftLine(detail, item, viewer, mode)} currency={detail.trip.currency} part="left" />
         </span>
         <span className="item-row__chev" aria-hidden="true">
           ›

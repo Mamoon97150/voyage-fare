@@ -2,7 +2,7 @@
 // from the trip and its money. The database does the sums (BR-13); this file only picks and words.
 import { formatMoney } from './money'
 import type { Item, TripDetail, TripMoney } from './trips'
-import { itemLine, itemTitle, type Mode } from './tripView'
+import { itemLine, itemTitle, leftLine, type Mode } from './tripView'
 
 const num = (v: unknown) => (v === null || v === undefined ? null : Number(v))
 
@@ -205,12 +205,35 @@ export function paidLines(detail: TripDetail, viewer: string | null) {
     })
 }
 
-/** Booked, not paid: not in the balances until someone pays. Lines inside a package (0) aren't money. */
+/** Booked, not paid (yet): what's left on each line. Lines inside a package (0) aren't money. */
 export function bookedLines(detail: TripDetail) {
   return detail.items
     .filter((i) => i.status === 'booked')
-    .map((i) => ({ id: i.id, name: itemTitle(detail, i).title, amount: num(detail.amounts.find((a) => a.item_id === i.id)?.current) }))
+    .map((i) => ({
+      id: i.id,
+      name: itemTitle(detail, i).title,
+      amount: num((detail.itemLeft ?? []).find((l) => l.item_id === i.id)?.left_to_pay) ?? num(detail.amounts.find((a) => a.item_id === i.id)?.current),
+    }))
     .filter((l) => (l.amount ?? 0) > 0)
+}
+
+export type LeftToPay = { id: string; name: string; amount: number; due: string | null; dueIn: number | null }
+
+/** Budget's "What's left to pay": booked lines with something left, soonest first (no date last). */
+export function leftToPayLines(detail: TripDetail, viewer: string | null, mode: Mode): { lines: LeftToPay[]; total: number; late: number } {
+  const lines = detail.items
+    .filter((i) => i.status === 'booked' || i.status === 'paid')
+    .flatMap((i) => {
+      const l = leftLine(detail, i, viewer, mode)
+      if (!l || l.left <= 0 || l.leftShown <= 0) return []
+      return [{ id: i.id, name: itemTitle(detail, i).title, amount: l.leftShown, due: l.due, dueIn: l.dueIn }]
+    })
+    .sort((a, b) => (a.due ?? '9999').localeCompare(b.due ?? '9999'))
+  return {
+    lines,
+    total: Math.round(lines.reduce((s, l) => s + l.amount, 0) * 100) / 100,
+    late: lines.filter((l) => l.dueIn !== null && l.dueIn < 0).length,
+  }
 }
 
 export function repaymentLines(detail: TripDetail, money: TripMoney, viewer: string | null) {

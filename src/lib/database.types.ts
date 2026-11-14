@@ -370,6 +370,7 @@ export type Database = {
           category: string
           created_at: string
           day_number: number | null
+          due_on: string | null
           end_day_number: number | null
           id: string
           kind: string
@@ -394,6 +395,7 @@ export type Database = {
           category: string
           created_at?: string
           day_number?: number | null
+          due_on?: string | null
           end_day_number?: number | null
           id?: string
           kind: string
@@ -418,6 +420,7 @@ export type Database = {
           category?: string
           created_at?: string
           day_number?: number | null
+          due_on?: string | null
           end_day_number?: number | null
           id?: string
           kind?: string
@@ -557,6 +560,51 @@ export type Database = {
             referencedColumns: ["item_id", "trip_id"]
           },
         ]
+      }
+      payments: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          id: string
+          item_id: string
+          kind: string
+          note: string | null
+          paid_by: string | null
+          paid_each: boolean
+          paid_on: string
+          rate: number
+          trip_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency: string
+          id?: string
+          item_id: string
+          kind?: string
+          note?: string | null
+          paid_by?: string | null
+          paid_each?: boolean
+          paid_on?: string
+          rate?: number
+          trip_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          item_id?: string
+          kind?: string
+          note?: string | null
+          paid_by?: string | null
+          paid_each?: boolean
+          paid_on?: string
+          rate?: number
+          trip_id?: string
+        }
+        Relationships: []
       }
       places: {
         Row: {
@@ -1022,6 +1070,31 @@ export type Database = {
           },
         ]
       }
+      v_item_left: {
+        Row: {
+          due_on: string | null
+          item_id: string | null
+          left_to_pay: number | null
+          paid: number | null
+          place_id: string | null
+          price: number | null
+          trip_id: string | null
+        }
+        Relationships: []
+      }
+      v_item_payments: {
+        Row: {
+          amount: number | null
+          item_id: string | null
+          kind: string | null
+          paid_by: string | null
+          paid_each: boolean | null
+          paid_on: string | null
+          payment_id: string | null
+          trip_id: string | null
+        }
+        Relationships: []
+      }
       v_item_shares: {
         Row: {
           fraction: number | null
@@ -1137,6 +1210,20 @@ export type Database = {
       }
     }
     Functions: {
+      add_payment: {
+        Args: {
+          p_amount: number
+          p_currency?: string
+          p_item_id: string
+          p_kind: string
+          p_note?: string
+          p_paid_by?: string
+          p_paid_each?: boolean
+          p_paid_on?: string
+          p_rate?: number
+        }
+        Returns: string
+      }
       accept_invitation: { Args: { p_token: string }; Returns: string }
       add_item: {
         Args: {
@@ -1185,6 +1272,7 @@ export type Database = {
         Args: { p_item_id: string; p_package_id: string | null }
         Returns: undefined
       }
+      set_item_due: { Args: { p_due_on: string | null; p_item_id: string }; Returns: undefined }
       set_item_dropped: {
         Args: { p_dropped: boolean; p_item_id: string }
         Returns: undefined
@@ -1265,6 +1353,7 @@ export type Database = {
         }
         Returns: string
       }
+      delete_payment: { Args: { p_payment_id: string }; Returns: undefined }
       delete_place: { Args: { p_place_id: string }; Returns: undefined }
       leave_trip: { Args: { p_trip_id: string }; Returns: undefined }
       remove_traveller: { Args: { p_traveller_id: string }; Returns: undefined }

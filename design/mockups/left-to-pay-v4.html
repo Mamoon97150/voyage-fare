@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mockup — What's left to pay (v4 look)</title>
+    <script type="module">
+      import '/src/index.css'
+      import './forms.css'
+      import './v4.css'
+      import './v4.js'
+    </script>
+    <style>
+      .phone { padding: var(--space-3) var(--space-3) var(--space-6); }
+      .stack { display: flex; flex-direction: column; gap: var(--space-4); }
+      .pin-n { display: inline-grid; place-items: center; width: 1.5rem; height: 1.5rem; border-radius: 50%; background: var(--confirmed); color: var(--paper); font: 600 0.75rem var(--font-text); margin-right: 0.45rem; vertical-align: 0.15em; }
+      .left { display: block; font-size: 0.75rem; font-weight: 600; color: var(--estimated-ink); margin-top: 0.15rem; text-align: right; }
+      .dot-todo { display: inline-block; width: 0.55rem; height: 0.55rem; border-radius: 50%; background: var(--estimated); margin-right: 0.35rem; vertical-align: 0.1em; }
+      .soon { font-family: var(--font-hand); font-size: 1.15rem; color: var(--estimated-ink); line-height: 1.2; display: block; margin-top: 0.15rem; }
+      .pay { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0 var(--space-3); padding: 0.55rem 0; border-top: 1px solid var(--line); }
+      .pay:first-of-type { border-top: 0; }
+      .pay b { font-variant-numeric: tabular-nums; }
+      .pay small { display: block; color: var(--ink-soft); font-size: 0.8125rem; }
+      .kind { font-size: 0.6875rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--confirmed); }
+      .rest { display: grid; grid-template-columns: minmax(0, 1fr) auto; padding: 0.6rem 0; border-top: 1.5px solid var(--ink); }
+      .rest b { font-family: var(--font-title); font-size: 1.1rem; }
+      .rest .due { display: block; font-family: var(--font-hand); font-size: 1.15rem; color: var(--estimated-ink); }
+      .section-label { font-size: 0.75rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); margin: var(--space-3) 0 var(--space-1); display: block; }
+      .adds span { font-size: 0.875rem; font-weight: 600; color: var(--confirmed); }
+      .field { margin-bottom: var(--space-3); }
+      .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
+      .chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-2); margin: var(--space-1) 0 var(--space-3); }
+      .chips .chip { min-height: 2.1rem; font-size: 0.8125rem; padding: 0 0.3rem; }
+      .hand { font-family: var(--font-hand); font-size: 1.1rem; color: var(--ink-soft); line-height: 1.2; }
+      .circled { display: inline-block; padding: 0 0.3rem; border: 1.6px solid var(--estimated); border-radius: 50% 45% 55% 48% / 60% 50% 55% 45%; transform: rotate(-3deg); color: var(--ink); }
+      .late-word { font-family: var(--font-hand); font-size: 1.15rem; color: var(--estimated-ink); display: block; }
+      .total-left { text-align: center; padding: var(--space-2) 0 var(--space-3); border-bottom: 1px dashed var(--line); margin-bottom: var(--space-1); }
+      .total-left p { font-size: 0.875rem; color: var(--ink-soft); }
+      .total-left b { display: block; font-family: var(--font-title); font-size: 2rem; font-weight: 600; color: var(--estimated-ink); line-height: 1.15; }
+      .who-pays { font-size: 0.8125rem; color: var(--ink-soft); }
+    </style>
+  </head>
+  <body>
+    <div class="phones">
+
+      <!-- 1. On the trip page + a line's payments -->
+      <figure>
+        <div class="phone stack">
+          <div class="sketch-box sketch-box--light card" data-seed="71">
+            <svg class="sketch-box__line" aria-hidden="true"></svg>
+            <header class="card__head"><h2><span class="pin-n">3</span>Medellín<small>4 nights</small></h2><b class="num">336 €</b></header>
+            <div class="line"><span><span class="line__name"><span class="dot-todo"></span>Casa Kolacho graffiti tour</span><span class="line__meta">Activities · day 7</span><span class="soon">balance due in 5 days</span></span><span class="line__amount">55 €<span class="line__tag line__tag--ok">Booked</span><span class="left">deposit paid · 37 € left</span></span></div>
+            <div class="line"><span><span class="line__name">Nock Reserved Residences</span><span class="line__meta">Stay · days 5–9</span></span><span class="line__amount">in the<span class="line__tag" style="color:var(--chosen)">Package</span></span></div>
+          </div>
+
+          <div class="sketch-box sketch-box--strong card" data-seed="72">
+            <svg class="sketch-box__line" aria-hidden="true"></svg>
+            <span class="tape tape--green" aria-hidden="true"></span>
+            <header class="card__head"><h2>Casa Kolacho<small>booked · 200 € in all</small></h2></header>
+            <span class="section-label">Paid so far</span>
+            <div class="pay"><span><span class="kind">Deposit</span><small>Djamina · 30 Aug · on Viator</small></span><b>73 €</b></div>
+            <div class="rest"><span>Left to pay<span class="due">by 12 Sept, on the day</span></span><b>127 €</b></div>
+            <div class="adds"><span>+ Add a payment</span></div>
+            <p class="hand" style="margin-top: var(--space-2)">the budget already counts the 200 €: paying only changes what’s left</p>
+          </div>
+        </div>
+        <figcaption><b>1 · A line paid in parts.</b> On the trip page the line stays <b>Booked</b> at its full price (your share), with <i>deposit paid · 37 € left</i> under it; a few days before the balance is due, a handwritten reminder and the mustard dot. Open it: what’s been paid (each payment, who, when), <b>left to pay</b> and by when, “+ Add a payment”.</figcaption>
+      </figure>
+
+      <!-- 2. Adding a payment -->
+      <figure>
+        <div class="phone stack">
+          <div class="sketch-box sketch-box--strong card" data-seed="73">
+            <svg class="sketch-box__line" aria-hidden="true"></svg>
+            <span class="tape tape--mustard" aria-hidden="true"></span>
+            <header class="card__head"><h2>A payment<small>Casa Kolacho</small></h2></header>
+            <span class="field__label">What is it?</span>
+            <div class="chips"><button class="chip" aria-pressed="false">Deposit</button><button class="chip" aria-pressed="true">Balance</button><button class="chip" aria-pressed="false">Instalment</button></div>
+            <div class="row2">
+              <div class="field"><label class="field__label">Amount</label><div class="field__box"><input class="field__input num" value="127" /><span class="field__unit">EUR</span></div></div>
+              <div class="field"><label class="field__label">On</label><input class="field__input" value="12 Sept" /></div>
+            </div>
+            <div class="field"><label class="field__label">Paid by</label><input class="field__input" value="Djamina" /></div>
+            <p class="hand">= what was left: Casa Kolacho will be <b>paid in full</b></p>
+            <div class="add-item__actions" style="margin-top: var(--space-3)"><button class="button button--quiet">Cancel</button><button class="button button--primary">Add</button></div>
+          </div>
+
+          <div class="sketch-box sketch-box--light card" data-seed="74">
+            <svg class="sketch-box__line" aria-hidden="true"></svg>
+            <header class="card__head"><h2>Frégate Agency package<small>10 240 € in all</small></h2></header>
+            <span class="section-label">Paid so far · each their own share</span>
+            <div class="pay"><span><span class="kind">Instalment</span><small>Djamina · 2 Aug</small></span><b>1 500 €</b></div>
+            <div class="pay"><span><span class="kind">Instalment</span><small>Djamina · 13 Aug</small></span><b>1 060 €</b></div>
+            <div class="pay"><span><span class="kind">Paid</span><small>Danielle · Peggy · Gabriel · their share each</small></span><b>7 680 €</b></div>
+            <div class="rest"><span>Paid in full</span><b style="color:var(--confirmed)">✓</b></div>
+          </div>
+        </div>
+        <figcaption><b>2 · Adding a payment.</b> Deposit, balance or instalment; amount (any currency, rate saved); the day; who paid (one person, or “each their own share”). The form says what it leaves. <b>Below:</b> your package, paid in 2 instalments, while the others paid their share at once. Who paid what counts each payment with its own payer.</figcaption>
+      </figure>
+
+      <!-- 3. Budget: what's left to pay -->
+      <figure>
+        <div class="phone stack">
+          <div class="sketch-box sketch-box--strong card" data-seed="75">
+            <svg class="sketch-box__line" aria-hidden="true"></svg>
+            <span class="tape tape--green" aria-hidden="true"></span>
+            <header class="card__head"><h2>What’s left to pay<small>your share</small></h2></header>
+            <div class="total-left"><p>Still to pay before / during the trip</p><b>312 €</b><span class="who-pays">on 4 lines · 1 late</span></div>
+            <div class="pay"><span><span class="dot-todo"></span>Boat to Rosario islands<small>was due <span class="circled">1 Sept</span></small><span class="late-word">↑ late: pay it or change the date</span></span><b>90 €</b></div>
+            <div class="pay"><span>Casa Kolacho graffiti tour<small>by 12 Sept · on the day</small></span><b>37 €</b></div>
+            <div class="pay"><span>Spa day<small>by 15 Sept</small></span><b>140 €</b></div>
+            <div class="pay"><span>Palenque tour<small>no date</small></span><b>45 €</b></div>
+          </div>
+          <p class="hand" style="padding: 0 var(--space-2)">Late = the mustard “to decide” dot and the date circled in pen (red stays for over budget only). Reminders by email / phone come after going online.</p>
+        </div>
+        <figcaption><b>3 · In Budget: “What’s left to pay”.</b> Every booked line with something left, soonest first, with the total left (yours, or the whole trip with the switch). Late ones get the mustard dot and a circled date. Tap one to add the payment. <i>Example amounts.</i></figcaption>
+      </figure>
+    </div>
+  </body>
+</html>

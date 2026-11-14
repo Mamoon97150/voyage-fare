@@ -2,7 +2,7 @@ import { Link } from 'react-router'
 import { HandBar } from '../components/HandBar'
 import { Card, MoneyScreen } from '../components/MoneyScreen'
 import { formatWhole } from '../lib/money'
-import { categoryLines, everyoneLines, notCounted, placeLines } from '../lib/moneyPages'
+import { categoryLines, everyoneLines, leftToPayLines, notCounted, placeLines } from '../lib/moneyPages'
 
 /**
  * Budget (build 4, mockup budget-v4): the notebook's last page. One card per section, like the
@@ -19,8 +19,10 @@ export function Budget() {
         const figure = mode === 'mine' && viewer ? detail.travellerShares.find((s) => s.traveller_id === viewer)?.share_current : detail.budget?.current_total
         const whose = solo ? 'the trip' : mode === 'mine' ? 'your share' : 'whole trip'
         const missing = notCounted(detail)
+        const left = leftToPayLines(detail, viewer, mode)
         return (
           <>
+            {left.lines.length > 0 && <LeftToPayCard left={left} currency={currency} whose={whose} />}
             <Card title="By category" small={whose} total={formatWhole(figure === null || figure === undefined ? null : Number(figure), currency)} seed={71}>
               {cats.length === 0 ? (
                 <p className="card__note">nothing priced yet</p>
@@ -93,5 +95,54 @@ export function Budget() {
         )
       }}
     </MoneyScreen>
+  )
+}
+
+const day = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' })
+const dayOf = (iso: string) => day.format(new Date(`${iso}T00:00:00Z`))
+
+/** "What's left to pay" (mockup left-to-pay-v4, step 3): soonest first; a late one gets the mustard dot. */
+function LeftToPayCard({ left, currency, whose }: { left: ReturnType<typeof leftToPayLines>; currency: string; whose: string }) {
+  return (
+    <Card title="What’s left to pay" small={whose} seed={70}>
+      <div className="left-total">
+        <p>Still to pay</p>
+        <b className="num">{formatWhole(left.total, currency)}</b>
+        <span>
+          on {left.lines.length} {left.lines.length === 1 ? 'line' : 'lines'}
+          {left.late ? ` · ${left.late} late` : ''}
+        </span>
+      </div>
+      <ul className="lines">
+        {left.lines.map((l) => {
+          const late = l.dueIn !== null && l.dueIn < 0
+          return (
+            <li key={l.id} className="line">
+              <span>
+                <span className="line__name">
+                  {late && <span className="dot-todo" aria-hidden="true" />}
+                  {l.name}
+                </span>
+                <span className="line__meta">
+                  {l.due ? (
+                    late ? (
+                      <>
+                        was due <span className="circled">{dayOf(l.due)}</span>
+                      </>
+                    ) : (
+                      `by ${dayOf(l.due)}`
+                    )
+                  ) : (
+                    'no date'
+                  )}
+                </span>
+                {late && <span className="left-late">↑ late: pay it or change the date</span>}
+              </span>
+              <b className="line__amount num">{formatWhole(l.amount, currency)}</b>
+            </li>
+          )
+        })}
+      </ul>
+    </Card>
   )
 }

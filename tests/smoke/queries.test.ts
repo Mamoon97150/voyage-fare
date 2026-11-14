@@ -10,11 +10,13 @@ import {
   addPlace,
   addTicket,
   acceptInvitation,
+  addPayment,
   addTraveller,
   cancelInvitation,
   chooseOption,
   createTrip,
   deleteDailyEstimate,
+  deletePayment,
   deleteItem,
   deleteOption,
   deleteRepayment,
@@ -31,7 +33,9 @@ import {
   removeTraveller,
   saveDailyEstimate,
   setEstimateDays,
+  setItemDue,
   setItemPackage,
+  setItemStatus,
   setPackageCover,
   renameTraveller,
   setFavourite,
@@ -228,6 +232,23 @@ describe('the real queries, end to end', () => {
     await setItemPackage(hotel, null)
     detail = await getTrip(tripId)
     expect(Number(detail!.amounts.find((a) => a.item_id === hotel)?.current)).toBe(300)
+  })
+
+  it('paid in parts: a deposit, a due date, what’s left, then deleted', async () => {
+    const tour = await addItem({ tripId, placeId: null, kind: 'activity', name: 'Tour paid in parts', dayNumber: null, endDayNumber: null, amount: 200 })
+    await setItemStatus({ id: tour, status: 'booked', actualAmount: 200, paidBy: null })
+    const me = (await getTrip(tripId))!.travellers.find((t) => t.user_id === userId)!
+    const pay = await addPayment({ itemId: tour, kind: 'deposit', amount: 80, paidBy: me.id, each: false, paidOn: '2027-05-01' })
+    await setItemDue(tour, '2027-05-20')
+    let detail = await getTrip(tripId)
+    const left = detail!.itemLeft.find((l) => l.item_id === tour)!
+    expect([Number(left.paid), Number(left.left_to_pay), left.due_on]).toEqual([80, 120, '2027-05-20'])
+    expect(detail!.payments.map((p) => p.kind)).toEqual(['deposit'])
+    await addPayment({ itemId: tour, kind: 'balance', amount: 120, paidBy: me.id, each: false, paidOn: '2027-05-20' })
+    expect((await getTrip(tripId))!.items.find((i) => i.id === tour)?.status).toBe('paid')
+    await deletePayment(pay)
+    detail = await getTrip(tripId)
+    expect(detail!.items.find((i) => i.id === tour)?.status).toBe('booked')
   })
 
   it('deleting the trip removes it from the list', async () => {

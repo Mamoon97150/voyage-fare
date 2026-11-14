@@ -310,3 +310,45 @@ export function coversText(detail: Pick<TripDetail, 'items'>, pkg: Item): string
     })
     .join(' · ')}`
 }
+
+// ── What's left to pay (build 6, mockup left-to-pay-v4) ─────────────────────────
+
+/** Days from today (local) to an ISO date: negative = late. */
+export function daysUntil(iso: string, today = new Date()): number {
+  const start = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate())
+  return Math.round((Date.parse(`${iso}T00:00:00Z`) - start) / 86_400_000)
+}
+
+export type LeftLine = {
+  /** Paid so far and left, whole line. */
+  paid: number
+  left: number
+  /** Left for you (your share) or the whole line, as the page shows. */
+  leftShown: number
+  hasPayments: boolean
+  /** "deposit paid" when only a deposit is in, else "paid in part". */
+  paidWord: string
+  due: string | null
+  /** Days until the balance is due (negative = late); null without a date or nothing left. */
+  dueIn: number | null
+}
+
+/** A booked line's paid / left to pay; null for lines with nothing to pay (not booked, in a package). */
+export function leftLine(detail: TripDetail, item: Item, viewer: string | null, mode: Mode): LeftLine | null {
+  const row = (detail.itemLeft ?? []).find((l) => l.item_id === item.id)
+  if (!row) return null
+  const left = num(row.left_to_pay) ?? 0
+  const paid = num(row.paid) ?? 0
+  const share = detail.shares.find((s) => s.item_id === item.id && s.traveller_id === viewer)
+  const leftShown = mode === 'total' || !viewer ? left : Math.round(left * Number(share?.fraction ?? 0) * 100) / 100
+  const kinds = (detail.payments ?? []).filter((p) => p.item_id === item.id).map((p) => p.kind)
+  return {
+    paid,
+    left,
+    leftShown,
+    hasPayments: kinds.length > 0,
+    paidWord: kinds.length > 0 && kinds.every((k) => k === 'deposit') ? 'deposit paid' : 'paid in part',
+    due: row.due_on,
+    dueIn: row.due_on && left > 0 ? daysUntil(row.due_on) : null,
+  }
+}

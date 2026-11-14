@@ -73,6 +73,8 @@ export type ItemAmount = Tables<'v_item_amounts'>
 export type DailyEstimate = Tables<'daily_estimates'>
 export type EstimatePeople = Tables<'v_daily_estimate_people'>
 export type EstimateCheck = Tables<'v_daily_estimate_checks'>
+export type Payment = Tables<'payments'>
+export type ItemLeft = Tables<'v_item_left'>
 export type ItemShare = Tables<'v_item_shares'>
 export type TripBudget = Tables<'v_trip_budget'>
 export type TravellerShare = Tables<'v_traveller_shares'>
@@ -99,11 +101,14 @@ export type TripDetail = {
   dailyEstimates: DailyEstimate[]
   estimatePeople: EstimatePeople[]
   estimateChecks: EstimateCheck[]
+  /** Payments in parts (build 6) and, per booked line, paid so far / left to pay. */
+  payments: Payment[]
+  itemLeft: ItemLeft[]
 }
 
 /** null when the trip doesn't exist or isn't shared with this person (privacy hides both the same way). */
 export async function getTrip(id: string): Promise<TripDetail | null> {
-  const [trip, travellers, places, items, options, legs, amounts, shares, budget, travellerShares, placeTotals, travellerPlaceTotals, rooms, roomOccupants, dailyEstimates, estimatePeople, estimateChecks] =
+  const [trip, travellers, places, items, options, legs, amounts, shares, budget, travellerShares, placeTotals, travellerPlaceTotals, rooms, roomOccupants, dailyEstimates, estimatePeople, estimateChecks, payments, itemLeft] =
     await Promise.all([
       supabase.from('trips').select('*').eq('id', id).maybeSingle(),
       supabase.from('travellers').select('*').eq('trip_id', id).order('position'),
@@ -122,8 +127,10 @@ export async function getTrip(id: string): Promise<TripDetail | null> {
       supabase.from('daily_estimates').select('*').eq('trip_id', id).order('label'),
       supabase.from('v_daily_estimate_people').select('*').eq('trip_id', id),
       supabase.from('v_daily_estimate_checks').select('*').eq('trip_id', id),
+      supabase.from('payments').select('*').eq('trip_id', id).order('paid_on').order('created_at'),
+      supabase.from('v_item_left').select('*').eq('trip_id', id),
     ])
-  for (const r of [trip, travellers, places, items, options, legs, amounts, shares, budget, travellerShares, placeTotals, travellerPlaceTotals, rooms, roomOccupants, dailyEstimates, estimatePeople, estimateChecks]) {
+  for (const r of [trip, travellers, places, items, options, legs, amounts, shares, budget, travellerShares, placeTotals, travellerPlaceTotals, rooms, roomOccupants, dailyEstimates, estimatePeople, estimateChecks, payments, itemLeft]) {
     if (r.error) throw r.error
   }
   if (!trip.data) return null
@@ -145,6 +152,8 @@ export async function getTrip(id: string): Promise<TripDetail | null> {
     dailyEstimates: dailyEstimates.data ?? [],
     estimatePeople: estimatePeople.data ?? [],
     estimateChecks: estimateChecks.data ?? [],
+    payments: payments.data ?? [],
+    itemLeft: itemLeft.data ?? [],
   }
 }
 
@@ -691,5 +700,46 @@ export async function setPackageCover(packageId: string, items: string[]): Promi
 /** One line in a package, or out of it (null). */
 export async function setItemPackage(itemId: string, packageId: string | null): Promise<void> {
   const { error } = await supabase.rpc('set_item_package', { p_item_id: itemId, p_package_id: packageId })
+  if (error) throw error
+}
+
+// ── Paid in parts: what's left to pay (build 6) ─────────────────────────────────
+
+export type PaymentKind = 'deposit' | 'balance' | 'instalment' | 'payment'
+
+export async function addPayment(p: {
+  itemId: string
+  kind: PaymentKind
+  amount: number
+  /** Another currency than the trip's, with the rate saved now (trip currency per 1 unit). */
+  currency?: string
+  rate?: number
+  /** A traveller, or null with each = true: everyone on the line paid their own share. */
+  paidBy: string | null
+  each: boolean
+  paidOn: string
+}): Promise<string> {
+  const { data, error } = await supabase.rpc('add_payment', {
+    p_item_id: p.itemId,
+    p_kind: p.kind,
+    p_amount: p.amount,
+    p_currency: p.currency,
+    p_rate: p.rate,
+    p_paid_by: p.paidBy ?? undefined,
+    p_paid_each: p.each,
+    p_paid_on: p.paidOn,
+  })
+  if (error) throw error
+  return data
+}
+
+export async function deletePayment(id: string): Promise<void> {
+  const { error } = await supabase.rpc('delete_payment', { p_payment_id: id })
+  if (error) throw error
+}
+
+/** When the balance is due; null = no date. */
+export async function setItemDue(itemId: string, dueOn: string | null): Promise<void> {
+  const { error } = await supabase.rpc('set_item_due', { p_item_id: itemId, p_due_on: dueOn })
   if (error) throw error
 }
