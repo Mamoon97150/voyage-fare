@@ -29,7 +29,7 @@ export function RouteMap({ route, big = false, height }: { route: Route; big?: b
       maxZoom: 16,
     }).addTo(map)
 
-    const ink = getComputedStyle(document.documentElement).getPropertyValue('--ink').trim() || '#1f2a24'
+    const ink = getComputedStyle(document.documentElement).getPropertyValue('--ink').trim() || 'currentColor'
     const pts: LatLng[] = route.pinned.map((s) => s.at)
     const home = route.home?.at ?? null
 

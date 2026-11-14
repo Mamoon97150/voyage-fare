@@ -31,21 +31,22 @@ export function HandBar({
       const { width, height } = el.getBoundingClientRect()
       if (width < 20 || height < 6) return
       const css = getComputedStyle(el)
-      const colour = (name: string, fallback: string) => css.getPropertyValue(name).trim() || fallback
+      // The palette's variables (tokens.css): no colour typed here.
+      const colour = (name: string) => css.getPropertyValue(name).trim() || 'currentColor'
       const r = rough.svg(svg)
       const w = width - 4
       const hatch = { roughness: 1.2, fillStyle: 'hachure', hachureGap: 3, fillWeight: 1.4, stroke: 'none' } as const
       svg.setAttribute('viewBox', `0 0 ${width} ${height}`)
       const parts: SVGGElement[] = []
-      if (confirmed > 0) parts.push(r.rectangle(2, 3, w * confirmed, height - 6, { ...hatch, seed: 3, fill: colour('--confirmed', '#2f6b4f') }))
+      if (confirmed > 0) parts.push(r.rectangle(2, 3, w * confirmed, height - 6, { ...hatch, seed: 3, fill: colour('--confirmed') }))
       if (estimated > 0) {
-        const fill = over ? colour('--over', '#c2513f') : colour('--estimated', '#e2a93b')
+        const fill = over ? colour('--over') : colour('--estimated')
         parts.push(r.rectangle(2 + w * confirmed, 3, w * estimated, height - 6, { ...hatch, seed: 4, fill }))
       }
-      if (!bare) parts.push(r.rectangle(2, 2, w, height - 4, { seed: 5, roughness: 0.9, bowing: 1, strokeWidth: 1.1, stroke: colour('--ink-soft', '#55615a') }))
+      if (!bare) parts.push(r.rectangle(2, 2, w, height - 4, { seed: 5, roughness: 0.9, bowing: 1, strokeWidth: 1.1, stroke: colour('--ink-soft') }))
       if (target !== null) {
         const x = 2 + w * target
-        parts.push(r.line(x, -2, x, height + 2, { seed: 6, roughness: 0.6, strokeWidth: 2, stroke: colour('--ink', '#1f2a24') }))
+        parts.push(r.line(x, -2, x, height + 2, { seed: 6, roughness: 0.6, strokeWidth: 2, stroke: colour('--ink') }))
       }
       svg.replaceChildren(...parts)
     }
