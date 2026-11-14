@@ -147,7 +147,7 @@ export type Tab = 'travel' | 'stay' | 'around' | 'activities' | 'food'
 export const TABS: { key: Tab; label: string; kinds: ItemKind[] }[] = [
   { key: 'travel', label: 'Travel', kinds: ['transport'] },
   { key: 'stay', label: 'Stay', kinds: ['housing'] },
-  { key: 'around', label: 'Around', kinds: ['car_rental', 'transport'] },
+  { key: 'around', label: 'Getting around', kinds: ['car_rental', 'transport'] },
   { key: 'activities', label: 'Activities', kinds: ['activity'] },
   { key: 'food', label: 'Food', kinds: ['restaurant'] },
 ]

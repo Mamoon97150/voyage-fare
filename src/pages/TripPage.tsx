@@ -5,6 +5,7 @@ import { Sketch, SketchBox } from '../components/Sketch'
 import { TripBudget } from '../components/TripBudget'
 import { TripNav } from '../components/TripNav'
 import { AddPlace } from '../components/trip/AddPlace'
+import { EstimateForm, EstimateRows } from '../components/trip/DailyEstimates'
 import { AddItem } from '../components/trip/ItemForm'
 import { ItemRow } from '../components/trip/ItemRow'
 import { PlaceForm } from '../components/trip/PlaceForm'
@@ -202,6 +203,7 @@ export function TripPage() {
                           </ul>
                         </div>
                       ))}
+                      <EstimateRows detail={detail} placeId={place.id} viewer={viewer} mode={shownMode} onChanged={reload} />
                       {adding === place.id ? (
                         <AddItem
                           detail={detail}
@@ -211,13 +213,23 @@ export function TripPage() {
                           onAdded={added}
                           onCancel={() => setAdding(null)}
                         />
+                      ) : adding === `estimate:${place.id}` ? (
+                        <EstimateForm detail={detail} placeId={place.id} onDone={added} onCancel={() => setAdding(null)} />
                       ) : (
-                        <button type="button" className="add-row place__add" onClick={() => setAdding(place.id)}>
-                          <span className="add-row__plus" aria-hidden="true">
-                            +
-                          </span>
-                          Add to {place.name}
-                        </button>
+                        <div className="place__adds">
+                          <button type="button" className="add-row place__add" onClick={() => setAdding(place.id)}>
+                            <span className="add-row__plus" aria-hidden="true">
+                              +
+                            </span>
+                            Add to {place.name}
+                          </button>
+                          <button type="button" className="add-row place__add" onClick={() => setAdding(`estimate:${place.id}`)}>
+                            <span className="add-row__plus" aria-hidden="true">
+                              +
+                            </span>
+                            Daily estimate
+                          </button>
+                        </div>
                       )}
                     </SketchBox>
                   </section>
@@ -251,6 +263,7 @@ export function TripPage() {
                     ))}
                   </ul>
                 )}
+                <EstimateRows detail={detail} placeId={null} viewer={viewer} mode={shownMode} onChanged={reload} />
                 {adding === 'trip' ? (
                   <AddItem
                     detail={detail}
@@ -260,13 +273,23 @@ export function TripPage() {
                     onAdded={added}
                     onCancel={() => setAdding(null)}
                   />
+                ) : adding === 'estimate:trip' ? (
+                  <EstimateForm detail={detail} placeId={null} onDone={added} onCancel={() => setAdding(null)} />
                 ) : (
-                  <button type="button" className="add-row place__add" onClick={() => setAdding('trip')}>
-                    <span className="add-row__plus" aria-hidden="true">
-                      +
-                    </span>
-                    Add to the whole trip
-                  </button>
+                  <div className="place__adds">
+                    <button type="button" className="add-row place__add" onClick={() => setAdding('trip')}>
+                      <span className="add-row__plus" aria-hidden="true">
+                        +
+                      </span>
+                      Add to the whole trip
+                    </button>
+                    <button type="button" className="add-row place__add" onClick={() => setAdding('estimate:trip')}>
+                      <span className="add-row__plus" aria-hidden="true">
+                        +
+                      </span>
+                      Daily estimate
+                    </button>
+                  </div>
                 )}
               </SketchBox>
             </section>

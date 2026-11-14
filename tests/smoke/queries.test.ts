@@ -14,6 +14,7 @@ import {
   cancelInvitation,
   chooseOption,
   createTrip,
+  deleteDailyEstimate,
   deleteItem,
   deleteOption,
   deleteRepayment,
@@ -28,6 +29,8 @@ import {
   listOpenInvitations,
   listTrips,
   removeTraveller,
+  saveDailyEstimate,
+  setEstimateDays,
   renameTraveller,
   setFavourite,
   updateItem,
@@ -195,6 +198,21 @@ describe('the real queries, end to end', () => {
     expect((await getInvitationPreview(token))?.state).toBe('cancelled')
     expect(await listOpenInvitations(tripId)).toEqual([])
     expect(await getInvitationPreview('nope')).toBeNull()
+  })
+
+  it('daily estimates: add, change the days, delete', async () => {
+    const id = await saveDailyEstimate({
+      tripId, placeId: null, category: 'food', label: 'Food & drinks', amount: 30, currency: 'EUR', rate: 1, days: 3, travellers: [],
+    })
+    let detail = await getTrip(tripId)
+    expect(detail!.dailyEstimates.map((e) => e.label)).toEqual(['Food & drinks'])
+    expect(detail!.estimatePeople.filter((p) => p.daily_estimate_id === id)).toHaveLength(detail!.travellers.length)
+    expect(detail!.estimateChecks.some((c) => c.daily_estimate_id === id)).toBe(true)
+    await setEstimateDays(id, 5)
+    detail = await getTrip(tripId)
+    expect(detail!.dailyEstimates[0].days).toBe(5)
+    await deleteDailyEstimate(id)
+    expect((await getTrip(tripId))!.dailyEstimates).toEqual([])
   })
 
   it('deleting the trip removes it from the list', async () => {

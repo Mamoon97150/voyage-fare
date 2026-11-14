@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { amountForInput } from '../../lib/money'
 import { deleteItem, updateItem, type Item, type ItemKind, type TripDetail } from '../../lib/trips'
-import { daysText, itemLine, itemTitle, KINDS, type Mode } from '../../lib/tripView'
+import { daysText, itemLine, itemTitle, kindLabel, type Mode } from '../../lib/tripView'
 import { optionCount } from '../../lib/options'
 import { amountText, priceInCompare, STATUS, priceOf } from './itemShared'
 import { DropControl } from './DropControl'
@@ -39,7 +39,7 @@ export function ItemRow({
   const dot = item.status === 'dropped' ? 'dot--none' : !line.priced ? 'dot--none' : line.confirmed ? 'dot--confirmed' : 'dot--estimated'
   const { title, decision } = itemTitle(detail, item)
   const meta = [
-    decision ?? KINDS[item.kind as ItemKind]?.label,
+    decision ?? kindLabel(item.kind as ItemKind, item.place_id !== null).label,
     showDays ? daysText(item) : null,
     optionCount(detail, item) >= 2 ? `${optionCount(detail, item)} options compared` : null,
     item.note,
@@ -58,7 +58,7 @@ export function ItemRow({
         <ItemForm
           detail={detail}
           formId={`edit-${item.id}`}
-          kinds={kinds.includes(item.kind as ItemKind) ? kinds : [item.kind as ItemKind, ...kinds]}
+          kinds={editKinds(kinds, item.kind as ItemKind)}
           days={days}
           initial={{
             kind: item.kind as ItemKind,
@@ -131,4 +131,14 @@ export function ItemRow({
       </button>
     </li>
   )
+}
+
+/**
+ * The kinds offered when changing a line: its own kind stays pickable. An older rental car in a
+ * place takes the place of "Getting around" (both say it), so the word isn't there twice.
+ */
+function editKinds(kinds: ItemKind[], own: ItemKind): ItemKind[] {
+  if (kinds.includes(own)) return kinds
+  if (own === 'car_rental' && kinds.includes('transport')) return kinds.map((k) => (k === 'transport' ? own : k))
+  return [own, ...kinds]
 }

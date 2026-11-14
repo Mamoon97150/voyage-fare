@@ -4,19 +4,30 @@ import type { Item, ItemKind, Leg, Place, TicketChange, TicketMode, TripDetail }
 
 export type Mode = 'mine' | 'total'
 
+/**
+ * The words are the budget's categories, the same on adding, Compare and Budget (14 Nov):
+ * Travel · Stay · Getting around · Activities · Food · Insurance · Other.
+ * A transport line inside a place is getting around (a taxi, a ferry); for the whole trip it's a ticket.
+ */
 export const KINDS: Record<ItemKind, { label: string; icon: string }> = {
-  transport: { label: 'Transport', icon: '✈' },
+  transport: { label: 'Travel', icon: '✈' },
   housing: { label: 'Stay', icon: '⌂' },
-  activity: { label: 'Activity', icon: '✦' },
-  restaurant: { label: 'Restaurant', icon: '◍' },
-  car_rental: { label: 'Car', icon: '◫' },
+  activity: { label: 'Activities', icon: '✦' },
+  restaurant: { label: 'Food', icon: '◍' },
+  car_rental: { label: 'Getting around', icon: '⇄' },
   insurance: { label: 'Insurance', icon: '☂' },
   other: { label: 'Other', icon: '•' },
 }
 
+/** A kind's word where it is: transport inside a place is "Getting around". */
+export function kindLabel(kind: ItemKind, inPlace: boolean): { label: string; icon: string } {
+  if (kind === 'transport' && inPlace) return KINDS.car_rental
+  return KINDS[kind] ?? KINDS.other
+}
+
 /** What can be added where: tickets and insurance belong to the whole trip, stays and outings to a place. */
-export const KINDS_FOR_PLACE: ItemKind[] = ['housing', 'activity', 'restaurant', 'transport', 'car_rental', 'other']
-export const KINDS_FOR_TRIP: ItemKind[] = ['transport', 'insurance', 'car_rental', 'other']
+export const KINDS_FOR_PLACE: ItemKind[] = ['housing', 'activity', 'restaurant', 'transport', 'other']
+export const KINDS_FOR_TRIP: ItemKind[] = ['transport', 'car_rental', 'insurance', 'other']
 
 /** Kinds that usually last several days. */
 export const SPANS_DAYS: ItemKind[] = ['housing', 'car_rental']
@@ -219,5 +230,45 @@ export function ticketOf(detail: Pick<TripDetail, 'legs'>, item: Item, amount: n
     roundTrip: Boolean(back),
     returnAfterPlaceId: back?.after_place_id ?? null,
     amount,
+  }
+}
+
+// ── Daily estimates (build 6) ───────────────────────────────────────────────────
+
+/** What a daily estimate can be for: the budget's words (14 Nov), with a name to start from. */
+export const ESTIMATE_CATEGORIES: { key: string; label: string; suggestion: string }[] = [
+  { key: 'food', label: 'Food', suggestion: 'Food & drinks' },
+  { key: 'local_transport', label: 'Getting around', suggestion: 'Getting around' },
+  { key: 'activities', label: 'Activities', suggestion: 'Activities' },
+  { key: 'buffer', label: 'Other', suggestion: 'Extras' },
+]
+
+/** Days by default: the place's nights, or the trip's days for the whole trip. */
+export function estimateDefaultDays(detail: Pick<TripDetail, 'trip' | 'places'>, placeId: string | null): number {
+  if (placeId) return detail.places.find((p) => p.id === placeId)?.nights ?? 0
+  return tripDays(detail)
+}
+
+/**
+ * One estimate's figure: your share (a day each × days, if it's for you) or the whole group's.
+ * Same rounding as the budget view (BR-7): the day's amount in the trip currency, to the cent, × days.
+ */
+export function estimateLine(
+  detail: Pick<TripDetail, 'estimatePeople' | 'estimateChecks'>,
+  e: { id: string; amount: number; rate: number; days: number },
+  viewer: string | null,
+  mode: Mode,
+): { amount: number | null; people: number; forViewer: boolean; mismatch: boolean; expectedDays: number | null } {
+  const people = (detail.estimatePeople ?? []).filter((p) => p.daily_estimate_id === e.id)
+  const forViewer = viewer !== null && people.some((p) => p.traveller_id === viewer)
+  const each = (Math.round(Number(e.amount) * Number(e.rate) * 100) / 100) * e.days
+  const check = (detail.estimateChecks ?? []).find((c) => c.daily_estimate_id === e.id)
+  const amount = mode === 'total' || !viewer ? each * people.length : forViewer ? each : null
+  return {
+    amount,
+    people: people.length,
+    forViewer,
+    mismatch: Boolean(check?.days_mismatch),
+    expectedDays: check?.expected_days ?? null,
   }
 }

@@ -1163,6 +1163,21 @@ export type Database = {
         }
         Returns: string
       }
+      save_daily_estimate: {
+        Args: {
+          p_amount: number
+          p_category: string
+          p_currency: string
+          p_days: number
+          p_id: string | null
+          p_label: string
+          p_place_id: string | null
+          p_rate: number | null
+          p_travellers?: string[]
+          p_trip_id: string
+        }
+        Returns: string
+      }
       set_item_dropped: {
         Args: { p_dropped: boolean; p_item_id: string }
         Returns: undefined

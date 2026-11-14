@@ -2638,3 +2638,103 @@ select.field__input,
   color: var(--confirmed);
   cursor: pointer;
 }
+
+/* ── Daily estimates (build 6, mockup daily-estimates-v4) ─────────────────────── */
+.place__adds {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: var(--space-4);
+}
+
+.estimates {
+  border-top: 1px dashed var(--line);
+  margin-top: var(--space-1);
+}
+
+.estimate-row__approx {
+  color: var(--estimated-ink);
+}
+
+.estimate-row__calc {
+  display: block;
+  font-family: var(--font-hand);
+  font-size: 1.1rem;
+  line-height: 1.15;
+  color: var(--ink-soft);
+}
+
+.item-row__status--estimated {
+  color: var(--estimated-ink);
+}
+
+/* A number to look at again: circled in mustard pen (no side bars: 14 Nov). */
+.circled {
+  display: inline-block;
+  padding: 0 0.3rem;
+  margin: 0 0.1rem;
+  border: 1.6px solid var(--estimated);
+  border-radius: 50% 45% 55% 48% / 60% 50% 55% 45%;
+  transform: rotate(-3deg);
+  color: var(--ink);
+}
+
+.estimate-row__check {
+  padding: 0 0 var(--space-2) calc(0.55rem + var(--space-3));
+}
+
+.estimate-row__note {
+  font-family: var(--font-hand);
+  font-size: 1.15rem;
+  line-height: 1.2;
+  color: var(--estimated-ink);
+  transform: rotate(-1.5deg);
+  transform-origin: left;
+  margin-left: var(--space-6);
+}
+
+.estimate-row__fix {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+.estimate-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) 0;
+}
+
+.estimate-form .chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+.estimate-form__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 5.5rem;
+  gap: var(--space-2);
+}
+
+.estimate-form__days {
+  font-size: 1.1rem;
+  color: var(--ink-soft);
+  margin-top: calc(-1 * var(--space-1));
+}
+
+.estimate-form__sum {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-top: 1.5px solid var(--ink);
+}
+
+.estimate-form__sum .hand {
+  font-size: 1.1rem;
+  color: var(--ink-soft);
+}

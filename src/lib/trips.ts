@@ -70,6 +70,9 @@ export type Room = Tables<'rooms'>
 export type RoomOccupant = Tables<'room_occupants'>
 export type Leg = Tables<'item_legs'>
 export type ItemAmount = Tables<'v_item_amounts'>
+export type DailyEstimate = Tables<'daily_estimates'>
+export type EstimatePeople = Tables<'v_daily_estimate_people'>
+export type EstimateCheck = Tables<'v_daily_estimate_checks'>
 export type ItemShare = Tables<'v_item_shares'>
 export type TripBudget = Tables<'v_trip_budget'>
 export type TravellerShare = Tables<'v_traveller_shares'>
@@ -92,11 +95,15 @@ export type TripDetail = {
   /** A stay's option by room (SR-4): each room, and who sleeps in it. */
   rooms: Room[]
   roomOccupants: RoomOccupant[]
+  /** Daily estimates (build 6), who they're for, and whether their days still fit. */
+  dailyEstimates: DailyEstimate[]
+  estimatePeople: EstimatePeople[]
+  estimateChecks: EstimateCheck[]
 }
 
 /** null when the trip doesn't exist or isn't shared with this person (privacy hides both the same way). */
 export async function getTrip(id: string): Promise<TripDetail | null> {
-  const [trip, travellers, places, items, options, legs, amounts, shares, budget, travellerShares, placeTotals, travellerPlaceTotals, rooms, roomOccupants] =
+  const [trip, travellers, places, items, options, legs, amounts, shares, budget, travellerShares, placeTotals, travellerPlaceTotals, rooms, roomOccupants, dailyEstimates, estimatePeople, estimateChecks] =
     await Promise.all([
       supabase.from('trips').select('*').eq('id', id).maybeSingle(),
       supabase.from('travellers').select('*').eq('trip_id', id).order('position'),
@@ -112,8 +119,11 @@ export async function getTrip(id: string): Promise<TripDetail | null> {
       supabase.from('v_traveller_by_place').select('*').eq('trip_id', id),
       supabase.from('rooms').select('*').eq('trip_id', id).order('position'),
       supabase.from('room_occupants').select('*').eq('trip_id', id),
+      supabase.from('daily_estimates').select('*').eq('trip_id', id).order('label'),
+      supabase.from('v_daily_estimate_people').select('*').eq('trip_id', id),
+      supabase.from('v_daily_estimate_checks').select('*').eq('trip_id', id),
     ])
-  for (const r of [trip, travellers, places, items, options, legs, amounts, shares, budget, travellerShares, placeTotals, travellerPlaceTotals, rooms, roomOccupants]) {
+  for (const r of [trip, travellers, places, items, options, legs, amounts, shares, budget, travellerShares, placeTotals, travellerPlaceTotals, rooms, roomOccupants, dailyEstimates, estimatePeople, estimateChecks]) {
     if (r.error) throw r.error
   }
   if (!trip.data) return null
@@ -132,6 +142,9 @@ export async function getTrip(id: string): Promise<TripDetail | null> {
     travellerPlaceTotals: travellerPlaceTotals.data ?? [],
     rooms: rooms.data ?? [],
     roomOccupants: roomOccupants.data ?? [],
+    dailyEstimates: dailyEstimates.data ?? [],
+    estimatePeople: estimatePeople.data ?? [],
+    estimateChecks: estimateChecks.data ?? [],
   }
 }
 
@@ -620,3 +633,49 @@ export async function leaveTrip(tripId: string): Promise<void> {
 
 /** The address someone opens to join: the app's own address + the secret. */
 export const joinLink = (token: string) => `${window.location.origin}/join/${token}`
+
+// ── Daily estimates (build 6) ───────────────────────────────────────────────────
+
+export type EstimateInput = {
+  id?: string | null
+  tripId: string
+  placeId: string | null
+  category: string
+  label: string
+  /** A day, each, in `currency`. */
+  amount: number
+  currency: string
+  /** Trip currency per 1 unit of `currency`; 1 for the trip's own currency. */
+  rate: number
+  days: number
+  /** Who it's for; empty = everyone. */
+  travellers: string[]
+}
+
+export async function saveDailyEstimate(e: EstimateInput): Promise<string> {
+  const { data, error } = await supabase.rpc('save_daily_estimate', {
+    p_id: e.id ?? null,
+    p_trip_id: e.tripId,
+    p_place_id: e.placeId,
+    p_category: e.category,
+    p_label: e.label,
+    p_amount: e.amount,
+    p_currency: e.currency,
+    p_rate: e.rate,
+    p_days: e.days,
+    p_travellers: e.travellers,
+  })
+  if (error) throw error
+  return data
+}
+
+export async function deleteDailyEstimate(id: string): Promise<void> {
+  const { error } = await supabase.from('daily_estimates').delete().eq('id', id)
+  if (error) throw error
+}
+
+/** "Make it 3 days": only the days change. */
+export async function setEstimateDays(id: string, days: number): Promise<void> {
+  const { error } = await supabase.from('daily_estimates').update({ days }).eq('id', id)
+  if (error) throw error
+}

@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mockup — Daily estimates (v4 look)</title>
+    <script type="module">
+      import rough from 'roughjs'
+      document.fonts.ready.then(() => setTimeout(() => {
+        for (const el of document.querySelectorAll('.circled')) {
+          const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+          el.append(svg)
+          const { width, height } = svg.getBoundingClientRect()
+          svg.setAttribute('viewBox', `0 0 ${width} ${height}`)
+          svg.appendChild(rough.svg(svg).ellipse(width / 2, height / 2, width - 3, height - 3, { seed: 9, roughness: 1.4, strokeWidth: 1.6, stroke: 'currentColor' }))
+        }
+      }, 300))
+      import '/src/index.css'
+      import './forms.css'
+      import './v4.css'
+      import './v4.js'
+    </script>
+    <style>
+      .phone { padding: var(--space-3) var(--space-3) var(--space-6); }
+      .place-no { font-family: var(--font-hand); font-size: 1.2rem; color: var(--ink-soft); }
+      .est { border-top: 1px dashed var(--line); }
+      .est .line__name::before { content: '≈ '; color: var(--estimated-ink); }
+      .est-calc { display: block; font-family: var(--font-hand); font-size: 1.1rem; color: var(--ink-soft); line-height: 1.15; }
+      .adds { display: flex; gap: var(--space-4); padding-top: var(--space-2); }
+      .adds span { font-size: 0.875rem; font-weight: 600; color: var(--confirmed); }
+      .chips { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: var(--space-1) 0 var(--space-3); }
+      .chips .chip { min-height: 2.1rem; font-size: 0.8125rem; }
+      .row2 { display: grid; grid-template-columns: 1fr 6rem; gap: var(--space-2); }
+      .sum { display: flex; justify-content: space-between; align-items: baseline; padding: var(--space-2) 0; border-top: 1.5px solid var(--ink); margin-top: var(--space-3); }
+      .sum b { font-variant-numeric: tabular-nums; }
+      .sum span { font-family: var(--font-hand); font-size: 1.15rem; color: var(--ink-soft); }
+      .hand { font-family: var(--font-hand); font-size: 1.15rem; color: var(--ink-soft); line-height: 1.2; }
+      .warn { margin-top: var(--space-2); padding: var(--space-2) var(--space-3); border-left: 3px solid var(--estimated); font-size: 0.8125rem; line-height: 1.4; }
+      .warn b { display: block; }
+      .warn .small-button { margin-right: var(--space-2); }
+      .field { margin-bottom: var(--space-3); }
+      .words { font-size: 0.75rem; letter-spacing: .08em; text-transform: uppercase; font-weight: 600; color: var(--ink-soft); margin: var(--space-4) 0 var(--space-1); }
+      .compare-words { font-size: 0.8125rem; line-height: 1.6; }
+      .compare-words s { color: var(--ink-soft); }
+      .compare-words b { color: var(--confirmed); }
+      .dot-todo { display: inline-block; width: 0.55rem; height: 0.55rem; border-radius: 50%; background: var(--estimated); margin-right: 0.4rem; vertical-align: 0.1em; }
+      .circled { position: relative; display: inline-block; padding: 0 0.15rem; color: var(--ink); }
+      .circled svg { position: absolute; left: -0.45rem; top: -0.35rem; width: calc(100% + 0.9rem); height: calc(100% + 0.7rem); overflow: visible; pointer-events: none; color: var(--estimated); }
+      .pen-note { display: block; font-family: var(--font-hand); font-size: 1.2rem; color: var(--estimated-ink); margin: 0.2rem 0 0.1rem 2.2rem; transform: rotate(-2deg); white-space: nowrap; }
+      .fix { display: flex; gap: var(--space-2); flex-wrap: wrap; margin-top: 0.2rem; }
+    </style>
+  </head>
+  <body>
+    <div class="phones">
+
+      <!-- 1. On the trip page: a place with a daily estimate -->
+      <figure>
+        <div class="phone">
+          <div class="sketch-box sketch-box--light card" data-seed="61">
+            <svg class="sketch-box__line" aria-hidden="true"></svg>
+            <header class="card__head"><h2>Medellín<small>4 nights</small></h2><span class="place-no">3</span></header>
+            <div class="group">
+              <div class="line"><span><span class="line__name">Apartment Laureles</span><span class="line__meta">Stay · days 6–10</span></span><span class="line__amount">212 €<span class="line__tag line__tag--ok">Paid</span></span></div>
+              <div class="line"><span><span class="line__name">Comuna 13 tour</span><span class="line__meta">Activities · day 7</span></span><span class="line__amount">18 €<span class="line__tag line__tag--ok">Paid</span></span></div>
+              <div class="line"><span><span class="line__name">Mar y Fuego</span><span class="line__meta">Food · day 8</span></span><span class="line__amount">39 €<span class="line__tag line__tag--ok">Paid</span></span></div>
+              <div class="line est"><span><span class="line__name">Food &amp; drinks</span><span class="est-calc">30 € a day each × 4 days</span></span><span class="line__amount">120 €<span class="line__tag line__tag--owe">Estimated</span></span></div>
+              <div class="line est"><span><span class="line__name">Getting around</span><span class="est-calc">10 € a day each × 4 days</span></span><span class="line__amount">40 €<span class="line__tag line__tag--owe">Estimated</span></span></div>
+            </div>
+            <div class="adds"><span>+ Add</span><span>+ Daily estimate</span></div>
+          </div>
+          <p class="hand" style="padding: var(--space-3) var(--space-2) 0; transform: rotate(-1deg)">For what you won’t plan line by line: meals, taxis, coffee, cash.</p>
+        </div>
+        <figcaption><b>1 · On the trip page.</b> Under a place’s lines, its daily estimates: a “≈” before the name, the sum in handwriting (<i>30 € a day each × 4 days</i>), your share on the right, always <b>Estimated</b> (mustard). “+ Daily estimate” sits next to “+ Add”. Same on the whole-trip sheet (tips, phone data).</figcaption>
+      </figure>
+
+      <!-- 2. Adding one -->
+      <figure>
+        <div class="phone">
+          <div class="sketch-box sketch-box--strong card" data-seed="62">
+            <svg class="sketch-box__line" aria-hidden="true"></svg>
+            <span class="tape tape--mustard" aria-hidden="true"></span>
+            <header class="card__head"><h2>Daily estimate<small>Medellín</small></h2></header>
+            <span class="field__label">For</span>
+            <div class="chips"><button class="chip" aria-pressed="true">Food</button><button class="chip" aria-pressed="false">Getting around</button><button class="chip" aria-pressed="false">Activities</button><button class="chip" aria-pressed="false">Other</button></div>
+            <div class="field"><label class="field__label">Name</label><input class="field__input" value="Food &amp; drinks" /></div>
+            <div class="row2">
+              <div class="field"><label class="field__label">A day, each</label><div class="field__box"><input class="field__input num" value="30" /><span class="field__unit">EUR</span></div></div>
+              <div class="field"><label class="field__label">Days</label><input class="field__input num" value="4" /></div>
+            </div>
+            <p class="hand" style="margin-top: -0.4rem">= the 4 nights in Medellín</p>
+            <span class="field__label" style="margin-top: var(--space-3); display:block">Who</span>
+            <div class="chips"><button class="chip" aria-pressed="true">Djamina</button><button class="chip" aria-pressed="true">Danielle</button><button class="chip" aria-pressed="true">Peggy</button><button class="chip" aria-pressed="true">Gabriel</button></div>
+            <div class="sum"><span>30 € × 4 days × 4 people</span><b>480 €</b></div>
+            <div class="add-item__actions"><button class="button button--quiet">Cancel</button><button class="button button--primary">Add</button></div>
+          </div>
+        </div>
+        <figcaption><b>2 · Adding one.</b> What it’s for (the budget categories), a name, an amount <b>a day, each</b>, and the days (the place’s nights by default). Who it’s for: everyone, or some (like “Who it’s for” on a line). Another currency works like prices (rate saved). The total adds up as you type.</figcaption>
+      </figure>
+
+      <!-- 3. Budget + the check -->
+      <figure>
+        <div class="phone">
+          <div class="sketch-box sketch-box--light card" data-seed="63">
+            <svg class="sketch-box__line" aria-hidden="true"></svg>
+            <header class="card__head"><h2>By category<small>your share</small></h2></header>
+            <div class="line"><span><span class="line__name">Food</span><span class="line__meta">39 € confirmed · 120 € estimated</span><span class="line__meta">incl. ≈ 30 € a day in Medellín</span></span><span class="line__amount">159 €</span></div>
+            <div class="line"><span><span class="line__name">Getting around</span><span class="line__meta">40 € estimated</span></span><span class="line__amount">40 €</span></div>
+          </div>
+          <div class="sketch-box sketch-box--light card" data-seed="64" style="margin-top: var(--space-4)">
+            <svg class="sketch-box__line" aria-hidden="true"></svg>
+            <header class="card__head"><h2>Medellín<small>now 3 nights</small></h2></header>
+            <div class="line est"><span><span class="line__name"><span class="dot-todo" aria-hidden="true"></span>Food &amp; drinks</span><span class="est-calc">30 € a day each × <span class="circled">4 days</span></span>
+              <span class="pen-note">↑ Medellín has 3 nights now</span>
+              <span class="fix"><span class="small-button">Make it 3 days</span><span class="small-button">Keep 4</span></span></span><span class="line__amount">120 €<span class="line__tag line__tag--owe">Estimated</span></span></div>
+          </div>
+          <p class="words">The words, everywhere (proposal)</p>
+          <div class="compare-words">
+            Add to a place: <s>Stay · Activity · Restaurant · Transport · Car · Other</s><br />
+            → <b>Stay · Activities · Food · Getting around · Other</b><br />
+            Add to the whole trip: <s>Transport · Insurance · Car · Other</s><br />
+            → <b>Travel · Getting around · Insurance · Other</b><br /><span style="color:var(--ink-soft)">(a rental car = Getting around)</span><br />
+            Compare tabs: Travel · Stay · <s>Around</s> <b>Getting around</b> · Activities · Food
+          </div>
+        </div>
+        <figcaption><b>3 · In the budget, and a check.</b> Estimates count in Budget (by category, by place, everyone’s share) as estimated. If a place’s nights change, the estimate gets the mustard “to decide” dot, its days circled in pen and a handwritten note, with a one-tap fix. <b>Bottom:</b> the category words, the same on adding, Compare and Budget.</figcaption>
+      </figure>
+    </div>
+  </body>
+</html>

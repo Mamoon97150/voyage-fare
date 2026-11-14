@@ -3,7 +3,7 @@ import { Link } from 'react-router'
 import { explainAuthError } from '../../lib/authForm'
 import { NO_AMOUNT, parseAmount } from '../../lib/money'
 import { addItem, addTicket, type ItemKind, type TripDetail } from '../../lib/trips'
-import { dayLabel, KINDS, SPANS_DAYS } from '../../lib/tripView'
+import { dayLabel, kindLabel, SPANS_DAYS } from '../../lib/tripView'
 import { FormMessage } from '../AuthForm'
 import { FormActions } from '../FormActions'
 import { TicketForm } from './TicketForm'
@@ -72,11 +72,13 @@ export function AddItem({
 }
 
 export function KindPicker({ kinds, kind, onKind }: { kinds: ItemKind[]; kind: ItemKind; onKind: (k: ItemKind) => void }) {
+  // The place's list has stays; the whole trip's doesn't (its transport is a ticket: "Travel").
+  const inPlace = kinds.includes('housing')
   return (
     <div className="kinds" role="radiogroup" aria-label="What is it?">
       {kinds.map((k) => (
         <button key={k} type="button" role="radio" aria-checked={kind === k} className="kind" onClick={() => onKind(k)}>
-          <span aria-hidden="true">{KINDS[k].icon}</span> {KINDS[k].label}
+          <span aria-hidden="true">{kindLabel(k, inPlace).icon}</span> {kindLabel(k, inPlace).label}
         </button>
       ))}
     </div>
