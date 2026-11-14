@@ -383,7 +383,7 @@ it('rebuilds the Colombia & Panama trip in the demo account', async () => {
   await addLine(null, {
     kind: 'other',
     name: 'Agency package',
-    note: 'Flights, hotels, transfers · Djamina paid 1 500 € so far, the rest in 4 payments',
+    note: 'Flights, hotels, transfers · each paid their own share in full',
     booked: 10240,
     options: [{ name: 'Agency package', amount: 10240, note: '2 560 € a person, booking fees included' }],
   })

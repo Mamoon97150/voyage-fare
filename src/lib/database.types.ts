@@ -325,6 +325,7 @@ export type Database = {
           name: string
           note: string | null
           paid_by: string | null
+          paid_each: boolean
           paid_on: string | null
           place_id: string | null
           position: number
@@ -347,6 +348,7 @@ export type Database = {
           name: string
           note?: string | null
           paid_by?: string | null
+          paid_each?: boolean
           paid_on?: string | null
           place_id?: string | null
           position?: number
@@ -369,6 +371,7 @@ export type Database = {
           name?: string
           note?: string | null
           paid_by?: string | null
+          paid_each?: boolean
           paid_on?: string | null
           place_id?: string | null
           position?: number
@@ -1116,6 +1119,7 @@ export type Database = {
           p_actual_rate?: number
           p_item_id: string
           p_paid_by?: string
+          p_paid_each?: boolean
           p_paid_on?: string
           p_status: string
         }

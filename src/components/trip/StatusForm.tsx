@@ -5,7 +5,10 @@ import { setItemStatus, type Item, type ItemStatus, type TripDetail } from '../.
 import { isSolo } from '../../lib/tripView'
 import { FormMessage } from '../AuthForm'
 import { useRate } from '../../lib/rates'
+import { localToday } from '../../lib/tripText'
 import { CurrencyPicker, RateField } from '../RateField'
+
+const EACH = 'each'
 
 const STEPS: { key: ItemStatus; label: string }[] = [
   { key: 'chosen', label: 'Chosen' },
@@ -41,7 +44,8 @@ export function StatusForm({
   const start = item.actual_amount ?? chosen?.amount ?? null
   const [status, setStatus] = useState<ItemStatus>(initial)
   const [amount, setAmount] = useState(amountForInput(start === null ? null : Number(start)))
-  const [paidBy, setPaidBy] = useState(item.paid_by ?? viewer ?? detail.travellers[0]?.id ?? '')
+  // A traveller's id, or EACH: everyone on the line paid their own share (build 4).
+  const [paidBy, setPaidBy] = useState(item.paid_each ? EACH : (item.paid_by ?? viewer ?? detail.travellers[0]?.id ?? ''))
   const [paidOn, setPaidOn] = useState(() => item.paid_on ?? localToday())
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string>()
@@ -72,7 +76,8 @@ export function StatusForm({
         id: item.id,
         status,
         actualAmount: status === 'chosen' ? null : actual,
-        paidBy: status === 'paid' ? paidBy : null,
+        paidBy: status === 'paid' && paidBy !== EACH ? paidBy : null,
+        paidEach: status === 'paid' && paidBy === EACH,
         paidOn: status === 'paid' ? paidOn : null,
         ...(foreign ? { actualCurrency: rate.currency, actualRate: rate.rate ?? undefined } : {}),
       })
@@ -135,6 +140,7 @@ export function StatusForm({
                 {t.name}
               </option>
             ))}
+            <option value={EACH}>Each paid their own share</option>
           </select>
         </div>
       )}
@@ -145,7 +151,9 @@ export function StatusForm({
             ? 'With the amount, the line turns confirmed.'
             : solo
               ? 'Confirmed, at what you really paid.'
-              : 'Confirmed. Who owes whom comes with “Who paid”.'}
+              : paidBy === EACH
+                ? 'Confirmed. Everyone paid their own part: nobody owes anything for it.'
+                : 'Confirmed. Who owes whom is on “Who paid”.'}
       </p>
       {error && <FormMessage tone="error">{error}</FormMessage>}
       <button type="submit" className="button button--quiet" disabled={busy}>
@@ -155,8 +163,3 @@ export function StatusForm({
   )
 }
 
-/** Today where you are (review 13 Nov: UTC said tomorrow after 20:00 in St Martin). */
-function localToday(): string {
-  const d = new Date()
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-}

@@ -42,3 +42,9 @@ export const CURRENCIES = [
 
 const names = new Intl.DisplayNames(['en'], { type: 'currency' })
 export const currencyLabel = (code: string) => `${code} · ${names.of(code) ?? code}`
+
+/** Today where you are, as an ISO date (UTC said tomorrow after 20:00 in St Martin, review 13 Nov). */
+export function localToday(): string {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}

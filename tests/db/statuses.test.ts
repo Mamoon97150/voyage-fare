@@ -117,3 +117,31 @@ describe('review fixes (13 Nov)', () => {
     await expect(db.query(`select set_item_dropped($1, true)`, [item])).rejects.toThrow('set it back to Chosen')
   })
 })
+
+describe('each paid their own share (build 4)', () => {
+  it('counts as paid and creates no debts', async () => {
+    await status(`p_item_id => $1, p_status => 'paid', p_actual_amount => 1000, p_paid_each => true`, [item])
+    const l = await one<Record<string, unknown>>(db, 'select status, paid_by, paid_each from items where id = $1', [item])
+    expect(l).toMatchObject({ status: 'paid', paid_by: null, paid_each: true })
+    expect(num((await budget()).confirmed_total)).toBe(1000)
+    const b = await db.query<{ paid: unknown; balance: unknown }>(`select paid, balance from v_traveller_balances where trip_id = $1`, [trip])
+    expect(b.rows.map((r) => [num(r.paid), num(r.balance)])).toEqual([
+      [500, 0],
+      [500, 0],
+    ])
+  })
+
+  it('one payer and each-their-own together: only the one payer’s line makes a debt', async () => {
+    await status(`p_item_id => $1, p_status => 'paid', p_actual_amount => 1000, p_paid_each => true`, [item])
+    const dinner = (await one<{ id: string }>(db, `select add_item(p_trip_id => $1, p_kind => 'restaurant', p_name => 'Dinner', p_place_id => $2, p_amount => 100) as id`, [trip, place])).id
+    await status(`p_item_id => $1, p_status => 'paid', p_actual_amount => 100, p_paid_by => $2`, [dinner, me])
+    const b = await one<{ balance: unknown }>(db, `select balance from v_traveller_balances where traveller_id = $1`, [me])
+    expect(num(b.balance)).toBe(50)
+  })
+
+  it('back to booked clears it', async () => {
+    await status(`p_item_id => $1, p_status => 'paid', p_actual_amount => 1000, p_paid_each => true`, [item])
+    await status(`p_item_id => $1, p_status => 'booked', p_actual_amount => 1000`, [item])
+    expect((await one<{ paid_each: boolean }>(db, 'select paid_each from items where id = $1', [item])).paid_each).toBe(false)
+  })
+})

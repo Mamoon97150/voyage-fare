@@ -6,6 +6,7 @@ import { supabase } from '../../src/lib/supabase'
 import {
   addItem,
   addOption,
+  addRepayment,
   addPlace,
   addTicket,
   addTraveller,
@@ -13,10 +14,11 @@ import {
   createTrip,
   deleteItem,
   deleteOption,
+  deleteRepayment,
   deletePlace,
   deleteTrip,
+  getMoney,
   getTrip,
-  getTripHeader,
   isTripOwner,
   listTrips,
   removeTraveller,
@@ -65,7 +67,15 @@ describe('the real queries, end to end', () => {
     expect((await listTrips()).some((t) => t.id === tripId)).toBe(true)
     const detail = await getTrip(tripId)
     expect(detail?.travellers.map((t) => t.name)).toEqual(['Demo', 'Bea'])
-    expect(await getTripHeader(tripId)).toEqual(expect.objectContaining({ travellers: 2 }))
+    // Build 4: the money side loads, and a repayment goes in and out.
+    const money = await getMoney(tripId)
+    expect(money.balances).toHaveLength(2)
+    const [me, bea] = detail?.travellers ?? []
+    await addRepayment({ tripId, from: bea.id, to: me.id, amount: 10, paidOn: '2026-11-13' })
+    const after = await getMoney(tripId)
+    expect(after.repayments).toHaveLength(1)
+    expect(Number(after.balances.find((b) => b.traveller_id === me.id)?.balance)).toBe(-10)
+    await deleteRepayment(after.repayments[0].id)
     expect(await isTripOwner(tripId, userId)).toBe(true)
   })
 
