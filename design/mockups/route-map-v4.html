@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mockup — Route map (v4 look)</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script type="module">
+      import '/src/index.css'
+      import './forms.css'
+      import './v4.css'
+      import './v4.js'
+    </script>
+    <style>
+      .phone .screen { padding-bottom: var(--space-6); }
+      .route { margin: var(--space-3) var(--space-3) 0; }
+      .sketch-box.route-card { padding: var(--space-3) var(--space-3) var(--space-3); }
+      .route-card__head { display: flex; align-items: baseline; justify-content: space-between; padding: 0 var(--space-1) var(--space-2); }
+      .route-card__head h2 { font-family: var(--font-title); font-size: 1.15rem; font-weight: 600; }
+      .route-card__head span { font-size: 0.8125rem; font-weight: 600; color: var(--confirmed); }
+      .map { border-radius: 6px; overflow: hidden; border: 1px solid var(--line); background: #f3eee2; }
+      .map .leaflet-tile-pane { filter: grayscale(1) sepia(0.35) contrast(0.85) brightness(1.06); }
+      .map .leaflet-control-attribution { font-size: 9px; background: rgb(251 247 239 / 0.8); }
+      .pin { width: 22px; height: 22px; border-radius: 50%; background: var(--confirmed); color: var(--paper); font: 600 12px/22px var(--font-text); text-align: center; box-shadow: 0 0 0 2px var(--paper); }
+      .pin--home { background: var(--ink); font-size: 13px; }
+      .pin-label { font-family: var(--font-hand); font-size: 15px; color: var(--ink); white-space: nowrap; text-shadow: 0 0 3px var(--paper), 0 0 3px var(--paper); }
+      .route-note { font-family: var(--font-hand); font-size: 1.1rem; color: var(--ink-soft); line-height: 1.2; padding: var(--space-2) var(--space-1) 0; }
+      .stops { list-style: none; margin: var(--space-3) 0 0; padding: 0; }
+      .stops li { display: grid; grid-template-columns: 1.6rem minmax(0, 1fr) auto; gap: var(--space-2); align-items: center; padding: 0.45rem 0; border-top: 1px solid var(--line); font-size: 0.9rem; }
+      .stops li:first-child { border-top: 0; }
+      .stops .n { width: 1.4rem; height: 1.4rem; border-radius: 50%; background: var(--confirmed); color: var(--paper); font-size: 0.75rem; font-weight: 600; display: grid; place-items: center; }
+      .stops .n--home { background: var(--ink); }
+      .stops small { color: var(--ink-soft); font-size: 0.8125rem; }
+      .stops .leg { grid-column: 2 / 4; font-family: var(--font-hand); font-size: 1.05rem; color: var(--ink-soft); border-top: 0; padding: 0; }
+      .states h4 { font-size: 0.75rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); margin: var(--space-3) 0 var(--space-1); }
+      .states h4:first-of-type { margin-top: var(--space-1); }
+      .states p { font-size: 0.875rem; line-height: 1.4; }
+      .dot-todo { display: inline-block; width: 0.55rem; height: 0.55rem; border-radius: 50%; background: var(--estimated); margin-right: 0.35rem; vertical-align: 0.1em; }
+      .home-arrow { position: absolute; top: 8px; right: 10px; z-index: 500; font-family: var(--font-hand); font-size: 15px; color: var(--ink); background: rgb(251 247 239 / 0.85); padding: 0 6px; border-radius: 4px; }
+      .home-arrow span { font-family: var(--font-text); }
+      .full-top { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-3) var(--space-2); }
+      .full-top h1 { font-family: var(--font-title); font-size: 1.35rem; font-weight: 600; }
+    </style>
+  </head>
+  <body>
+    <div class="phones">
+
+      <!-- 1. On the trip page -->
+      <figure>
+        <div class="phone">
+          <div class="screen screen--trip">
+            <header class="screen__top"><span class="screen__back">‹</span><div class="screen__heading"><h1 class="screen__title screen__title--trip">Colombia &amp; Panama</h1><p class="screen__sub">4 – 18 Sept 2026 · 4 travellers</p></div><span class="avatars"><span class="avatar avatar--me">D</span><span class="avatar">P</span><span class="avatar">D</span><span class="avatar">G</span></span></header>
+            <section class="trip-budget"><div class="trip-budget__row"><p class="trip-budget__figure num">3 463 €</p><div class="words-switch"><button><span class="u">your share</span></button><span> · </span><button>total</button></div></div><div class="hand-bar" data-confirmed="0.99" data-estimated="0.01" style="height:16px;margin-top:var(--space-2)"><svg></svg></div></section>
+            <div class="route">
+              <div class="sketch-box sketch-box--light route-card" data-seed="51">
+                <svg class="sketch-box__line" aria-hidden="true"></svg>
+                <div class="route-card__head"><h2>The route</h2><span>Open the map ›</span></div>
+                <div class="map" id="map1" style="height: 190px"></div>
+                <p class="route-note">from St Martin → 5 places → back home · 14 nights</p>
+              </div>
+            </div>
+            <div class="cards" style="padding-top: var(--space-4)">
+              <div class="sketch-box sketch-box--light card" data-seed="52"><svg class="sketch-box__line" aria-hidden="true"></svg>
+                <header class="card__head"><h2><span class="stops"><span class="n" style="display:inline-grid;margin-right:.4rem">1</span></span>Bogotá<small>2 nights</small></h2><b class="num">612 €</b></header>
+                <p class="hand-note" style="padding: var(--space-2) 0">…the place’s lines, as today</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <figcaption><b>1 · On the trip page.</b> A small map between the budget and the places: home and each place pinned in route order, <b>the same number as the place’s sheet</b>, joined by a pen line. <b>Framed on the places</b>: home (often far, like St Martin) is a dotted line leaving the map with “⌂ St Martin ↗” at the edge, so the places don’t end up squeezed together. It just shows the route: no dragging here. “Open the map ›” for the big one.</figcaption>
+      </figure>
+
+      <!-- 2. The big map -->
+      <figure>
+        <div class="phone">
+          <div class="full-top"><span class="round-button">‹</span><h1>The route</h1></div>
+          <div style="padding: 0 var(--space-3)">
+            <div class="map" id="map2" style="height: 330px"></div>
+            <ol class="stops">
+              <li><span class="n n--home">⌂</span><span>St Martin <small>leaving 4 Sept</small></span><span></span></li>
+              <li class="leg"><span class="leg">✈ via Panama</span></li>
+              <li><span class="n">1</span><span>Bogotá <small>2 nights</small></span><small>612 €</small></li>
+              <li><span class="n">2</span><span>Guatapé <small>2 nights</small></span><small>388 €</small></li>
+              <li><span class="n">3</span><span>Medellín <small>4 nights</small></span><small>701 €</small></li>
+              <li><span class="n">4</span><span>Cartagena <small>5 nights</small></span><small>1 207 €</small></li>
+              <li><span class="n">5</span><span>Panama City <small>1 night</small></span><small>214 €</small></li>
+              <li><span class="n n--home">⌂</span><span>St Martin <small>home 18 Sept</small></span><span></span></li>
+            </ol>
+          </div>
+        </div>
+        <figcaption><b>2 · The big map.</b> Same framing; pinch out to see home too; under it, the stops in order with nights and your share there (tap one to jump to its sheet). Tickets with a “via” show it on the line. Free map (OpenStreetMap), toned to the paper colour so it sits in the notebook.</figcaption>
+      </figure>
+
+      <!-- 3. Small cases -->
+      <figure>
+        <div class="phone">
+          <div class="cards">
+            <div class="sketch-box sketch-box--light route-card" data-seed="53">
+              <svg class="sketch-box__line" aria-hidden="true"></svg>
+              <div class="route-card__head"><h2>The route</h2><span>Open the map ›</span></div>
+              <div class="map" id="map3" style="height: 150px"></div>
+              <p class="route-note"><span class="dot-todo"></span>Guatapé isn’t on the map: pick it from the suggestions <u>in Edit</u></p>
+            </div>
+            <section class="sketch-box sketch-box--light card states" data-seed="54">
+              <svg class="sketch-box__line" aria-hidden="true"></svg>
+              <h4>A place typed by hand</h4>
+              <p>It has no spot on the map: the line skips it, and a note says how to fix it (the mustard “to decide” dot).</p>
+              <h4>One place</h4>
+              <p>Home → the city → home: still shown, it’s the trip.</p>
+              <h4>No places yet / no home</h4>
+              <p>No map until there’s a place. Without “Leaving from”, the line starts at the first place.</p>
+              <h4>Solo, demo trip</h4>
+              <p>Same map. Nothing to set up: the spots come from the city suggestions you already pick.</p>
+            </section>
+          </div>
+        </div>
+        <figcaption><b>3 · The small cases.</b> A place typed without picking a suggestion, a one-city trip, no places yet. Later (not V1): a map next to each day, and the stays you’re comparing on a map.</figcaption>
+      </figure>
+    </div>
+
+    <script>
+      const home = [18.0425, -63.0548]
+      const places = [
+        ['Bogotá', 4.711, -74.0721], ['Guatapé', 6.2326, -75.158], ['Medellín', 6.2442, -75.5812],
+        ['Cartagena', 10.391, -75.4794], ['Panama City', 8.9824, -79.5199],
+      ]
+      const ink = '#1F2A24'
+      function draw(id, list, opts = {}) {
+        const map = L.map(id, { zoomControl: !!opts.interactive, dragging: !!opts.interactive, scrollWheelZoom: false, doubleClickZoom: !!opts.interactive, touchZoom: !!opts.interactive, attributionControl: true })
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 12 }).addTo(map)
+        const pts = list.map((p) => [p[1], p[2]])
+        L.polyline([home, pts[0]], { color: ink, weight: 1.6, dashArray: '2 5', opacity: 0.7 }).addTo(map)
+        L.polyline(pts, { color: ink, weight: 2, dashArray: '7 5', opacity: 0.85 }).addTo(map)
+        L.polyline([pts[pts.length - 1], home], { color: ink, weight: 1.6, dashArray: '2 5', opacity: 0.7 }).addTo(map)
+        L.marker(home, { icon: L.divIcon({ className: '', html: '<div class="pin pin--home">⌂</div>', iconSize: [22, 22] }) }).addTo(map)
+        list.forEach((p, i) => {
+          const n = opts.numbers ? opts.numbers[i] : i + 1
+          L.marker([p[1], p[2]], { icon: L.divIcon({ className: '', html: `<div class="pin">${n}</div>`, iconSize: [22, 22] }) }).addTo(map)
+          if (opts.labels) L.marker([p[1], p[2]], { icon: L.divIcon({ className: '', html: `<div class="pin-label">${p[0]}</div>`, iconSize: [0, 0], iconAnchor: p[0] === 'Guatapé' ? [-14, 2] : p[0] === 'Medellín' ? [72, 8] : p[0] === 'Panama City' ? [40, -12] : [-14, 8] }) }).addTo(map)
+        })
+        // Framed on the places: home is usually far away (St Martin), so it's an arrow at the edge.
+        map.fitBounds(L.latLngBounds(pts), { padding: opts.pad || [26, 26] })
+        const box = document.createElement('div')
+        box.className = 'home-arrow'
+        box.innerHTML = '⌂ St Martin <span>↗</span>'
+        document.getElementById(id).appendChild(box)
+        return map
+      }
+      draw('map1', places)
+      draw('map2', places, { interactive: true, labels: true })
+      draw('map3', places.filter((p) => p[0] !== 'Guatapé'), { numbers: [1, 3, 4, 5] })
+    </script>
+  </body>
+</html>

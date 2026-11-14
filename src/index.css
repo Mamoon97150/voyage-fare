@@ -2781,3 +2781,181 @@ select.field__input,
 .chip--pick[aria-pressed='true'] .chip__icon {
   display: none;
 }
+
+/* ── The route map (build 6, mockup route-map-v4) ─────────────────────────────── */
+.route-card {
+  margin-bottom: var(--space-4);
+}
+
+.sketch-box.route-card__sheet {
+  padding: var(--space-3);
+}
+
+.route-card__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 0 var(--space-1) var(--space-2);
+}
+
+.route-card__head h2 {
+  font-family: var(--font-title);
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.route-card__head a {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--confirmed);
+  text-decoration: none;
+}
+
+.route-map {
+  position: relative;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: #f3eee2;
+  z-index: 0; /* Leaflet's panes stay under the app's bars */
+}
+
+/* The free map, toned to the notebook's paper. */
+.route-map .leaflet-tile-pane {
+  filter: grayscale(1) sepia(0.35) contrast(0.85) brightness(1.06);
+}
+
+.route-map .leaflet-control-attribution {
+  font-size: 9px;
+  background: rgb(251 247 239 / 0.8);
+}
+
+.route-pin {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--confirmed);
+  color: var(--paper);
+  font: 600 12px/22px var(--font-text);
+  text-align: center;
+  box-shadow: 0 0 0 2px var(--paper);
+}
+
+.route-pin--home {
+  background: var(--ink);
+  font-size: 13px;
+}
+
+.route-label {
+  font-family: var(--font-hand);
+  font-size: 16px;
+  color: var(--ink);
+  white-space: nowrap;
+  text-shadow: 0 0 3px var(--paper), 0 0 3px var(--paper), 0 0 3px var(--paper);
+}
+
+.route-home {
+  position: absolute;
+  z-index: 500;
+  font-family: var(--font-hand);
+  font-size: 15px;
+  color: var(--ink);
+  background: rgb(251 247 239 / 0.85);
+  padding: 0 6px;
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+.route-home--n { top: 8px; left: 50%; transform: translateX(-50%); }
+.route-home--ne { top: 8px; right: 10px; }
+.route-home--e { top: 50%; right: 10px; transform: translateY(-50%); }
+.route-home--se { bottom: 22px; right: 10px; }
+.route-home--s { bottom: 22px; left: 50%; transform: translateX(-50%); }
+.route-home--sw { bottom: 22px; left: 10px; }
+.route-home--w { top: 50%; left: 10px; transform: translateY(-50%); }
+.route-home--nw { top: 8px; left: 10px; }
+.route-map--big .route-home--nw,
+.route-map--big .route-home--w { left: 48px; }
+
+.route-card__note {
+  font-family: var(--font-hand);
+  font-size: 1.1rem;
+  line-height: 1.2;
+  color: var(--ink-soft);
+  padding: var(--space-2) var(--space-1) 0;
+}
+
+.route-card__missing {
+  font-family: var(--font-hand);
+  font-size: 1.1rem;
+  line-height: 1.2;
+  color: var(--estimated-ink);
+  padding: var(--space-1) var(--space-1) 0;
+}
+
+.dot-todo {
+  display: inline-block;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: var(--estimated);
+  margin-right: 0.35rem;
+  vertical-align: 0.1em;
+}
+
+.stops {
+  list-style: none;
+  margin: var(--space-3) 0 0;
+  padding: 0;
+}
+
+.stops__row {
+  display: grid;
+  grid-template-columns: 1.6rem minmax(0, 1fr) auto;
+  gap: var(--space-2);
+  align-items: center;
+  padding: 0.5rem 0;
+  border-top: 1px solid var(--line);
+}
+
+.stops__row:first-child {
+  border-top: 0;
+}
+
+.stops__row small {
+  color: var(--ink-soft);
+  font-size: 0.8125rem;
+}
+
+.stops__name {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.stops__n {
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  background: var(--confirmed);
+  color: var(--paper);
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: grid;
+  place-items: center;
+}
+
+.stops__n--home {
+  background: var(--ink);
+}
+
+.stops__n--off {
+  background: var(--line);
+  color: var(--ink);
+}
+
+.stops__via {
+  padding: 0 0 0.35rem calc(1.6rem + var(--space-2));
+  font-family: var(--font-hand);
+  font-size: 1.05rem;
+  color: var(--ink-soft);
+}

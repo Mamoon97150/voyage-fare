@@ -5,6 +5,7 @@ import { Compare } from './pages/Compare'
 import { ForgotPassword } from './pages/ForgotPassword'
 import { Home } from './pages/Home'
 import { JoinTrip } from './pages/JoinTrip'
+import { RoutePage } from './pages/RoutePage'
 import { NewTrip } from './pages/NewTrip'
 import { ResetPassword } from './pages/ResetPassword'
 import { SignIn } from './pages/SignIn'
@@ -30,6 +31,7 @@ export function AppRoutes() {
       <Route path="/trips/:tripId/compare" element={<RequireAuth><Compare /></RequireAuth>} />
       <Route path="/trips/:tripId/budget" element={<RequireAuth><Budget /></RequireAuth>} />
       <Route path="/trips/:tripId/who-paid" element={<RequireAuth><WhoPaid /></RequireAuth>} />
+      <Route path="/trips/:tripId/route" element={<RequireAuth><RoutePage /></RequireAuth>} />
       <Route path="/trips/:tripId/settings" element={<RequireAuth><TripSettings /></RequireAuth>} />
       <Route path="/account" element={<RequireAuth><Account /></RequireAuth>} />
       <Route path="*" element={<Navigate to="/" replace />} />

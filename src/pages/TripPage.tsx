@@ -10,6 +10,7 @@ import { AddItem } from '../components/trip/ItemForm'
 import { ItemRow } from '../components/trip/ItemRow'
 import { PlaceForm } from '../components/trip/PlaceForm'
 import { RouteGap } from '../components/trip/RouteGap'
+import { RouteCard } from '../components/trip/RouteCard'
 import { TripTopBar } from '../components/trip/TripTopBar'
 import { WelcomeNote } from '../components/trip/WelcomeNote'
 import { Loading } from '../lib/auth'
@@ -65,6 +66,13 @@ export function TripPage() {
       active = false
     }
   }, [tripId])
+
+  // Coming from the route map's list of stops (#place-…): go to that place's sheet.
+  const loaded = detail !== undefined && detail !== null
+  useEffect(() => {
+    if (!loaded || !window.location.hash.startsWith('#place-')) return
+    document.getElementById(window.location.hash.slice(1))?.scrollIntoView?.({ block: 'start' })
+  }, [loaded])
 
   if (loadError) {
     return (
@@ -125,6 +133,7 @@ export function TripPage() {
       />
 
       <div className="screen__body">
+        <RouteCard detail={detail} />
         {tapHint && items.length > 0 && (
           <p className="tap-hint">
             <span className="hand">tap anything to change it</span>
