@@ -1,0 +1,548 @@
+/* Compare: folder tabs, decisions and options, the option form, statuses, currencies, dropped lines. */
+
+/* ═════ Compare (mockups 2 and 10) ═════ */
+
+/* Compare v4 (13 Nov): the same notebook as the trip page. Folder tabs drawn with the sheets' pen,
+   one sheet per page with a calm head, the decisions labelled like "DAY 1", the options as lines. */
+.folder-tabs {
+  display: flex;
+  gap: 2px;
+  padding: var(--space-3) var(--space-4) 0;
+  margin-bottom: -2px;
+  position: relative;
+  z-index: 1;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.folder-tab {
+  position: relative;
+  flex: none;
+  min-height: 2.5rem;
+  padding: 0.45rem 0.6rem 0.4rem;
+  border: 0;
+  background: var(--paper);
+  font: inherit;
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.folder-tab--on {
+  background: var(--paper-raised);
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.folder-tab__line {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  color: var(--ink-soft);
+  opacity: 0.7;
+}
+
+.folder-tab--todo::after {
+  content: '';
+  position: absolute;
+  top: 0.35rem;
+  right: 0.25rem;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: var(--radius-round);
+  background: var(--estimated);
+}
+
+.compare-page {
+  padding: 0 var(--space-3) var(--space-6);
+}
+
+.sketch-box.compare-sheet {
+  padding: 0 var(--space-4) var(--space-3);
+}
+
+/* The page head: the place, its dates by hand; the neighbours in the corners turn the page. */
+.page-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-2);
+  padding: var(--space-4) 0 var(--space-2);
+}
+
+.page-head__mid {
+  text-align: center;
+  max-width: 13rem;
+}
+
+.page-head__mid h2 {
+  font-family: var(--font-title);
+  font-size: var(--text-2xl);
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+.page-head__mid p {
+  font-family: var(--font-hand);
+  font-size: var(--text-note-l);
+  line-height: 1.15;
+  color: var(--ink-soft);
+}
+
+.page-head__turn {
+  min-height: 2.5rem;
+  padding: 0.35rem 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.page-head__turn--next {
+  text-align: right;
+}
+
+/* One decision: a group labelled like the trip page's days. */
+.compare-item + .compare-item {
+  margin-top: var(--space-4);
+}
+
+.compare-item__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.compare-item__head .switch {
+  margin: 0;
+  flex: none;
+}
+
+
+
+.compare-item__dropped {
+  text-decoration: line-through;
+}
+
+.compare-item__note {
+  margin: 0 0 var(--space-2);
+}
+
+.compare-empty {
+  padding: var(--space-2) 0 var(--space-3);
+}
+
+/* An option: the trip page's line with the choose circle in front. */
+.opts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.opt {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0 var(--space-3);
+  align-items: start;
+  padding: 0.65rem 0;
+  border-top: 1px solid var(--line);
+}
+
+.opt:first-child {
+  border-top: 0;
+}
+
+/* The circle is the Choose button (44px to tap, 24px to see). Chosen: filled, in blue ink. */
+.opt__pick {
+  width: 2.75rem;
+  height: 2.75rem;
+  margin: -0.6rem -0.6rem -0.6rem -0.6rem;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: none;
+  font-size: var(--text-sm);
+  color: var(--paper);
+  cursor: pointer;
+}
+
+.opt__pick::before {
+  content: '';
+  grid-area: 1 / 1;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 1.5px solid var(--ink-soft);
+  border-radius: var(--radius-round);
+}
+
+.opt--chosen .opt__pick {
+  cursor: default;
+}
+
+.opt--chosen .opt__pick::before {
+  background: var(--chosen);
+  border-color: var(--chosen);
+}
+
+.opt__pick:not(:disabled):hover::before {
+  border-color: var(--chosen);
+}
+
+.opt__pick {
+  position: relative;
+}
+
+.opt__pick > * {
+  grid-area: 1 / 1;
+}
+
+.opt--chosen .opt__pick {
+  font-weight: 700;
+}
+
+.opt__tap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.opt__name {
+  font-weight: 600;
+}
+
+.opt--chosen .opt__name {
+  color: var(--chosen);
+}
+
+.opt--chosen .opt__name .underlined path {
+  stroke: var(--chosen);
+  stroke-width: 2;
+}
+
+.opt--chosen .opt__name + .opt__meta {
+  margin-top: 0.4rem;
+}
+
+.opt__pill {
+  display: inline-block;
+  margin-left: 0.35rem;
+  padding: 0 0.4rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-2xs);
+  font-weight: 500;
+  color: var(--ink-soft);
+  vertical-align: 0.1em;
+}
+
+.opt__meta {
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+  margin-top: 0.1rem;
+}
+
+.opt__way {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.4rem;
+  margin-top: 0.2rem;
+  font-size: var(--text-sm);
+}
+
+.opt__way-label {
+  min-width: 2.2rem;
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  line-height: 1.6;
+}
+
+.opt__dur {
+  font-weight: 600;
+}
+
+.opt__stops {
+  flex-basis: 100%;
+  padding-left: 2.6rem;
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+}
+
+.opt__fast {
+  color: var(--confirmed);
+}
+
+.opt__side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+}
+
+.opt__amount {
+  font-weight: 700;
+}
+
+.opt__tag {
+  margin-top: 0.15rem;
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.opt__tag--best,
+.opt__tag--settled {
+  color: var(--confirmed);
+}
+
+.opt__heart {
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+  margin-right: -0.5rem;
+  border: 0;
+  background: none;
+  font-size: var(--text-note);
+  color: var(--ink-soft);
+  opacity: 0.55;
+  cursor: pointer;
+}
+
+.opt__heart--on {
+  color: var(--estimated);
+  opacity: 1;
+}
+
+.flag--yes {
+  color: var(--confirmed);
+}
+
+.flag--no {
+  color: var(--over);
+}
+
+.stars {
+  color: var(--estimated-text);
+  letter-spacing: 0.05em;
+}
+
+.stars i {
+  font-style: normal;
+  color: var(--line);
+}
+
+/* The option form */
+.option-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.way-fields {
+  margin: 0;
+  padding: var(--space-3) 0 0;
+  border: 0;
+  border-top: 1px dashed var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.row3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.row3 > * {
+  min-width: 0;
+}
+
+.row3 .field__input {
+  width: 100%;
+  padding-inline: var(--space-2);
+}
+
+.yesno,
+.looks {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.yesno__label {
+  flex: 1;
+  font-size: var(--text-body);
+}
+
+.yesno button {
+  min-width: 3.5rem;
+  min-height: 2.5rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--paper);
+  font: inherit;
+  font-size: var(--text-md);
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.yesno button[aria-checked='true'] {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 600;
+}
+
+.looks__star {
+  min-width: 2.25rem;
+  min-height: 2.5rem;
+  border: 0;
+  background: none;
+  font-size: var(--text-xl);
+  color: var(--line);
+  cursor: pointer;
+}
+
+.looks__star--on {
+  color: var(--estimated-text);
+}
+
+.options-note {
+  font-size: var(--text-body);
+}
+
+/* Where it stands (build 3): chosen → booked → paid, under the edit form, on a dashed fold. */
+.status-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1.5px dashed var(--line);
+}
+
+.status-form .sheet-title {
+  margin: 0;
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border: 1.5px solid var(--ink);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.steps button {
+  min-height: 2.5rem;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: var(--text-md);
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.steps button + button {
+  border-left: 1.5px solid var(--ink);
+}
+
+.steps button[aria-checked='true'] {
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 600;
+}
+
+.status-form .button {
+  align-self: flex-start;
+}
+
+/* Currencies (build 3): the unit beside a price is a small picker; the rate reads "1 EUR = 3 645 COP". */
+.field__unit--pick {
+  pointer-events: auto;
+  right: 0.25rem;
+  min-height: 2.25rem;
+  padding: 0 0.25rem;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: var(--text-md);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.field__box:has(.field__unit--pick) .field__input {
+  padding-right: 4.25rem;
+}
+
+.rate {
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.rate__left {
+  flex: none;
+  font-size: var(--text-md);
+  color: var(--ink-soft);
+}
+
+.rate .field__input {
+  padding-right: 3.5rem;
+}
+
+.currency-change {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* Dropped (review 13 Nov): kept for the record, greyed and struck through, out of the budget. */
+.item-row--dropped .item-row__name {
+  color: var(--ink-soft);
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+
+.item-row--dropped .item-row__amount,
+.item-row--dropped .item-row__meta {
+  opacity: 0.6;
+}
+
+.drop-control {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+
+.screen__top:has(.screen__heading) {
+  align-items: flex-start;
+}
+
+.screen__top:has(.screen__heading) .avatars {
+  margin-top: 0.3rem;
+}

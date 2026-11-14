@@ -1,0 +1,144 @@
+/* Daily estimates, the pen circle, picking chips in even rows. */
+
+/* ── Daily estimates (build 6, mockup daily-estimates-v4) ─────────────────────── */
+.place__adds {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: var(--space-4);
+}
+
+.estimates {
+  border-top: 1px dashed var(--line);
+  margin-top: var(--space-1);
+}
+
+.estimate-row__approx {
+  color: var(--estimated-text);
+}
+
+.estimate-row__calc {
+  display: block;
+  font-family: var(--font-hand);
+  font-size: var(--text-note);
+  line-height: 1.15;
+  color: var(--ink-soft);
+}
+
+.item-row__status--estimated {
+  color: var(--estimated-text);
+}
+
+/* A number to look at again: circled in mustard pen (no side bars: 14 Nov). */
+.circled {
+  display: inline-block;
+  padding: 0 0.3rem;
+  margin: 0 0.1rem;
+  border: 1.6px solid var(--estimated);
+  border-radius: var(--radius-pen);
+  transform: rotate(-3deg);
+  color: var(--ink);
+}
+
+.estimate-row__check {
+  padding: 0 0 var(--space-2) calc(0.55rem + var(--space-3));
+}
+
+.estimate-row__note {
+  font-family: var(--font-hand);
+  font-size: var(--text-note-l);
+  line-height: 1.2;
+  color: var(--estimated-text);
+  transform: rotate(-1.5deg);
+  transform-origin: left;
+  margin-left: var(--space-6);
+}
+
+.estimate-row__fix {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+.estimate-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) 0;
+}
+
+.estimate-form .chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+.estimate-form__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 5.5rem;
+  gap: var(--space-2);
+}
+
+.estimate-form__days {
+  font-size: var(--text-note);
+  color: var(--ink-soft);
+  margin-top: calc(-1 * var(--space-1));
+}
+
+.estimate-form__sum {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-top: 1.5px solid var(--ink);
+}
+
+.estimate-form__sum .hand {
+  font-size: var(--text-note);
+  color: var(--ink-soft);
+}
+
+/* Picking what something is (14 Nov): pills like everywhere else, two per row (2-2), three
+   on top when there are five (3-2), never one alone on its line. */
+.chip-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+.chip-grid > .chip {
+  grid-column: span 3;
+}
+
+.chip-grid:has(> :nth-child(5):last-child) > .chip:nth-child(-n + 3),
+.chip-grid:has(> :nth-child(3):last-child) > .chip {
+  grid-column: span 2;
+}
+
+.chip--pick {
+  padding: 0 0.6rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chip__icon {
+  opacity: 0.7;
+}
+
+.form-title {
+  margin: 0;
+}
+
+.add-item .form-title .hand-note {
+  display: block;
+  margin-top: 0.1rem;
+}
+
+/* Chosen: the tick takes the icon's place. */
+.chip--pick[aria-checked='true'] .chip__icon {
+  display: none;
+}

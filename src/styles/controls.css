@@ -1,0 +1,373 @@
+/* Controls: the budget bar, buttons, focus, account pages, forms, the hand-drawn look. */
+
+/* Budget bar */
+.budget-bar__figure {
+  font-family: var(--font-title);
+  font-size: var(--text-4xl);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  margin-top: var(--space-1);
+}
+
+.budget-bar__track {
+  display: flex;
+  height: 10px;
+  margin-top: var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--line);
+  overflow: hidden;
+}
+
+.budget-bar__confirmed {
+  background: var(--confirmed);
+}
+
+.budget-bar__estimated {
+  background: var(--estimated);
+}
+
+.budget-bar__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-6);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--text-md);
+  font-variant-numeric: tabular-nums;
+}
+
+.budget-bar__legend li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-round);
+}
+
+.dot--confirmed {
+  background: var(--confirmed);
+}
+
+.dot--estimated {
+  background: var(--estimated-ink); /* the soft mustard is too faint for a small mark (1.97:1) */
+}
+
+.note {
+  margin-top: var(--space-6);
+  font-size: var(--text-md);
+  color: var(--ink-soft);
+}
+
+a {
+  color: var(--confirmed);
+  text-underline-offset: 0.15em;
+}
+
+.app-header__account {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-md);
+}
+
+.hero__actions {
+  margin-top: var(--space-6);
+}
+
+.loading {
+  padding: var(--space-12) var(--space-4);
+  text-align: center;
+  color: var(--ink-soft);
+}
+
+/* Buttons */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0 var(--space-6);
+  border-radius: var(--radius-pill);
+  border: 1px solid transparent;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.button--primary {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.button--quiet {
+  min-height: 2.25rem;
+  padding: 0 var(--space-4);
+  background: var(--paper-raised);
+  border-color: var(--line);
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+/* Keyboard focus: ink, which shows on every surface (mustard was 1.97:1). */
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+/* Account pages */
+.auth {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-6) var(--space-4) var(--space-12);
+}
+
+.auth__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--ink);
+  text-decoration: none;
+  font-family: var(--font-title);
+  font-size: var(--text-note-l);
+  font-weight: 600;
+  margin-bottom: var(--space-4);
+}
+
+.auth__page {
+  width: 100%;
+  max-width: 24rem;
+}
+
+.auth__page > .sketch {
+  margin-bottom: var(--space-4);
+}
+
+.auth__title {
+  font-size: var(--text-3xl);
+}
+
+.auth__intro {
+  margin-top: var(--space-2);
+  color: var(--ink-soft);
+}
+
+.auth__switch {
+  margin-top: var(--space-6);
+  text-align: center;
+  font-size: var(--text-md);
+  color: var(--ink-soft);
+}
+
+/* Forms */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+}
+
+.button--wide {
+  width: 100%;
+}
+
+.form__sheet {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-top: var(--space-2);
+}
+
+.link-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--confirmed);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  cursor: pointer;
+}
+
+.form__aside {
+  margin-top: calc(var(--space-2) * -1);
+  font-size: var(--text-md);
+  text-align: right;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.field__label {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.field__box {
+  position: relative;
+  display: flex;
+}
+
+.field__box .field__input {
+  flex: 1;
+  min-width: 0;
+}
+
+.field__show {
+  position: absolute;
+  right: 0.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  min-height: 2.25rem;
+  padding: 0 var(--space-3);
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: var(--text-md);
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.field__input[type='password'],
+.field__box:has(.field__show) .field__input {
+  padding-right: 4rem;
+}
+
+.field__input {
+  min-height: 2.75rem;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--text-base); /* 16px or more: phones don't zoom in */
+}
+
+.field--error .field__input {
+  border-color: var(--over);
+}
+
+.field__hint {
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+}
+
+.field__error {
+  font-size: var(--text-sm);
+  color: var(--over);
+}
+
+.form-message {
+  padding: var(--space-3);
+  border-radius: var(--radius-lg);
+  font-size: var(--text-md);
+  border-left: 3px solid;
+}
+
+.form-message--error {
+  border-color: var(--over);
+  background: var(--wash-over);
+}
+
+.form-message--info {
+  border-color: var(--confirmed);
+  background: var(--wash-confirmed);
+}
+
+/* ═════ Look B — illustrated carnet (chosen 13 Nov 2026) ═════
+   Drawings on welcome and empty pages, sheets outlined by hand, a strip of tape.
+   Working screens stay clean, and amounts never use the hand font. */
+.hand {
+  font-family: var(--font-hand);
+  font-weight: 500;
+}
+
+.sketch {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  mix-blend-mode: multiply; /* the white of the drawing paper melts into the app paper */
+}
+
+.sketch-box {
+  position: relative;
+  background: var(--paper-raised);
+  color: var(--ink);
+  padding: var(--space-6) var(--space-4) var(--space-4);
+}
+
+.sketch-box--light .sketch-box__line {
+  color: var(--ink-soft); /* working sheets: a softer pen */
+  opacity: 0.7;
+}
+
+.sketch-box__line {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+.tape {
+  position: absolute;
+  top: -0.6rem;
+  left: 50%;
+  width: 4.5rem;
+  height: 1.2rem;
+  transform: translateX(-50%) rotate(-3deg);
+  border-radius: var(--radius-2xs);
+}
+
+.tape--mustard {
+  background: color-mix(in srgb, var(--estimated) 45%, transparent);
+}
+
+.tape--green {
+  background: color-mix(in srgb, var(--confirmed) 28%, transparent);
+}
+
+.underlined {
+  position: relative;
+  display: inline-block;
+}
+
+.underlined svg {
+  position: absolute;
+  left: -2%;
+  bottom: -0.4em;
+  width: 104%;
+  height: 0.55em;
+  overflow: visible;
+}
+
+.underlined path {
+  fill: none;
+  stroke: var(--estimated);
+  stroke-width: 3;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}

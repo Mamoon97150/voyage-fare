@@ -1,0 +1,259 @@
+/* Navigation: account menu, the bottom bar, account, trip settings, the sticky budget bar. */
+
+/* ═════ Navigation (mockups 1 and 5) ═════ */
+
+/* Your initial at the top right of "Your trips": your account, sign out. */
+.account-menu {
+  position: relative;
+}
+
+.account-menu__button {
+  border: 0;
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  position: relative;
+}
+
+.account-menu__button::after {
+  content: '';
+  position: absolute;
+  inset: -6px; /* 44 px to the finger */
+}
+
+.account-menu__list {
+  position: absolute;
+  right: 0;
+  top: calc(100% + var(--space-2));
+  z-index: 10;
+  min-width: 12rem;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-2);
+  background: var(--paper-raised);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-3);
+}
+
+.account-menu__who {
+  padding: var(--space-1) var(--space-3) var(--space-2);
+  border-bottom: 1px solid var(--line);
+  margin-bottom: var(--space-1);
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+}
+
+.account-menu__item {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: none;
+  font: inherit;
+  color: var(--ink);
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.account-menu__item:hover {
+  background: var(--paper);
+}
+
+/* The bar at the bottom of a trip: Trip · Compare · Budget · Who paid */
+.screen--trip {
+  padding-bottom: calc(5rem + env(safe-area-inset-bottom));
+}
+
+.trip-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  z-index: 6;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 28rem;
+  display: flex;
+  padding: var(--space-1) var(--space-2) calc(var(--space-2) + env(safe-area-inset-bottom));
+  background: var(--paper);
+  border-top: 1.5px solid var(--ink);
+}
+
+.trip-nav a {
+  flex: 1;
+  min-height: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+  text-decoration: none;
+}
+
+.trip-nav a.active {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.trip-nav svg {
+  width: 1.375rem;
+  height: 1.375rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Your account */
+.account__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.account__form .button {
+  align-self: flex-start;
+}
+
+.kv {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--line);
+}
+
+.kv span {
+  color: var(--ink-soft);
+  font-size: var(--text-md);
+}
+
+.kv b {
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Who's on the trip, at the top right: opens the trip settings */
+.avatars {
+  display: flex;
+  flex: none;
+  min-height: 44px;
+  align-items: center;
+  text-decoration: none;
+}
+
+.avatars .avatar {
+  width: 1.75rem;
+  height: 1.75rem;
+  margin-left: -0.45rem;
+  border: 2px solid var(--paper);
+  font-size: var(--text-2xs);
+}
+
+.avatars .avatar:first-child {
+  margin-left: 0;
+}
+
+.avatars .avatar--me {
+  box-shadow: 0 0 0 2px var(--estimated);
+}
+
+.avatar--more {
+  background: var(--paper-raised);
+  color: var(--ink-soft);
+}
+
+/* Trip settings (mockup 8) */
+.settings__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.sheet-title__note {
+  font-family: var(--font-text);
+  font-size: var(--text-xs);
+  font-weight: 400;
+  color: var(--ink-soft);
+}
+
+.people .people__row {
+  display: block;
+  padding: var(--space-2) 0;
+  border-top: 1px solid var(--line);
+}
+
+.people .people__row:first-child {
+  border-top: 0;
+}
+
+.people__line {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.people__line .people__name {
+  flex: 1;
+}
+
+.people__row .confirm-delete {
+  margin-top: var(--space-2);
+}
+
+.settings__rename,
+.settings__add {
+  flex: 1;
+  display: flex;
+  gap: var(--space-2);
+}
+
+.settings__add {
+  margin-top: var(--space-3);
+}
+
+.settings__add .field__input {
+  flex: 1;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Once you scroll into the trip, the budget bar keeps one line: figure, switch, track (review #9). */
+.trip-budget--compact {
+  padding-block: var(--space-2);
+}
+
+.trip-budget--compact .trip-budget__figure {
+  font-size: var(--text-lg);
+}
+
+.trip-budget--compact .trip-budget__figure small {
+  font-size: var(--text-xs);
+}
+
+.trip-budget--compact .hand-bar {
+  height: 12px;
+  margin-top: var(--space-1);
+}
+
+.trip-budget--compact .trip-budget__legend,
+.trip-budget--compact .trip-budget__target-text,
+.trip-budget--compact .trip-budget__missing {
+  display: none;
+}

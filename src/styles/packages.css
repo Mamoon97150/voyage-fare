@@ -1,0 +1,82 @@
+/* Agency packages. */
+
+/* ── Agency packages (build 6, mockup package-v4) ─────────────────────────────── */
+.item-row__status--package {
+  color: var(--chosen);
+}
+
+.item-row__hand {
+  display: block;
+  font-family: var(--font-hand);
+  font-size: var(--text-note);
+  line-height: 1.15;
+  color: var(--ink-soft);
+}
+
+.place__plus {
+  display: block;
+  font-family: var(--font-hand);
+  font-size: var(--text-base);
+  font-weight: 400;
+  color: var(--ink-soft);
+  text-align: right;
+}
+
+.covers {
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.covers__where {
+  margin-top: var(--space-2);
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.covers__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.covers__line {
+  display: grid;
+  grid-template-columns: 1.4rem minmax(0, 1fr);
+  gap: var(--space-2);
+  align-items: start;
+  padding: 0.45rem 0;
+  border-top: 1px solid var(--line);
+  font-size: var(--text-body);
+  cursor: pointer;
+}
+
+.covers__list li:first-child .covers__line {
+  border-top: 0;
+}
+
+.covers__line input {
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-top: 0.15rem;
+  accent-color: var(--chosen);
+}
+
+.covers__line small {
+  display: block;
+  color: var(--ink-soft);
+  font-size: var(--text-xs);
+}
+
+.covers__note {
+  font-size: var(--text-note);
+  color: var(--ink-soft);
+  margin-top: var(--space-2);
+}
+
+.part-of {
+  margin-top: var(--space-3);
+}

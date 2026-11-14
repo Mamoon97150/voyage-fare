@@ -1,0 +1,77 @@
+/* Base: the page, text, links (tokens come from tokens.css). */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-text);
+  font-size: var(--text-base);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-title);
+  font-weight: 600;
+  line-height: 1.2;
+  margin: 0;
+}
+
+p {
+  margin: 0;
+}
+
+.page {
+  max-width: var(--page-width);
+  margin: 0 auto;
+  padding: var(--space-4);
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding-block: var(--space-4);
+  border-bottom: 1px solid var(--line);
+}
+
+.app-header__name {
+  font-family: var(--font-title);
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+.hero {
+  padding-block: var(--space-12) var(--space-8);
+}
+
+.hero h1 {
+  font-size: clamp(1.75rem, 6vw, 2.5rem);
+  text-wrap: balance;
+}
+
+.hero p {
+  margin-top: var(--space-4);
+  color: var(--ink-soft);
+  max-width: 34rem;
+}
+
+.card {
+  background: var(--paper-raised);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: var(--space-6);
+}
+
+.card__label {
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+}
