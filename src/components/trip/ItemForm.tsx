@@ -1,6 +1,5 @@
 import { useState, type FormEvent, type ReactNode } from 'react'
 import { Link } from 'react-router'
-import { explainAuthError } from '../../lib/authForm'
 import { NO_AMOUNT, parseAmount } from '../../lib/money'
 import { addItem, addTicket, setPackageCover, type ItemKind, type TripDetail } from '../../lib/trips'
 import { dayLabel, kindLabel, SPANS_DAYS } from '../../lib/tripView'
@@ -8,6 +7,7 @@ import { FormMessage } from '../AuthForm'
 import { FormActions } from '../FormActions'
 import { CoversPicker } from './Packages'
 import { TicketForm } from './TicketForm'
+import { useSaving } from '../../lib/useSaving'
 
 export type ItemValues = {
   kind: ItemKind
@@ -164,7 +164,7 @@ export function ItemForm({
   const [covers, setCovers] = useState<string[]>(initial?.covers ?? [])
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [formError, setFormError] = useState<string>()
-  const [busy, setBusy] = useState(false)
+  const { busy, run } = useSaving()
   const id = formId
   const currency = detail.trip.currency
   const spans = SPANS_DAYS.includes(kind)
@@ -182,13 +182,12 @@ export function ItemForm({
     setErrors(found)
     if (Object.keys(found).length) return
 
-    setBusy(true)
-    try {
-      await onSubmit({ kind, name: name.trim(), dayNumber: start, endDayNumber: end, amount, covers: kind === 'package' ? covers : undefined })
-    } catch (error) {
-      setBusy(false)
-      setFormError(explainAuthError(error as { message?: string }).message)
-    }
+    await run(
+      async () => {
+        await onSubmit({ kind, name: name.trim(), dayNumber: start, endDayNumber: end, amount, covers: kind === 'package' ? covers : undefined })
+      },
+      setFormError,
+    )
   }
 
   const dayOptions = Array.from({ length: days }, (_, i) => i + 1)

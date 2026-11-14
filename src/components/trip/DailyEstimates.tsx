@@ -1,5 +1,4 @@
 import { useState, type FormEvent } from 'react'
-import { explainAuthError } from '../../lib/authForm'
 import { hintSeen, markHintSeen } from '../../lib/hints'
 import { amountForInput, formatMoney, parseAmount } from '../../lib/money'
 import { useRate } from '../../lib/rates'
@@ -16,6 +15,7 @@ import { FormMessage } from '../AuthForm'
 import { FormActions } from '../FormActions'
 import { FormTitle } from './ItemForm'
 import { CurrencyPicker, RateField } from '../RateField'
+import { useSaving } from '../../lib/useSaving'
 
 /**
  * Daily estimates (build 6, mockup daily-estimates-v4): what isn't planned line by line,
@@ -81,7 +81,7 @@ function EstimateRow({
   const currency = detail.trip.currency
   const keptKey = `estimate-days:${estimate.id}:${estimate.days}:${line.expectedDays}`
   const [kept, setKept] = useState(() => hintSeen(keptKey))
-  const [busy, setBusy] = useState(false)
+  const { busy, run } = useSaving()
   const [error, setError] = useState<string>()
   const flagged = line.mismatch && !kept && line.expectedDays !== null
   const where = estimate.place_id ? detail.places.find((p) => p.id === estimate.place_id) : null
@@ -89,15 +89,14 @@ function EstimateRow({
 
   async function fix() {
     if (line.expectedDays === null) return
-    setBusy(true)
     setError(undefined)
-    try {
-      await setEstimateDays(estimate.id, line.expectedDays)
-      onChanged()
-    } catch (e) {
-      setError(explainAuthError(e as { message?: string }).message)
-      setBusy(false)
-    }
+    await run(
+      async () => {
+        await setEstimateDays(estimate.id, line.expectedDays!)
+        onChanged()
+      },
+      setError,
+    )
   }
 
   return (
@@ -179,7 +178,7 @@ export function EstimateForm({
   const [people, setPeople] = useState<string[]>(startPeople.length ? startPeople : travellers.map((t) => t.id))
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [formError, setFormError] = useState<string>()
-  const [busy, setBusy] = useState(false)
+  const { busy, run } = useSaving()
   const rate = useRate(trip.currency, estimate?.currency ?? trip.currency, estimate ? Number(estimate.rate) : 1)
 
   const perDay = parseAmount(amount)
@@ -206,25 +205,24 @@ export function EstimateForm({
     if (foreign && rate.rate === null) found.rate = `What’s the rate? 1 ${rate.currency} is how many ${trip.currency}?`
     setErrors(found)
     if (Object.keys(found).length) return
-    setBusy(true)
-    try {
-      await saveDailyEstimate({
-        id: estimate?.id ?? null,
-        tripId: trip.id,
-        placeId,
-        category,
-        label: label.trim(),
-        amount: perDay!,
-        currency: rate.currency,
-        rate: foreign ? rate.rate! : 1,
-        days: dayCount!,
-        travellers: people.length === travellers.length ? [] : people,
-      })
-      onDone()
-    } catch (e) {
-      setFormError(explainAuthError(e as { message?: string }).message)
-      setBusy(false)
-    }
+    await run(
+      async () => {
+        await saveDailyEstimate({
+          id: estimate?.id ?? null,
+          tripId: trip.id,
+          placeId,
+          category,
+          label: label.trim(),
+          amount: perDay!,
+          currency: rate.currency,
+          rate: foreign ? rate.rate! : 1,
+          days: dayCount!,
+          travellers: people.length === travellers.length ? [] : people,
+        })
+        onDone()
+      },
+      setFormError,
+    )
   }
 
   const toggle = (tid: string) => {

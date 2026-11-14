@@ -2,27 +2,26 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import { FormMessage } from '../AuthForm'
 import { SketchBox } from '../Sketch'
-import { explainAuthError } from '../../lib/authForm'
 import { leaveTrip, deleteTrip, type TripDetail } from '../../lib/trips'
+import { useSaving } from '../../lib/useSaving'
 
 /** Only the person who created the trip can delete it; it asks once and says what goes. */
 export function DeleteTrip({ detail, owner }: { detail: TripDetail; owner: boolean }) {
   const navigate = useNavigate()
   const [confirming, setConfirming] = useState(false)
-  const [busy, setBusy] = useState(false)
+  const { busy, run } = useSaving()
   const [error, setError] = useState<string>()
   const name = detail.trip.name
 
   async function remove() {
-    setBusy(true)
     setError(undefined)
-    try {
-      await deleteTrip(detail.trip.id)
-      navigate('/trips', { replace: true })
-    } catch (e) {
-      setBusy(false)
-      setError(explainAuthError(e as { message?: string }).message)
-    }
+    await run(
+      async () => {
+        await deleteTrip(detail.trip.id)
+        navigate('/trips', { replace: true })
+      },
+      setError,
+    )
   }
 
   return (
@@ -58,19 +57,18 @@ export function DeleteTrip({ detail, owner }: { detail: TripDetail; owner: boole
 export function LeaveTrip({ detail }: { detail: TripDetail }) {
   const navigate = useNavigate()
   const [confirming, setConfirming] = useState(false)
-  const [busy, setBusy] = useState(false)
+  const { busy, run } = useSaving()
   const [error, setError] = useState<string>()
 
   async function leave() {
-    setBusy(true)
     setError(undefined)
-    try {
-      await leaveTrip(detail.trip.id)
-      navigate('/trips', { replace: true })
-    } catch (e) {
-      setBusy(false)
-      setError(explainAuthError(e as { message?: string }).message)
-    }
+    await run(
+      async () => {
+        await leaveTrip(detail.trip.id)
+        navigate('/trips', { replace: true })
+      },
+      setError,
+    )
   }
 
   return (

@@ -1,5 +1,4 @@
 import { useState, type FormEvent } from 'react'
-import { explainAuthError } from '../../lib/authForm'
 import { amountForInput, NO_AMOUNT, parseAmount } from '../../lib/money'
 import { detailsOf, type OptionDetails, type Way } from '../../lib/options'
 import type { ItemKind, OptionInput, RoomInput, TicketMode, Traveller, TripOption } from '../../lib/trips'
@@ -10,6 +9,7 @@ import { FormActions } from '../FormActions'
 import { CurrencyPicker, RateField } from '../RateField'
 import { roomsTotal, type RoomDraft } from '../../lib/rooms'
 import { RoomsEditor } from './RoomsEditor'
+import { useSaving } from '../../lib/useSaving'
 
 const STAY_TYPES = ['Hotel', 'Apartment', 'House', 'Guesthouse', 'Hostel', 'Room']
 
@@ -65,7 +65,7 @@ export function OptionForm({
   const [link, setLink] = useState(initial?.link ?? '')
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [formError, setFormError] = useState<string>()
-  const [busy, setBusy] = useState(false)
+  const { busy, run } = useSaving()
   const id = initial?.id ?? 'new'
   const [byRoom, setByRoom] = useState(initialRooms.length > 0)
   const [rooms, setRooms] = useState<RoomDraft[]>(
@@ -143,26 +143,25 @@ export function OptionForm({
           }
         : {}
 
-    setBusy(true)
-    try {
-      await onSubmit({
-        name: name.trim(),
-        amount,
-        ...(stay && byRoom
-          ? { rooms: rooms.map((r) => ({ name: r.name.trim(), amount: parseAmount(r.price) as number, occupants: r.occupants })) }
-          : stay && initialRooms.length
-            ? { rooms: null }
-            : {}),
-        currency: foreign && rate.rate !== null ? rate.currency : currency,
-        rate: foreign && rate.rate !== null ? rate.rate : 1,
-        details,
-        link: link.trim() || null,
-        note: note.trim() || null,
-      })
-    } catch (error) {
-      setBusy(false)
-      setFormError(explainAuthError(error as { message?: string }).message)
-    }
+    await run(
+      async () => {
+        await onSubmit({
+          name: name.trim(),
+          amount,
+          ...(stay && byRoom
+            ? { rooms: rooms.map((r) => ({ name: r.name.trim(), amount: parseAmount(r.price) as number, occupants: r.occupants })) }
+            : stay && initialRooms.length
+              ? { rooms: null }
+              : {}),
+          currency: foreign && rate.rate !== null ? rate.currency : currency,
+          rate: foreign && rate.rate !== null ? rate.rate : 1,
+          details,
+          link: link.trim() || null,
+          note: note.trim() || null,
+        })
+      },
+      setFormError,
+    )
   }
 
   const text = (key: string, label: string, value: string, set: (v: string) => void, extra: Record<string, unknown> = {}) => (

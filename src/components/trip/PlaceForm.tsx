@@ -1,8 +1,8 @@
 import { useState, type FormEvent } from 'react'
 import { FormMessage } from '../AuthForm'
 import { FormActions } from '../FormActions'
-import { explainAuthError } from '../../lib/authForm'
 import { deletePlace, updatePlace, type Place } from '../../lib/trips'
+import { useSaving } from '../../lib/useSaving'
 
 /** Change a place's name and nights, or delete it with what's in it. */
 export function PlaceForm({
@@ -20,7 +20,7 @@ export function PlaceForm({
   const [nights, setNights] = useState(String(place.nights))
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [formError, setFormError] = useState<string>()
-  const [busy, setBusy] = useState(false)
+  const { busy, run } = useSaving()
   const id = `place-edit-${place.id}`
 
   async function submit(event: FormEvent) {
@@ -32,14 +32,13 @@ export function PlaceForm({
     if (!Number.isInteger(n) || n < 0 || n > 365) found.nights = 'A whole number of nights, like 3.'
     setErrors(found)
     if (Object.keys(found).length) return
-    setBusy(true)
-    try {
-      await updatePlace(place.id, { name: name.trim(), nights: n })
-      onDone()
-    } catch (error) {
-      setBusy(false)
-      setFormError(explainAuthError(error as { message?: string }).message)
-    }
+    await run(
+      async () => {
+        await updatePlace(place.id, { name: name.trim(), nights: n })
+        onDone()
+      },
+      setFormError,
+    )
   }
 
   const goesWith =

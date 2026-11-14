@@ -7,6 +7,7 @@ import { formatMoney, formatWhole, parseAmount } from '../lib/money'
 import { balanceLines, bookedLines, headline, paidLines, repaymentLines, settleWords } from '../lib/moneyPages'
 import { addRepayment, deleteRepayment } from '../lib/trips'
 import { localToday } from '../lib/tripText'
+import { useSaving } from '../lib/useSaving'
 
 /**
  * Who paid what (build 4, mockup who-paid-v4): the answer first (owed, owe, square), the few
@@ -203,7 +204,7 @@ function RepaymentForm({ page }: { page: Ctx }) {
   const [paidOn, setPaidOn] = useState(localToday)
   const [note, setNote] = useState('')
   const [error, setError] = useState<string>()
-  const [busy, setBusy] = useState(false)
+  const { busy, run } = useSaving()
   const currency = detail.trip.currency
 
   async function submit(e: FormEvent) {
@@ -211,19 +212,17 @@ function RepaymentForm({ page }: { page: Ctx }) {
     const value = parseAmount(amount)
     if (from === to) return setError('Someone pays someone else back.')
     if (value === null || value <= 0) return setError('How much? Like 67 or 1 060,50.')
-    setBusy(true)
     setError(undefined)
-    try {
-      await addRepayment({ tripId: detail.trip.id, from, to, amount: value, paidOn, note: note.trim() || null })
-      setOpen(false)
-      setAmount('')
-      setNote('')
-      reload()
-    } catch (err) {
-      setError(explainAuthError(err as { message?: string }).message)
-    } finally {
-      setBusy(false)
-    }
+    await run(
+      async () => {
+        await addRepayment({ tripId: detail.trip.id, from, to, amount: value, paidOn, note: note.trim() || null })
+        setOpen(false)
+        setAmount('')
+        setNote('')
+        reload()
+      },
+      setError,
+    )
   }
 
   if (!open) {

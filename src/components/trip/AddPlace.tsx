@@ -1,9 +1,9 @@
 import { useState, type FormEvent } from 'react'
 import { FormMessage } from '../AuthForm'
 import { CityField } from '../CityField'
-import { explainAuthError } from '../../lib/authForm'
 import { emptyCity, type CityValue } from '../../lib/places'
 import { addPlace, type Place } from '../../lib/trips'
+import { useSaving } from '../../lib/useSaving'
 
 export function AddPlace({
   tripId,
@@ -20,7 +20,7 @@ export function AddPlace({
   const [nights, setNights] = useState('')
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [formError, setFormError] = useState<string>()
-  const [busy, setBusy] = useState(false)
+  const { busy, run } = useSaving()
 
   async function submit(event: FormEvent) {
     event.preventDefault()
@@ -32,25 +32,23 @@ export function AddPlace({
     setErrors(found)
     if (Object.keys(found).length) return
 
-    setBusy(true)
-    try {
-      const place = await addPlace({
-        tripId,
-        name: city.name.trim(),
-        country: city.country,
-        latitude: city.latitude,
-        longitude: city.longitude,
-        nights: n,
-        position,
-      })
-      onAdded(place)
-      setCity(emptyCity)
-      setNights('')
-    } catch (error) {
-      setFormError(explainAuthError(error as { message?: string }).message)
-    } finally {
-      setBusy(false)
-    }
+    await run(
+      async () => {
+        const place = await addPlace({
+          tripId,
+          name: city.name.trim(),
+          country: city.country,
+          latitude: city.latitude,
+          longitude: city.longitude,
+          nights: n,
+          position,
+        })
+        onAdded(place)
+        setCity(emptyCity)
+        setNights('')
+      },
+      setFormError,
+    )
   }
 
   return (

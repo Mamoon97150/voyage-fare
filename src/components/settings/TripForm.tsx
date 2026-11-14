@@ -2,10 +2,10 @@ import { useState, type FormEvent } from 'react'
 import { FormMessage } from '../AuthForm'
 import { CityField } from '../CityField'
 import { SketchBox } from '../Sketch'
-import { explainAuthError } from '../../lib/authForm'
 import { amountForInput, parseAmount } from '../../lib/money'
 import type { CityValue } from '../../lib/places'
 import { updateTrip, type TripDetail } from '../../lib/trips'
+import { useSaving } from '../../lib/useSaving'
 
 /** Name, dates, leaving from, and the target: one form, one Save. */
 export function TripForm({ detail, onSaved }: { detail: TripDetail; onSaved: () => void }) {
@@ -24,7 +24,7 @@ export function TripForm({ detail, onSaved }: { detail: TripDetail; onSaved: () 
   const [scope, setScope] = useState<'per_person' | 'total'>(trip.target_scope === 'total' ? 'total' : 'per_person')
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [message, setMessage] = useState<{ tone: 'info' | 'error'; text: string }>()
-  const [busy, setBusy] = useState(false)
+  const { busy, run } = useSaving()
 
   async function submit(event: FormEvent) {
     event.preventDefault()
@@ -39,25 +39,25 @@ export function TripForm({ detail, onSaved }: { detail: TripDetail; onSaved: () 
     if (target.trim() && amount === null) found.target = 'Enter an amount, like 2 500.'
     setErrors(found)
     if (Object.keys(found).length) return
-    setBusy(true)
-    try {
-      await updateTrip(trip.id, {
-        name: name.trim(),
-        startDate: noDates ? null : start,
-        endDate: noDates ? null : end,
-        homeCity: home.name.trim() || null,
-        homeLatitude: home.name.trim() ? home.latitude : null,
-        homeLongitude: home.name.trim() ? home.longitude : null,
-        targetAmount: amount,
-        targetScope: scope,
-      })
-      setMessage({ tone: 'info', text: 'Saved.' })
-      onSaved()
-    } catch (error) {
-      setMessage({ tone: 'error', text: explainAuthError(error as { message?: string }).message })
-    } finally {
-      setBusy(false)
-    }
+    await run(
+      async () => {
+        await updateTrip(trip.id, {
+          name: name.trim(),
+          startDate: noDates ? null : start,
+          endDate: noDates ? null : end,
+          homeCity: home.name.trim() || null,
+          homeLatitude: home.name.trim() ? home.latitude : null,
+          homeLongitude: home.name.trim() ? home.longitude : null,
+          targetAmount: amount,
+          targetScope: scope,
+        })
+        setMessage({ tone: 'info', text: 'Saved.' })
+        onSaved()
+      },
+      (message) => {
+        setMessage({ tone: 'error', text: message })
+      },
+    )
   }
 
   return (

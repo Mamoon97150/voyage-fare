@@ -7,6 +7,7 @@ import { isSolo, leftLine } from '../../lib/tripView'
 import { localToday, shortDay } from '../../lib/tripText'
 import { FormMessage } from '../AuthForm'
 import { CurrencyPicker, RateField } from '../RateField'
+import { useSaving } from '../../lib/useSaving'
 
 const KINDS: { key: PaymentKind; label: string }[] = [
   { key: 'deposit', label: 'Deposit' },
@@ -154,7 +155,7 @@ function PaymentForm({
   const [amount, setAmount] = useState('')
   const [paidOn, setPaidOn] = useState(localToday())
   const [paidBy, setPaidBy] = useState(viewer ?? detail.travellers[0]?.id ?? '')
-  const [busy, setBusy] = useState(false)
+  const { busy, run } = useSaving()
   const [error, setError] = useState<string>()
   const rate = useRate(trip, trip, 1)
   const solo = isSolo(detail)
@@ -174,23 +175,22 @@ function PaymentForm({
       setError(`What’s the rate? 1 ${rate.currency} is how many ${trip}?`)
       return
     }
-    setBusy(true)
     setError(undefined)
-    try {
-      await addPayment({
-        itemId: item.id,
-        kind,
-        amount: typed,
-        ...(foreign ? { currency: rate.currency, rate: rate.rate! } : {}),
-        paidBy: paidBy === EACH ? null : paidBy,
-        each: paidBy === EACH,
-        paidOn,
-      })
-      onDone()
-    } catch (err) {
-      setBusy(false)
-      setError(explainAuthError(err as { message?: string }).message)
-    }
+    await run(
+      async () => {
+        await addPayment({
+          itemId: item.id,
+          kind,
+          amount: typed,
+          ...(foreign ? { currency: rate.currency, rate: rate.rate! } : {}),
+          paidBy: paidBy === EACH ? null : paidBy,
+          each: paidBy === EACH,
+          paidOn,
+        })
+        onDone()
+      },
+      setError,
+    )
   }
 
   return (

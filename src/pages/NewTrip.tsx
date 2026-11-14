@@ -5,10 +5,10 @@ import { CityField } from '../components/CityField'
 import { emptyCity, type CityValue } from '../lib/places'
 import { SketchBox } from '../components/Sketch'
 import { useAuth } from '../lib/authContext'
-import { explainAuthError } from '../lib/authForm'
 import { createTrip } from '../lib/trips'
 import { parseAmount } from '../lib/money'
 import { CURRENCIES, currencyLabel } from '../lib/tripText'
+import { useSaving } from '../lib/useSaving'
 
 type Step = 1 | 2 | 3
 
@@ -30,7 +30,7 @@ export function NewTrip() {
   const [scope, setScope] = useState<'per_person' | 'total'>('per_person')
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [formError, setFormError] = useState<string>()
-  const [busy, setBusy] = useState(false)
+  const { busy, run } = useSaving()
 
   function checkStep1() {
     const found: Record<string, string> = {}
@@ -55,27 +55,26 @@ export function NewTrip() {
   async function create(withTarget: boolean) {
     setFormError(undefined)
     if (withTarget && !checkTarget()) return
-    setBusy(true)
-    try {
-      const amount = withTarget && target.trim() ? parseAmount(target) : null
-      const id = await createTrip({
-        name: name.trim(),
-        me,
-        travellers: others.map((o) => o.trim()).filter(Boolean),
-        startDate: noDates ? null : start,
-        endDate: noDates ? null : end,
-        homeCity: home.name.trim() || null,
-        homeLatitude: home.latitude,
-        homeLongitude: home.longitude,
-        currency,
-        targetAmount: amount,
-        targetScope: scope,
-      })
-      navigate(`/trips/${id}`, { replace: true })
-    } catch (error) {
-      setBusy(false)
-      setFormError(explainAuthError(error as { message?: string }).message)
-    }
+    await run(
+      async () => {
+        const amount = withTarget && target.trim() ? parseAmount(target) : null
+        const id = await createTrip({
+          name: name.trim(),
+          me,
+          travellers: others.map((o) => o.trim()).filter(Boolean),
+          startDate: noDates ? null : start,
+          endDate: noDates ? null : end,
+          homeCity: home.name.trim() || null,
+          homeLatitude: home.latitude,
+          homeLongitude: home.longitude,
+          currency,
+          targetAmount: amount,
+          targetScope: scope,
+        })
+        navigate(`/trips/${id}`, { replace: true })
+      },
+      setFormError,
+    )
   }
 
   function next(event: FormEvent) {

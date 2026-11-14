@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { FormMessage } from '../AuthForm'
 import { SketchBox } from '../Sketch'
-import { explainAuthError } from '../../lib/authForm'
 import { addTraveller, cancelInvitation, inviteTraveller, joinLink, listOpenInvitations, removeTraveller, renameTraveller, type Invitation, type Traveller, type TripDetail } from '../../lib/trips'
 import { sentAgo } from '../../lib/tripText'
+import { useSaving } from '../../lib/useSaving'
 
 /** Each traveller has their own share. Rename, add, or remove (when it's safe). */
 export function Travellers({
@@ -19,7 +19,7 @@ export function Travellers({
 }) {
   const [newName, setNewName] = useState('')
   const [error, setError] = useState<string>()
-  const [busy, setBusy] = useState(false)
+  const { busy, run } = useSaving()
   const [invites, setInvites] = useState<Invitation[]>([])
   const travellers = detail.travellers
   const tripId = detail.trip.id
@@ -47,16 +47,14 @@ export function Travellers({
       setError('Type a name first.')
       return
     }
-    setBusy(true)
-    try {
-      await addTraveller(detail.trip.id, newName.trim(), Math.max(0, ...travellers.map((t) => t.position)) + 1)
-      setNewName('')
-      onChanged()
-    } catch (e) {
-      setError(explainAuthError(e as { message?: string }).message)
-    } finally {
-      setBusy(false)
-    }
+    await run(
+      async () => {
+        await addTraveller(detail.trip.id, newName.trim(), Math.max(0, ...travellers.map((t) => t.position)) + 1)
+        setNewName('')
+        onChanged()
+      },
+      setError,
+    )
   }
 
   return (
@@ -130,20 +128,18 @@ function TravellerRow({
   const removable = !isYou && (!onTrip || amOwner)
   const [name, setName] = useState(traveller.name)
   const [error, setError] = useState<string>()
-  const [busy, setBusy] = useState(false)
+  const { busy, run } = useSaving()
 
-  async function run(action: () => Promise<void>) {
-    setBusy(true)
+  async function save(action: () => Promise<void>) {
     setError(undefined)
-    try {
-      await action()
-      setMode('view')
-      onChanged()
-    } catch (e) {
-      setError(explainAuthError(e as { message?: string }).message)
-    } finally {
-      setBusy(false)
-    }
+    await run(
+      async () => {
+        await action()
+        setMode('view')
+        onChanged()
+      },
+      setError,
+    )
   }
 
   return (
@@ -157,7 +153,7 @@ function TravellerRow({
             className="settings__rename"
             onSubmit={(e) => {
               e.preventDefault()
-              if (name.trim()) void run(() => renameTraveller(traveller.id, name.trim()))
+              if (name.trim()) void save(() => renameTraveller(traveller.id, name.trim()))
             }}
           >
             <input
@@ -221,7 +217,7 @@ function TravellerRow({
             <button
               type="button"
               className="button button--danger"
-              onClick={() => void run(() => removeTraveller(traveller.id))}
+              onClick={() => void save(() => removeTraveller(traveller.id))}
               disabled={busy}
             >
               {busy ? 'Removing…' : `Yes, remove ${traveller.name}`}
@@ -282,38 +278,34 @@ function InviteActions({
   onInvitesChanged: () => void
 }) {
   const [link, setLink] = useState<string>()
-  const [busy, setBusy] = useState(false)
+  const { busy, run } = useSaving()
   const [copied, setCopied] = useState(false)
   const [error, setError] = useState<string>()
 
   async function getLink() {
-    setBusy(true)
     setError(undefined)
-    try {
-      const { token } = await inviteTraveller(traveller.id)
-      setLink(joinLink(token))
-      onOpen(true)
-      onInvitesChanged()
-    } catch (e) {
-      setError(explainAuthError(e as { message?: string }).message)
-    } finally {
-      setBusy(false)
-    }
+    await run(
+      async () => {
+        const { token } = await inviteTraveller(traveller.id)
+        setLink(joinLink(token))
+        onOpen(true)
+        onInvitesChanged()
+      },
+      setError,
+    )
   }
 
   async function cancel() {
-    setBusy(true)
     setError(undefined)
-    try {
-      await cancelInvitation(traveller.id)
-      setLink(undefined)
-      onOpen(false)
-      onInvitesChanged()
-    } catch (e) {
-      setError(explainAuthError(e as { message?: string }).message)
-    } finally {
-      setBusy(false)
-    }
+    await run(
+      async () => {
+        await cancelInvitation(traveller.id)
+        setLink(undefined)
+        onOpen(false)
+        onInvitesChanged()
+      },
+      setError,
+    )
   }
 
   async function share() {

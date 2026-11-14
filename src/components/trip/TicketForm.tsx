@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { Link } from "react-router";
-import { explainAuthError } from "../../lib/authForm";
+import { useSaving } from "../../lib/useSaving";
 import { amountForInput, NO_AMOUNT, parseAmount } from "../../lib/money";
 import type { TicketChange, TicketMode, TripDetail } from "../../lib/trips";
 import { legsAfter, MODES, suggestedRoute } from "../../lib/tripView";
@@ -61,7 +61,7 @@ export function TicketForm({
   const [price, setPrice] = useState(amountForInput(initial?.amount));
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string>();
-  const [busy, setBusy] = useState(false);
+  const { busy, run } = useSaving()
 
   function moveTo(gap: string) {
     setWhere(gap);
@@ -97,22 +97,21 @@ export function TicketForm({
     setErrors(found);
     if (Object.keys(found).length) return;
 
-    setBusy(true);
-    try {
-      await onSubmit({
-        from: from.trim(),
-        to: to.trim(),
-        mode,
-        via: via.trim() || null,
-        afterPlaceId: placeOf(where),
-        roundTrip,
-        returnAfterPlaceId: roundTrip ? placeOf(returnWhere) : null,
-        amount,
-      });
-    } catch (error) {
-      setBusy(false);
-      setFormError(explainAuthError(error as { message?: string }).message);
-    }
+    await run(
+      async () => {
+        await onSubmit({
+          from: from.trim(),
+          to: to.trim(),
+          mode,
+          via: via.trim() || null,
+          afterPlaceId: placeOf(where),
+          roundTrip,
+          returnAfterPlaceId: roundTrip ? placeOf(returnWhere) : null,
+          amount,
+        });
+      },
+      setFormError,
+    );
   }
 
   const field = (

@@ -12,7 +12,6 @@ import { Loading } from '../lib/auth'
 import { useTrip } from '../lib/useTrip'
 import { formatMoney } from '../lib/money'
 import { useAuth } from '../lib/authContext'
-import { explainAuthError } from '../lib/authForm'
 import { optionLines, roomsOf, subjectsFor, TABS, tabToDecide, type Sort, type Subject, type Tab } from '../lib/options'
 import { tripSubtitle } from '../lib/tripText'
 import {
@@ -28,6 +27,7 @@ import {
   type TripDetail,
 } from '../lib/trips'
 import { budgetView, daysText, isSolo, viewerOf, type Mode } from '../lib/tripView'
+import { useSaving } from '../lib/useSaving'
 
 const EMPTY: Record<Tab, { kind: ItemKind; add: string; none: (where: string) => string }> = {
   travel: { kind: 'transport', add: '', none: () => '' },
@@ -196,7 +196,7 @@ function ItemOptions({
 }) {
   const [sort, setSort] = useState<Sort>('cheapest')
   const [editing, setEditing] = useState<string | null>(null) // an option id, 'new', or nothing
-  const [busy, setBusy] = useState(false)
+  const { busy, run } = useSaving()
   const [error, setError] = useState<string>()
   const roundTrip = detail.legs.some((l) => l.item_id === item.id && l.leg_number === 2)
   const lines = optionLines(detail, item, viewer, mode, sort)
@@ -216,16 +216,14 @@ function ItemOptions({
   ].filter((p): p is { text: string; tone?: 'what' | 'todo' | 'dropped' } => p !== null)
 
   async function act(action: () => Promise<void>) {
-    setBusy(true)
     setError(undefined)
-    try {
-      await action()
-      onChanged()
-    } catch (e) {
-      setError(explainAuthError(e as { message?: string }).message)
-    } finally {
-      setBusy(false)
-    }
+    await run(
+      async () => {
+        await action()
+        onChanged()
+      },
+      setError,
+    )
   }
 
   const form = (option?: (typeof lines)[number]['option']) => (

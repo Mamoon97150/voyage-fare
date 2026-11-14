@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { FormMessage } from '../AuthForm'
 import { SketchBox } from '../Sketch'
-import { explainAuthError } from '../../lib/authForm'
 import { formatMoney } from '../../lib/money'
 import { fetchRate, formatRate, parseRate } from '../../lib/rates'
 import { changeTripCurrency, type TripDetail } from '../../lib/trips'
 import { CURRENCIES, currencyLabel } from '../../lib/tripText'
+import { useSaving } from '../../lib/useSaving'
 
 /**
  * The main currency: totals, the target and who-owes-whom are in it. It can change until the
@@ -18,7 +18,7 @@ export function MainCurrency({ detail, onChanged }: { detail: TripDetail; onChan
   const [text, setText] = useState('')
   const [inverted, setInverted] = useState(false)
   const [state, setState] = useState<'idle' | 'loading' | 'failed'>('idle')
-  const [busy, setBusy] = useState(false)
+  const { busy, run } = useSaving()
   const [error, setError] = useState<string>()
   const fixed = detail.items.some((i) => i.status === 'paid')
 
@@ -50,18 +50,16 @@ export function MainCurrency({ detail, onChanged }: { detail: TripDetail; onChan
       setError(text.trim() ? 'That rate doesn’t look right: type it like 1,1531.' : `What’s the rate? 1 ${from} is how many ${to}?`)
       return
     }
-    setBusy(true)
     setError(undefined)
-    try {
-      await changeTripCurrency(detail.trip.id, to, Math.round(rate * 1e8) / 1e8)
-      setOpen(false)
-      setTo('')
-      onChanged()
-    } catch (e) {
-      setError(explainAuthError(e as { message?: string }).message)
-    } finally {
-      setBusy(false)
-    }
+    await run(
+      async () => {
+        await changeTripCurrency(detail.trip.id, to, Math.round(rate * 1e8) / 1e8)
+        setOpen(false)
+        setTo('')
+        onChanged()
+      },
+      setError,
+    )
   }
 
   return (

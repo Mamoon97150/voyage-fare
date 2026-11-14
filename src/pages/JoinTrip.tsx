@@ -7,6 +7,7 @@ import { useAuth } from '../lib/authContext'
 import { explainAuthError } from '../lib/authForm'
 import { acceptInvitation, getInvitationPreview, type InvitationPreview } from '../lib/trips'
 import { formatDates } from '../lib/tripText'
+import { useSaving } from '../lib/useSaving'
 
 /**
  * The page an invitation link opens (mockup invitations-v4, step 2): whose trip it is and
@@ -19,7 +20,7 @@ export function JoinTrip() {
   const navigate = useNavigate()
   const [preview, setPreview] = useState<InvitationPreview | null | undefined>(undefined)
   const [loadError, setLoadError] = useState<string>()
-  const [busy, setBusy] = useState(false)
+  const { busy, run } = useSaving()
   const [error, setError] = useState<string>()
   const signedIn = Boolean(session)
 
@@ -68,15 +69,14 @@ export function JoinTrip() {
   const where = preview.places.join(', ')
 
   async function join() {
-    setBusy(true)
     setError(undefined)
-    try {
-      const tripId = await acceptInvitation(token)
-      navigate(`/trips/${tripId}`, { replace: true })
-    } catch (e) {
-      setBusy(false)
-      setError(explainAuthError(e as { message?: string }).message)
-    }
+    await run(
+      async () => {
+        const tripId = await acceptInvitation(token)
+        navigate(`/trips/${tripId}`, { replace: true })
+      },
+      setError,
+    )
   }
 
   return (

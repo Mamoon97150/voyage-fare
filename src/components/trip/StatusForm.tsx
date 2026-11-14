@@ -1,5 +1,4 @@
 import { useState, type FormEvent } from 'react'
-import { explainAuthError } from '../../lib/authForm'
 import { amountForInput, parseAmount } from '../../lib/money'
 import { setItemStatus, type Item, type ItemStatus, type TripDetail } from '../../lib/trips'
 import { isSolo } from '../../lib/tripView'
@@ -7,6 +6,7 @@ import { FormMessage } from '../AuthForm'
 import { useRate } from '../../lib/rates'
 import { localToday } from '../../lib/tripText'
 import { CurrencyPicker, RateField } from '../RateField'
+import { useSaving } from '../../lib/useSaving'
 
 const EACH = 'each'
 
@@ -47,7 +47,7 @@ export function StatusForm({
   // A traveller's id, or EACH: everyone on the line paid their own share (build 4).
   const [paidBy, setPaidBy] = useState(item.paid_each ? EACH : (item.paid_by ?? viewer ?? detail.travellers[0]?.id ?? ''))
   const [paidOn, setPaidOn] = useState(() => item.paid_on ?? localToday())
-  const [busy, setBusy] = useState(false)
+  const { busy, run } = useSaving()
   const [error, setError] = useState<string>()
   const solo = isSolo(detail)
   const id = `status-${item.id}`
@@ -69,24 +69,22 @@ export function StatusForm({
       setError(rate.unreadable ? 'That rate doesn’t look right: type it like 1,1531.' : `What’s the rate? 1 ${rate.currency} is how many ${trip}?`)
       return
     }
-    setBusy(true)
     setError(undefined)
-    try {
-      await setItemStatus({
-        id: item.id,
-        status,
-        actualAmount: status === 'chosen' ? null : actual,
-        paidBy: status === 'paid' && paidBy !== EACH ? paidBy : null,
-        paidEach: status === 'paid' && paidBy === EACH,
-        paidOn: status === 'paid' ? paidOn : null,
-        ...(foreign ? { actualCurrency: rate.currency, actualRate: rate.rate ?? undefined } : {}),
-      })
-      onSaved()
-    } catch (err) {
-      setError(explainAuthError(err as { message?: string }).message)
-    } finally {
-      setBusy(false)
-    }
+    await run(
+      async () => {
+        await setItemStatus({
+          id: item.id,
+          status,
+          actualAmount: status === 'chosen' ? null : actual,
+          paidBy: status === 'paid' && paidBy !== EACH ? paidBy : null,
+          paidEach: status === 'paid' && paidBy === EACH,
+          paidOn: status === 'paid' ? paidOn : null,
+          ...(foreign ? { actualCurrency: rate.currency, actualRate: rate.rate ?? undefined } : {}),
+        })
+        onSaved()
+      },
+      setError,
+    )
   }
 
   return (

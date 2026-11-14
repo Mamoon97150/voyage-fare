@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { explainAuthError } from '../../lib/authForm'
 import { Link } from 'react-router'
 import { compareLink, roomsOf } from '../../lib/options'
 import { setItemSplit, type Item, type TripDetail } from '../../lib/trips'
 import { FormMessage } from '../AuthForm'
+import { useSaving } from '../../lib/useSaving'
 
 /**
  * "Split between…" (SR-3, build 4): who a line is for. Everyone by default; tap a name to take
@@ -14,7 +14,7 @@ export function WhoFor({ detail, item, onChanged }: { detail: TripDetail; item: 
   const everyone = detail.travellers.map((t) => t.id)
   const from = detail.shares.filter((s) => s.item_id === item.id && Number(s.fraction) > 0).map((s) => s.traveller_id as string)
   const [on, setOn] = useState<string[]>(from.length ? from : everyone)
-  const [busy, setBusy] = useState(false)
+  const { busy, run } = useSaving()
   const [error, setError] = useState<string>()
   if (detail.travellers.length < 2) return null
 
@@ -40,17 +40,17 @@ export function WhoFor({ detail, item, onChanged }: { detail: TripDetail; item: 
     if (next.length === 0) return
     const before = on
     setOn(next)
-    setBusy(true)
     setError(undefined)
-    try {
-      await setItemSplit(item.id, next.length === everyone.length ? [] : next)
-      onChanged()
-    } catch (e) {
-      setOn(before)
-      setError(explainAuthError(e as { message?: string }).message)
-    } finally {
-      setBusy(false)
-    }
+    await run(
+      async () => {
+        await setItemSplit(item.id, next.length === everyone.length ? [] : next)
+        onChanged()
+      },
+      (message) => {
+        setOn(before)
+        setError(message)
+      },
+    )
   }
 
   const out = detail.travellers.filter((t) => !on.includes(t.id)).map((t) => t.name)

@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { explainAuthError } from '../../lib/authForm'
 import { setItemPackage, type Item, type TripDetail } from '../../lib/trips'
 import { itemTitle, kindLabel, packagesOf } from '../../lib/tripView'
 import type { ItemKind } from '../../lib/trips'
 import { FormMessage } from '../AuthForm'
+import { useSaving } from '../../lib/useSaving'
 
 /**
  * "What it covers" (mockup package-v4, step 2): tick the lines of the trip a package includes,
@@ -64,22 +64,20 @@ export function CoversPicker({
 /** On any line, when the trip has a package: "Part of a package", saved on change. */
 export function PartOfPackage({ detail, item, onChanged }: { detail: TripDetail; item: Item; onChanged: () => void }) {
   const packages = packagesOf(detail)
-  const [busy, setBusy] = useState(false)
+  const { busy, run } = useSaving()
   const [error, setError] = useState<string>()
   if (item.kind === 'package' || packages.length === 0) return null
   const id = `part-of-${item.id}`
 
   async function change(next: string) {
-    setBusy(true)
     setError(undefined)
-    try {
-      await setItemPackage(item.id, next || null)
-      onChanged()
-    } catch (e) {
-      setError(explainAuthError(e as { message?: string }).message)
-    } finally {
-      setBusy(false)
-    }
+    await run(
+      async () => {
+        await setItemPackage(item.id, next || null)
+        onChanged()
+      },
+      setError,
+    )
   }
 
   return (
