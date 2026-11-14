@@ -21,7 +21,8 @@ export function RoomsEditor({
   currency: string
   error?: string
 }) {
-  const set = (i: number, change: Partial<RoomDraft>) => onRooms(rooms.map((r, j) => (j === i ? { ...r, ...change } : r)))
+  const set = (i: number, change: Partial<RoomDraft>) =>
+    onRooms(rooms.map((r, j) => (j === i ? { ...r, ...change } : r)))
   const total = roomsTotal(rooms)
   return (
     <div className="rooms">
@@ -32,7 +33,12 @@ export function RoomsEditor({
               <label htmlFor={`${id}-room-${i}`} className="field__label">
                 Room
               </label>
-              <input id={`${id}-room-${i}`} className="field__input" value={room.name} onChange={(e) => set(i, { name: e.target.value })} />
+              <input
+                id={`${id}-room-${i}`}
+                className="field__input"
+                value={room.name}
+                onChange={(e) => set(i, { name: e.target.value })}
+              />
             </div>
             <div className="field">
               <label htmlFor={`${id}-room-${i}-price`} className="field__label">
@@ -61,7 +67,9 @@ export function RoomsEditor({
                   className="chip"
                   aria-pressed={on}
                   aria-label={`${t.name} sleeps in ${room.name || `room ${i + 1}`}`}
-                  onClick={() => set(i, { occupants: on ? room.occupants.filter((x) => x !== t.id) : [...room.occupants, t.id] })}
+                  onClick={() =>
+                    set(i, { occupants: on ? room.occupants.filter((x) => x !== t.id) : [...room.occupants, t.id] })
+                  }
                 >
                   {t.name}
                 </button>
@@ -69,13 +77,21 @@ export function RoomsEditor({
             })}
           </div>
           {rooms.length > 1 && (
-            <button type="button" className="link-button room__remove" onClick={() => onRooms(rooms.filter((_, j) => j !== i))}>
+            <button
+              type="button"
+              className="link-button room__remove"
+              onClick={() => onRooms(rooms.filter((_, j) => j !== i))}
+            >
               Remove this room
             </button>
           )}
         </div>
       ))}
-      <button type="button" className="add-row" onClick={() => onRooms([...rooms, { name: `Room ${rooms.length + 1}`, price: '', occupants: [] }])}>
+      <button
+        type="button"
+        className="add-row"
+        onClick={() => onRooms([...rooms, { name: `Room ${rooms.length + 1}`, price: '', occupants: [] }])}
+      >
         <span className="add-row__plus" aria-hidden="true">
           +
         </span>

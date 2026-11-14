@@ -12,16 +12,80 @@ vi.mock('../lib/places', async (original) => ({
 describe('Compare', () => {
   const journey = {
     places: [cartagena],
-    items: [{ id: 'f', place_id: null, kind: 'transport', name: 'St Martin ⇄ Cartagena', status: 'chosen', day_number: null, end_day_number: null, position: 1 }],
+    items: [
+      {
+        id: 'f',
+        place_id: null,
+        kind: 'transport',
+        name: 'St Martin ⇄ Cartagena',
+        status: 'chosen',
+        day_number: null,
+        end_day_number: null,
+        position: 1,
+      },
+    ],
     legs: [
-      { id: 'l1', item_id: 'f', leg_number: 1, mode: 'plane', from_name: 'St Martin', to_name: 'Cartagena', via: null, after_place_id: null, position: 0 },
-      { id: 'l2', item_id: 'f', leg_number: 2, mode: 'plane', from_name: 'Cartagena', to_name: 'St Martin', via: null, after_place_id: 'p1', position: 1 },
+      {
+        id: 'l1',
+        item_id: 'f',
+        leg_number: 1,
+        mode: 'plane',
+        from_name: 'St Martin',
+        to_name: 'Cartagena',
+        via: null,
+        after_place_id: null,
+        position: 0,
+      },
+      {
+        id: 'l2',
+        item_id: 'f',
+        leg_number: 2,
+        mode: 'plane',
+        from_name: 'Cartagena',
+        to_name: 'St Martin',
+        via: null,
+        after_place_id: 'p1',
+        position: 1,
+      },
     ],
     options: [
-      { id: 'copa', item_id: 'f', name: 'Copa', amount: 1600, rate: 1, currency: 'EUR', is_chosen: true, is_favourite: true, position: 1, note: 'Short stop',
-        details: { mode: 'plane', out: { fromAirport: 'SXM', toAirport: 'CTG', leaves: '13:05', arrives: '19:25', stops: 1, via: 'Panama' }, back: { leaves: '08:40', arrives: '15:45', stops: 1 }, bag: true, refundable: true } },
-      { id: 'avianca', item_id: 'f', name: 'Avianca', amount: 1400, rate: 1, currency: 'EUR', is_chosen: false, is_favourite: false, position: 2, note: null,
-        details: { mode: 'plane', out: { leaves: '07:10', arrives: '16:50', stops: 1, via: 'Bogotá' }, back: { leaves: '11:30', arrives: '20:25' }, bag: false } },
+      {
+        id: 'copa',
+        item_id: 'f',
+        name: 'Copa',
+        amount: 1600,
+        rate: 1,
+        currency: 'EUR',
+        is_chosen: true,
+        is_favourite: true,
+        position: 1,
+        note: 'Short stop',
+        details: {
+          mode: 'plane',
+          out: { fromAirport: 'SXM', toAirport: 'CTG', leaves: '13:05', arrives: '19:25', stops: 1, via: 'Panama' },
+          back: { leaves: '08:40', arrives: '15:45', stops: 1 },
+          bag: true,
+          refundable: true,
+        },
+      },
+      {
+        id: 'avianca',
+        item_id: 'f',
+        name: 'Avianca',
+        amount: 1400,
+        rate: 1,
+        currency: 'EUR',
+        is_chosen: false,
+        is_favourite: false,
+        position: 2,
+        note: null,
+        details: {
+          mode: 'plane',
+          out: { leaves: '07:10', arrives: '16:50', stops: 1, via: 'Bogotá' },
+          back: { leaves: '11:30', arrives: '20:25' },
+          bag: false,
+        },
+      },
     ],
     shares: [
       { item_id: 'f', traveller_id: 'a', fraction: 0.5 },
@@ -82,7 +146,11 @@ describe('Compare', () => {
       expect(data.addOption).toHaveBeenCalledWith(
         expect.anything(),
         'f',
-        expect.objectContaining({ name: 'JetBlue + Copa', amount: 1690, details: { mode: 'plane', prices: [890, 800] } }),
+        expect.objectContaining({
+          name: 'JetBlue + Copa',
+          amount: 1690,
+          details: { mode: 'plane', prices: [890, 800] },
+        }),
       ),
     )
   })
@@ -110,10 +178,38 @@ describe('Compare', () => {
     data.getTrip.mockResolvedValue(
       detail({
         places: [cartagena],
-        items: [{ id: 'i1', place_id: 'p1', kind: 'housing', name: 'Casa Lola', status: 'chosen', day_number: null, end_day_number: null }],
+        items: [
+          {
+            id: 'i1',
+            place_id: 'p1',
+            kind: 'housing',
+            name: 'Casa Lola',
+            status: 'chosen',
+            day_number: null,
+            end_day_number: null,
+          },
+        ],
         options: [
-          { id: 'o1', item_id: 'i1', name: 'Casa Lola', amount: 1200, rate: 1, is_chosen: true, position: 1, details: {} },
-          { id: 'o2', item_id: 'i1', name: 'Hotel Sofitel', amount: 2000, rate: 1, is_chosen: false, position: 2, details: {} },
+          {
+            id: 'o1',
+            item_id: 'i1',
+            name: 'Casa Lola',
+            amount: 1200,
+            rate: 1,
+            is_chosen: true,
+            position: 1,
+            details: {},
+          },
+          {
+            id: 'o2',
+            item_id: 'i1',
+            name: 'Hotel Sofitel',
+            amount: 2000,
+            rate: 1,
+            is_chosen: false,
+            position: 2,
+            details: {},
+          },
         ],
         amounts: [{ item_id: 'i1', current: 1200, is_confirmed: false }],
       }),
@@ -123,12 +219,17 @@ describe('Compare', () => {
     expect(await screen.findByText(/2 options compared/)).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Change Casa Lola' }))
     expect(screen.getByText(/2 options compared · chosen: Casa Lola/)).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Open in Compare' })).toHaveAttribute('href', '/trips/t1/compare?tab=stay&page=p1')
+    expect(screen.getByRole('link', { name: 'Open in Compare' })).toHaveAttribute(
+      'href',
+      '/trips/t1/compare?tab=stay&page=p1',
+    )
     expect(screen.queryByLabelText('Price')).not.toBeInTheDocument()
     type('Name', 'Stay in Cartagena')
     click('Save')
     await waitFor(() =>
-      expect(data.updateItem).toHaveBeenCalledWith(expect.objectContaining({ name: 'Stay in Cartagena', keepPrice: true })),
+      expect(data.updateItem).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'Stay in Cartagena', keepPrice: true }),
+      ),
     )
   })
 })
@@ -139,8 +240,29 @@ describe('Compare: a line shared by some', () => {
       detail({
         travellers: [...travellers, { id: 'c', name: 'Cleo', user_id: null }],
         places: [cartagena],
-        items: [{ id: 'i1', place_id: 'p1', kind: 'activity', name: 'Photoshoot', status: 'chosen', day_number: null, end_day_number: null }],
-        options: [{ id: 'o1', item_id: 'i1', name: 'Fly Dress', amount: 210, rate: 1, is_chosen: true, position: 1, details: {} }],
+        items: [
+          {
+            id: 'i1',
+            place_id: 'p1',
+            kind: 'activity',
+            name: 'Photoshoot',
+            status: 'chosen',
+            day_number: null,
+            end_day_number: null,
+          },
+        ],
+        options: [
+          {
+            id: 'o1',
+            item_id: 'i1',
+            name: 'Fly Dress',
+            amount: 210,
+            rate: 1,
+            is_chosen: true,
+            position: 1,
+            details: {},
+          },
+        ],
         shares: [
           { item_id: 'i1', traveller_id: 'a', fraction: 1 / 2 },
           { item_id: 'i1', traveller_id: 'b', fraction: 1 / 2 },
@@ -158,8 +280,30 @@ describe('rooms (a stay by room)', () => {
     detail({
       travellers: three,
       places: [cartagena],
-      items: [{ id: 'h', place_id: 'p1', kind: 'housing', name: 'Casona', status: 'chosen', day_number: null, end_day_number: null }],
-      options: [{ id: 'o1', item_id: 'h', name: 'Casona', amount: 1000, rate: 1, currency: 'EUR', is_chosen: true, position: 1, details: {} }],
+      items: [
+        {
+          id: 'h',
+          place_id: 'p1',
+          kind: 'housing',
+          name: 'Casona',
+          status: 'chosen',
+          day_number: null,
+          end_day_number: null,
+        },
+      ],
+      options: [
+        {
+          id: 'o1',
+          item_id: 'h',
+          name: 'Casona',
+          amount: 1000,
+          rate: 1,
+          currency: 'EUR',
+          is_chosen: true,
+          position: 1,
+          details: {},
+        },
+      ],
       amounts: [{ item_id: 'h', current: 1000, is_confirmed: false }],
       ...over,
     })

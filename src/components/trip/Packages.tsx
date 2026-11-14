@@ -21,12 +21,21 @@ export function CoversPicker({
   value: string[]
   onChange: (ids: string[]) => void
 }) {
-  const free = (i: Item) => i.kind !== 'package' && i.status !== 'dropped' && (!i.package_id || i.package_id === packageId)
+  const free = (i: Item) =>
+    i.kind !== 'package' && i.status !== 'dropped' && (!i.package_id || i.package_id === packageId)
   const groups = [
-    { key: 'trip', label: 'Getting there and back · whole trip', items: detail.items.filter((i) => !i.place_id && free(i)) },
+    {
+      key: 'trip',
+      label: 'Getting there and back · whole trip',
+      items: detail.items.filter((i) => !i.place_id && free(i)),
+    },
     ...[...detail.places]
       .sort((a, b) => a.position - b.position)
-      .map((p, n) => ({ key: p.id, label: `${n + 1} · ${p.name}`, items: detail.items.filter((i) => i.place_id === p.id && free(i)) })),
+      .map((p, n) => ({
+        key: p.id,
+        label: `${n + 1} · ${p.name}`,
+        items: detail.items.filter((i) => i.place_id === p.id && free(i)),
+      })),
   ].filter((g) => g.items.length > 0)
 
   const toggle = (id: string) => onChange(value.includes(id) ? value.filter((x) => x !== id) : [...value, id])
@@ -71,13 +80,10 @@ export function PartOfPackage({ detail, item, onChanged }: { detail: TripDetail;
 
   async function change(next: string) {
     setError(undefined)
-    await run(
-      async () => {
-        await setItemPackage(item.id, next || null)
-        onChanged()
-      },
-      setError,
-    )
+    await run(async () => {
+      await setItemPackage(item.id, next || null)
+      onChanged()
+    }, setError)
   }
 
   return (
@@ -85,7 +91,13 @@ export function PartOfPackage({ detail, item, onChanged }: { detail: TripDetail;
       <label htmlFor={id} className="field__label">
         Part of a package
       </label>
-      <select id={id} className="field__input" value={item.package_id ?? ''} onChange={(e) => void change(e.target.value)} disabled={busy}>
+      <select
+        id={id}
+        className="field__input"
+        value={item.package_id ?? ''}
+        onChange={(e) => void change(e.target.value)}
+        disabled={busy}
+      >
         <option value="">Not in a package</option>
         {packages.map((p) => (
           <option key={p.id} value={p.id}>

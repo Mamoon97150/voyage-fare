@@ -8,13 +8,23 @@ import type { LeftLine } from '../../lib/tripView'
  * - "reminder": in handwriting, "balance due in 5 days" (a week before) or "balance late" — mustard,
  *   with the "to decide" dot; never red (red is over budget only).
  */
-export function LeftWords({ line, currency = '', part }: { line: LeftLine | null; currency?: string; part: 'left' | 'reminder' }) {
+export function LeftWords({
+  line,
+  currency = '',
+  part,
+}: {
+  line: LeftLine | null
+  currency?: string
+  part: 'left' | 'reminder'
+}) {
   if (!line || line.left <= 0) return null
   if (part === 'left') {
     if (!line.hasPayments || line.leftShown <= 0) return null
-    return <span className="item-row__left">
+    return (
+      <span className="item-row__left">
         {line.paidWord} · {formatWhole(line.leftShown, currency)} left
       </span>
+    )
   }
   if (line.dueIn === null || line.dueIn > 7) return null
   const text =

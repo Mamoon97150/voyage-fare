@@ -74,7 +74,10 @@ export function Compare() {
 
   const tab = (TABS.find((t) => t.key === params.get('tab'))?.key ?? 'travel') as Tab
   const subjects = subjectsFor(detail, tab)
-  const index = Math.max(0, subjects.findIndex((s) => s.key === params.get('page')))
+  const index = Math.max(
+    0,
+    subjects.findIndex((s) => s.key === params.get('page')),
+  )
   const subject = subjects[index]
   const viewer = viewerOf(detail, session?.user.id)
   const solo = isSolo(detail)
@@ -111,7 +114,12 @@ export function Compare() {
             {/* The page head (Compare v4): the place and its dates by hand; the neighbours turn the page. */}
             <header className="page-head">
               {index > 0 ? (
-                <button type="button" className="page-head__turn" onClick={() => go({ page: subjects[index - 1].key })} aria-label="Previous page">
+                <button
+                  type="button"
+                  className="page-head__turn"
+                  onClick={() => go({ page: subjects[index - 1].key })}
+                  aria-label="Previous page"
+                >
                   ‹ {subjects[index - 1].title}
                 </button>
               ) : (
@@ -157,7 +165,9 @@ export function Compare() {
           <SketchBox tape="mustard" className="empty" seed={81}>
             <Sketch name="compare-empty" width={230} />
             <h2 className="empty__title">{tab === 'travel' ? 'No journeys yet' : 'Add a place first'}</h2>
-            <p className="hand empty__note">{tab === 'travel' ? 'where are you flying?' : 'then compare what’s there'}</p>
+            <p className="hand empty__note">
+              {tab === 'travel' ? 'where are you flying?' : 'then compare what’s there'}
+            </p>
             <p className="field__hint">
               {tab === 'travel'
                 ? 'Add a ticket from the trip page (Whole trip → Transport): it becomes a journey here, with its options.'
@@ -174,7 +184,6 @@ export function Compare() {
     </div>
   )
 }
-
 
 /** One item's options, side by side, with Choose, ♥ and "+ Add an option". */
 function ItemOptions({
@@ -217,13 +226,10 @@ function ItemOptions({
 
   async function act(action: () => Promise<void>) {
     setError(undefined)
-    await run(
-      async () => {
-        await action()
-        onChanged()
-      },
-      setError,
-    )
+    await run(async () => {
+      await action()
+      onChanged()
+    }, setError)
   }
 
   const form = (option?: (typeof lines)[number]['option']) => (
@@ -282,7 +288,9 @@ function ItemOptions({
           )}
         </div>
       )}
-      {item.status === 'dropped' && <p className="field__hint compare-item__note">Kept for the record. Choose one to bring it back.</p>}
+      {item.status === 'dropped' && (
+        <p className="field__hint compare-item__note">Kept for the record. Choose one to bring it back.</p>
+      )}
       {error && <FormMessage tone="error">{error}</FormMessage>}
       <ul className="opts">
         {lines.map((line) =>
@@ -324,7 +332,17 @@ function ItemOptions({
 }
 
 /** A place with nothing yet in this category: the first option creates the item too. */
-function EmptyPage({ detail, tab, subject, onChanged }: { detail: TripDetail; tab: Tab; subject: Subject; onChanged: () => void }) {
+function EmptyPage({
+  detail,
+  tab,
+  subject,
+  onChanged,
+}: {
+  detail: TripDetail
+  tab: Tab
+  subject: Subject
+  onChanged: () => void
+}) {
   const [adding, setAdding] = useState(false)
   const empty = EMPTY[tab]
   const where = subject.place?.name ?? 'the trip'
@@ -341,7 +359,11 @@ function EmptyPage({ detail, tab, subject, onChanged }: { detail: TripDetail; ta
           travellers={detail.travellers}
           submitLabel="Add the option"
           onSubmit={async (input) => {
-            await addItemWithOption(detail, { placeId: subject.place?.id ?? null, kind: empty.kind, name: input.name }, input)
+            await addItemWithOption(
+              detail,
+              { placeId: subject.place?.id ?? null, kind: empty.kind, name: input.name },
+              input,
+            )
             setAdding(false)
             onChanged()
           }}

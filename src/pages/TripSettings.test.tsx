@@ -44,7 +44,10 @@ describe('trip settings', () => {
 
   it('removing a traveller who paid says why it can’t', async () => {
     data.isTripOwner.mockResolvedValue(true)
-    data.removeTraveller.mockRejectedValue({ code: 'P0001', message: 'Bea has paid or owes money on this trip: settle up first.' })
+    data.removeTraveller.mockRejectedValue({
+      code: 'P0001',
+      message: 'Bea has paid or owes money on this trip: settle up first.',
+    })
     open('/trips/t1/settings')
     await screen.findByText('Travellers')
     expect(screen.queryByRole('button', { name: 'Remove Ana' })).not.toBeInTheDocument() // that's you
@@ -166,8 +169,14 @@ describe('invitations (build 6)', () => {
 
   it('a link that doesn’t work any more says to ask for a new one', async () => {
     data.getInvitationPreview.mockResolvedValue({
-      trip_id: 't1', trip_name: 'Colombia', start_date: null, end_date: null, places: [],
-      traveller_name: 'Gabriel', invited_by_name: 'Djamina', state: 'expired',
+      trip_id: 't1',
+      trip_name: 'Colombia',
+      start_date: null,
+      end_date: null,
+      places: [],
+      traveller_name: 'Gabriel',
+      invited_by_name: 'Djamina',
+      state: 'expired',
     })
     open('/join/old')
     expect(await screen.findByText('This invitation doesn’t work any more')).toBeInTheDocument()

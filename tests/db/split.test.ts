@@ -40,9 +40,7 @@ const balances = () =>
 
 async function settlement() {
   const result = await rows<Record<string, unknown>>(db, 'select * from trip_settlement($1)', [ids.trip])
-  return result.map(
-    (r) => `${names[r.from_traveller as string]} → ${names[r.to_traveller as string]} ${num(r.amount)}`,
-  )
+  return result.map((r) => `${names[r.from_traveller as string]} → ${names[r.to_traveller as string]} ${num(r.amount)}`)
 }
 
 describe('who shares what', () => {

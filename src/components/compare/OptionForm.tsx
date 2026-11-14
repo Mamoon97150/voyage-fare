@@ -48,7 +48,9 @@ export function OptionForm({
   const stay = kind === 'housing'
   const [name, setName] = useState(initial?.name ?? '')
   const [two, setTwo] = useState(Boolean(d0.prices))
-  const [price, setPrice] = useState(amountForInput(initial?.amount === undefined ? null : initial.amount === null ? null : Number(initial.amount)))
+  const [price, setPrice] = useState(
+    amountForInput(initial?.amount === undefined ? null : initial.amount === null ? null : Number(initial.amount)),
+  )
   const [priceOut, setPriceOut] = useState(amountForInput(d0.prices?.[0]))
   const [priceBack, setPriceBack] = useState(amountForInput(d0.prices?.[1]))
   const [mode, setMode] = useState<TicketMode>(d0.mode ?? defaultMode)
@@ -115,13 +117,17 @@ export function OptionForm({
     }
     const foreign = rate.currency !== currency
     if (foreign && amount !== null && rate.rate === null)
-      found.rate = rate.unreadable ? 'That rate doesn’t look right: type it like 1,1531.' : `What’s the rate? 1 ${rate.currency} is how many ${currency}?`
+      found.rate = rate.unreadable
+        ? 'That rate doesn’t look right: type it like 1,1531.'
+        : `What’s the rate? 1 ${rate.currency} is how many ${currency}?`
     setErrors(found)
     if (Object.keys(found).length) return
 
     const clean = (w: Way): Way | undefined => {
       const v: Way = {}
-      for (const [k, val] of Object.entries(w)) if (val !== '' && val !== undefined) (v as Record<string, unknown>)[k] = typeof val === 'string' ? val.trim() : val
+      for (const [k, val] of Object.entries(w))
+        if (val !== '' && val !== undefined)
+          (v as Record<string, unknown>)[k] = typeof val === 'string' ? val.trim() : val
       return Object.keys(v).length ? v : undefined
     }
     const details: OptionDetails = journey
@@ -143,28 +149,37 @@ export function OptionForm({
           }
         : {}
 
-    await run(
-      async () => {
-        await onSubmit({
-          name: name.trim(),
-          amount,
-          ...(stay && byRoom
-            ? { rooms: rooms.map((r) => ({ name: r.name.trim(), amount: parseAmount(r.price) as number, occupants: r.occupants })) }
-            : stay && initialRooms.length
-              ? { rooms: null }
-              : {}),
-          currency: foreign && rate.rate !== null ? rate.currency : currency,
-          rate: foreign && rate.rate !== null ? rate.rate : 1,
-          details,
-          link: link.trim() || null,
-          note: note.trim() || null,
-        })
-      },
-      setFormError,
-    )
+    await run(async () => {
+      await onSubmit({
+        name: name.trim(),
+        amount,
+        ...(stay && byRoom
+          ? {
+              rooms: rooms.map((r) => ({
+                name: r.name.trim(),
+                amount: parseAmount(r.price) as number,
+                occupants: r.occupants,
+              })),
+            }
+          : stay && initialRooms.length
+            ? { rooms: null }
+            : {}),
+        currency: foreign && rate.rate !== null ? rate.currency : currency,
+        rate: foreign && rate.rate !== null ? rate.rate : 1,
+        details,
+        link: link.trim() || null,
+        note: note.trim() || null,
+      })
+    }, setFormError)
   }
 
-  const text = (key: string, label: string, value: string, set: (v: string) => void, extra: Record<string, unknown> = {}) => (
+  const text = (
+    key: string,
+    label: string,
+    value: string,
+    set: (v: string) => void,
+    extra: Record<string, unknown> = {},
+  ) => (
     <div className={`field${errors[key] ? ' field--error' : ''}`}>
       <label htmlFor={`${id}-${key}`} className="field__label">
         {label}
@@ -238,8 +253,17 @@ export function OptionForm({
       <legend className="sheet-title">{label}</legend>
       {plane && (
         <div className="row2">
-          {text(`${key}-from`, 'From airport', way.fromAirport ?? '', (v) => set({ ...way, fromAirport: v.toUpperCase() }), { placeholder: 'SXM', maxLength: 4 })}
-          {text(`${key}-to`, 'To airport', way.toAirport ?? '', (v) => set({ ...way, toAirport: v.toUpperCase() }), { placeholder: 'CTG', maxLength: 4 })}
+          {text(
+            `${key}-from`,
+            'From airport',
+            way.fromAirport ?? '',
+            (v) => set({ ...way, fromAirport: v.toUpperCase() }),
+            { placeholder: 'SXM', maxLength: 4 },
+          )}
+          {text(`${key}-to`, 'To airport', way.toAirport ?? '', (v) => set({ ...way, toAirport: v.toUpperCase() }), {
+            placeholder: 'CTG',
+            maxLength: 4,
+          })}
         </div>
       )}
       <div className="row3">
@@ -263,7 +287,8 @@ export function OptionForm({
           </select>
         </div>
       </div>
-      {(way.stops ?? 0) > 0 && text(`${key}-via`, 'Via', way.via ?? '', (v) => set({ ...way, via: v }), { placeholder: 'Panama' })}
+      {(way.stops ?? 0) > 0 &&
+        text(`${key}-via`, 'Via', way.via ?? '', (v) => set({ ...way, via: v }), { placeholder: 'Panama' })}
     </fieldset>
   )
 
@@ -280,7 +305,12 @@ export function OptionForm({
           <label htmlFor={`${id}-mode`} className="field__label">
             By
           </label>
-          <select id={`${id}-mode`} className="field__input" value={mode} onChange={(e) => setMode(e.target.value as TicketMode)}>
+          <select
+            id={`${id}-mode`}
+            className="field__input"
+            value={mode}
+            onChange={(e) => setMode(e.target.value as TicketMode)}
+          >
             {(Object.keys(MODES) as TicketMode[]).map((m) => (
               <option key={m} value={m}>
                 {MODES[m].icon} {MODES[m].label}
@@ -320,7 +350,14 @@ export function OptionForm({
             </button>
           </div>
           {byRoom ? (
-            <RoomsEditor id={id} rooms={rooms} onRooms={setRooms} travellers={travellers} currency={rate.currency} error={errors.rooms} />
+            <RoomsEditor
+              id={id}
+              rooms={rooms}
+              onRooms={setRooms}
+              travellers={travellers}
+              currency={rate.currency}
+              error={errors.rooms}
+            />
           ) : (
             <p className="field__hint">Split equally. A hotel with a room each? Choose “By room”.</p>
           )}
@@ -361,16 +398,26 @@ export function OptionForm({
               </button>
             ))}
           </div>
-          {text('location', 'Location, in your words', location, setLocation, { placeholder: 'Great area, lots of stairs' })}
+          {text('location', 'Location, in your words', location, setLocation, {
+            placeholder: 'Great area, lots of stairs',
+          })}
           {yesNo('breakfast', 'Breakfast', breakfast, setBreakfast)}
           {yesNo('cancel', 'Free cancellation', freeCancellation, setFreeCancellation)}
         </>
       )}
 
-      {text('note', 'Note', note, setNote, { placeholder: journey ? 'Short stop, good times' : 'Why it’s on the list' })}
+      {text('note', 'Note', note, setNote, {
+        placeholder: journey ? 'Short stop, good times' : 'Why it’s on the list',
+      })}
       {text('link', 'Link', link, setLink, { type: 'url', placeholder: 'https://…', inputMode: 'url' })}
 
-      <FormActions busy={busy} submitLabel={submitLabel} onCancel={onCancel} onDelete={onDelete} deleteName={initial?.name} />
+      <FormActions
+        busy={busy}
+        submitLabel={submitLabel}
+        onCancel={onCancel}
+        onDelete={onDelete}
+        deleteName={initial?.name}
+      />
     </form>
   )
 }

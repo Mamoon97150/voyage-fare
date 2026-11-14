@@ -50,7 +50,10 @@ export async function addOption(detail: TripDetail, itemId: string, input: Optio
 
 /** A stay's rooms (SR-4), saved in one step; null or none = one price, split equally. */
 export async function setOptionRooms(optionId: string, rooms: RoomInput[] | null): Promise<void> {
-  const { error } = await supabase.rpc('set_option_rooms', { p_option_id: optionId, p_rooms: (rooms ?? []) as unknown as Json })
+  const { error } = await supabase.rpc('set_option_rooms', {
+    p_option_id: optionId,
+    p_rooms: (rooms ?? []) as unknown as Json,
+  })
   if (error) throw error
 }
 

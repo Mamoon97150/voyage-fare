@@ -45,7 +45,9 @@ export function StatusForm({
   const [status, setStatus] = useState<ItemStatus>(initial)
   const [amount, setAmount] = useState(amountForInput(start === null ? null : Number(start)))
   // A traveller's id, or EACH: everyone on the line paid their own share (build 4).
-  const [paidBy, setPaidBy] = useState(item.paid_each ? EACH : (item.paid_by ?? viewer ?? detail.travellers[0]?.id ?? ''))
+  const [paidBy, setPaidBy] = useState(
+    item.paid_each ? EACH : (item.paid_by ?? viewer ?? detail.travellers[0]?.id ?? ''),
+  )
   const [paidOn, setPaidOn] = useState(() => item.paid_on ?? localToday())
   const { busy, run } = useSaving()
   const [error, setError] = useState<string>()
@@ -66,25 +68,26 @@ export function StatusForm({
     }
     const foreign = status !== 'chosen' && actual !== null && rate.currency !== trip
     if (foreign && rate.rate === null) {
-      setError(rate.unreadable ? 'That rate doesn’t look right: type it like 1,1531.' : `What’s the rate? 1 ${rate.currency} is how many ${trip}?`)
+      setError(
+        rate.unreadable
+          ? 'That rate doesn’t look right: type it like 1,1531.'
+          : `What’s the rate? 1 ${rate.currency} is how many ${trip}?`,
+      )
       return
     }
     setError(undefined)
-    await run(
-      async () => {
-        await setItemStatus({
-          id: item.id,
-          status,
-          actualAmount: status === 'chosen' ? null : actual,
-          paidBy: status === 'paid' && paidBy !== EACH ? paidBy : null,
-          paidEach: status === 'paid' && paidBy === EACH,
-          paidOn: status === 'paid' ? paidOn : null,
-          ...(foreign ? { actualCurrency: rate.currency, actualRate: rate.rate ?? undefined } : {}),
-        })
-        onSaved()
-      },
-      setError,
-    )
+    await run(async () => {
+      await setItemStatus({
+        id: item.id,
+        status,
+        actualAmount: status === 'chosen' ? null : actual,
+        paidBy: status === 'paid' && paidBy !== EACH ? paidBy : null,
+        paidEach: status === 'paid' && paidBy === EACH,
+        paidOn: status === 'paid' ? paidOn : null,
+        ...(foreign ? { actualCurrency: rate.currency, actualRate: rate.rate ?? undefined } : {}),
+      })
+      onSaved()
+    }, setError)
   }
 
   return (
@@ -92,7 +95,13 @@ export function StatusForm({
       <h3 className="sheet-title">Where it stands</h3>
       <div className="status-steps" role="radiogroup" aria-label="Status">
         {STEPS.map((s) => (
-          <button key={s.key} type="button" role="radio" aria-checked={status === s.key} onClick={() => setStatus(s.key)}>
+          <button
+            key={s.key}
+            type="button"
+            role="radio"
+            aria-checked={status === s.key}
+            onClick={() => setStatus(s.key)}
+          >
             {s.label}
           </button>
         ))}
@@ -121,12 +130,20 @@ export function StatusForm({
               <label className="field__label" htmlFor={`${id}-on`}>
                 On
               </label>
-              <input id={`${id}-on`} type="date" className="field__input" value={paidOn} onChange={(e) => setPaidOn(e.target.value)} />
+              <input
+                id={`${id}-on`}
+                type="date"
+                className="field__input"
+                value={paidOn}
+                onChange={(e) => setPaidOn(e.target.value)}
+              />
             </div>
           )}
         </div>
       )}
-      {status !== 'chosen' && <RateField id={`${id}-rate`} rate={rate} amount={amount.trim() ? parseAmount(amount) : null} />}
+      {status !== 'chosen' && (
+        <RateField id={`${id}-rate`} rate={rate} amount={amount.trim() ? parseAmount(amount) : null} />
+      )}
       {status === 'paid' && !solo && (
         <div className="field">
           <label className="field__label" htmlFor={`${id}-by`}>
@@ -160,4 +177,3 @@ export function StatusForm({
     </form>
   )
 }
-

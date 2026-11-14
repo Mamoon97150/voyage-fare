@@ -27,7 +27,6 @@ export const travellers = [
 ]
 export const cartagena = { id: 'p1', name: 'Cartagena', country: 'Colombia', nights: 4, position: 1 }
 
-
 /** A trip as the database gives it; empty budget unless said otherwise. */
 export const detail = (over: Record<string, unknown> = {}) => ({
   trip,
@@ -38,7 +37,13 @@ export const detail = (over: Record<string, unknown> = {}) => ({
   legs: [],
   amounts: [],
   shares: [],
-  budget: { current_total: null, confirmed_total: null, estimated_total: null, target_total: 5000, missing_amount_count: 0 },
+  budget: {
+    current_total: null,
+    confirmed_total: null,
+    estimated_total: null,
+    target_total: 5000,
+    missing_amount_count: 0,
+  },
   travellerShares: [],
   placeTotals: [],
   travellerPlaceTotals: [],
@@ -52,7 +57,6 @@ export const detail = (over: Record<string, unknown> = {}) => ({
   ...over,
 })
 
-
 beforeEach(() => {
   window.localStorage.clear()
   Object.values(data).forEach((fn) => fn.mockReset())
@@ -61,7 +65,6 @@ beforeEach(() => {
   data.listOpenInvitations.mockResolvedValue([])
   data.getMyWelcome.mockResolvedValue(null)
 })
-
 
 export function open(path: string) {
   return render(
@@ -76,4 +79,3 @@ export function open(path: string) {
 export const type = (label: string | RegExp, value: string) =>
   fireEvent.change(screen.getByLabelText(label), { target: { value } })
 export const click = (name: string | RegExp) => fireEvent.click(screen.getByRole('button', { name }))
-

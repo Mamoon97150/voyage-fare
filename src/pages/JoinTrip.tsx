@@ -35,14 +35,17 @@ export function JoinTrip() {
     }
   }, [token, session])
 
-  if (loadError) return <Shell><FormMessage tone="error">{loadError}</FormMessage></Shell>
+  if (loadError)
+    return (
+      <Shell>
+        <FormMessage tone="error">{loadError}</FormMessage>
+      </Shell>
+    )
   if (session === undefined || preview === undefined) return <Loading />
   if (preview === null) {
     return (
       <Shell>
-        <Notice title="This link doesn’t work">
-          Check you copied the whole link, or ask for a new one.
-        </Notice>
+        <Notice title="This link doesn’t work">Check you copied the whole link, or ask for a new one.</Notice>
       </Shell>
     )
   }
@@ -70,13 +73,10 @@ export function JoinTrip() {
 
   async function join() {
     setError(undefined)
-    await run(
-      async () => {
-        const tripId = await acceptInvitation(token)
-        navigate(`/trips/${tripId}`, { replace: true })
-      },
-      setError,
-    )
+    await run(async () => {
+      const tripId = await acceptInvitation(token)
+      navigate(`/trips/${tripId}`, { replace: true })
+    }, setError)
   }
 
   return (

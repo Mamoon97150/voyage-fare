@@ -1,7 +1,18 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { FormMessage } from '../AuthForm'
 import { SketchBox } from '../Sketch'
-import { addTraveller, cancelInvitation, inviteTraveller, joinLink, listOpenInvitations, removeTraveller, renameTraveller, type Invitation, type Traveller, type TripDetail } from '../../lib/trips'
+import {
+  addTraveller,
+  cancelInvitation,
+  inviteTraveller,
+  joinLink,
+  listOpenInvitations,
+  removeTraveller,
+  renameTraveller,
+  type Invitation,
+  type Traveller,
+  type TripDetail,
+} from '../../lib/trips'
 import { sentAgo } from '../../lib/tripText'
 import { useSaving } from '../../lib/useSaving'
 
@@ -47,57 +58,54 @@ export function Travellers({
       setError('Type a name first.')
       return
     }
-    await run(
-      async () => {
-        await addTraveller(detail.trip.id, newName.trim(), Math.max(0, ...travellers.map((t) => t.position)) + 1)
-        setNewName('')
-        onChanged()
-      },
-      setError,
-    )
+    await run(async () => {
+      await addTraveller(detail.trip.id, newName.trim(), Math.max(0, ...travellers.map((t) => t.position)) + 1)
+      setNewName('')
+      onChanged()
+    }, setError)
   }
 
   return (
     <>
-    <SketchBox weight="strong" tape="green" className="form__sheet settings__travellers" seed={73}>
-      <h2 className="sheet-title">
-        Travellers <small className="sheet-title__note hand-note">each has their own share</small>
-      </h2>
-      <ul className="people">
-        {travellers.map((t) => (
-          <TravellerRow
-            key={t.id}
-            traveller={t}
-            isYou={Boolean(t.user_id && t.user_id === userId)}
-            isCreator={Boolean(t.user_id && t.user_id === detail.trip.created_by)}
-            amOwner={owner}
-            canInvite={canInvite && travellers.length > 1}
-            invite={invites.find((i) => i.traveller_id === t.id)}
-            onChanged={onChanged}
-            onInvitesChanged={loadInvites}
+      <SketchBox weight="strong" tape="green" className="form__sheet settings__travellers" seed={73}>
+        <h2 className="sheet-title">
+          Travellers <small className="sheet-title__note hand-note">each has their own share</small>
+        </h2>
+        <ul className="people">
+          {travellers.map((t) => (
+            <TravellerRow
+              key={t.id}
+              traveller={t}
+              isYou={Boolean(t.user_id && t.user_id === userId)}
+              isCreator={Boolean(t.user_id && t.user_id === detail.trip.created_by)}
+              amOwner={owner}
+              canInvite={canInvite && travellers.length > 1}
+              invite={invites.find((i) => i.traveller_id === t.id)}
+              onChanged={onChanged}
+              onInvitesChanged={loadInvites}
+            />
+          ))}
+        </ul>
+        <form onSubmit={add} noValidate className="settings__add">
+          <label htmlFor="settings-new-traveller" className="visually-hidden">
+            New traveller
+          </label>
+          <input
+            id="settings-new-traveller"
+            className="field__input"
+            placeholder="Add someone: Dana"
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
           />
-        ))}
-      </ul>
-      <form onSubmit={add} noValidate className="settings__add">
-        <label htmlFor="settings-new-traveller" className="visually-hidden">
-          New traveller
-        </label>
-        <input
-          id="settings-new-traveller"
-          className="field__input"
-          placeholder="Add someone: Dana"
-          value={newName}
-          onChange={(e) => setNewName(e.target.value)}
-        />
-        <button type="submit" className="button button--quiet" disabled={busy}>
-          {busy ? 'Adding…' : 'Add'}
-        </button>
-      </form>
-      {error && <FormMessage tone="error">{error}</FormMessage>}
-    </SketchBox>
-    {canInvite && travellers.length > 1 && (
-      <p className="settings__margin-note">No need to invite everyone: a name is enough to count their share.</p>
-    )}
+          <button type="submit" className="button button--quiet" disabled={busy}>
+            {busy ? 'Adding…' : 'Add'}
+          </button>
+        </form>
+        {error && <FormMessage tone="error">{error}</FormMessage>}
+      </SketchBox>
+      {canInvite && travellers.length > 1 && (
+        <p className="settings__margin-note">No need to invite everyone: a name is enough to count their share.</p>
+      )}
     </>
   )
 }
@@ -132,14 +140,11 @@ function TravellerRow({
 
   async function save(action: () => Promise<void>) {
     setError(undefined)
-    await run(
-      async () => {
-        await action()
-        setMode('view')
-        onChanged()
-      },
-      setError,
-    )
+    await run(async () => {
+      await action()
+      setMode('view')
+      onChanged()
+    }, setError)
   }
 
   return (
@@ -175,7 +180,12 @@ function TravellerRow({
         )}
         {mode === 'view' && (
           <>
-            <button type="button" className="place__edit" onClick={() => setMode('rename')} aria-label={`Rename ${traveller.name}`}>
+            <button
+              type="button"
+              className="place__edit"
+              onClick={() => setMode('rename')}
+              aria-label={`Rename ${traveller.name}`}
+            >
               Rename
             </button>
             {removable && (
@@ -284,28 +294,22 @@ function InviteActions({
 
   async function getLink() {
     setError(undefined)
-    await run(
-      async () => {
-        const { token } = await inviteTraveller(traveller.id)
-        setLink(joinLink(token))
-        onOpen(true)
-        onInvitesChanged()
-      },
-      setError,
-    )
+    await run(async () => {
+      const { token } = await inviteTraveller(traveller.id)
+      setLink(joinLink(token))
+      onOpen(true)
+      onInvitesChanged()
+    }, setError)
   }
 
   async function cancel() {
     setError(undefined)
-    await run(
-      async () => {
-        await cancelInvitation(traveller.id)
-        setLink(undefined)
-        onOpen(false)
-        onInvitesChanged()
-      },
-      setError,
-    )
+    await run(async () => {
+      await cancelInvitation(traveller.id)
+      setLink(undefined)
+      onOpen(false)
+      onInvitesChanged()
+    }, setError)
   }
 
   async function share() {

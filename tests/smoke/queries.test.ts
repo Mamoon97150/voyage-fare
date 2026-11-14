@@ -95,10 +95,26 @@ describe('the real queries, end to end', () => {
   })
 
   it('places, items and tickets: add, change, and the budget follows', async () => {
-    const place = await addPlace({ tripId, name: 'Lisbon', country: 'Portugal', latitude: 38.7, longitude: -9.1, nights: 3, position: 1 })
+    const place = await addPlace({
+      tripId,
+      name: 'Lisbon',
+      country: 'Portugal',
+      latitude: 38.7,
+      longitude: -9.1,
+      nights: 3,
+      position: 1,
+    })
     await updatePlace(place.id, { name: 'Lisboa', nights: 4 })
 
-    const stay = await addItem({ tripId, placeId: place.id, kind: 'housing', name: 'Flat', dayNumber: 1, endDayNumber: 4, amount: 400 })
+    const stay = await addItem({
+      tripId,
+      placeId: place.id,
+      kind: 'housing',
+      name: 'Flat',
+      dayNumber: 1,
+      endDayNumber: 4,
+      amount: 400,
+    })
     await updateItem({ id: stay, kind: 'housing', name: 'Alfama flat', dayNumber: 1, endDayNumber: 4, amount: 450 })
     const ticket = await addTicket({
       tripId,
@@ -139,10 +155,32 @@ describe('the real queries, end to end', () => {
   })
 
   it('options: compare, choose, coup de cœur, and the item keeps its price', async () => {
-    const place = await addPlace({ tripId, name: 'Porto', country: 'Portugal', latitude: 41.1, longitude: -8.6, nights: 2, position: 2 })
-    const stay = await addItem({ tripId, placeId: place.id, kind: 'housing', name: 'Stay in Porto', dayNumber: null, endDayNumber: null, amount: 300 })
+    const place = await addPlace({
+      tripId,
+      name: 'Porto',
+      country: 'Portugal',
+      latitude: 41.1,
+      longitude: -8.6,
+      nights: 2,
+      position: 2,
+    })
+    const stay = await addItem({
+      tripId,
+      placeId: place.id,
+      kind: 'housing',
+      name: 'Stay in Porto',
+      dayNumber: null,
+      endDayNumber: null,
+      amount: 300,
+    })
     let detail = (await getTrip(tripId))!
-    const other = await addOption(detail, stay, { name: 'Ribeira hotel', amount: 260, details: { looks: 4 }, link: null, note: 'by the river' })
+    const other = await addOption(detail, stay, {
+      name: 'Ribeira hotel',
+      amount: 260,
+      details: { looks: 4 },
+      link: null,
+      note: 'by the river',
+    })
     detail = (await getTrip(tripId))!
     expect(detail.options.filter((o) => o.item_id === stay)).toHaveLength(2)
     expect(detail.options.find((o) => o.id === other)?.is_chosen).toBe(false) // the second waits to be chosen
@@ -155,7 +193,15 @@ describe('the real queries, end to end', () => {
     expect(detail.options.filter((o) => o.item_id === stay && o.is_chosen).map((o) => o.id)).toEqual([other])
     expect(detail.options.find((o) => o.id === other)?.is_favourite).toBe(true)
 
-    await updateItem({ id: stay, kind: 'housing', name: 'Porto', dayNumber: null, endDayNumber: null, amount: null, keepPrice: true })
+    await updateItem({
+      id: stay,
+      kind: 'housing',
+      name: 'Porto',
+      dayNumber: null,
+      endDayNumber: null,
+      amount: null,
+      keepPrice: true,
+    })
     detail = (await getTrip(tripId))!
     expect(detail.options.filter((o) => o.item_id === stay)).toHaveLength(2) // nothing lost
     expect(Number(detail.budget?.current_total)).toBe(before - 40)
@@ -208,7 +254,15 @@ describe('the real queries, end to end', () => {
 
   it('daily estimates: add, change the days, delete', async () => {
     const id = await saveDailyEstimate({
-      tripId, placeId: null, category: 'food', label: 'Food & drinks', amount: 30, currency: 'EUR', rate: 1, days: 3, travellers: [],
+      tripId,
+      placeId: null,
+      category: 'food',
+      label: 'Food & drinks',
+      amount: 30,
+      currency: 'EUR',
+      rate: 1,
+      days: 3,
+      travellers: [],
     })
     let detail = await getTrip(tripId)
     expect(detail!.dailyEstimates.map((e) => e.label)).toEqual(['Food & drinks'])
@@ -222,8 +276,24 @@ describe('the real queries, end to end', () => {
   })
 
   it('packages: a package covers a line, which then counts 0', async () => {
-    const hotel = await addItem({ tripId, placeId: null, kind: 'housing', name: 'Hotel in the package', dayNumber: null, endDayNumber: null, amount: 300 })
-    const pkg = await addItem({ tripId, placeId: null, kind: 'package', name: 'Agency package', dayNumber: null, endDayNumber: null, amount: 1000 })
+    const hotel = await addItem({
+      tripId,
+      placeId: null,
+      kind: 'housing',
+      name: 'Hotel in the package',
+      dayNumber: null,
+      endDayNumber: null,
+      amount: 300,
+    })
+    const pkg = await addItem({
+      tripId,
+      placeId: null,
+      kind: 'package',
+      name: 'Agency package',
+      dayNumber: null,
+      endDayNumber: null,
+      amount: 1000,
+    })
     await setPackageCover(pkg, [hotel])
     let detail = await getTrip(tripId)
     expect(detail!.items.find((i) => i.id === hotel)?.package_id).toBe(pkg)
@@ -235,10 +305,25 @@ describe('the real queries, end to end', () => {
   })
 
   it('paid in parts: a deposit, a due date, what’s left, then deleted', async () => {
-    const tour = await addItem({ tripId, placeId: null, kind: 'activity', name: 'Tour paid in parts', dayNumber: null, endDayNumber: null, amount: 200 })
+    const tour = await addItem({
+      tripId,
+      placeId: null,
+      kind: 'activity',
+      name: 'Tour paid in parts',
+      dayNumber: null,
+      endDayNumber: null,
+      amount: 200,
+    })
     await setItemStatus({ id: tour, status: 'booked', actualAmount: 200, paidBy: null })
     const me = (await getTrip(tripId))!.travellers.find((t) => t.user_id === userId)!
-    const pay = await addPayment({ itemId: tour, kind: 'deposit', amount: 80, paidBy: me.id, each: false, paidOn: '2027-05-01' })
+    const pay = await addPayment({
+      itemId: tour,
+      kind: 'deposit',
+      amount: 80,
+      paidBy: me.id,
+      each: false,
+      paidOn: '2027-05-01',
+    })
     await setItemDue(tour, '2027-05-20')
     let detail = await getTrip(tripId)
     const left = detail!.itemLeft.find((l) => l.item_id === tour)!

@@ -27,7 +27,8 @@ export function RouteCard({ detail }: { detail: TripDetail }) {
 /** "Guatapé isn't on the map: pick it from the suggestions in Edit." */
 export function MissingNote({ names }: { names: string[] }) {
   if (names.length === 0) return null
-  const who = names.length === 1 ? `${names[0]} isn’t` : `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]} aren’t`
+  const who =
+    names.length === 1 ? `${names[0]} isn’t` : `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]} aren’t`
   return (
     <p className="route-card__missing">
       <span className="dot-todo" aria-hidden="true" />

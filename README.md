@@ -1,6 +1,6 @@
 # Voyage Fare
 
-*See your whole trip, and know exactly what it really costs.*
+_See your whole trip, and know exactly what it really costs._
 
 A trip planner built around the budget, for the organizer of a group trip (2–6 people, several
 stops). It replaces the notebook or spreadsheet next to the itinerary app, not the itinerary app:
@@ -29,7 +29,7 @@ rebuilt in it and reconciles to the cent with the bank statement.
 
 - **Every number is computed in the database** (`supabase/migrations/`), never in the interface:
   one place, one answer, tested.
-- *Confirmed* = booked or paid **and** a real amount; everything else is *still estimated*. A
+- _Confirmed_ = booked or paid **and** a real amount; everything else is _still estimated_. A
   missing amount is a dash, never 0.
 - A booked line counts at its full price: paying it in parts changes what's left, not the budget.
 - Privacy by row-level security: a trip is visible only to its members; the demo trip is public

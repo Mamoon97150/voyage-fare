@@ -27,12 +27,22 @@ export function HandBar({
       const w = width - 4
       const hatch = { roughness: 1.2, fillStyle: 'hachure', hachureGap: 3, fillWeight: 1.4, stroke: 'none' } as const
       const parts: SVGElement[] = []
-      if (confirmed > 0) parts.push(pen.rectangle(2, 3, w * confirmed, height - 6, { ...hatch, seed: 3, fill: colour('--confirmed') }))
+      if (confirmed > 0)
+        parts.push(pen.rectangle(2, 3, w * confirmed, height - 6, { ...hatch, seed: 3, fill: colour('--confirmed') }))
       if (estimated > 0) {
         const fill = over ? colour('--over') : colour('--estimated')
         parts.push(pen.rectangle(2 + w * confirmed, 3, w * estimated, height - 6, { ...hatch, seed: 4, fill }))
       }
-      if (!bare) parts.push(pen.rectangle(2, 2, w, height - 4, { seed: 5, roughness: 0.9, bowing: 1, strokeWidth: 1.1, stroke: colour('--ink-soft') }))
+      if (!bare)
+        parts.push(
+          pen.rectangle(2, 2, w, height - 4, {
+            seed: 5,
+            roughness: 0.9,
+            bowing: 1,
+            strokeWidth: 1.1,
+            stroke: colour('--ink-soft'),
+          }),
+        )
       if (target !== null) {
         const x = 2 + w * target
         parts.push(pen.line(x, -2, x, height + 2, { seed: 6, roughness: 0.6, strokeWidth: 2, stroke: colour('--ink') }))

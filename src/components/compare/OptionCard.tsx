@@ -56,7 +56,9 @@ export function OptionCard({
     item.kind === 'transport' ? `${MODES[mode].icon} ${MODES[mode].label}` : null,
     rooms.length ? `${rooms.length} rooms` : null,
     item.kind === 'housing' && details.type ? details.type : null,
-    item.kind === 'housing' && whole !== null && place?.nights ? `${formatWhole(whole / place.nights, currency)} a night` : null,
+    item.kind === 'housing' && whole !== null && place?.nights
+      ? `${formatWhole(whole / place.nights, currency)} a night`
+      : null,
   ]
     .filter(Boolean)
     .join(' · ')
@@ -108,7 +110,9 @@ export function OptionCard({
         ))}
         <Flags item={item} line={line} mode={mode} />
         {option.note && <span className="opt__meta opt__note">{option.note}</span>}
-        {fastest && minutes !== null && roundTrip && <span className="opt__meta opt__fast">Fastest · {formatMinutes(minutes)} in all</span>}
+        {fastest && minutes !== null && roundTrip && (
+          <span className="opt__meta opt__fast">Fastest · {formatMinutes(minutes)} in all</span>
+        )}
       </button>
 
       <span className="opt__side">
@@ -144,11 +148,14 @@ function WayLine({ label, way, fast = false }: { label: string; way?: Way; fast?
     <span className="opt__way num">
       <span className="opt__way-label">{label}</span>
       <span className="opt__times">
-        {[way.fromAirport, way.leaves].filter(Boolean).join(' ')} → {[way.toAirport, way.arrives].filter(Boolean).join(' ')}
+        {[way.fromAirport, way.leaves].filter(Boolean).join(' ')} →{' '}
+        {[way.toAirport, way.arrives].filter(Boolean).join(' ')}
         {nextDay(way) ? ' +1' : ''}
       </span>
       <span className={`opt__dur${fast ? ' opt__fast' : ''}`}>{formatMinutes(minutes)}</span>
-      {(stops || way.via) && <span className="opt__stops">{[stops, way.via && `via ${way.via}`].filter(Boolean).join(' · ')}</span>}
+      {(stops || way.via) && (
+        <span className="opt__stops">{[stops, way.via && `via ${way.via}`].filter(Boolean).join(' · ')}</span>
+      )}
     </span>
   )
 }
@@ -159,7 +166,9 @@ function Flags({ item, line, mode }: { item: Item; line: OptionLine; mode: Ticke
     item.kind === 'transport'
       ? [
           // Trains, buses and ferries almost always include luggage (13 Nov): no bag line for them.
-          ...(mode === 'plane' ? [[d.bag, 'Checked bag', 'No checked bag'] as [boolean | undefined, string, string]] : []),
+          ...(mode === 'plane'
+            ? [[d.bag, 'Checked bag', 'No checked bag'] as [boolean | undefined, string, string]]
+            : []),
           [d.refundable, 'Refundable', 'Not refundable'],
         ]
       : item.kind === 'housing'

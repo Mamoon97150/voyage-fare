@@ -4,7 +4,9 @@ import { CURRENCIES } from '../lib/tripText'
 
 /** The currency beside a price: a small picker in place of the unit. */
 export function CurrencyPicker({ id, rate, label = 'Currency' }: { id: string; rate: RateState; label?: string }) {
-  const codes = CURRENCIES.includes(rate.currency as (typeof CURRENCIES)[number]) ? CURRENCIES : [rate.currency, ...CURRENCIES]
+  const codes = CURRENCIES.includes(rate.currency as (typeof CURRENCIES)[number])
+    ? CURRENCIES
+    : [rate.currency, ...CURRENCIES]
   return (
     <select
       id={id}
@@ -26,7 +28,17 @@ export function CurrencyPicker({ id, rate, label = 'Currency' }: { id: string; r
  * Under a price in another currency: today's rate, saved with it, and what it comes to.
  * "1 EUR = 3 645 COP" or "1 USD = 0,9035 EUR", whichever reads better.
  */
-export function RateField({ id, rate, amount, error }: { id: string; rate: RateState; amount: number | null; error?: string }) {
+export function RateField({
+  id,
+  rate,
+  amount,
+  error,
+}: {
+  id: string
+  rate: RateState
+  amount: number | null
+  error?: string
+}) {
   if (rate.currency === rate.tripCurrency) return null
   const [left, right] = rate.inverted ? [rate.tripCurrency, rate.currency] : [rate.currency, rate.tripCurrency]
   const converted = amount !== null && rate.rate !== null ? amount * rate.rate : null

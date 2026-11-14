@@ -19,7 +19,15 @@ describe('your trips', () => {
 
   it('lists each trip in a line of words', async () => {
     data.listTrips.mockResolvedValue([
-      { id: 't1', name: 'Colombia', start_date: '2027-05-12', end_date: '2027-05-24', travellers: 4, places: 3, nights: 12 },
+      {
+        id: 't1',
+        name: 'Colombia',
+        start_date: '2027-05-12',
+        end_date: '2027-05-24',
+        travellers: 4,
+        places: 3,
+        nights: 12,
+      },
       { id: 't2', name: 'Lisbon', start_date: null, end_date: null, travellers: 1, places: 0, nights: 0 },
     ])
     open('/trips')
@@ -118,7 +126,9 @@ describe('create a trip', () => {
     click('It’s just me')
     expect(await screen.findByText('What’s the budget?')).toBeInTheDocument()
     click('No target for now')
-    await waitFor(() => expect(data.createTrip).toHaveBeenCalledWith(expect.objectContaining({ me: 'Ana', travellers: [] })))
+    await waitFor(() =>
+      expect(data.createTrip).toHaveBeenCalledWith(expect.objectContaining({ me: 'Ana', travellers: [] })),
+    )
   })
 
   it('a target that isn’t an amount is said on the field', async () => {

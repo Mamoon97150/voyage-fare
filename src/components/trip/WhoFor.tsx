@@ -12,7 +12,9 @@ import { useSaving } from '../../lib/useSaving'
  */
 export function WhoFor({ detail, item, onChanged }: { detail: TripDetail; item: Item; onChanged: () => void }) {
   const everyone = detail.travellers.map((t) => t.id)
-  const from = detail.shares.filter((s) => s.item_id === item.id && Number(s.fraction) > 0).map((s) => s.traveller_id as string)
+  const from = detail.shares
+    .filter((s) => s.item_id === item.id && Number(s.fraction) > 0)
+    .map((s) => s.traveller_id as string)
   const [on, setOn] = useState<string[]>(from.length ? from : everyone)
   const { busy, run } = useSaving()
   const [error, setError] = useState<string>()
@@ -28,8 +30,11 @@ export function WhoFor({ detail, item, onChanged }: { detail: TripDetail; item: 
       <div className="who-for">
         <p className="field__label">Who it’s for</p>
         <p className="field__hint">
-          Split by room: {rooms.map((r) => (r.occupants.length ? r.occupants.map(name).join(' & ') : `${r.name}: everyone`)).join(' · ')}.{' '}
-          {link && <Link to={link}>Change the rooms in Compare ›</Link>}
+          Split by room:{' '}
+          {rooms
+            .map((r) => (r.occupants.length ? r.occupants.map(name).join(' & ') : `${r.name}: everyone`))
+            .join(' · ')}
+          . {link && <Link to={link}>Change the rooms in Compare ›</Link>}
         </p>
       </div>
     )

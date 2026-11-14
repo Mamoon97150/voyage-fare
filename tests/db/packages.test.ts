@@ -11,24 +11,38 @@ const owner = { user: ids.owner }
 beforeEach(async () => {
   db = await createDb()
   await seedTrip(db)
-  await db.exec(`insert into trip_members (trip_id, user_id, role) values ('${ids.trip}', '${ids.owner}', 'owner') on conflict do nothing`)
+  await db.exec(
+    `insert into trip_members (trip_id, user_id, role) values ('${ids.trip}', '${ids.owner}', 'owner') on conflict do nothing`,
+  )
 })
 afterEach(async () => {
   await actAs(db, 'owner')
 })
 
 const addPackage = async (amount: number | null = 1200) =>
-  (await one<{ id: string }>(db, `select add_item($1, 'package', 'Agency package', null, null, null, $2) as id`, [ids.trip, amount])).id
+  (
+    await one<{ id: string }>(db, `select add_item($1, 'package', 'Agency package', null, null, null, $2) as id`, [
+      ids.trip,
+      amount,
+    ])
+  ).id
 const amounts = (id: string) =>
-  one<{ current: string; is_confirmed: boolean; category: string }>(db, 'select current, is_confirmed, category from v_item_amounts where item_id = $1', [id])
-const total = async () => num((await one<{ t: string }>(db, 'select current_total as t from v_trip_budget where trip_id = $1', [ids.trip])).t)
+  one<{ current: string; is_confirmed: boolean; category: string }>(
+    db,
+    'select current, is_confirmed, category from v_item_amounts where item_id = $1',
+    [id],
+  )
+const total = async () =>
+  num((await one<{ t: string }>(db, 'select current_total as t from v_trip_budget where trip_id = $1', [ids.trip])).t)
 
 describe('agency packages', () => {
   it('a package is its own category, on the whole trip only', async () => {
     await actAs(db, owner)
     const pkg = await addPackage()
     expect((await amounts(pkg)).category).toBe('package')
-    await expect(db.query(`select add_item($1, 'package', 'Nope', $2)`, [ids.trip, ids.lisbon])).rejects.toThrow('belongs to the whole trip')
+    await expect(db.query(`select add_item($1, 'package', 'Nope', $2)`, [ids.trip, ids.lisbon])).rejects.toThrow(
+      'belongs to the whole trip',
+    )
   })
 
   it('covered lines count 0, and are confirmed once the package is booked', async () => {
@@ -54,7 +68,9 @@ describe('agency packages', () => {
     expect(covered.map((r) => r.id)).toEqual([ids.flat])
     await db.query('select set_item_package($1, $2)', [ids.hotel, pkg])
     await db.query('select set_item_package($1, null)', [ids.flat])
-    expect((await rows<{ id: string }>(db, 'select id from items where package_id = $1', [pkg])).map((r) => r.id)).toEqual([ids.hotel])
+    expect(
+      (await rows<{ id: string }>(db, 'select id from items where package_id = $1', [pkg])).map((r) => r.id),
+    ).toEqual([ids.hotel])
   })
 
   it('no package in a package, no line from elsewhere; deleting the package frees its lines', async () => {
@@ -62,10 +78,15 @@ describe('agency packages', () => {
     const pkg = await addPackage()
     const other = await addPackage()
     await expect(db.query('select set_package_cover($1, $2)', [pkg, [other]])).rejects.toThrow('not another package')
-    await expect(db.query('select set_item_package($1, $2)', [ids.flat, ids.flights])).rejects.toThrow('isn’t on this trip'.replace('’', '’'))
+    await expect(db.query('select set_item_package($1, $2)', [ids.flat, ids.flights])).rejects.toThrow(
+      'isn’t on this trip'.replace('’', '’'),
+    )
     await db.query('select set_package_cover($1, $2)', [pkg, [ids.flat]])
     await db.query('delete from items where id = $1', [pkg])
-    expect((await one<{ package_id: string | null }>(db, 'select package_id from items where id = $1', [ids.flat])).package_id).toBeNull()
+    expect(
+      (await one<{ package_id: string | null }>(db, 'select package_id from items where id = $1', [ids.flat]))
+        .package_id,
+    ).toBeNull()
     expect(num((await amounts(ids.flat)).current)).toBe(500)
   })
 
@@ -75,6 +96,6 @@ describe('agency packages', () => {
     await actAs(db, { user: ids.stranger })
     await db.query('select set_package_cover($1, $2)', [pkg, [ids.flat]]).catch(() => {})
     await actAs(db, 'owner')
-    expect((await rows(db, 'select 1 from items where package_id = $1', [pkg]))).toHaveLength(0)
+    expect(await rows(db, 'select 1 from items where package_id = $1', [pkg])).toHaveLength(0)
   })
 })

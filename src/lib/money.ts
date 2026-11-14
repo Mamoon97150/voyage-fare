@@ -10,11 +10,7 @@ export const NO_AMOUNT = '—'
 
 export type MoneyScope = 'pp' | 'total'
 
-export function formatMoney(
-  amount: number | null | undefined,
-  currency = 'EUR',
-  scope?: MoneyScope,
-): string {
+export function formatMoney(amount: number | null | undefined, currency = 'EUR', scope?: MoneyScope): string {
   if (amount === null || amount === undefined || Number.isNaN(amount)) {
     return NO_AMOUNT
   }

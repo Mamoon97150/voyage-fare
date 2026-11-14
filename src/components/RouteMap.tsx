@@ -34,11 +34,20 @@ export function RouteMap({ route, big = false, height }: { route: Route; big?: b
     const home = route.home?.at ?? null
 
     if (home) {
-      L.polyline([home, pts[0]], { color: ink, weight: 1.6, dashArray: '2 5', opacity: 0.7, interactive: false }).addTo(map)
-      L.polyline([pts[pts.length - 1], home], { color: ink, weight: 1.6, dashArray: '2 5', opacity: 0.7, interactive: false }).addTo(map)
+      L.polyline([home, pts[0]], { color: ink, weight: 1.6, dashArray: '2 5', opacity: 0.7, interactive: false }).addTo(
+        map,
+      )
+      L.polyline([pts[pts.length - 1], home], {
+        color: ink,
+        weight: 1.6,
+        dashArray: '2 5',
+        opacity: 0.7,
+        interactive: false,
+      }).addTo(map)
       L.marker(home, { icon: pin('⌂', 'route-pin route-pin--home'), interactive: false, keyboard: false }).addTo(map)
     }
-    if (pts.length > 1) L.polyline(pts, { color: ink, weight: 2, dashArray: '7 5', opacity: 0.85, interactive: false }).addTo(map)
+    if (pts.length > 1)
+      L.polyline(pts, { color: ink, weight: 2, dashArray: '7 5', opacity: 0.85, interactive: false }).addTo(map)
 
     // Framed on the places; one place alone gets a city-sized view.
     if (pts.length === 1) map.setView(pts[0], 9)
@@ -59,10 +68,20 @@ export function RouteMap({ route, big = false, height }: { route: Route; big?: b
         offset = unit.multiplyBy(24 - len)
       }
       placed.push(at.add(offset))
-      L.marker(s.at, { icon: pin(String(s.n), 'route-pin', offset), interactive: false, keyboard: false, title: s.place.name }).addTo(map)
+      L.marker(s.at, {
+        icon: pin(String(s.n), 'route-pin', offset),
+        interactive: false,
+        keyboard: false,
+        title: s.place.name,
+      }).addTo(map)
       if (big) {
         L.marker(s.at, {
-          icon: L.divIcon({ className: 'route-label', html: escape(s.place.name), iconSize: [0, 0], iconAnchor: [offset.x < 0 ? s.place.name.length * 7.5 + 14 - offset.x : -14 - offset.x, 9 - offset.y] }),
+          icon: L.divIcon({
+            className: 'route-label',
+            html: escape(s.place.name),
+            iconSize: [0, 0],
+            iconAnchor: [offset.x < 0 ? s.place.name.length * 7.5 + 14 - offset.x : -14 - offset.x, 9 - offset.y],
+          }),
           interactive: false,
           keyboard: false,
         }).addTo(map)
@@ -96,6 +115,11 @@ export function RouteMap({ route, big = false, height }: { route: Route; big?: b
 }
 
 const pin = (text: string, className: string, offset = L.point(0, 0)) =>
-  L.divIcon({ className: '', html: `<div class="${className}">${escape(text)}</div>`, iconSize: [22, 22], iconAnchor: [11 - offset.x, 11 - offset.y] })
+  L.divIcon({
+    className: '',
+    html: `<div class="${className}">${escape(text)}</div>`,
+    iconSize: [22, 22],
+    iconAnchor: [11 - offset.x, 11 - offset.y],
+  })
 
 const escape = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`)

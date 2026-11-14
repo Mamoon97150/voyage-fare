@@ -17,14 +17,22 @@ export function Budget() {
         const cats = categoryLines(detail, money, viewer, mode)
         const scale = Math.max(1, ...cats.map((c) => c.amount ?? 0))
         const { lines: places, untied, packages } = placeLines(detail, viewer, mode)
-        const figure = mode === 'mine' && viewer ? detail.travellerShares.find((s) => s.traveller_id === viewer)?.share_current : detail.budget?.current_total
+        const figure =
+          mode === 'mine' && viewer
+            ? detail.travellerShares.find((s) => s.traveller_id === viewer)?.share_current
+            : detail.budget?.current_total
         const whose = solo ? 'the trip' : mode === 'mine' ? 'your share' : 'whole trip'
         const missing = notCounted(detail)
         const left = leftToPayLines(detail, viewer, mode)
         return (
           <>
             {left.lines.length > 0 && <LeftToPayCard left={left} currency={currency} whose={whose} />}
-            <Card title="By category" small={whose} total={formatWhole(figure === null || figure === undefined ? null : Number(figure), currency)} seed={71}>
+            <Card
+              title="By category"
+              small={whose}
+              total={formatWhole(figure === null || figure === undefined ? null : Number(figure), currency)}
+              seed={71}
+            >
               {cats.length === 0 ? (
                 <p className="card__note">nothing priced yet</p>
               ) : (
@@ -36,7 +44,13 @@ export function Budget() {
                         {c.meta && <span className="line__meta">{c.meta}</span>}
                         {!c.word && (c.amount ?? 0) > 0 && (
                           <span className="line__bar">
-                            <HandBar confirmed={c.confirmed / scale} estimated={c.estimated / scale} target={null} over={false} bare />
+                            <HandBar
+                              confirmed={c.confirmed / scale}
+                              estimated={c.estimated / scale}
+                              target={null}
+                              over={false}
+                              bare
+                            />
                           </span>
                         )}
                       </span>
@@ -60,13 +74,25 @@ export function Budget() {
                     </li>
                   ))}
                 </ul>
-                {packages > 0 && <p className="card__note">+ {formatWhole(packages, currency)} package, for the whole trip</p>}
+                {packages > 0 && (
+                  <p className="card__note">+ {formatWhole(packages, currency)} package, for the whole trip</p>
+                )}
                 {untied > 0 && <p className="card__note">+ {formatWhole(untied, currency)} not tied to a place</p>}
               </Card>
             )}
 
             {!solo && (
-              <Card title="Everyone’s share" small="the whole trip" total={formatWhole(detail.budget?.current_total === null || detail.budget?.current_total === undefined ? null : Number(detail.budget.current_total), currency)} seed={73}>
+              <Card
+                title="Everyone’s share"
+                small="the whole trip"
+                total={formatWhole(
+                  detail.budget?.current_total === null || detail.budget?.current_total === undefined
+                    ? null
+                    : Number(detail.budget.current_total),
+                  currency,
+                )}
+                seed={73}
+              >
                 <ul className="lines">
                   {everyoneLines(detail, viewer).map((t) => (
                     <li key={t.id} className="line line--who">
@@ -99,9 +125,16 @@ export function Budget() {
   )
 }
 
-
 /** "What's left to pay" (mockup left-to-pay-v4, step 3): soonest first; a late one gets the mustard dot. */
-function LeftToPayCard({ left, currency, whose }: { left: ReturnType<typeof leftToPayLines>; currency: string; whose: string }) {
+function LeftToPayCard({
+  left,
+  currency,
+  whose,
+}: {
+  left: ReturnType<typeof leftToPayLines>
+  currency: string
+  whose: string
+}) {
   return (
     <Card title="What’s left to pay" small={whose} seed={70}>
       <div className="left-total">

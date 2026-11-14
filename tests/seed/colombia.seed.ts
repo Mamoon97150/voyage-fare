@@ -21,7 +21,15 @@ const NAME = 'Colombia & Panama'
 /** Euros per 1 unit, 13 Nov 2026 (open.er-api.com: 1 € = 1,106822 $ = 3 645,03 COP). */
 const RATES = { USD: Math.round((1 / 1.106822) * 1e8) / 1e8, COP: Math.round((1 / 3645.029563) * 1e8) / 1e8 }
 
-type Opt = { name: string; amount: number | null; currency?: 'USD' | 'COP'; note?: string; link?: string; details?: OptionDetails; favourite?: boolean }
+type Opt = {
+  name: string
+  amount: number | null
+  currency?: 'USD' | 'COP'
+  note?: string
+  link?: string
+  details?: OptionDetails
+  favourite?: boolean
+}
 type Line = {
   kind: 'transport' | 'housing' | 'activity' | 'restaurant' | 'other'
   name: string
@@ -48,7 +56,22 @@ const PLACES: { name: string; country: string; lat: number; lon: number; nights:
     lon: -74.0721,
     nights: 2,
     lines: [
-      { kind: 'housing', name: 'Grand Hyatt Bogotá', day: 1, endDay: 3, note: 'In the package', booked: 0, options: [{ name: 'Grand Hyatt Bogotá', amount: 0, note: 'In the package', details: { type: 'Hotel', breakfast: true, location: 'North, 30–40 min from La Candelaria' } }] },
+      {
+        kind: 'housing',
+        name: 'Grand Hyatt Bogotá',
+        day: 1,
+        endDay: 3,
+        note: 'In the package',
+        booked: 0,
+        options: [
+          {
+            name: 'Grand Hyatt Bogotá',
+            amount: 0,
+            note: 'In the package',
+            details: { type: 'Hotel', breakfast: true, location: 'North, 30–40 min from La Candelaria' },
+          },
+        ],
+      },
       {
         kind: 'restaurant',
         name: 'First dinner',
@@ -82,7 +105,14 @@ const PLACES: { name: string; country: string; lat: number; lon: number; nights:
           { name: 'Capital Cocina y Café', amount: null },
         ],
       },
-      { kind: 'activity', name: 'Monserrate at sunset', day: 2, options: [{ name: 'Monserrate cable car', amount: 28, note: '~7 € each, return', link: 'https://cerromonserrate.com' }] },
+      {
+        kind: 'activity',
+        name: 'Monserrate at sunset',
+        day: 2,
+        options: [
+          { name: 'Monserrate cable car', amount: 28, note: '~7 € each, return', link: 'https://cerromonserrate.com' },
+        ],
+      },
       {
         kind: 'restaurant',
         name: 'Saturday dinner',
@@ -113,7 +143,22 @@ const PLACES: { name: string; country: string; lat: number; lon: number; nights:
     lon: -75.158,
     nights: 2,
     lines: [
-      { kind: 'housing', name: 'The Boato Hotel', day: 3, endDay: 5, note: 'In the package', booked: 0, options: [{ name: 'The Boato Hotel', amount: 0, note: 'Superior room · in the package', details: { type: 'Hotel', breakfast: true } }] },
+      {
+        kind: 'housing',
+        name: 'The Boato Hotel',
+        day: 3,
+        endDay: 5,
+        note: 'In the package',
+        booked: 0,
+        options: [
+          {
+            name: 'The Boato Hotel',
+            amount: 0,
+            note: 'Superior room · in the package',
+            details: { type: 'Hotel', breakfast: true },
+          },
+        ],
+      },
       {
         kind: 'restaurant',
         name: 'Trout dinner in town',
@@ -123,7 +168,12 @@ const PLACES: { name: string; country: string; lat: number; lon: number; nights:
           { name: 'The Snuggly Duckling', amount: null },
         ],
       },
-      { kind: 'activity', name: 'La Piedra del Peñol', day: 4, options: [{ name: 'La Piedra del Peñol', amount: 24, note: '740 steps · ~6 € each' }] },
+      {
+        kind: 'activity',
+        name: 'La Piedra del Peñol',
+        day: 4,
+        options: [{ name: 'La Piedra del Peñol', amount: 24, note: '740 steps · ~6 € each' }],
+      },
       {
         kind: 'activity',
         name: 'Boat tour: the sunken village',
@@ -148,7 +198,14 @@ const PLACES: { name: string; country: string; lat: number; lon: number; nights:
         name: 'Transfer to Medellín',
         day: 5,
         note: 'Not in the package · ask The Boato',
-        options: [{ name: 'Private transfer via The Boato', amount: 70, note: '60–80 € for the group, ~2 h', details: { mode: 'car' } }],
+        options: [
+          {
+            name: 'Private transfer via The Boato',
+            amount: 70,
+            note: '60–80 € for the group, ~2 h',
+            details: { mode: 'car' },
+          },
+        ],
       },
     ],
   },
@@ -159,7 +216,22 @@ const PLACES: { name: string; country: string; lat: number; lon: number; nights:
     lon: -75.5812,
     nights: 4,
     lines: [
-      { kind: 'housing', name: 'Nock Reserved Residences', day: 5, endDay: 9, note: 'In the package', booked: 0, options: [{ name: 'Nock Reserved Residences', amount: 0, note: '2-bedroom flat, deluxe balcony · in the package', details: { type: 'Apartment', breakfast: true, location: 'El Poblado' } }] },
+      {
+        kind: 'housing',
+        name: 'Nock Reserved Residences',
+        day: 5,
+        endDay: 9,
+        note: 'In the package',
+        booked: 0,
+        options: [
+          {
+            name: 'Nock Reserved Residences',
+            amount: 0,
+            note: '2-bedroom flat, deluxe balcony · in the package',
+            details: { type: 'Apartment', breakfast: true, location: 'El Poblado' },
+          },
+        ],
+      },
       {
         kind: 'restaurant',
         name: 'Dinner in Provenza',
@@ -170,7 +242,12 @@ const PLACES: { name: string; country: string; lat: number; lon: number; nights:
           { name: 'Sambombi', amount: null },
         ],
       },
-      { kind: 'activity', name: 'Plaza Botero + Museo de Antioquia', day: 6, options: [{ name: 'Plaza Botero + Museo de Antioquia', amount: 20, note: '~5 € each' }] },
+      {
+        kind: 'activity',
+        name: 'Plaza Botero + Museo de Antioquia',
+        day: 6,
+        options: [{ name: 'Plaza Botero + Museo de Antioquia', amount: 20, note: '~5 € each' }],
+      },
       {
         kind: 'restaurant',
         name: 'Bandeja paisa lunch',
@@ -181,21 +258,44 @@ const PLACES: { name: string; country: string; lat: number; lon: number; nights:
           { name: 'Mondongo’s', amount: null },
         ],
       },
-      { kind: 'activity', name: 'Comuna 13 tour', day: 6, note: '16:30 · the tour’s street food is dinner', options: [{ name: 'Casa Kolacho', amount: 80, note: '~20 € each · the money stays in the neighbourhood' }] },
+      {
+        kind: 'activity',
+        name: 'Comuna 13 tour',
+        day: 6,
+        note: '16:30 · the tour’s street food is dinner',
+        options: [{ name: 'Casa Kolacho', amount: 80, note: '~20 € each · the money stays in the neighbourhood' }],
+      },
       {
         kind: 'activity',
         name: 'The thrill day',
         day: 7,
         chosen: 1,
         options: [
-          { name: 'Paragliding, GTOPIK', amount: 315, currency: 'USD', note: '20 min, 70 $ each + transport 35 $ · dropped' },
+          {
+            name: 'Paragliding, GTOPIK',
+            amount: 315,
+            currency: 'USD',
+            note: '20 min, 70 $ each + transport 35 $ · dropped',
+          },
           { name: 'Sabaneta, Pueblito Paisa, Laureles', amount: 0, note: 'Neighbourhoods day' },
           { name: 'Coffee finca, half day', amount: 312, currency: 'USD', note: '~78 $ each · dropped' },
         ],
       },
-      { kind: 'restaurant', name: 'Dinner on La 70 + salsa', day: 7, options: [{ name: 'La 70, then Son Havana', amount: null }] },
+      {
+        kind: 'restaurant',
+        name: 'Dinner on La 70 + salsa',
+        day: 7,
+        options: [{ name: 'La 70, then Son Havana', amount: null }],
+      },
       { kind: 'activity', name: 'Spa', day: 8, options: [{ name: 'Spa Bonanova', amount: null }] },
-      { kind: 'activity', name: 'Nails, the four of us', day: 8, options: [{ name: 'Momo Beauty Bar, Lalinde', amount: 615000, currency: 'COP', note: 'Gel X, pedi spa, pedicures' }] },
+      {
+        kind: 'activity',
+        name: 'Nails, the four of us',
+        day: 8,
+        options: [
+          { name: 'Momo Beauty Bar, Lalinde', amount: 615000, currency: 'COP', note: 'Gel X, pedi spa, pedicures' },
+        ],
+      },
       {
         kind: 'activity',
         name: 'Perfume workshop',
@@ -204,10 +304,23 @@ const PLACES: { name: string; country: string; lat: number; lon: number; nights:
         dropped: true,
         split: ['Djamina', 'Danielle'],
         note: 'Dropped: no perfume this time',
-        options: [{ name: 'Iris Alta Perfumería', amount: 580000, currency: 'COP', note: '~290 000 COP each, your own 50 ml' }],
+        options: [
+          { name: 'Iris Alta Perfumería', amount: 580000, currency: 'COP', note: '~290 000 COP each, your own 50 ml' },
+        ],
       },
-      { kind: 'restaurant', name: 'Dinner at RITWAL', day: 8, options: [{ name: 'RITWAL', amount: null, note: 'Mirador Los Balsos · book' }] },
-      { kind: 'transport', name: 'Transfer to the airport', day: 9, note: 'Not in the package', options: [{ name: 'Taxi or van', amount: null, details: { mode: 'car' } }] },
+      {
+        kind: 'restaurant',
+        name: 'Dinner at RITWAL',
+        day: 8,
+        options: [{ name: 'RITWAL', amount: null, note: 'Mirador Los Balsos · book' }],
+      },
+      {
+        kind: 'transport',
+        name: 'Transfer to the airport',
+        day: 9,
+        note: 'Not in the package',
+        options: [{ name: 'Taxi or van', amount: null, details: { mode: 'car' } }],
+      },
     ],
   },
   {
@@ -217,7 +330,22 @@ const PLACES: { name: string; country: string; lat: number; lon: number; nights:
     lon: -75.4794,
     nights: 5,
     lines: [
-      { kind: 'housing', name: 'Hotel Casona del Porvenir', day: 9, endDay: 14, note: 'In the package', booked: 0, options: [{ name: 'Hotel Casona del Porvenir', amount: 0, note: 'In the package', details: { type: 'Hotel', breakfast: true, location: 'El Centro, inside the walls' } }] },
+      {
+        kind: 'housing',
+        name: 'Hotel Casona del Porvenir',
+        day: 9,
+        endDay: 14,
+        note: 'In the package',
+        booked: 0,
+        options: [
+          {
+            name: 'Hotel Casona del Porvenir',
+            amount: 0,
+            note: 'In the package',
+            details: { type: 'Hotel', breakfast: true, location: 'El Centro, inside the walls' },
+          },
+        ],
+      },
       {
         kind: 'restaurant',
         name: 'Welcome dinner',
@@ -227,8 +355,18 @@ const PLACES: { name: string; country: string; lat: number; lon: number; nights:
           { name: 'La Cevichería', amount: null, note: 'Better for lunch' },
         ],
       },
-      { kind: 'activity', name: 'Palacio de la Inquisición', day: 10, options: [{ name: 'Palacio de la Inquisición', amount: 20, note: '~5 € each' }] },
-      { kind: 'restaurant', name: 'Birthday brunch', day: 11, options: [{ name: 'Nía Bakery & Cocktails', amount: null }] },
+      {
+        kind: 'activity',
+        name: 'Palacio de la Inquisición',
+        day: 10,
+        options: [{ name: 'Palacio de la Inquisición', amount: 20, note: '~5 € each' }],
+      },
+      {
+        kind: 'restaurant',
+        name: 'Birthday brunch',
+        day: 11,
+        options: [{ name: 'Nía Bakery & Cocktails', amount: null }],
+      },
       {
         kind: 'activity',
         name: 'Peggy’s photoshoot',
@@ -238,17 +376,34 @@ const PLACES: { name: string; country: string; lat: number; lon: number; nights:
         options: [
           { name: 'Fly Dress Colombia', amount: 230, currency: 'USD', favourite: true },
           { name: 'Fly Dress Colombia, bigger package', amount: 310, currency: 'USD' },
-          { name: 'Flytographer', amount: 425, currency: 'USD', note: 'From, for 60 min', link: 'https://www.flytographer.com/destinations/cartagena' },
+          {
+            name: 'Flytographer',
+            amount: 425,
+            currency: 'USD',
+            note: 'From, for 60 min',
+            link: 'https://www.flytographer.com/destinations/cartagena',
+          },
           { name: 'Private photo shoot (Viator)', amount: 90, currency: 'USD', note: 'From, a person, 1 h 30' },
         ],
       },
-      { kind: 'restaurant', name: 'Birthday dinner', day: 11, note: '21:00, with the surprise cake', options: [{ name: 'Morena Orígenes', amount: null, note: 'Getsemaní' }] },
+      {
+        kind: 'restaurant',
+        name: 'Birthday dinner',
+        day: 11,
+        note: '21:00, with the surprise cake',
+        options: [{ name: 'Morena Orígenes', amount: null, note: 'Getsemaní' }],
+      },
       {
         kind: 'activity',
         name: 'Day trip',
         day: 13,
         options: [
-          { name: 'San Basilio de Palenque', amount: 440, currency: 'USD', note: 'Black Legacy Experience · 110 $ each' },
+          {
+            name: 'San Basilio de Palenque',
+            amount: 440,
+            currency: 'USD',
+            note: 'Black Legacy Experience · 110 $ each',
+          },
           { name: 'Rosario Islands', amount: 260, note: '~65 € each · dropped' },
           { name: 'Volcán del Totumo', amount: 140, note: 'Mud bath · ~35 € each · cancelled' },
         ],
@@ -262,7 +417,22 @@ const PLACES: { name: string; country: string; lat: number; lon: number; nights:
     lon: -79.5199,
     nights: 1,
     lines: [
-      { kind: 'housing', name: 'Riande Aeropuerto', day: 14, endDay: 15, note: 'In the package', booked: 0, options: [{ name: 'Riande Aeropuerto', amount: 0, note: 'Room only, free airport shuttle · in the package', details: { type: 'Hotel', breakfast: false, location: 'By the airport' } }] },
+      {
+        kind: 'housing',
+        name: 'Riande Aeropuerto',
+        day: 14,
+        endDay: 15,
+        note: 'In the package',
+        booked: 0,
+        options: [
+          {
+            name: 'Riande Aeropuerto',
+            amount: 0,
+            note: 'Room only, free airport shuttle · in the package',
+            details: { type: 'Hotel', breakfast: false, location: 'By the airport' },
+          },
+        ],
+      },
       {
         kind: 'activity',
         name: 'The afternoon',
@@ -279,12 +449,70 @@ const PLACES: { name: string; country: string; lat: number; lon: number; nights:
   },
 ]
 
-const FLIGHTS: { from: string; to: string; after: string | null; airline: string; leaves: string; arrives: string; via?: string; fromAirport: string; toAirport: string; stops?: number }[] = [
-  { from: 'St Martin', to: 'Bogotá', after: null, airline: 'Copa Airlines', leaves: '12:32', arrives: '17:07', via: 'Panama', fromAirport: 'SXM', toAirport: 'BOG', stops: 1 },
-  { from: 'Bogotá', to: 'Medellín', after: 'Bogotá', airline: 'Avianca', leaves: '16:50', arrives: '17:50', fromAirport: 'BOG', toAirport: 'MDE' },
-  { from: 'Medellín', to: 'Cartagena', after: 'Medellín', airline: 'Avianca', leaves: '17:40', arrives: '18:55', fromAirport: 'MDE', toAirport: 'CTG' },
-  { from: 'Cartagena', to: 'Panama City', after: 'Cartagena', airline: 'Copa Airlines', leaves: '09:45', arrives: '11:07', fromAirport: 'CTG', toAirport: 'PTY' },
-  { from: 'Panama City', to: 'St Martin', after: 'Panama City', airline: 'Copa Airlines', leaves: '07:24', arrives: '11:33', fromAirport: 'PTY', toAirport: 'SXM' },
+const FLIGHTS: {
+  from: string
+  to: string
+  after: string | null
+  airline: string
+  leaves: string
+  arrives: string
+  via?: string
+  fromAirport: string
+  toAirport: string
+  stops?: number
+}[] = [
+  {
+    from: 'St Martin',
+    to: 'Bogotá',
+    after: null,
+    airline: 'Copa Airlines',
+    leaves: '12:32',
+    arrives: '17:07',
+    via: 'Panama',
+    fromAirport: 'SXM',
+    toAirport: 'BOG',
+    stops: 1,
+  },
+  {
+    from: 'Bogotá',
+    to: 'Medellín',
+    after: 'Bogotá',
+    airline: 'Avianca',
+    leaves: '16:50',
+    arrives: '17:50',
+    fromAirport: 'BOG',
+    toAirport: 'MDE',
+  },
+  {
+    from: 'Medellín',
+    to: 'Cartagena',
+    after: 'Medellín',
+    airline: 'Avianca',
+    leaves: '17:40',
+    arrives: '18:55',
+    fromAirport: 'MDE',
+    toAirport: 'CTG',
+  },
+  {
+    from: 'Cartagena',
+    to: 'Panama City',
+    after: 'Cartagena',
+    airline: 'Copa Airlines',
+    leaves: '09:45',
+    arrives: '11:07',
+    fromAirport: 'CTG',
+    toAirport: 'PTY',
+  },
+  {
+    from: 'Panama City',
+    to: 'St Martin',
+    after: 'Panama City',
+    airline: 'Copa Airlines',
+    leaves: '07:24',
+    arrives: '11:33',
+    fromAirport: 'PTY',
+    toAirport: 'SXM',
+  },
 ]
 
 const must = <T>(r: { data: T; error: unknown }): T => {
@@ -329,7 +557,15 @@ it('rebuilds the Colombia & Panama trip in the demo account', async () => {
     const row = must(
       await supabase
         .from('places')
-        .insert({ trip_id: tripId, name: p.name, country: p.country, latitude: p.lat, longitude: p.lon, nights: p.nights, position: i + 1 })
+        .insert({
+          trip_id: tripId,
+          name: p.name,
+          country: p.country,
+          latitude: p.lat,
+          longitude: p.lon,
+          nights: p.nights,
+          position: i + 1,
+        })
         .select('id')
         .single(),
     )
@@ -373,10 +609,15 @@ it('rebuilds the Colombia & Panama trip in the demo account', async () => {
       )
     }
     if (line.split) {
-      must(await supabase.from('item_split_travellers').insert(line.split.map((n) => ({ item_id: itemId, traveller_id: who(n), trip_id: tripId }))))
+      must(
+        await supabase
+          .from('item_split_travellers')
+          .insert(line.split.map((n) => ({ item_id: itemId, traveller_id: who(n), trip_id: tripId }))),
+      )
     }
     if (line.dropped) must(await supabase.rpc('set_item_dropped', { p_item_id: itemId, p_dropped: true }))
-    if (line.booked !== undefined) await setItemStatus({ id: itemId, status: 'booked', actualAmount: line.booked, paidBy: null })
+    if (line.booked !== undefined)
+      await setItemStatus({ id: itemId, status: 'booked', actualAmount: line.booked, paidBy: null })
   }
 
   // The package: one line for the whole trip, booked.
@@ -413,7 +654,14 @@ it('rebuilds the Colombia & Panama trip in the demo account', async () => {
           note: 'In the package',
           details: {
             mode: 'plane',
-            out: { fromAirport: f.fromAirport, toAirport: f.toAirport, leaves: f.leaves, arrives: f.arrives, stops: f.stops ?? 0, via: f.via },
+            out: {
+              fromAirport: f.fromAirport,
+              toAirport: f.toAirport,
+              leaves: f.leaves,
+              arrives: f.arrives,
+              stops: f.stops ?? 0,
+              via: f.via,
+            },
           },
         },
       ],
@@ -423,9 +671,18 @@ it('rebuilds the Colombia & Panama trip in the demo account', async () => {
   for (const p of PLACES) for (const line of p.lines) await addLine(placeIds[p.name], line)
 
   // What the package covers (build 6): the flights and the hotels "in the package".
-  const pkg = must(await supabase.from('items').select('id').eq('trip_id', tripId).eq('kind', 'package').single()) as { id: string }
-  const hotels = must(await supabase.from('items').select('id').eq('trip_id', tripId).eq('note', 'In the package')) as { id: string }[]
-  must(await supabase.rpc('set_package_cover', { p_package_id: pkg.id, p_items: [...flightIds, ...hotels.map((h) => h.id)] }))
+  const pkg = must(await supabase.from('items').select('id').eq('trip_id', tripId).eq('kind', 'package').single()) as {
+    id: string
+  }
+  const hotels = must(await supabase.from('items').select('id').eq('trip_id', tripId).eq('note', 'In the package')) as {
+    id: string
+  }[]
+  must(
+    await supabase.rpc('set_package_cover', {
+      p_package_id: pkg.id,
+      p_items: [...flightIds, ...hotels.map((h) => h.id)],
+    }),
+  )
 
   const budget = must(await supabase.from('v_trip_budget').select('*').eq('trip_id', tripId).single())
   console.log('Colombia & Panama:', tripId, budget)

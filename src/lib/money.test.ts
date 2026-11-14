@@ -61,9 +61,12 @@ describe('reading a typed amount', () => {
     expect(parseAmount(typed)).toBe(expected)
   })
 
-  it.each(['', 'a lot', '-5', '12.', '1.2345', '1.20.300', '1.200.50,3', ',50', '1,2,3'])('“%s” is refused', (typed) => {
-    expect(parseAmount(typed)).toBeNull()
-  })
+  it.each(['', 'a lot', '-5', '12.', '1.2345', '1.20.300', '1.200.50,3', ',50', '1,2,3'])(
+    '“%s” is refused',
+    (typed) => {
+      expect(parseAmount(typed)).toBeNull()
+    },
+  )
 })
 
 describe('an amount in a form', () => {

@@ -15,16 +15,35 @@ import {
 } from './tripView'
 
 const item = (over: Partial<Item>): Item =>
-  ({ id: 'i', trip_id: 't', place_id: 'p', kind: 'activity', name: 'x', day_number: null, end_day_number: null, ...over }) as Item
+  ({
+    id: 'i',
+    trip_id: 't',
+    place_id: 'p',
+    kind: 'activity',
+    name: 'x',
+    day_number: null,
+    end_day_number: null,
+    ...over,
+  }) as Item
 
 function detail(over: Partial<TripDetail> = {}): TripDetail {
   return {
-    trip: { id: 't', start_date: null, end_date: null, target_amount: 700, target_scope: 'per_person', currency: 'EUR' },
+    trip: {
+      id: 't',
+      start_date: null,
+      end_date: null,
+      target_amount: 700,
+      target_scope: 'per_person',
+      currency: 'EUR',
+    },
     travellers: [
       { id: 'ana', user_id: 'u-ana', name: 'Ana' },
       { id: 'bea', user_id: null, name: 'Bea' },
     ],
-    places: [{ id: 'p', nights: 3 }, { id: 'q', nights: 2 }],
+    places: [
+      { id: 'p', nights: 3 },
+      { id: 'q', nights: 2 },
+    ],
     items: [],
     amounts: [
       { item_id: 'gift', current: 150, is_confirmed: true },
@@ -36,7 +55,13 @@ function detail(over: Partial<TripDetail> = {}): TripDetail {
       { item_id: 'dinner', traveller_id: 'ana', fraction: 0.5 },
       { item_id: 'dinner', traveller_id: 'bea', fraction: 0.5 },
     ],
-    budget: { current_total: 240, confirmed_total: 150, estimated_total: 90, target_total: 1400, missing_amount_count: 1 },
+    budget: {
+      current_total: 240,
+      confirmed_total: 150,
+      estimated_total: 90,
+      target_total: 1400,
+      missing_amount_count: 1,
+    },
     travellerShares: [{ traveller_id: 'ana', share_current: 45, share_confirmed: null, share_estimated: 45 }],
     placeTotals: [],
     travellerPlaceTotals: [],
@@ -129,7 +154,11 @@ describe('the budget bar', () => {
   })
 
   it('nothing priced: a dash, never 0', () => {
-    const v = budgetView(detail({ budget: { current_total: null, target_total: null, missing_amount_count: 0 } as TripDetail['budget'] }), null, 'total')
+    const v = budgetView(
+      detail({ budget: { current_total: null, target_total: null, missing_amount_count: 0 } as TripDetail['budget'] }),
+      null,
+      'total',
+    )
     expect(v.figure).toBeNull()
     expect(v.difference).toBeNull()
   })

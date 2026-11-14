@@ -38,14 +38,17 @@ export function priceInCompare(detail: TripDetail, item: Item): { text: string; 
   if (count >= 2) parts.push(`${count} options compared${chosen ? ` · chosen: ${chosen.name}` : ' · none chosen yet'}`)
   if (foreign) {
     const amount = Number(chosen.amount)
-    parts.push(`${formatMoney(amount, chosen.currency)} ≈ ${formatWhole(amount * Number(chosen.rate), detail.trip.currency)}`)
+    parts.push(
+      `${formatMoney(amount, chosen.currency)} ≈ ${formatWhole(amount * Number(chosen.rate), detail.trip.currency)}`,
+    )
   }
   return { text: parts.join(' · '), link: compareLink(detail, item) }
 }
 
 /** The small word under the amount: the status, or "Package" (blue) for a line a package covers. */
 export function statusWord(item: Item): { text: string; className: string } | null {
-  if (item.package_id && item.status !== 'dropped') return { text: 'Package', className: 'item-row__status item-row__status--package' }
+  if (item.package_id && item.status !== 'dropped')
+    return { text: 'Package', className: 'item-row__status item-row__status--package' }
   const text = STATUS[item.status]
   return text ? { text, className: 'item-row__status' } : null
 }

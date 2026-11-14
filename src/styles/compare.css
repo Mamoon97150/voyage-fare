@@ -128,8 +128,6 @@
   flex: none;
 }
 
-
-
 .compare-item__dropped {
   text-decoration: line-through;
 }
@@ -537,7 +535,6 @@
   gap: var(--space-2);
   margin-top: var(--space-3);
 }
-
 
 .screen__top:has(.screen__heading) {
   align-items: flex-start;

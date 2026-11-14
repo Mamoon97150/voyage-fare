@@ -26,19 +26,11 @@ export async function createDb(): Promise<PGlite> {
   return db
 }
 
-export async function rows<T = Record<string, unknown>>(
-  db: PGlite,
-  sql: string,
-  params: unknown[] = [],
-): Promise<T[]> {
+export async function rows<T = Record<string, unknown>>(db: PGlite, sql: string, params: unknown[] = []): Promise<T[]> {
   return (await db.query<T>(sql, params)).rows
 }
 
-export async function one<T = Record<string, unknown>>(
-  db: PGlite,
-  sql: string,
-  params: unknown[] = [],
-): Promise<T> {
+export async function one<T = Record<string, unknown>>(db: PGlite, sql: string, params: unknown[] = []): Promise<T> {
   const result = await rows<T>(db, sql, params)
   if (result.length !== 1) throw new Error(`Expected 1 row, got ${result.length}`)
   return result[0]
@@ -58,9 +50,7 @@ export async function actAs(db: PGlite, who: { user: string } | 'anon' | 'owner'
     await db.exec(`select set_config('request.jwt.claims', '', false); set role anon`)
     return
   }
-  await db.exec(
-    `select set_config('request.jwt.claims', '{"sub":"${who.user}"}', false); set role authenticated`,
-  )
+  await db.exec(`select set_config('request.jwt.claims', '{"sub":"${who.user}"}', false); set role authenticated`)
 }
 
 /** Expect a statement to be refused, without breaking the surrounding transaction. */

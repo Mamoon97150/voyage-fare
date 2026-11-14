@@ -11,16 +11,82 @@ vi.mock('../lib/places', async (original) => ({
 
 describe('Budget and Who paid (build 4)', () => {
   // Ana and Bea; Ana paid the 1 000 € flat; the 200 € dinner is a gift to Bea (only Ana on it).
-  const flat = { id: 'flat', place_id: 'p1', kind: 'housing', name: 'Flat', category: 'accommodation', status: 'paid', paid_by: 'a', paid_each: false, paid_on: '2026-09-01', actual_amount: 1000, actual_currency: 'EUR', day_number: null, end_day_number: null }
-  const dinner = { id: 'din', place_id: 'p1', kind: 'restaurant', name: 'Dinner', category: 'food', status: 'chosen', paid_by: null, paid_each: false, day_number: 2, end_day_number: null }
-  const lunch = { id: 'lun', place_id: 'p1', kind: 'restaurant', name: 'Lunch', category: 'food', status: 'chosen', paid_by: null, paid_each: false, day_number: 3, end_day_number: null }
+  const flat = {
+    id: 'flat',
+    place_id: 'p1',
+    kind: 'housing',
+    name: 'Flat',
+    category: 'accommodation',
+    status: 'paid',
+    paid_by: 'a',
+    paid_each: false,
+    paid_on: '2026-09-01',
+    actual_amount: 1000,
+    actual_currency: 'EUR',
+    day_number: null,
+    end_day_number: null,
+  }
+  const dinner = {
+    id: 'din',
+    place_id: 'p1',
+    kind: 'restaurant',
+    name: 'Dinner',
+    category: 'food',
+    status: 'chosen',
+    paid_by: null,
+    paid_each: false,
+    day_number: 2,
+    end_day_number: null,
+  }
+  const lunch = {
+    id: 'lun',
+    place_id: 'p1',
+    kind: 'restaurant',
+    name: 'Lunch',
+    category: 'food',
+    status: 'chosen',
+    paid_by: null,
+    paid_each: false,
+    day_number: 3,
+    end_day_number: null,
+  }
   const trip2 = detail({
     places: [cartagena],
     items: [flat, dinner, lunch],
     options: [
-      { id: 'o1', item_id: 'flat', name: 'Flat', amount: 1000, rate: 1, currency: 'EUR', is_chosen: true, position: 1, details: {} },
-      { id: 'o2', item_id: 'din', name: 'Dinner', amount: 200, rate: 1, currency: 'EUR', is_chosen: true, position: 1, details: {} },
-      { id: 'o3', item_id: 'lun', name: 'La Puerta Falsa', amount: null, rate: 1, currency: 'EUR', is_chosen: true, position: 1, details: {} },
+      {
+        id: 'o1',
+        item_id: 'flat',
+        name: 'Flat',
+        amount: 1000,
+        rate: 1,
+        currency: 'EUR',
+        is_chosen: true,
+        position: 1,
+        details: {},
+      },
+      {
+        id: 'o2',
+        item_id: 'din',
+        name: 'Dinner',
+        amount: 200,
+        rate: 1,
+        currency: 'EUR',
+        is_chosen: true,
+        position: 1,
+        details: {},
+      },
+      {
+        id: 'o3',
+        item_id: 'lun',
+        name: 'La Puerta Falsa',
+        amount: null,
+        rate: 1,
+        currency: 'EUR',
+        is_chosen: true,
+        position: 1,
+        details: {},
+      },
     ],
     amounts: [
       { item_id: 'flat', current: 1000, actual: 1000, is_confirmed: true, status: 'paid' },
@@ -31,7 +97,13 @@ describe('Budget and Who paid (build 4)', () => {
       { item_id: 'flat', traveller_id: 'b', fraction: 0.5 },
       { item_id: 'din', traveller_id: 'a', fraction: 1 },
     ],
-    budget: { current_total: 1200, confirmed_total: 1000, estimated_total: 200, target_total: null, missing_amount_count: 1 },
+    budget: {
+      current_total: 1200,
+      confirmed_total: 1000,
+      estimated_total: 200,
+      target_total: null,
+      missing_amount_count: 1,
+    },
     travellerShares: [
       { traveller_id: 'a', share_current: 700, share_confirmed: 500, share_estimated: 200 },
       { traveller_id: 'b', share_current: 500, share_confirmed: 500, share_estimated: null },
@@ -79,7 +151,9 @@ describe('Budget and Who paid (build 4)', () => {
     click('Paid back: Bea pays you')
     expect(screen.getByText(/Record 500 € paid back today\?/)).toBeInTheDocument()
     click('Yes, record it')
-    await waitFor(() => expect(data.addRepayment).toHaveBeenCalledWith(expect.objectContaining({ from: 'b', to: 'a', amount: 500 })))
+    await waitFor(() =>
+      expect(data.addRepayment).toHaveBeenCalledWith(expect.objectContaining({ from: 'b', to: 'a', amount: 500 })),
+    )
   })
 
   it('Who paid: record any repayment', async () => {
@@ -88,7 +162,9 @@ describe('Budget and Who paid (build 4)', () => {
     click(await screen.findByText('Record a repayment').then(() => 'Record a repayment'))
     type('How much', '200')
     click('Record it')
-    await waitFor(() => expect(data.addRepayment).toHaveBeenCalledWith(expect.objectContaining({ from: 'b', to: 'a', amount: 200 })))
+    await waitFor(() =>
+      expect(data.addRepayment).toHaveBeenCalledWith(expect.objectContaining({ from: 'b', to: 'a', amount: 200 })),
+    )
   })
 
   it('Paid: each paid their own share', async () => {
@@ -98,7 +174,11 @@ describe('Budget and Who paid (build 4)', () => {
     fireEvent.change(screen.getByLabelText('Paid by'), { target: { value: 'each' } })
     expect(screen.getByText(/nobody owes anything for it/)).toBeInTheDocument()
     click('Save where it stands')
-    await waitFor(() => expect(data.setItemStatus).toHaveBeenCalledWith(expect.objectContaining({ status: 'paid', paidBy: null, paidEach: true })))
+    await waitFor(() =>
+      expect(data.setItemStatus).toHaveBeenCalledWith(
+        expect.objectContaining({ status: 'paid', paidBy: null, paidEach: true }),
+      ),
+    )
   })
 })
 
@@ -108,8 +188,30 @@ describe('who it’s for (split between…)', () => {
     detail({
       travellers: three,
       places: [cartagena],
-      items: [{ id: 'i1', place_id: 'p1', kind: 'activity', name: 'Photoshoot', status: 'chosen', day_number: null, end_day_number: null }],
-      options: [{ id: 'o1', item_id: 'i1', name: 'Fly Dress', amount: 210, rate: 1, currency: 'EUR', is_chosen: true, position: 1, details: {} }],
+      items: [
+        {
+          id: 'i1',
+          place_id: 'p1',
+          kind: 'activity',
+          name: 'Photoshoot',
+          status: 'chosen',
+          day_number: null,
+          end_day_number: null,
+        },
+      ],
+      options: [
+        {
+          id: 'o1',
+          item_id: 'i1',
+          name: 'Fly Dress',
+          amount: 210,
+          rate: 1,
+          currency: 'EUR',
+          is_chosen: true,
+          position: 1,
+          details: {},
+        },
+      ],
       amounts: [{ item_id: 'i1', current: 210, is_confirmed: false }],
       shares,
     })

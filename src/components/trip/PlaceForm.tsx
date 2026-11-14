@@ -32,13 +32,10 @@ export function PlaceForm({
     if (!Number.isInteger(n) || n < 0 || n > 365) found.nights = 'A whole number of nights, like 3.'
     setErrors(found)
     if (Object.keys(found).length) return
-    await run(
-      async () => {
-        await updatePlace(place.id, { name: name.trim(), nights: n })
-        onDone()
-      },
-      setFormError,
-    )
+    await run(async () => {
+      await updatePlace(place.id, { name: name.trim(), nights: n })
+      onDone()
+    }, setFormError)
   }
 
   const goesWith =

@@ -40,17 +40,33 @@ function Pages({ detail, money, viewer, reload }: MoneyPage) {
     <>
       <SketchBox weight="strong" className="card card--hero" seed={80}>
         <p>{top.words}</p>
-        {top.amount !== null && <b className={`num${top.owed ? '' : ' card--hero__owe'}`}>{formatWhole(top.amount, currency)}</b>}
+        {top.amount !== null && (
+          <b className={`num${top.owed ? '' : ' card--hero__owe'}`}>{formatWhole(top.amount, currency)}</b>
+        )}
         <span>{top.sub}</span>
       </SketchBox>
 
-      <Card title="To settle up" small={money.settlement.length ? `${money.settlement.length} ${money.settlement.length === 1 ? 'payment' : 'payments'}` : undefined} seed={81}>
+      <Card
+        title="To settle up"
+        small={
+          money.settlement.length
+            ? `${money.settlement.length} ${money.settlement.length === 1 ? 'payment' : 'payments'}`
+            : undefined
+        }
+        seed={81}
+      >
         {money.settlement.length === 0 ? (
           <p className="card__note">nothing to settle: everyone is square</p>
         ) : (
           <ul className="lines">
             {money.settlement.map((s) => (
-              <SettleRow key={`${s.from_traveller}-${s.to_traveller}`} page={{ detail, money, viewer, reload }} from={s.from_traveller} to={s.to_traveller} amount={s.amount} />
+              <SettleRow
+                key={`${s.from_traveller}-${s.to_traveller}`}
+                page={{ detail, money, viewer, reload }}
+                from={s.from_traveller}
+                to={s.to_traveller}
+                amount={s.amount}
+              />
             ))}
           </ul>
         )}
@@ -69,7 +85,9 @@ function Pages({ detail, money, viewer, reload }: MoneyPage) {
               </span>
               <span className="line__amount num">
                 <b className={b.tag === 'is owed' ? 'plus' : b.tag === 'owes' ? 'minus' : undefined}>
-                  {b.tag === 'settled' ? formatWhole(0, currency) : `${b.balance > 0 ? '+' : '−'}${formatWhole(Math.abs(b.balance), currency)}`}
+                  {b.tag === 'settled'
+                    ? formatWhole(0, currency)
+                    : `${b.balance > 0 ? '+' : '−'}${formatWhole(Math.abs(b.balance), currency)}`}
                 </b>
                 <span className={`line__tag${b.tag === 'owes' ? ' line__tag--owe' : ' line__tag--ok'}`}>{b.tag}</span>
               </span>
@@ -182,7 +200,12 @@ function SettleRow({ page, from, to, amount }: { page: Ctx; from: string; to: st
             </button>
           </span>
         ) : (
-          <button type="button" className="small-button" onClick={() => setAsking(true)} aria-label={`Paid back: ${words}`}>
+          <button
+            type="button"
+            className="small-button"
+            onClick={() => setAsking(true)}
+            aria-label={`Paid back: ${words}`}
+          >
             Paid back
           </button>
         )}
@@ -213,16 +236,13 @@ function RepaymentForm({ page }: { page: Ctx }) {
     if (from === to) return setError('Someone pays someone else back.')
     if (value === null || value <= 0) return setError('How much? Like 67 or 1 060,50.')
     setError(undefined)
-    await run(
-      async () => {
-        await addRepayment({ tripId: detail.trip.id, from, to, amount: value, paidOn, note: note.trim() || null })
-        setOpen(false)
-        setAmount('')
-        setNote('')
-        reload()
-      },
-      setError,
-    )
+    await run(async () => {
+      await addRepayment({ tripId: detail.trip.id, from, to, amount: value, paidOn, note: note.trim() || null })
+      setOpen(false)
+      setAmount('')
+      setNote('')
+      reload()
+    }, setError)
   }
 
   if (!open) {
@@ -261,7 +281,13 @@ function RepaymentForm({ page }: { page: Ctx }) {
             How much
           </label>
           <div className="field__box">
-            <input id="repay-amount" className="field__input num" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} />
+            <input
+              id="repay-amount"
+              className="field__input num"
+              inputMode="decimal"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+            />
             <span className="field__unit">{currency}</span>
           </div>
         </div>
@@ -269,14 +295,26 @@ function RepaymentForm({ page }: { page: Ctx }) {
           <label htmlFor="repay-on" className="field__label">
             On
           </label>
-          <input id="repay-on" type="date" className="field__input" value={paidOn} onChange={(e) => setPaidOn(e.target.value)} />
+          <input
+            id="repay-on"
+            type="date"
+            className="field__input"
+            value={paidOn}
+            onChange={(e) => setPaidOn(e.target.value)}
+          />
         </div>
       </div>
       <div className="field">
         <label htmlFor="repay-note" className="field__label">
           Note
         </label>
-        <input id="repay-note" className="field__input" value={note} onChange={(e) => setNote(e.target.value)} placeholder="Bank transfer, cash…" />
+        <input
+          id="repay-note"
+          className="field__input"
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          placeholder="Bank transfer, cash…"
+        />
       </div>
       {error && <FormMessage tone="error">{error}</FormMessage>}
       <div className="add-item__actions">
@@ -290,4 +328,3 @@ function RepaymentForm({ page }: { page: Ctx }) {
     </form>
   )
 }
-

@@ -13,8 +13,33 @@ describe('where it stands', () => {
   const stay = (over: Record<string, unknown> = {}) =>
     detail({
       places: [cartagena],
-      items: [{ id: 'i1', place_id: 'p1', kind: 'housing', name: 'Casa Lola', status: 'chosen', day_number: null, end_day_number: null, actual_amount: null, paid_by: null, paid_on: null, ...over }],
-      options: [{ id: 'o1', item_id: 'i1', name: 'Casa Lola', amount: 1200, rate: 1, is_chosen: true, position: 1, details: {} }],
+      items: [
+        {
+          id: 'i1',
+          place_id: 'p1',
+          kind: 'housing',
+          name: 'Casa Lola',
+          status: 'chosen',
+          day_number: null,
+          end_day_number: null,
+          actual_amount: null,
+          paid_by: null,
+          paid_on: null,
+          ...over,
+        },
+      ],
+      options: [
+        {
+          id: 'o1',
+          item_id: 'i1',
+          name: 'Casa Lola',
+          amount: 1200,
+          rate: 1,
+          is_chosen: true,
+          position: 1,
+          details: {},
+        },
+      ],
       amounts: [{ item_id: 'i1', current: 1200, is_confirmed: false }],
     })
 
@@ -29,7 +54,14 @@ describe('where it stands', () => {
     type('Booked for', '1 150')
     click('Save where it stands')
     await waitFor(() =>
-      expect(data.setItemStatus).toHaveBeenCalledWith({ id: 'i1', status: 'booked', actualAmount: 1150, paidBy: null, paidEach: false, paidOn: null }),
+      expect(data.setItemStatus).toHaveBeenCalledWith({
+        id: 'i1',
+        status: 'booked',
+        actualAmount: 1150,
+        paidBy: null,
+        paidEach: false,
+        paidOn: null,
+      }),
     )
   })
 
@@ -44,7 +76,9 @@ describe('where it stands', () => {
     fireEvent.change(screen.getByLabelText('Paid by'), { target: { value: 'b' } })
     click('Save where it stands')
     await waitFor(() =>
-      expect(data.setItemStatus).toHaveBeenCalledWith(expect.objectContaining({ status: 'paid', actualAmount: 1150, paidBy: 'b' })),
+      expect(data.setItemStatus).toHaveBeenCalledWith(
+        expect.objectContaining({ status: 'paid', actualAmount: 1150, paidBy: 'b' }),
+      ),
     )
   })
 
@@ -69,7 +103,11 @@ describe('where it stands', () => {
 
 describe('currencies', () => {
   // Today's rates, faked: 1 USD = 0,90 EUR; 1 EUR = 3 645 COP.
-  const rates: Record<string, Record<string, number>> = { USD: { EUR: 0.9 }, COP: { EUR: 0.00027435 }, EUR: { COP: 3645, USD: 1.1111 } }
+  const rates: Record<string, Record<string, number>> = {
+    USD: { EUR: 0.9 },
+    COP: { EUR: 0.00027435 },
+    EUR: { COP: 3645, USD: 1.1111 },
+  }
   beforeEach(async () => {
     const { clearRates } = await import('../lib/rates')
     clearRates()
@@ -85,12 +123,36 @@ describe('currencies', () => {
   const stayPage = (options: unknown[] = []) =>
     detail({
       places: [cartagena],
-      items: [{ id: 'i1', place_id: 'p1', kind: 'activity', name: 'Photoshoot', status: 'chosen', day_number: null, end_day_number: null }],
+      items: [
+        {
+          id: 'i1',
+          place_id: 'p1',
+          kind: 'activity',
+          name: 'Photoshoot',
+          status: 'chosen',
+          day_number: null,
+          end_day_number: null,
+        },
+      ],
       options,
     })
 
   it('an option in dollars: today’s rate filled in, saved with the price', async () => {
-    data.getTrip.mockResolvedValue(stayPage([{ id: 'o1', item_id: 'i1', name: 'Viator', amount: 81, currency: 'EUR', rate: 1, is_chosen: true, position: 1, details: {} }]))
+    data.getTrip.mockResolvedValue(
+      stayPage([
+        {
+          id: 'o1',
+          item_id: 'i1',
+          name: 'Viator',
+          amount: 81,
+          currency: 'EUR',
+          rate: 1,
+          is_chosen: true,
+          position: 1,
+          details: {},
+        },
+      ]),
+    )
     data.addOption.mockResolvedValue('o2')
     open('/trips/t1/compare?tab=activities&page=p1')
     click(await screen.findByText('Add an option').then(() => 'Add an option'))
@@ -101,7 +163,11 @@ describe('currencies', () => {
     expect(screen.getByText(/≈ 207 €/)).toBeInTheDocument()
     click('Add the option')
     await waitFor(() =>
-      expect(data.addOption).toHaveBeenCalledWith(expect.anything(), 'i1', expect.objectContaining({ amount: 230, currency: 'USD', rate: 0.9 })),
+      expect(data.addOption).toHaveBeenCalledWith(
+        expect.anything(),
+        'i1',
+        expect.objectContaining({ amount: 230, currency: 'USD', rate: 0.9 }),
+      ),
     )
   })
 
@@ -126,8 +192,25 @@ describe('currencies', () => {
   })
 
   it('no rate to be had: it asks for one', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: false })))
-    data.getTrip.mockResolvedValue(stayPage([{ id: 'o1', item_id: 'i1', name: 'Viator', amount: 81, currency: 'EUR', rate: 1, is_chosen: true, position: 1, details: {} }]))
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => ({ ok: false })),
+    )
+    data.getTrip.mockResolvedValue(
+      stayPage([
+        {
+          id: 'o1',
+          item_id: 'i1',
+          name: 'Viator',
+          amount: 81,
+          currency: 'EUR',
+          rate: 1,
+          is_chosen: true,
+          position: 1,
+          details: {},
+        },
+      ]),
+    )
     open('/trips/t1/compare?tab=activities&page=p1')
     click(await screen.findByText('Add an option').then(() => 'Add an option'))
     type('Name', 'Fly Dress')
@@ -140,7 +223,21 @@ describe('currencies', () => {
   })
 
   it('a card in dollars: the price as typed, then what it comes to', async () => {
-    data.getTrip.mockResolvedValue(stayPage([{ id: 'o1', item_id: 'i1', name: 'Fly Dress', amount: 230, currency: 'USD', rate: 0.9, is_chosen: true, position: 1, details: {} }]))
+    data.getTrip.mockResolvedValue(
+      stayPage([
+        {
+          id: 'o1',
+          item_id: 'i1',
+          name: 'Fly Dress',
+          amount: 230,
+          currency: 'USD',
+          rate: 0.9,
+          is_chosen: true,
+          position: 1,
+          details: {},
+        },
+      ]),
+    )
     open('/trips/t1/compare?tab=activities&page=p1')
     expect(await screen.findByText('230 $ for 2 · ≈ 207 €')).toBeInTheDocument()
   })
@@ -159,7 +256,9 @@ describe('currencies', () => {
   })
 
   it('settings: fixed once someone has paid', async () => {
-    data.getTrip.mockResolvedValue(detail({ items: [{ id: 'i1', place_id: null, kind: 'other', name: 'x', status: 'paid' }] }))
+    data.getTrip.mockResolvedValue(
+      detail({ items: [{ id: 'i1', place_id: null, kind: 'other', name: 'x', status: 'paid' }] }),
+    )
     data.isTripOwner.mockResolvedValue(true)
     open('/trips/t1/settings')
     expect(await screen.findByText(/Fixed since the first payment/)).toBeInTheDocument()

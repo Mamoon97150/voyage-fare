@@ -29,14 +29,20 @@ describe('the route map', () => {
   })
 
   it('home far away: an arrow at the right edge', () => {
-    const pins: [number, number][] = [[4.7, -74.1], [6.2, -75.6], [10.4, -75.5]]
+    const pins: [number, number][] = [
+      [4.7, -74.1],
+      [6.2, -75.6],
+      [10.4, -75.5],
+    ]
     expect(homeDirection(pins, [18.04, -63.05])).toEqual({ arrow: '↗', edge: 'ne' })
     expect(homeDirection(pins, [48.85, -75])).toEqual({ arrow: '↑', edge: 'n' })
     expect(homeDirection(pins, [-12, -77])).toEqual({ arrow: '↓', edge: 's' })
   })
 
   it('says the route in words', () => {
-    expect(routeSummary(routeOf({ trip: trip('St Martin'), places: colombia }))).toBe('from St Martin → 3 places → back home · 8 nights')
+    expect(routeSummary(routeOf({ trip: trip('St Martin'), places: colombia }))).toBe(
+      'from St Martin → 3 places → back home · 8 nights',
+    )
     expect(routeSummary(routeOf({ trip: trip(null), places: [colombia[0]] }))).toBe('Bogotá · 2 nights')
   })
 })

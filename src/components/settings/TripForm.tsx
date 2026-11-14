@@ -88,7 +88,13 @@ export function TripForm({ detail, onSaved }: { detail: TripDetail; onSaved: () 
               </label>
               <label className="field">
                 <span className="field__hint">To</span>
-                <input type="date" className="field__input" value={end} min={start || undefined} onChange={(e) => setEnd(e.target.value)} />
+                <input
+                  type="date"
+                  className="field__input"
+                  value={end}
+                  min={start || undefined}
+                  onChange={(e) => setEnd(e.target.value)}
+                />
               </label>
             </div>
           )}
@@ -133,7 +139,12 @@ export function TripForm({ detail, onSaved }: { detail: TripDetail; onSaved: () 
             </p>
           )}
           <div className="switch" role="radiogroup" aria-label="Target for">
-            <button type="button" role="radio" aria-checked={scope === 'per_person'} onClick={() => setScope('per_person')}>
+            <button
+              type="button"
+              role="radio"
+              aria-checked={scope === 'per_person'}
+              onClick={() => setScope('per_person')}
+            >
               Per person
             </button>
             <button type="button" role="radio" aria-checked={scope === 'total'} onClick={() => setScope('total')}>
@@ -144,7 +155,12 @@ export function TripForm({ detail, onSaved }: { detail: TripDetail; onSaved: () 
       </SketchBox>
 
       {message && <FormMessage tone={message.tone}>{message.text}</FormMessage>}
-      <button type="submit" className="button button--primary button--wide" disabled={busy} aria-busy={busy || undefined}>
+      <button
+        type="submit"
+        className="button button--primary button--wide"
+        disabled={busy}
+        aria-busy={busy || undefined}
+      >
         {busy ? 'Saving…' : 'Save the trip'}
       </button>
     </form>

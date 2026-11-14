@@ -10,9 +10,48 @@ vi.mock('../lib/places', async (original) => ({
 }))
 
 describe('agency packages (build 6)', () => {
-  const hotel = { id: 'h1', trip_id: 't1', place_id: 'p1', kind: 'housing', category: 'accommodation', name: 'Casa Lola', status: 'booked', package_id: 'pk', position: 1, day_number: null, end_day_number: null, note: null }
-  const dinner = { id: 'd1', trip_id: 't1', place_id: 'p1', kind: 'restaurant', category: 'food', name: 'La Cevichería', status: 'chosen', package_id: null, position: 2, day_number: null, end_day_number: null, note: null }
-  const pkg = { id: 'pk', trip_id: 't1', place_id: null, kind: 'package', category: 'package', name: 'Frégate Agency package', status: 'booked', package_id: null, position: 1, day_number: null, end_day_number: null, note: null }
+  const hotel = {
+    id: 'h1',
+    trip_id: 't1',
+    place_id: 'p1',
+    kind: 'housing',
+    category: 'accommodation',
+    name: 'Casa Lola',
+    status: 'booked',
+    package_id: 'pk',
+    position: 1,
+    day_number: null,
+    end_day_number: null,
+    note: null,
+  }
+  const dinner = {
+    id: 'd1',
+    trip_id: 't1',
+    place_id: 'p1',
+    kind: 'restaurant',
+    category: 'food',
+    name: 'La Cevichería',
+    status: 'chosen',
+    package_id: null,
+    position: 2,
+    day_number: null,
+    end_day_number: null,
+    note: null,
+  }
+  const pkg = {
+    id: 'pk',
+    trip_id: 't1',
+    place_id: null,
+    kind: 'package',
+    category: 'package',
+    name: 'Frégate Agency package',
+    status: 'booked',
+    package_id: null,
+    position: 1,
+    day_number: null,
+    end_day_number: null,
+    note: null,
+  }
   const withPackage = () =>
     detail({
       places: [cartagena],
@@ -40,7 +79,11 @@ describe('agency packages (build 6)', () => {
     data.addItem.mockResolvedValue('pk2')
     data.setPackageCover.mockResolvedValue(undefined)
     open('/trips/t1')
-    click(await screen.findByRole('button', { name: /Add to the whole trip/ }).then((b) => b.textContent!.replace(/^\+\s*/, '').trim()))
+    click(
+      await screen
+        .findByRole('button', { name: /Add to the whole trip/ })
+        .then((b) => b.textContent!.replace(/^\+\s*/, '').trim()),
+    )
     const picker = screen.getByRole('radiogroup', { name: 'What is it?' })
     fireEvent.click([...picker.querySelectorAll('[role=radio]')].find((r) => r.textContent?.includes('Package'))!)
     type('Name', 'Second package')
@@ -49,7 +92,9 @@ describe('agency packages (build 6)', () => {
     expect(screen.queryByRole('checkbox', { name: /Casa Lola/ })).not.toBeInTheDocument() // already in the other package
     click('Add')
     await waitFor(() => expect(data.setPackageCover).toHaveBeenCalledWith('pk2', ['d1']))
-    expect(data.addItem).toHaveBeenCalledWith(expect.objectContaining({ kind: 'package', name: 'Second package', amount: 900, placeId: null }))
+    expect(data.addItem).toHaveBeenCalledWith(
+      expect.objectContaining({ kind: 'package', name: 'Second package', amount: 900, placeId: null }),
+    )
   })
 
   it('a line can join a package from its own form', async () => {

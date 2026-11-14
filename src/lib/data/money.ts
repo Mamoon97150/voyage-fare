@@ -38,7 +38,14 @@ export async function getMoney(tripId: string): Promise<TripMoney> {
 }
 
 /** One traveller paid another back (SR-8: in the trip's main currency). */
-export async function addRepayment(r: { tripId: string; from: string; to: string; amount: number; paidOn: string; note?: string | null }): Promise<void> {
+export async function addRepayment(r: {
+  tripId: string
+  from: string
+  to: string
+  amount: number
+  paidOn: string
+  note?: string | null
+}): Promise<void> {
   const { error } = await supabase.from('repayments').insert({
     trip_id: r.tripId,
     from_traveller: r.from,

@@ -38,7 +38,9 @@ export function AddItem({
   const [kind, setKind] = useState<ItemKind>(kinds[0])
   const id = placeId ?? 'trip'
   const place = placeId ? detail.places.find((p) => p.id === placeId) : null
-  const title = <FormTitle title={place ? `Add to ${place.name}` : 'Add to the whole trip'} note="no price yet? it stays an idea" />
+  const title = (
+    <FormTitle title={place ? `Add to ${place.name}` : 'Add to the whole trip'} note="no price yet? it stays an idea" />
+  )
 
   // A ticket on the whole trip goes somewhere: it gets its own form, with its route.
   if (kind === 'transport' && placeId === null) {
@@ -182,12 +184,16 @@ export function ItemForm({
     setErrors(found)
     if (Object.keys(found).length) return
 
-    await run(
-      async () => {
-        await onSubmit({ kind, name: name.trim(), dayNumber: start, endDayNumber: end, amount, covers: kind === 'package' ? covers : undefined })
-      },
-      setFormError,
-    )
+    await run(async () => {
+      await onSubmit({
+        kind,
+        name: name.trim(),
+        dayNumber: start,
+        endDayNumber: end,
+        amount,
+        covers: kind === 'package' ? covers : undefined,
+      })
+    }, setFormError)
   }
 
   const dayOptions = Array.from({ length: days }, (_, i) => i + 1)
@@ -207,7 +213,15 @@ export function ItemForm({
           className="field__input"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder={kind === 'housing' ? 'Casa Lola' : kind === 'transport' ? 'Ferry' : kind === 'package' ? 'Agency package' : 'Rosario islands'}
+          placeholder={
+            kind === 'housing'
+              ? 'Casa Lola'
+              : kind === 'transport'
+                ? 'Ferry'
+                : kind === 'package'
+                  ? 'Agency package'
+                  : 'Rosario islands'
+          }
           autoFocus
           aria-invalid={errors.name ? true : undefined}
           aria-describedby={errors.name ? `${id}-name-error` : undefined}
@@ -278,38 +292,51 @@ export function ItemForm({
           </p>
         </div>
       ) : (
-      <div className={`field${errors.price ? ' field--error' : ''}`}>
-        <label htmlFor={`${id}-price`} className="field__label">
-          Price
-        </label>
-        <div className="field__box">
-          <input
-            id={`${id}-price`}
-            className="field__input num"
-            inputMode="decimal"
-            placeholder={NO_AMOUNT}
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            aria-invalid={errors.price ? true : undefined}
-            aria-describedby={errors.price ? `${id}-price-error` : `${id}-price-hint`}
-          />
-          <span className="field__unit">{currency}</span>
+        <div className={`field${errors.price ? ' field--error' : ''}`}>
+          <label htmlFor={`${id}-price`} className="field__label">
+            Price
+          </label>
+          <div className="field__box">
+            <input
+              id={`${id}-price`}
+              className="field__input num"
+              inputMode="decimal"
+              placeholder={NO_AMOUNT}
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              aria-invalid={errors.price ? true : undefined}
+              aria-describedby={errors.price ? `${id}-price-error` : `${id}-price-hint`}
+            />
+            <span className="field__unit">{currency}</span>
+          </div>
+          {errors.price ? (
+            <p id={`${id}-price-error`} className="field__error">
+              {errors.price}
+            </p>
+          ) : (
+            <p id={`${id}-price-hint`} className="field__hint">
+              The whole price, your best guess. No price yet? Leave it empty: it stays an idea.
+            </p>
+          )}
         </div>
-        {errors.price ? (
-          <p id={`${id}-price-error`} className="field__error">
-            {errors.price}
-          </p>
-        ) : (
-          <p id={`${id}-price-hint`} className="field__hint">
-            The whole price, your best guess. No price yet? Leave it empty: it stays an idea.
-          </p>
-        )}
-      </div>
       )}
 
-      {kind === 'package' && <CoversPicker detail={detail} value={covers} onChange={setCovers} packageId={formId.startsWith('edit-') ? formId.slice(5) : undefined} />}
+      {kind === 'package' && (
+        <CoversPicker
+          detail={detail}
+          value={covers}
+          onChange={setCovers}
+          packageId={formId.startsWith('edit-') ? formId.slice(5) : undefined}
+        />
+      )}
 
-      <FormActions busy={busy} submitLabel={submitLabel} onCancel={onCancel} onDelete={onDelete} deleteName={deleteName} />
+      <FormActions
+        busy={busy}
+        submitLabel={submitLabel}
+        onCancel={onCancel}
+        onDelete={onDelete}
+        deleteName={deleteName}
+      />
     </form>
   )
 }

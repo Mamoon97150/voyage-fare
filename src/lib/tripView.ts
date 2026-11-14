@@ -34,7 +34,6 @@ export const KINDS_FOR_TRIP: ItemKind[] = ['transport', 'car_rental', 'insurance
 /** Kinds that usually last several days. */
 export const SPANS_DAYS: ItemKind[] = ['housing', 'car_rental']
 
-
 /** The traveller who is "you" on this trip, if any. */
 export function viewerOf(detail: Pick<TripDetail, 'travellers'>, userId: string | undefined): string | null {
   return detail.travellers.find((t) => t.user_id && t.user_id === userId)?.id ?? null
@@ -68,7 +67,10 @@ export function itemLine(detail: TripDetail, item: Item, viewer: string | null, 
  * What a line is called: once an option is chosen, what was chosen ("Spa Bonanova"), with the
  * name of the decision underneath ("Spa"). A ticket keeps its route: that's what it is (13 Nov).
  */
-export function itemTitle(detail: Pick<TripDetail, 'options' | 'legs'>, item: Item): { title: string; decision: string | null } {
+export function itemTitle(
+  detail: Pick<TripDetail, 'options' | 'legs'>,
+  item: Item,
+): { title: string; decision: string | null } {
   const chosen = detail.options.find((o) => o.item_id === item.id && o.is_chosen)
   const ticket = detail.legs.some((l) => l.item_id === item.id)
   if (!chosen || ticket || chosen.name.trim().toLowerCase() === item.name.trim().toLowerCase()) {
@@ -98,7 +100,8 @@ export function dayLabel(n: number, startDate: string | null): string {
 
 export function daysText(item: Pick<Item, 'day_number' | 'end_day_number'>): string | null {
   if (!item.day_number) return null
-  if (item.end_day_number && item.end_day_number !== item.day_number) return `Days ${item.day_number}–${item.end_day_number}`
+  if (item.end_day_number && item.end_day_number !== item.day_number)
+    return `Days ${item.day_number}–${item.end_day_number}`
   return `Day ${item.day_number}`
 }
 
@@ -111,7 +114,8 @@ export function groupPlaceItems(items: Item[]): ItemGroup[] {
   const days = [...new Set(rest.filter((i) => i.day_number).map((i) => i.day_number as number))].sort((a, b) => a - b)
   const groups: ItemGroup[] = []
   if (stays.length) groups.push({ key: 'stay', label: 'Stay', items: stays })
-  for (const d of days) groups.push({ key: `day-${d}`, label: `Day ${d}`, items: rest.filter((i) => i.day_number === d) })
+  for (const d of days)
+    groups.push({ key: `day-${d}`, label: `Day ${d}`, items: rest.filter((i) => i.day_number === d) })
   const ideas = rest.filter((i) => !i.day_number)
   if (ideas.length) groups.push({ key: 'ideas', label: 'Ideas, no day yet', items: ideas })
   return groups
@@ -171,7 +175,6 @@ export function budgetView(detail: TripDetail, viewer: string | null, mode: Mode
 }
 
 // ── Tickets and their legs, between the places ────────────────────────────────
-
 
 export const MODES: Record<TicketMode, { label: string; icon: string }> = {
   plane: { label: 'Plane', icon: '✈' },
@@ -297,7 +300,15 @@ export function coversText(detail: Pick<TripDetail, 'items'>, pkg: Item): string
   const counts = new Map<string, number>()
   for (const i of coveredBy(detail, pkg)) {
     const key =
-      i.kind === 'transport' ? (i.place_id ? 'around' : 'ticket') : i.kind === 'car_rental' ? 'around' : i.kind in COVER_WORDS ? i.kind : 'other'
+      i.kind === 'transport'
+        ? i.place_id
+          ? 'around'
+          : 'ticket'
+        : i.kind === 'car_rental'
+          ? 'around'
+          : i.kind in COVER_WORDS
+            ? i.kind
+            : 'other'
     counts.set(key, (counts.get(key) ?? 0) + 1)
   }
   if (counts.size === 0) return null

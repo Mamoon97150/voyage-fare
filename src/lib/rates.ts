@@ -10,7 +10,9 @@ function ratesFrom(base: string): Promise<Record<string, number> | null> {
   if (!hit) {
     hit = fetch(`https://open.er-api.com/v6/latest/${encodeURIComponent(base)}`)
       .then((r) => (r.ok ? r.json() : null))
-      .then((d: { result?: string; rates?: Record<string, number> } | null) => (d?.result === 'success' && d.rates ? d.rates : null))
+      .then((d: { result?: string; rates?: Record<string, number> } | null) =>
+        d?.result === 'success' && d.rates ? d.rates : null,
+      )
       .catch(() => null)
     hit.then((r) => r === null && cache.delete(base))
     cache.set(base, hit)
@@ -41,7 +43,7 @@ export function parseRate(input: string, reference?: number | null): number | nu
     const at = Math.max(text.lastIndexOf('.'), text.lastIndexOf(','))
     value = Number(`${text.slice(0, at).replace(/[.,]/g, '')}.${text.slice(at + 1)}`)
   } else {
-    const parts = text.split(marks[0] ?? ".")
+    const parts = text.split(marks[0] ?? '.')
     if (parts.length > 2) {
       if (!parts.slice(1).every((p) => p.length === 3)) return null
       value = Number(parts.join(''))
@@ -66,7 +68,10 @@ export const clearRates = () => cache.clear()
  * Always four decimals, never three, so "1,234" can't be read as a thousand.
  */
 export function formatRate(n: number): string {
-  if (n >= 100) return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+  if (n >= 100)
+    return Math.round(n)
+      .toString()
+      .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
   return n.toFixed(4).replace('.', ',')
 }
 
@@ -77,12 +82,18 @@ export function formatRate(n: number): string {
 export function useRate(tripCurrency: string, initialCurrency: string, initialRate: number) {
   const [currency, setCurrencyState] = useState(initialCurrency)
   const [inverted, setInverted] = useState(initialRate < 1)
-  const [text, setText] = useState(initialCurrency === tripCurrency ? '' : formatRate(initialRate < 1 ? 1 / initialRate : initialRate))
-  const [state, setState] = useState<'idle' | 'saved' | 'loading' | 'failed'>(initialCurrency === tripCurrency ? 'idle' : 'saved')
+  const [text, setText] = useState(
+    initialCurrency === tripCurrency ? '' : formatRate(initialRate < 1 ? 1 / initialRate : initialRate),
+  )
+  const [state, setState] = useState<'idle' | 'saved' | 'loading' | 'failed'>(
+    initialCurrency === tripCurrency ? 'idle' : 'saved',
+  )
   // The rate exactly as saved or fetched; typing in the field replaces it.
   const [exact, setExact] = useState<number | null>(initialCurrency === tripCurrency ? 1 : initialRate)
   // The number we showed, to settle "1.153" (a decimal, or thousands?).
-  const [shown, setShown] = useState<number | null>(initialCurrency === tripCurrency ? null : initialRate < 1 ? 1 / initialRate : initialRate)
+  const [shown, setShown] = useState<number | null>(
+    initialCurrency === tripCurrency ? null : initialRate < 1 ? 1 / initialRate : initialRate,
+  )
 
   async function setCurrency(next: string) {
     setCurrencyState(next)

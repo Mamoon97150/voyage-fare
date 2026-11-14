@@ -85,7 +85,11 @@ describe('accepting', () => {
     expect((await accept(token)).rows[0].trip).toBe(ids.trip)
     expect(await rows(db, 'select id from trips where id = $1', [ids.trip])).toHaveLength(1)
     expect(await danaUser()).toBe(guestId)
-    const member = await one<{ role: string }>(db, 'select role from trip_members where trip_id = $1 and user_id = $2', [ids.trip, guestId])
+    const member = await one<{ role: string }>(
+      db,
+      'select role from trip_members where trip_id = $1 and user_id = $2',
+      [ids.trip, guestId],
+    )
     expect(member.role).toBe('editor')
     expect((await preview(token)).state).toBe('joined')
     // Opening the link again just opens the trip.
@@ -167,13 +171,17 @@ describe('leaving and removing', () => {
   it('only the creator removes someone who has an account, and they lose access', async () => {
     await danaJoins()
     await actAs(db, 'owner')
-    await db.exec(`update items set status = 'chosen', actual_amount = null, actual_currency = null, paid_by = null where trip_id = '${ids.trip}'`)
+    await db.exec(
+      `update items set status = 'chosen', actual_amount = null, actual_currency = null, paid_by = null where trip_id = '${ids.trip}'`,
+    )
     // Cleo joins too, and tries to remove Dana.
     await actAs(db, owner)
     const forCleo = await invite(ids.cleo)
     await actAs(db, other)
     await accept(forCleo.token)
-    await expect(db.query('select remove_traveller($1)', [ids.dana])).rejects.toThrow('only the person who created the trip can remove them')
+    await expect(db.query('select remove_traveller($1)', [ids.dana])).rejects.toThrow(
+      'only the person who created the trip can remove them',
+    )
 
     await actAs(db, owner)
     await db.query('select remove_traveller($1)', [ids.dana])

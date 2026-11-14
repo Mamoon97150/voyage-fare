@@ -12,7 +12,14 @@ import { TripTopBar } from './trip/TripTopBar'
 import { TripBudget } from './TripBudget'
 import { TripNav } from './TripNav'
 
-export type MoneyPage = { detail: TripDetail; money: TripMoney; viewer: string | null; mode: Mode; solo: boolean; reload: () => void }
+export type MoneyPage = {
+  detail: TripDetail
+  money: TripMoney
+  viewer: string | null
+  mode: Mode
+  solo: boolean
+  reload: () => void
+}
 
 /**
  * Budget and Who paid (build 4): the trip's cover on top, the bottom bar, and in between the
@@ -82,7 +89,13 @@ export function MoneyScreen({ children }: { children: (page: MoneyPage) => React
         travellers={detail.travellers}
         userId={session?.user.id}
       />
-      <TripBudget view={budgetView(detail, viewer, shownMode)} currency={detail.trip.currency} mode={shownMode} onMode={setMode} solo={solo} />
+      <TripBudget
+        view={budgetView(detail, viewer, shownMode)}
+        currency={detail.trip.currency}
+        mode={shownMode}
+        onMode={setMode}
+        solo={solo}
+      />
       <div className="cards">{children({ detail, money, viewer, mode: shownMode, solo, reload })}</div>
       <TripNav tripId={detail.trip.id} solo={solo} />
     </div>

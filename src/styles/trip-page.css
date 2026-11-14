@@ -150,9 +150,6 @@
   border-top: 1px dashed var(--line);
 }
 
-
-
-
 .add-item__actions {
   display: flex;
   justify-content: flex-end;

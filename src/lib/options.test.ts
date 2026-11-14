@@ -1,21 +1,37 @@
 import { describe, expect, it } from 'vitest'
-import {
-  formatMinutes,
-  journeyMinutes,
-  nextDay,
-  optionLines,
-  subjectsFor,
-  tabToDecide,
-  wayMinutes,
-} from './options'
+import { formatMinutes, journeyMinutes, nextDay, optionLines, subjectsFor, tabToDecide, wayMinutes } from './options'
 import type { Item, TripDetail, TripOption } from './trips'
 import { parseRate } from './rates'
 import { itemTitle } from './tripView'
 
 const option = (over: Partial<TripOption>): TripOption =>
-  ({ id: 'o', item_id: 'f', trip_id: 't', name: 'x', amount: 100, currency: 'EUR', rate: 1, is_chosen: false, is_favourite: false, details: {}, position: 0, ...over }) as TripOption
+  ({
+    id: 'o',
+    item_id: 'f',
+    trip_id: 't',
+    name: 'x',
+    amount: 100,
+    currency: 'EUR',
+    rate: 1,
+    is_chosen: false,
+    is_favourite: false,
+    details: {},
+    position: 0,
+    ...over,
+  }) as TripOption
 const item = (over: Partial<Item>): Item =>
-  ({ id: 'i', trip_id: 't', place_id: null, kind: 'transport', name: 'x', status: 'idea', day_number: null, end_day_number: null, position: 0, ...over }) as Item
+  ({
+    id: 'i',
+    trip_id: 't',
+    place_id: null,
+    kind: 'transport',
+    name: 'x',
+    status: 'idea',
+    day_number: null,
+    end_day_number: null,
+    position: 0,
+    ...over,
+  }) as Item
 
 describe('durations, from the times', () => {
   it('same day, next day, missing', () => {
@@ -68,8 +84,18 @@ describe('options side by side', () => {
       { item_id: 'f', leg_number: 2, after_place_id: 'm', position: 1 },
     ] as TripDetail['legs'],
     options: [
-      option({ id: 'avianca', amount: 1470, rate: 3900, details: { out: { leaves: '07:10', arrives: '16:50' }, back: { leaves: '11:30', arrives: '20:25' } } }),
-      option({ id: 'copa', amount: 1560, rate: 3900, details: { out: { leaves: '13:05', arrives: '19:25' }, back: { leaves: '08:40', arrives: '15:45' } } }),
+      option({
+        id: 'avianca',
+        amount: 1470,
+        rate: 3900,
+        details: { out: { leaves: '07:10', arrives: '16:50' }, back: { leaves: '11:30', arrives: '20:25' } },
+      }),
+      option({
+        id: 'copa',
+        amount: 1560,
+        rate: 3900,
+        details: { out: { leaves: '13:05', arrives: '19:25' }, back: { leaves: '08:40', arrives: '15:45' } },
+      }),
       option({ id: 'idea', amount: null, details: {} }),
     ],
     shares: [
@@ -89,7 +115,11 @@ describe('options side by side', () => {
   })
 
   it('sorted by speed: the fastest first, the untimed last', () => {
-    expect(optionLines(detail, flights, 'ana', 'mine', 'fastest').map((l) => l.option.id)).toEqual(['copa', 'avianca', 'idea'])
+    expect(optionLines(detail, flights, 'ana', 'mine', 'fastest').map((l) => l.option.id)).toEqual([
+      'copa',
+      'avianca',
+      'idea',
+    ])
   })
 
   it('total: the whole price', () => {
@@ -142,17 +172,28 @@ describe('what a line is called', () => {
   const base = trip({ items: [spa] })
 
   it('once chosen, what was chosen; the decision underneath', () => {
-    expect(itemTitle({ ...base, options: [option({ item_id: 's', name: 'Spa Bonanova', is_chosen: true })] }, spa)).toEqual({ title: 'Spa Bonanova', decision: 'Spa' })
+    expect(
+      itemTitle({ ...base, options: [option({ item_id: 's', name: 'Spa Bonanova', is_chosen: true })] }, spa),
+    ).toEqual({ title: 'Spa Bonanova', decision: 'Spa' })
   })
 
   it('nothing chosen, or the same name: unchanged', () => {
-    expect(itemTitle({ ...base, options: [option({ item_id: 's', name: 'Spa Bonanova' })] }, spa)).toEqual({ title: 'Spa', decision: null })
-    expect(itemTitle({ ...base, options: [option({ item_id: 's', name: 'spa ', is_chosen: true })] }, spa)).toEqual({ title: 'Spa', decision: null })
+    expect(itemTitle({ ...base, options: [option({ item_id: 's', name: 'Spa Bonanova' })] }, spa)).toEqual({
+      title: 'Spa',
+      decision: null,
+    })
+    expect(itemTitle({ ...base, options: [option({ item_id: 's', name: 'spa ', is_chosen: true })] }, spa)).toEqual({
+      title: 'Spa',
+      decision: null,
+    })
   })
 
   it('a ticket keeps its route', () => {
     const t = item({ id: 'f', name: 'Bogotá → Medellín' })
-    const d = trip({ legs: [{ item_id: 'f', leg_number: 1 }] as TripDetail['legs'], options: [option({ item_id: 'f', name: 'Avianca', is_chosen: true })] })
+    const d = trip({
+      legs: [{ item_id: 'f', leg_number: 1 }] as TripDetail['legs'],
+      options: [option({ item_id: 'f', name: 'Avianca', is_chosen: true })],
+    })
     expect(itemTitle(d, t).title).toBe('Bogotá → Medellín')
   })
 })

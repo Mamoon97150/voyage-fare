@@ -10,7 +10,17 @@ vi.mock('../lib/places', async (original) => ({
 }))
 
 describe('daily estimates and the category words (build 6)', () => {
-  const food = { id: 'e1', trip_id: 't1', place_id: 'p1', category: 'food', label: 'Food & drinks', amount: 30, currency: 'EUR', rate: 1, days: 4 }
+  const food = {
+    id: 'e1',
+    trip_id: 't1',
+    place_id: 'p1',
+    category: 'food',
+    label: 'Food & drinks',
+    amount: 30,
+    currency: 'EUR',
+    rate: 1,
+    days: 4,
+  }
   const withFood = (check = { daily_estimate_id: 'e1', days: 4, expected_days: 4, days_mismatch: false }) =>
     detail({
       places: [cartagena],
@@ -25,7 +35,11 @@ describe('daily estimates and the category words (build 6)', () => {
   it('adding to a place offers the budget’s words', async () => {
     data.getTrip.mockResolvedValue(detail({ places: [cartagena] }))
     open('/trips/t1')
-    click(await screen.findByRole('button', { name: 'Add to Cartagena' }).then((b) => b.textContent!.trim().replace(/^\+\s*/, '')))
+    click(
+      await screen
+        .findByRole('button', { name: 'Add to Cartagena' })
+        .then((b) => b.textContent!.trim().replace(/^\+\s*/, '')),
+    )
     const picker = screen.getByRole('radiogroup', { name: 'What is it?' })
     const words = [...picker.querySelectorAll('[role=radio]')].map((r) => r.textContent!.replace(/^\S+\s/, '').trim())
     expect(words).toEqual(['Stay', 'Activities', 'Food', 'Getting around', 'Other'])
@@ -70,7 +84,9 @@ describe('daily estimates and the category words (build 6)', () => {
   })
 
   it('when the nights change: circled days, a note, and a one-tap fix', async () => {
-    data.getTrip.mockResolvedValue(withFood({ daily_estimate_id: 'e1', days: 4, expected_days: 2, days_mismatch: true }))
+    data.getTrip.mockResolvedValue(
+      withFood({ daily_estimate_id: 'e1', days: 4, expected_days: 2, days_mismatch: true }),
+    )
     data.setEstimateDays.mockResolvedValue(undefined)
     open('/trips/t1')
     expect(await screen.findByText('↑ Cartagena has 2 nights now')).toBeInTheDocument()
@@ -79,7 +95,9 @@ describe('daily estimates and the category words (build 6)', () => {
   })
 
   it('“Keep 4” puts the note away', async () => {
-    data.getTrip.mockResolvedValue(withFood({ daily_estimate_id: 'e1', days: 4, expected_days: 2, days_mismatch: true }))
+    data.getTrip.mockResolvedValue(
+      withFood({ daily_estimate_id: 'e1', days: 4, expected_days: 2, days_mismatch: true }),
+    )
     open('/trips/t1')
     click(await screen.findByRole('button', { name: 'Keep 4' }).then((b) => b.textContent!))
     expect(screen.queryByText(/has 2 nights now/)).not.toBeInTheDocument()

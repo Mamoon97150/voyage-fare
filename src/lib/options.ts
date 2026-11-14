@@ -135,7 +135,8 @@ export function optionLines(
     cheapest: priced.length > 1 && l.share === low,
     fastest: quick !== null && l.minutes === quick,
   }))
-  const byPrice = (a: OptionLine, b: OptionLine) => (a.share ?? Infinity) - (b.share ?? Infinity) || a.option.position - b.option.position
+  const byPrice = (a: OptionLine, b: OptionLine) =>
+    (a.share ?? Infinity) - (b.share ?? Infinity) || a.option.position - b.option.position
   const byTime = (a: OptionLine, b: OptionLine) => (a.minutes ?? Infinity) - (b.minutes ?? Infinity) || byPrice(a, b)
   return out.sort(sort === 'fastest' ? byTime : byPrice)
 }
@@ -199,7 +200,12 @@ export function subjectsFor(detail: TripDetail, tab: Tab): Subject[] {
     title: place.name,
     note: [
       place.nights ? `${place.nights} ${place.nights === 1 ? 'night' : 'nights'}` : 'nights not set',
-      start && place.nights ? formatShortDates(addDays(start, offset.get(place.id) ?? 0), addDays(start, (offset.get(place.id) ?? 0) + place.nights)) : null,
+      start && place.nights
+        ? formatShortDates(
+            addDays(start, offset.get(place.id) ?? 0),
+            addDays(start, (offset.get(place.id) ?? 0) + place.nights),
+          )
+        : null,
     ]
       .filter(Boolean)
       .join(' · '),
@@ -207,7 +213,8 @@ export function subjectsFor(detail: TripDetail, tab: Tab): Subject[] {
     place,
   }))
   const whole = items.filter((i) => !i.place_id)
-  if (whole.length) pages.push({ key: 'trip', title: 'Whole trip', note: 'not tied to a place', items: whole, place: null })
+  if (whole.length)
+    pages.push({ key: 'trip', title: 'Whole trip', note: 'not tied to a place', items: whole, place: null })
   return pages
 }
 
@@ -234,5 +241,9 @@ export function roomsOf(detail: Pick<TripDetail, 'rooms' | 'roomOccupants'>, opt
   return detail.rooms
     .filter((r) => r.option_id === optionId)
     .sort((a, b) => a.position - b.position)
-    .map((r) => ({ name: r.name, amount: Number(r.amount), occupants: detail.roomOccupants.filter((o) => o.room_id === r.id).map((o) => o.traveller_id) }))
+    .map((r) => ({
+      name: r.name,
+      amount: Number(r.amount),
+      occupants: detail.roomOccupants.filter((o) => o.room_id === r.id).map((o) => o.traveller_id),
+    }))
 }

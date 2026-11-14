@@ -40,7 +40,11 @@ export function TripTopBar({
           aria-label={`Trip settings: ${travellers.map((t) => t.name).join(', ')}`}
         >
           {shown.map((t) => (
-            <span key={t.id} className={`avatar${t.user_id && t.user_id === userId ? ' avatar--me' : ''}`} aria-hidden="true">
+            <span
+              key={t.id}
+              className={`avatar${t.user_id && t.user_id === userId ? ' avatar--me' : ''}`}
+              aria-hidden="true"
+            >
               {t.name.slice(0, 1).toUpperCase()}
             </span>
           ))}

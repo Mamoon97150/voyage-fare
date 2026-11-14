@@ -25,7 +25,12 @@ export function RoutePage() {
 
   const route = useMemo(() => (detail ? routeOf(detail) : null), [detail])
 
-  if (error) return <Shell tripId={tripId}><FormMessage tone="error">{error}</FormMessage></Shell>
+  if (error)
+    return (
+      <Shell tripId={tripId}>
+        <FormMessage tone="error">{error}</FormMessage>
+      </Shell>
+    )
   if (detail === null) {
     return (
       <Shell tripId={tripId}>
@@ -96,7 +101,8 @@ export function RoutePage() {
               ⌂
             </span>
             <span>
-              {route.home.name} {day(detail.trip.end_date) ? <small>home {day(detail.trip.end_date)}</small> : <small>home</small>}
+              {route.home.name}{' '}
+              {day(detail.trip.end_date) ? <small>home {day(detail.trip.end_date)}</small> : <small>home</small>}
             </span>
             <span />
           </li>

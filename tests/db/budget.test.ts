@@ -11,8 +11,7 @@ beforeAll(async () => {
   await seedTrip(db)
 })
 
-const item = (id: string) =>
-  one<Record<string, unknown>>(db, 'select * from v_item_amounts where item_id = $1', [id])
+const item = (id: string) => one<Record<string, unknown>>(db, 'select * from v_item_amounts where item_id = $1', [id])
 
 describe('amounts per item', () => {
   it('BR-1: only the chosen option counts', async () => {
@@ -60,9 +59,7 @@ describe('amounts per item', () => {
 
 describe('trip budget', () => {
   it('adds up planned, current, confirmed and estimated', async () => {
-    const b = await one<Record<string, unknown>>(db, 'select * from v_trip_budget where trip_id = $1', [
-      ids.trip,
-    ])
+    const b = await one<Record<string, unknown>>(db, 'select * from v_trip_budget where trip_id = $1', [ids.trip])
     expect(num(b.planned_total)).toBe(2580)
     expect(num(b.current_total)).toBe(2620)
     expect(num(b.confirmed_total)).toBe(1770) // flights 1 040 + flat 500 + photo 150 + surf 80
@@ -72,9 +69,7 @@ describe('trip budget', () => {
   })
 
   it('BR-6: per person is the total divided by the travellers', async () => {
-    const b = await one<Record<string, unknown>>(db, 'select * from v_trip_budget where trip_id = $1', [
-      ids.trip,
-    ])
+    const b = await one<Record<string, unknown>>(db, 'select * from v_trip_budget where trip_id = $1', [ids.trip])
     expect(Number(b.traveller_count)).toBe(4)
     expect(num(b.current_per_person)).toBe(655)
   })
@@ -90,8 +85,7 @@ describe('trip budget', () => {
   })
 
   it('BR-12: compares with the target, per person or total', async () => {
-    const read = () =>
-      one<Record<string, unknown>>(db, 'select * from v_trip_budget where trip_id = $1', [ids.trip])
+    const read = () => one<Record<string, unknown>>(db, 'select * from v_trip_budget where trip_id = $1', [ids.trip])
 
     let b = await read() // 700 € per person × 4 = 2 800
     expect(num(b.target_total)).toBe(2800)
@@ -117,9 +111,7 @@ describe('trip budget', () => {
   it('BR-4: a trip with no amounts has empty totals, not zeros', async () => {
     await db.exec('begin')
     const trip = await one<{ id: string }>(db, `insert into trips (name) values ('Empty') returning id`)
-    const b = await one<Record<string, unknown>>(db, 'select * from v_trip_budget where trip_id = $1', [
-      trip.id,
-    ])
+    const b = await one<Record<string, unknown>>(db, 'select * from v_trip_budget where trip_id = $1', [trip.id])
     expect(b.current_total).toBeNull()
     expect(b.current_per_person).toBeNull()
     await db.exec('rollback')
@@ -128,9 +120,7 @@ describe('trip budget', () => {
   it('splits the budget by category', async () => {
     const byCategory = Object.fromEntries(
       (
-        await rows<Record<string, unknown>>(db, 'select * from v_budget_by_category where trip_id = $1', [
-          ids.trip,
-        ])
+        await rows<Record<string, unknown>>(db, 'select * from v_budget_by_category where trip_id = $1', [ids.trip])
       ).map((r) => [r.category, num(r.current)]),
     )
     expect(byCategory).toEqual({
@@ -144,11 +134,9 @@ describe('trip budget', () => {
 
   it('BR-9: by place leaves whole-trip items out', async () => {
     const byPlace = Object.fromEntries(
-      (
-        await rows<Record<string, unknown>>(db, 'select * from v_budget_by_place where trip_id = $1', [
-          ids.trip,
-        ])
-      ).map((r) => [r.place_id, num(r.current)]),
+      (await rows<Record<string, unknown>>(db, 'select * from v_budget_by_place where trip_id = $1', [ids.trip])).map(
+        (r) => [r.place_id, num(r.current)],
+      ),
     )
     expect(byPlace).toEqual({ [ids.lisbon]: 740, [ids.porto]: 440 })
     // 740 + 440 = 1 180, well under the 2 620 trip total: flights, insurance and food are not here.
@@ -172,11 +160,9 @@ describe('status follows the choice (BR-8)', () => {
   it('choosing another option replaces the first one', async () => {
     await db.exec('begin')
     await db.exec(`update options set is_chosen = true where id = '${ids.flightsDear}'`)
-    const chosen = await rows<{ id: string }>(
-      db,
-      'select id from options where item_id = $1 and is_chosen',
-      [ids.flights],
-    )
+    const chosen = await rows<{ id: string }>(db, 'select id from options where item_id = $1 and is_chosen', [
+      ids.flights,
+    ])
     expect(chosen.map((o) => o.id)).toEqual([ids.flightsDear])
     expect(num((await item(ids.flights)).planned)).toBe(1200)
     await db.exec('rollback')
@@ -192,8 +178,6 @@ describe('status follows the choice (BR-8)', () => {
   })
 
   it('paid needs an actual amount and a payer (SR-6)', async () => {
-    await expect(
-      db.exec(`update items set status = 'paid' where id = '${ids.dinner}'`),
-    ).rejects.toThrow()
+    await expect(db.exec(`update items set status = 'paid' where id = '${ids.dinner}'`)).rejects.toThrow()
   })
 })

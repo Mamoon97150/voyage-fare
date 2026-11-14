@@ -185,7 +185,9 @@
   padding: var(--space-4) var(--space-4) var(--space-3);
   background: var(--paper-note);
   transform: rotate(-1.2deg);
-  box-shadow: 0 1px 0 var(--line), var(--shadow-1);
+  box-shadow:
+    0 1px 0 var(--line),
+    var(--shadow-1);
 }
 
 .welcome-note .tape {

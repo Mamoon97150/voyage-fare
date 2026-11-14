@@ -55,7 +55,15 @@ export function EstimateRows({
             />
           </li>
         ) : (
-          <EstimateRow key={e.id} detail={detail} estimate={e} viewer={viewer} mode={mode} onOpen={() => setEditing(e.id)} onChanged={onChanged} />
+          <EstimateRow
+            key={e.id}
+            detail={detail}
+            estimate={e}
+            viewer={viewer}
+            mode={mode}
+            onOpen={() => setEditing(e.id)}
+            onChanged={onChanged}
+          />
         ),
       )}
     </ul>
@@ -90,13 +98,10 @@ function EstimateRow({
   async function fix() {
     if (line.expectedDays === null) return
     setError(undefined)
-    await run(
-      async () => {
-        await setEstimateDays(estimate.id, line.expectedDays!)
-        onChanged()
-      },
-      setError,
-    )
+    await run(async () => {
+      await setEstimateDays(estimate.id, line.expectedDays!)
+      onChanged()
+    }, setError)
   }
 
   return (
@@ -126,7 +131,10 @@ function EstimateRow({
       {flagged && (
         <div className="estimate-row__check">
           <p className="estimate-row__note">
-            ↑ {where ? `${where.name} has ${plural(line.expectedDays!, 'night')} now` : `the trip is ${plural(line.expectedDays!, 'day')} now`}
+            ↑{' '}
+            {where
+              ? `${where.name} has ${plural(line.expectedDays!, 'night')} now`
+              : `the trip is ${plural(line.expectedDays!, 'day')} now`}
           </p>
           <div className="estimate-row__fix">
             <button type="button" className="button button--small" onClick={fix} disabled={busy}>
@@ -169,7 +177,9 @@ export function EstimateForm({
   const place = placeId ? detail.places.find((p) => p.id === placeId) : null
   const defaultDays = estimateDefaultDays(detail, placeId)
   const startPeople = estimate
-    ? (detail.estimatePeople ?? []).filter((p) => p.daily_estimate_id === estimate.id).map((p) => p.traveller_id as string)
+    ? (detail.estimatePeople ?? [])
+        .filter((p) => p.daily_estimate_id === estimate.id)
+        .map((p) => p.traveller_id as string)
     : travellers.map((t) => t.id)
   const [category, setCategory] = useState(estimate?.category ?? 'food')
   const [label, setLabel] = useState(estimate?.label ?? 'Food & drinks')
@@ -184,7 +194,7 @@ export function EstimateForm({
   const perDay = parseAmount(amount)
   const dayCount = /^\d+$/.test(days.trim()) ? Number(days.trim()) : null
   const unit = perDay !== null && rate.rate !== null ? perDay * rate.rate : null
-  const total = unit !== null && dayCount ? Math.round(unit * 100) / 100 * dayCount * people.length : null
+  const total = unit !== null && dayCount ? (Math.round(unit * 100) / 100) * dayCount * people.length : null
 
   function pickCategory(key: string) {
     // A name that still says the last category follows the new one.
@@ -205,24 +215,21 @@ export function EstimateForm({
     if (foreign && rate.rate === null) found.rate = `What’s the rate? 1 ${rate.currency} is how many ${trip.currency}?`
     setErrors(found)
     if (Object.keys(found).length) return
-    await run(
-      async () => {
-        await saveDailyEstimate({
-          id: estimate?.id ?? null,
-          tripId: trip.id,
-          placeId,
-          category,
-          label: label.trim(),
-          amount: perDay!,
-          currency: rate.currency,
-          rate: foreign ? rate.rate! : 1,
-          days: dayCount!,
-          travellers: people.length === travellers.length ? [] : people,
-        })
-        onDone()
-      },
-      setFormError,
-    )
+    await run(async () => {
+      await saveDailyEstimate({
+        id: estimate?.id ?? null,
+        tripId: trip.id,
+        placeId,
+        category,
+        label: label.trim(),
+        amount: perDay!,
+        currency: rate.currency,
+        rate: foreign ? rate.rate! : 1,
+        days: dayCount!,
+        travellers: people.length === travellers.length ? [] : people,
+      })
+      onDone()
+    }, setFormError)
   }
 
   const toggle = (tid: string) => {
@@ -232,7 +239,10 @@ export function EstimateForm({
 
   return (
     <form onSubmit={submit} noValidate className="add-item estimate-form">
-      <FormTitle title={estimate ? 'Daily estimate' : `Daily estimate · ${place ? place.name : 'whole trip'}`} note="for what you won’t plan line by line" />
+      <FormTitle
+        title={estimate ? 'Daily estimate' : `Daily estimate · ${place ? place.name : 'whole trip'}`}
+        note="for what you won’t plan line by line"
+      />
       {formError && <FormMessage tone="error">{formError}</FormMessage>}
       <div className="field" role="radiogroup" aria-labelledby={`${id}-for`}>
         <span id={`${id}-for`} className="field__label">
@@ -260,7 +270,13 @@ export function EstimateForm({
         <label htmlFor={`${id}-label`} className="field__label">
           Name
         </label>
-        <input id={`${id}-label`} className="field__input" value={label} onChange={(e) => setLabel(e.target.value)} aria-invalid={errors.label ? true : undefined} />
+        <input
+          id={`${id}-label`}
+          className="field__input"
+          value={label}
+          onChange={(e) => setLabel(e.target.value)}
+          aria-invalid={errors.label ? true : undefined}
+        />
         {errors.label && <p className="field__error">{errors.label}</p>}
       </div>
       <div className="estimate-form__row">
@@ -299,7 +315,9 @@ export function EstimateForm({
       </div>
       {defaultDays > 0 && (
         <p className="hand estimate-form__days">
-          {place ? `= the ${plural(defaultDays, 'night')} in ${place.name}` : `= the ${plural(defaultDays, 'day')} of the trip`}
+          {place
+            ? `= the ${plural(defaultDays, 'night')} in ${place.name}`
+            : `= the ${plural(defaultDays, 'day')} of the trip`}
         </p>
       )}
       <RateField id={`${id}-rate`} rate={rate} amount={perDay} error={errors.rate} />
@@ -310,7 +328,13 @@ export function EstimateForm({
           </span>
           <div className="chips">
             {travellers.map((t) => (
-              <button key={t.id} type="button" className="chip" aria-pressed={people.includes(t.id)} onClick={() => toggle(t.id)}>
+              <button
+                key={t.id}
+                type="button"
+                className="chip"
+                aria-pressed={people.includes(t.id)}
+                onClick={() => toggle(t.id)}
+              >
                 {t.name}
               </button>
             ))}

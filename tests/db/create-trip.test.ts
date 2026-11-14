@@ -28,7 +28,12 @@ describe('creating a trip', () => {
       p_currency => 'EUR', p_target_amount => 2500, p_target_scope => 'per_person'`)
 
     const trip = await one<Record<string, unknown>>(db, 'select * from trips where id = $1', [id])
-    expect(trip).toMatchObject({ name: 'Colombia', home_city: 'St Martin', currency: 'EUR', target_scope: 'per_person' })
+    expect(trip).toMatchObject({
+      name: 'Colombia',
+      home_city: 'St Martin',
+      currency: 'EUR',
+      target_scope: 'per_person',
+    })
     expect(trip.created_by).toBe(ana)
 
     const travellers = await rows<Record<string, unknown>>(
@@ -58,7 +63,9 @@ describe('creating a trip', () => {
     await actAs(db, { user: ana })
     const before = (await rows(db, 'select 1 from trips')).length
     await expect(create(`p_name => '   ', p_me => 'Ana'`)).rejects.toThrow()
-    await expect(create(`p_name => 'Bad dates', p_me => 'Ana', p_start_date => '2027-02-10', p_end_date => '2027-02-01'`)).rejects.toThrow()
+    await expect(
+      create(`p_name => 'Bad dates', p_me => 'Ana', p_start_date => '2027-02-10', p_end_date => '2027-02-01'`),
+    ).rejects.toThrow()
     expect(await rows(db, 'select 1 from trips')).toHaveLength(before)
   })
 

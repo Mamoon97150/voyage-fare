@@ -20,20 +20,97 @@ export function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/sign-in" element={<SignedOutOnly><SignIn /></SignedOutOnly>} />
-      <Route path="/sign-up" element={<SignedOutOnly><SignUp /></SignedOutOnly>} />
+      <Route
+        path="/sign-in"
+        element={
+          <SignedOutOnly>
+            <SignIn />
+          </SignedOutOnly>
+        }
+      />
+      <Route
+        path="/sign-up"
+        element={
+          <SignedOutOnly>
+            <SignUp />
+          </SignedOutOnly>
+        }
+      />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/join/:token" element={<JoinTrip />} />
-      <Route path="/trips" element={<RequireAuth><Trips /></RequireAuth>} />
-      <Route path="/trips/new" element={<RequireAuth><NewTrip /></RequireAuth>} />
-      <Route path="/trips/:tripId" element={<RequireAuth><TripPage /></RequireAuth>} />
-      <Route path="/trips/:tripId/compare" element={<RequireAuth><Compare /></RequireAuth>} />
-      <Route path="/trips/:tripId/budget" element={<RequireAuth><Budget /></RequireAuth>} />
-      <Route path="/trips/:tripId/who-paid" element={<RequireAuth><WhoPaid /></RequireAuth>} />
-      <Route path="/trips/:tripId/route" element={<RequireAuth><RoutePage /></RequireAuth>} />
-      <Route path="/trips/:tripId/settings" element={<RequireAuth><TripSettings /></RequireAuth>} />
-      <Route path="/account" element={<RequireAuth><Account /></RequireAuth>} />
+      <Route
+        path="/trips"
+        element={
+          <RequireAuth>
+            <Trips />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/trips/new"
+        element={
+          <RequireAuth>
+            <NewTrip />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/trips/:tripId"
+        element={
+          <RequireAuth>
+            <TripPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/trips/:tripId/compare"
+        element={
+          <RequireAuth>
+            <Compare />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/trips/:tripId/budget"
+        element={
+          <RequireAuth>
+            <Budget />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/trips/:tripId/who-paid"
+        element={
+          <RequireAuth>
+            <WhoPaid />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/trips/:tripId/route"
+        element={
+          <RequireAuth>
+            <RoutePage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/trips/:tripId/settings"
+        element={
+          <RequireAuth>
+            <TripSettings />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/account"
+        element={
+          <RequireAuth>
+            <Account />
+          </RequireAuth>
+        }
+      />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )

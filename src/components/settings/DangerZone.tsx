@@ -15,13 +15,10 @@ export function DeleteTrip({ detail, owner }: { detail: TripDetail; owner: boole
 
   async function remove() {
     setError(undefined)
-    await run(
-      async () => {
-        await deleteTrip(detail.trip.id)
-        navigate('/trips', { replace: true })
-      },
-      setError,
-    )
+    await run(async () => {
+      await deleteTrip(detail.trip.id)
+      navigate('/trips', { replace: true })
+    }, setError)
   }
 
   return (
@@ -62,13 +59,10 @@ export function LeaveTrip({ detail }: { detail: TripDetail }) {
 
   async function leave() {
     setError(undefined)
-    await run(
-      async () => {
-        await leaveTrip(detail.trip.id)
-        navigate('/trips', { replace: true })
-      },
-      setError,
-    )
+    await run(async () => {
+      await leaveTrip(detail.trip.id)
+      navigate('/trips', { replace: true })
+    }, setError)
   }
 
   return (

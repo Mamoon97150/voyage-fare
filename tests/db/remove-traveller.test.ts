@@ -12,7 +12,9 @@ const owner = { user: ids.owner }
 beforeEach(async () => {
   db = await createDb()
   await seedTrip(db)
-  await db.exec(`insert into trip_members (trip_id, user_id, role) values ('${ids.trip}', '${ids.owner}', 'owner') on conflict do nothing`)
+  await db.exec(
+    `insert into trip_members (trip_id, user_id, role) values ('${ids.trip}', '${ids.owner}', 'owner') on conflict do nothing`,
+  )
 })
 
 afterEach(async () => {
@@ -21,7 +23,9 @@ afterEach(async () => {
 
 const remove = (id: string) => db.query('select remove_traveller($1)', [id])
 const travellerNames = async () =>
-  (await rows<{ name: string }>(db, 'select name from travellers where trip_id = $1 order by position', [ids.trip])).map((r) => r.name)
+  (
+    await rows<{ name: string }>(db, 'select name from travellers where trip_id = $1 order by position', [ids.trip])
+  ).map((r) => r.name)
 
 describe('removing a traveller', () => {
   it('someone who paid, or owes for paid items, must settle up first', async () => {
@@ -33,12 +37,26 @@ describe('removing a traveller', () => {
 
   it('once nothing is paid, they can go and the others share more', async () => {
     await actAs(db, 'owner')
-    await db.exec(`update items set status = 'chosen', actual_amount = null, actual_currency = null, paid_by = null where trip_id = '${ids.trip}'`)
+    await db.exec(
+      `update items set status = 'chosen', actual_amount = null, actual_currency = null, paid_by = null where trip_id = '${ids.trip}'`,
+    )
     await actAs(db, owner)
-    const before = num((await one<{ s: string }>(db, 'select share_current as s from v_traveller_shares where traveller_id = $1', [ids.ana])).s)
+    const before = num(
+      (
+        await one<{ s: string }>(db, 'select share_current as s from v_traveller_shares where traveller_id = $1', [
+          ids.ana,
+        ])
+      ).s,
+    )
     await remove(ids.dana)
     expect(await travellerNames()).toEqual(['Ana', 'Bea', 'Cleo'])
-    const after = num((await one<{ s: string }>(db, 'select share_current as s from v_traveller_shares where traveller_id = $1', [ids.ana])).s)
+    const after = num(
+      (
+        await one<{ s: string }>(db, 'select share_current as s from v_traveller_shares where traveller_id = $1', [
+          ids.ana,
+        ])
+      ).s,
+    )
     expect(after).toBeGreaterThan(before!)
   })
 
@@ -59,8 +77,12 @@ describe('removing a traveller', () => {
     await expect(remove(ids.ana)).rejects.toThrow('You can’t remove yourself'.replace('’', "'"))
 
     await actAs(db, 'owner')
-    const solo = (await one<{ id: string }>(db, `insert into trips (name, created_by) values ('Solo', '${ids.owner}') returning id`)).id
-    const me = (await one<{ id: string }>(db, `insert into travellers (trip_id, name) values ($1, 'Me') returning id`, [solo])).id
+    const solo = (
+      await one<{ id: string }>(db, `insert into trips (name, created_by) values ('Solo', '${ids.owner}') returning id`)
+    ).id
+    const me = (
+      await one<{ id: string }>(db, `insert into travellers (trip_id, name) values ($1, 'Me') returning id`, [solo])
+    ).id
     await actAs(db, owner)
     await expect(remove(me)).rejects.toThrow('A trip needs at least one traveller.')
   })

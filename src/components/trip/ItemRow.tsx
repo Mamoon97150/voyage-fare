@@ -39,7 +39,14 @@ export function ItemRow({
 }) {
   const [editing, setEditing] = useState(false)
   const line = itemLine(detail, item, viewer, mode)
-  const dot = item.status === 'dropped' ? 'dot--none' : !line.priced ? 'dot--none' : line.confirmed ? 'dot--confirmed' : 'dot--estimated'
+  const dot =
+    item.status === 'dropped'
+      ? 'dot--none'
+      : !line.priced
+        ? 'dot--none'
+        : line.confirmed
+          ? 'dot--confirmed'
+          : 'dot--estimated'
   const { title, decision } = itemTitle(detail, item)
   const meta = [
     decision ?? kindLabel(item.kind as ItemKind, item.place_id !== null).label,
@@ -128,7 +135,9 @@ export function ItemRow({
         <span className="item-row__main">
           <span className="item-row__name">{title}</span>
           {meta && <span className="item-row__meta">{meta}</span>}
-          {item.kind === 'package' && coversText(detail, item) && <span className="item-row__hand">{coversText(detail, item)}</span>}
+          {item.kind === 'package' && coversText(detail, item) && (
+            <span className="item-row__hand">{coversText(detail, item)}</span>
+          )}
           <LeftWords line={leftLine(detail, item, viewer, mode)} part="reminder" />
         </span>
         <span className="item-row__amount num">

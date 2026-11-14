@@ -10,11 +10,7 @@ export function Home() {
         <img src="/illustrations/compass.svg" width={28} height={28} alt="" />
         <span className="app-header__name">Voyage Fare</span>
         <span className="app-header__account">
-          {session ? (
-            <Link to="/trips">Your trips</Link>
-          ) : (
-            <Link to="/sign-in">Sign in</Link>
-          )}
+          {session ? <Link to="/trips">Your trips</Link> : <Link to="/sign-in">Sign in</Link>}
         </span>
       </header>
 
@@ -22,8 +18,8 @@ export function Home() {
         <section className="hero">
           <h1>See your whole trip, and know exactly what it really costs.</h1>
           <p>
-            A trip planner built around the budget: compare your options, follow your coup de
-            cœur, and always know what it costs per person and who paid what.
+            A trip planner built around the budget: compare your options, follow your coup de cœur, and always know what
+            it costs per person and who paid what.
           </p>
           {!session && (
             <p className="hero__actions">

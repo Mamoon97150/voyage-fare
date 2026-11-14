@@ -2,7 +2,8 @@
 import { supabase } from '../supabase'
 import type { Place } from './trips'
 
-export type ItemKind = 'transport' | 'housing' | 'activity' | 'restaurant' | 'car_rental' | 'insurance' | 'package' | 'other'
+export type ItemKind =
+  'transport' | 'housing' | 'activity' | 'restaurant' | 'car_rental' | 'insurance' | 'package' | 'other'
 
 /** One step in the database: the item, and with a price its single chosen option. */
 export async function addItem(item: {
@@ -108,7 +109,11 @@ export async function updateItem(item: {
 
 /** Until the first payment (decision 12 Nov). rate: what 1 unit of the current currency is worth in the new one. */
 export async function changeTripCurrency(tripId: string, currency: string, rate: number): Promise<void> {
-  const { error } = await supabase.rpc('change_trip_currency', { p_trip_id: tripId, p_currency: currency, p_rate: rate })
+  const { error } = await supabase.rpc('change_trip_currency', {
+    p_trip_id: tripId,
+    p_currency: currency,
+    p_rate: rate,
+  })
   if (error) throw error
 }
 

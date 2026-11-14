@@ -69,7 +69,10 @@
   font-size: var(--text-base);
   color: var(--ink);
   white-space: nowrap;
-  text-shadow: 0 0 3px var(--paper), 0 0 3px var(--paper), 0 0 3px var(--paper);
+  text-shadow:
+    0 0 3px var(--paper),
+    0 0 3px var(--paper),
+    0 0 3px var(--paper);
 }
 
 .route-home {
@@ -84,16 +87,46 @@
   pointer-events: none;
 }
 
-.route-home--n { top: 8px; left: 50%; transform: translateX(-50%); }
-.route-home--ne { top: 8px; right: 10px; }
-.route-home--e { top: 50%; right: 10px; transform: translateY(-50%); }
-.route-home--se { bottom: 22px; right: 10px; }
-.route-home--s { bottom: 22px; left: 50%; transform: translateX(-50%); }
-.route-home--sw { bottom: 22px; left: 10px; }
-.route-home--w { top: 50%; left: 10px; transform: translateY(-50%); }
-.route-home--nw { top: 8px; left: 10px; }
+.route-home--n {
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.route-home--ne {
+  top: 8px;
+  right: 10px;
+}
+.route-home--e {
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+}
+.route-home--se {
+  bottom: 22px;
+  right: 10px;
+}
+.route-home--s {
+  bottom: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.route-home--sw {
+  bottom: 22px;
+  left: 10px;
+}
+.route-home--w {
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+}
+.route-home--nw {
+  top: 8px;
+  left: 10px;
+}
 .route-map--big .route-home--nw,
-.route-map--big .route-home--w { left: 48px; }
+.route-map--big .route-home--w {
+  left: 48px;
+}
 
 .route-card__note {
   font-family: var(--font-hand);

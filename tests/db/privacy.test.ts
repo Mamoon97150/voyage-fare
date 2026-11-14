@@ -17,8 +17,7 @@ afterEach(async () => {
   await actAs(db, 'owner')
 })
 
-const count = async (table: string) =>
-  Number((await one<{ n: string }>(db, `select count(*) as n from ${table}`)).n)
+const count = async (table: string) => Number((await one<{ n: string }>(db, `select count(*) as n from ${table}`)).n)
 
 describe('a trip is visible only to its members', () => {
   it('whoever creates a trip becomes its owner', async () => {
@@ -53,9 +52,7 @@ describe('a trip is visible only to its members', () => {
     await actAs(db, stranger)
     await db.exec(`update items set name = 'hacked' where trip_id = '${ids.trip}'`)
     await db.exec(`delete from options where trip_id = '${ids.trip}'`)
-    await expect(
-      db.exec(`insert into travellers (trip_id, name) values ('${ids.trip}', 'Intruder')`),
-    ).rejects.toThrow()
+    await expect(db.exec(`insert into travellers (trip_id, name) values ('${ids.trip}', 'Intruder')`)).rejects.toThrow()
     await actAs(db, 'owner')
     expect(await count(`items where name = 'hacked'`)).toBe(0)
     expect(await count('options')).toBe(10)
@@ -74,9 +71,7 @@ describe('a trip is visible only to its members', () => {
     const trip = await one<{ id: string }>(db, `insert into trips (name) values ('Mine') returning id`)
     await db.exec(`insert into travellers (trip_id, name) values ('${trip.id}', 'Me')`)
     expect(await count('trips')).toBe(1)
-    expect(
-      await refused(db, `insert into trips (name, created_by) values ('Not mine', '${ids.owner}')`),
-    ).toBe(true)
+    expect(await refused(db, `insert into trips (name, created_by) values ('Not mine', '${ids.owner}')`)).toBe(true)
     await actAs(db, 'owner')
     await db.exec('rollback')
   })
@@ -113,7 +108,9 @@ describe('who created a trip is locked (review 13 Nov)', () => {
     expect(await refused(db, `update trips set created_by = '${ids.stranger}' where id = '${ids.trip}'`)).toBe(true)
     expect(await refused(db, `update trips set is_demo = true where id = '${ids.trip}'`)).toBe(true)
     await actAs(db, 'owner')
-    const trip = await one<Record<string, unknown>>(db, 'select name, created_by, is_demo from trips where id = $1', [ids.trip])
+    const trip = await one<Record<string, unknown>>(db, 'select name, created_by, is_demo from trips where id = $1', [
+      ids.trip,
+    ])
     expect(trip).toEqual({ name: 'Lisbon, Porto & more', created_by: ids.owner, is_demo: false })
     await db.exec('rollback')
   })
@@ -122,7 +119,9 @@ describe('who created a trip is locked (review 13 Nov)', () => {
     await db.exec('begin')
     await actAs(db, 'owner')
     await db.exec(`update trips set created_by = '${ids.stranger}' where id = '${ids.trip}'`)
-    expect((await one<{ created_by: string }>(db, 'select created_by from trips where id = $1', [ids.trip])).created_by).toBe(ids.stranger)
+    expect(
+      (await one<{ created_by: string }>(db, 'select created_by from trips where id = $1', [ids.trip])).created_by,
+    ).toBe(ids.stranger)
     await db.exec('rollback')
   })
 })

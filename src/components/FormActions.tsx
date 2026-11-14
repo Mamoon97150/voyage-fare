@@ -43,10 +43,21 @@ export function FormActions({
         {error && <FormMessage tone="error">{error}</FormMessage>}
         <p className="field__hint">{deleteNote ?? 'This can’t be undone.'}</p>
         <div className="add-item__actions">
-          <button type="button" className="button button--quiet" onClick={() => setConfirming(false)} disabled={deleting}>
+          <button
+            type="button"
+            className="button button--quiet"
+            onClick={() => setConfirming(false)}
+            disabled={deleting}
+          >
             Keep it
           </button>
-          <button type="button" className="button button--danger" onClick={remove} disabled={deleting} aria-busy={deleting || undefined}>
+          <button
+            type="button"
+            className="button button--danger"
+            onClick={remove}
+            disabled={deleting}
+            aria-busy={deleting || undefined}
+          >
             {deleting ? 'Deleting…' : `Yes, delete ${deleteName ?? 'it'}`}
           </button>
         </div>
@@ -57,7 +68,12 @@ export function FormActions({
   return (
     <div className="add-item__actions">
       {onDelete && (
-        <button type="button" className="link-button add-item__delete" onClick={() => setConfirming(true)} disabled={busy}>
+        <button
+          type="button"
+          className="link-button add-item__delete"
+          onClick={() => setConfirming(true)}
+          disabled={busy}
+        >
           Delete
         </button>
       )}

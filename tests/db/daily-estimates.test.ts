@@ -62,15 +62,35 @@ describe('saving a daily estimate from the app (build 6)', () => {
 
   it('adds one for a place, for some travellers, and the budget counts it as estimated', async () => {
     await actAs(db, 'owner')
-    await db.exec(`insert into trip_members (trip_id, user_id, role) values ('${ids.trip}', '${ids.owner}', 'owner') on conflict do nothing`)
+    await db.exec(
+      `insert into trip_members (trip_id, user_id, role) values ('${ids.trip}', '${ids.owner}', 'owner') on conflict do nothing`,
+    )
     await actAs(db, owner)
-    const { id } = await save([null, ids.trip, ids.lisbon, 'local_transport', ' Taxis ', 10, 'EUR', null, 3, [ids.ana, ids.bea]])
-    const row = await one<{ label: string; rate: string }>(db, 'select label, rate from daily_estimates where id = $1', [id])
+    const { id } = await save([
+      null,
+      ids.trip,
+      ids.lisbon,
+      'local_transport',
+      ' Taxis ',
+      10,
+      'EUR',
+      null,
+      3,
+      [ids.ana, ids.bea],
+    ])
+    const row = await one<{ label: string; rate: string }>(
+      db,
+      'select label, rate from daily_estimates where id = $1',
+      [id],
+    )
     expect(row).toEqual({ label: 'Taxis', rate: '1.00000000' })
     const people = await rows(db, 'select traveller_id from v_daily_estimate_people where daily_estimate_id = $1', [id])
     expect(people).toHaveLength(2)
     const line = await one<{ current: string; is_confirmed: boolean }>(
-      db, `select current, is_confirmed from v_budget_lines where source_id = $1`, [id])
+      db,
+      `select current, is_confirmed from v_budget_lines where source_id = $1`,
+      [id],
+    )
     expect(num(line.current)).toBe(60) // 10 € × 3 days × 2 people
     expect(line.is_confirmed).toBe(false)
   })
@@ -82,13 +102,17 @@ describe('saving a daily estimate from the app (build 6)', () => {
     expect(await rows(db, 'select 1 from daily_estimate_travellers where daily_estimate_id = $1', [id])).toHaveLength(0)
     const line = await one<{ current: string }>(db, `select current from v_budget_lines where source_id = $1`, [id])
     expect(num(line.current)).toBe(216) // 27 € × 2 days × 4 people
-    await expect(save([id, ids.trip, ids.porto, 'food', 'Food', 30, 'USD', null, 2, []])).rejects.toThrow('needs its rate')
+    await expect(save([id, ids.trip, ids.porto, 'food', 'Food', 30, 'USD', null, 2, []])).rejects.toThrow(
+      'needs its rate',
+    )
   })
 
   it('says what’s missing, and strangers can’t', async () => {
     await actAs(db, owner)
     await expect(save([null, ids.trip, null, 'food', ' ', 30, 'EUR', null, 2, []])).rejects.toThrow('Give it a name')
-    await expect(save([null, ids.trip, null, 'food', 'Food', 30, 'EUR', null, 0, []])).rejects.toThrow('at least one day')
+    await expect(save([null, ids.trip, null, 'food', 'Food', 30, 'EUR', null, 0, []])).rejects.toThrow(
+      'at least one day',
+    )
     await actAs(db, { user: ids.stranger })
     await expect(save([null, ids.trip, null, 'food', 'Food', 30, 'EUR', null, 2, []])).rejects.toThrow()
     await actAs(db, 'owner')

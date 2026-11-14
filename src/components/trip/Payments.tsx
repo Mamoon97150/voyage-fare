@@ -14,7 +14,12 @@ const KINDS: { key: PaymentKind; label: string }[] = [
   { key: 'balance', label: 'Balance' },
   { key: 'instalment', label: 'Instalment' },
 ]
-const KIND_WORD: Record<string, string> = { deposit: 'Deposit', balance: 'Balance', instalment: 'Instalment', payment: 'Paid' }
+const KIND_WORD: Record<string, string> = {
+  deposit: 'Deposit',
+  balance: 'Balance',
+  instalment: 'Instalment',
+  payment: 'Paid',
+}
 const EACH = 'each'
 
 /**
@@ -22,7 +27,17 @@ const EACH = 'each'
  * who, when), what's left and by when, and "+ Add a payment". The budget already counts the full
  * price: paying only changes what's left.
  */
-export function PaymentsPanel({ detail, item, viewer, onChanged }: { detail: TripDetail; item: Item; viewer: string | null; onChanged: () => void }) {
+export function PaymentsPanel({
+  detail,
+  item,
+  viewer,
+  onChanged,
+}: {
+  detail: TripDetail
+  item: Item
+  viewer: string | null
+  onChanged: () => void
+}) {
   const [adding, setAdding] = useState(false)
   const [error, setError] = useState<string>()
   const line = leftLine(detail, item, viewer, 'total')
@@ -60,8 +75,15 @@ export function PaymentsPanel({ detail, item, viewer, onChanged }: { detail: Tri
                     {p.currency !== currency ? ` · ${formatMoney(Number(p.amount), p.currency)}` : ''}
                   </small>
                 </span>
-                <b className="num">{formatMoney(Math.round(Number(p.amount) * Number(p.rate) * 100) / 100, currency)}</b>
-                <button type="button" className="payments__remove" onClick={() => void remove(p.id)} aria-label={`Delete this payment of ${formatMoney(Number(p.amount), p.currency)}`}>
+                <b className="num">
+                  {formatMoney(Math.round(Number(p.amount) * Number(p.rate) * 100) / 100, currency)}
+                </b>
+                <button
+                  type="button"
+                  className="payments__remove"
+                  onClick={() => void remove(p.id)}
+                  aria-label={`Delete this payment of ${formatMoney(Number(p.amount), p.currency)}`}
+                >
                   ✕
                 </button>
               </li>
@@ -127,7 +149,13 @@ function DueDate({ item, onChanged }: { item: Item; onChanged: () => void }) {
   return (
     <label className="payments__due">
       <span className="hand">{value ? `by ${shortDay(value)}` : 'when? (optional)'}</span>
-      <input type="date" className="field__input" value={value} onChange={(e) => void save(e.target.value)} aria-label="Balance due on" />
+      <input
+        type="date"
+        className="field__input"
+        value={value}
+        onChange={(e) => void save(e.target.value)}
+        aria-label="Balance due on"
+      />
       {error && <FormMessage tone="error">{error}</FormMessage>}
     </label>
   )
@@ -176,21 +204,18 @@ function PaymentForm({
       return
     }
     setError(undefined)
-    await run(
-      async () => {
-        await addPayment({
-          itemId: item.id,
-          kind,
-          amount: typed,
-          ...(foreign ? { currency: rate.currency, rate: rate.rate! } : {}),
-          paidBy: paidBy === EACH ? null : paidBy,
-          each: paidBy === EACH,
-          paidOn,
-        })
-        onDone()
-      },
-      setError,
-    )
+    await run(async () => {
+      await addPayment({
+        itemId: item.id,
+        kind,
+        amount: typed,
+        ...(foreign ? { currency: rate.currency, rate: rate.rate! } : {}),
+        paidBy: paidBy === EACH ? null : paidBy,
+        each: paidBy === EACH,
+        paidOn,
+      })
+      onDone()
+    }, setError)
   }
 
   return (
@@ -201,7 +226,14 @@ function PaymentForm({
         </span>
         <div className="chip-grid" role="radiogroup" aria-label="Kind of payment">
           {KINDS.map((k) => (
-            <button key={k.key} type="button" role="radio" aria-checked={kind === k.key} className="chip chip--pick" onClick={() => setKind(k.key)}>
+            <button
+              key={k.key}
+              type="button"
+              role="radio"
+              aria-checked={kind === k.key}
+              className="chip chip--pick"
+              onClick={() => setKind(k.key)}
+            >
               {k.label}
             </button>
           ))}
@@ -213,7 +245,14 @@ function PaymentForm({
             Amount
           </label>
           <div className="field__box">
-            <input id={`${id}-amount`} className="field__input num" inputMode="decimal" value={amount} placeholder={String(left)} onChange={(e) => setAmount(e.target.value)} />
+            <input
+              id={`${id}-amount`}
+              className="field__input num"
+              inputMode="decimal"
+              value={amount}
+              placeholder={String(left)}
+              onChange={(e) => setAmount(e.target.value)}
+            />
             <CurrencyPicker id={`${id}-currency`} rate={rate} />
           </div>
         </div>
@@ -221,7 +260,13 @@ function PaymentForm({
           <label htmlFor={`${id}-on`} className="field__label">
             On
           </label>
-          <input id={`${id}-on`} type="date" className="field__input" value={paidOn} onChange={(e) => setPaidOn(e.target.value)} />
+          <input
+            id={`${id}-on`}
+            type="date"
+            className="field__input"
+            value={paidOn}
+            onChange={(e) => setPaidOn(e.target.value)}
+          />
         </div>
       </div>
       <RateField id={`${id}-rate`} rate={rate} amount={typed} />

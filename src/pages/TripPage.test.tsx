@@ -29,7 +29,9 @@ describe('inside a trip', () => {
     expect(await screen.findByRole('heading', { name: /Cartagena/ })).toBeInTheDocument()
     expect(screen.getByText('4 nights')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Add a place' })).toBeInTheDocument()
-    expect(data.addPlace).toHaveBeenCalledWith(expect.objectContaining({ tripId: 't1', name: 'Cartagena', nights: 4, position: 1 }))
+    expect(data.addPlace).toHaveBeenCalledWith(
+      expect.objectContaining({ tripId: 't1', name: 'Cartagena', nights: 4, position: 1 }),
+    )
   })
 
   it('adds a stay to a place, with its days and price', async () => {
@@ -85,9 +87,33 @@ describe('inside a trip', () => {
   const priced = detail({
     places: [cartagena],
     items: [
-      { id: 'i1', place_id: 'p1', kind: 'housing', name: 'Casa Lola', status: 'chosen', day_number: 1, end_day_number: 5 },
-      { id: 'i2', place_id: 'p1', kind: 'activity', name: 'Rosario islands', status: 'idea', day_number: null, end_day_number: null },
-      { id: 'i3', place_id: null, kind: 'transport', name: 'Flights', status: 'chosen', day_number: null, end_day_number: null },
+      {
+        id: 'i1',
+        place_id: 'p1',
+        kind: 'housing',
+        name: 'Casa Lola',
+        status: 'chosen',
+        day_number: 1,
+        end_day_number: 5,
+      },
+      {
+        id: 'i2',
+        place_id: 'p1',
+        kind: 'activity',
+        name: 'Rosario islands',
+        status: 'idea',
+        day_number: null,
+        end_day_number: null,
+      },
+      {
+        id: 'i3',
+        place_id: null,
+        kind: 'transport',
+        name: 'Flights',
+        status: 'chosen',
+        day_number: null,
+        end_day_number: null,
+      },
     ],
     amounts: [
       { item_id: 'i1', current: 1200, is_confirmed: false },
@@ -100,7 +126,13 @@ describe('inside a trip', () => {
       { item_id: 'i3', traveller_id: 'a', fraction: 0.5 },
       { item_id: 'i3', traveller_id: 'b', fraction: 0.5 },
     ],
-    budget: { current_total: 3000, confirmed_total: null, estimated_total: 3000, target_total: 5000, missing_amount_count: 0 },
+    budget: {
+      current_total: 3000,
+      confirmed_total: null,
+      estimated_total: 3000,
+      target_total: 5000,
+      missing_amount_count: 0,
+    },
     travellerShares: [{ traveller_id: 'a', share_current: 1500, share_confirmed: null, share_estimated: 1500 }],
     placeTotals: [{ place_id: 'p1', current: 1200 }],
     travellerPlaceTotals: [{ place_id: 'p1', traveller_id: 'a', current: 600 }],
@@ -176,8 +208,28 @@ describe('inside a trip', () => {
         places: [cartagena],
         items: [{ id: 'f', place_id: null, kind: 'transport', name: 'St Martin ⇄ Cartagena', status: 'chosen' }],
         legs: [
-          { id: 'l1', item_id: 'f', leg_number: 1, mode: 'plane', from_name: 'St Martin', to_name: 'Cartagena', via: null, after_place_id: null, position: 0 },
-          { id: 'l2', item_id: 'f', leg_number: 2, mode: 'plane', from_name: 'Cartagena', to_name: 'St Martin', via: null, after_place_id: 'p1', position: 1 },
+          {
+            id: 'l1',
+            item_id: 'f',
+            leg_number: 1,
+            mode: 'plane',
+            from_name: 'St Martin',
+            to_name: 'Cartagena',
+            via: null,
+            after_place_id: null,
+            position: 0,
+          },
+          {
+            id: 'l2',
+            item_id: 'f',
+            leg_number: 2,
+            mode: 'plane',
+            from_name: 'Cartagena',
+            to_name: 'St Martin',
+            via: null,
+            after_place_id: 'p1',
+            position: 1,
+          },
         ],
         amounts: [{ item_id: 'f', current: 1800, is_confirmed: false }],
         shares: [
@@ -207,12 +259,48 @@ describe('changing what was added', () => {
   const roundTrip = {
     places: [cartagena],
     items: [
-      { id: 'i1', place_id: 'p1', kind: 'housing', name: 'Casa Lola', status: 'chosen', day_number: 1, end_day_number: 5 },
-      { id: 'f', place_id: null, kind: 'transport', name: 'St Martin ⇄ Cartagena', status: 'chosen', day_number: null, end_day_number: null },
+      {
+        id: 'i1',
+        place_id: 'p1',
+        kind: 'housing',
+        name: 'Casa Lola',
+        status: 'chosen',
+        day_number: 1,
+        end_day_number: 5,
+      },
+      {
+        id: 'f',
+        place_id: null,
+        kind: 'transport',
+        name: 'St Martin ⇄ Cartagena',
+        status: 'chosen',
+        day_number: null,
+        end_day_number: null,
+      },
     ],
     legs: [
-      { id: 'l1', item_id: 'f', leg_number: 1, mode: 'plane', from_name: 'St Martin', to_name: 'Cartagena', via: 'Panama', after_place_id: null, position: 0 },
-      { id: 'l2', item_id: 'f', leg_number: 2, mode: 'plane', from_name: 'Cartagena', to_name: 'St Martin', via: 'Panama', after_place_id: 'p1', position: 1 },
+      {
+        id: 'l1',
+        item_id: 'f',
+        leg_number: 1,
+        mode: 'plane',
+        from_name: 'St Martin',
+        to_name: 'Cartagena',
+        via: 'Panama',
+        after_place_id: null,
+        position: 0,
+      },
+      {
+        id: 'l2',
+        item_id: 'f',
+        leg_number: 2,
+        mode: 'plane',
+        from_name: 'Cartagena',
+        to_name: 'St Martin',
+        via: 'Panama',
+        after_place_id: 'p1',
+        position: 1,
+      },
     ],
     amounts: [
       { item_id: 'i1', current: 1200, is_confirmed: false },
@@ -271,16 +359,20 @@ describe('changing what was added', () => {
     type('Price', '1 000')
     click('Save')
     await waitFor(() =>
-      expect(data.updateTicket).toHaveBeenCalledWith('f', {
-        from: 'St Martin',
-        to: 'Cartagena',
-        mode: 'plane',
-        via: 'Panama',
-        afterPlaceId: null,
-        roundTrip: false,
-        returnAfterPlaceId: null,
-        amount: 1000,
-      }, false),
+      expect(data.updateTicket).toHaveBeenCalledWith(
+        'f',
+        {
+          from: 'St Martin',
+          to: 'Cartagena',
+          mode: 'plane',
+          via: 'Panama',
+          afterPlaceId: null,
+          roundTrip: false,
+          returnAfterPlaceId: null,
+          amount: 1000,
+        },
+        false,
+      ),
     )
   })
 
@@ -309,7 +401,9 @@ describe('changing what was added', () => {
 
     fireEvent.click(await screen.findByRole('button', { name: 'Change Cartagena' }))
     click('Delete')
-    expect(screen.getByText(/Cartagena and the 1 thing in it go. Tickets after it move up in the route./)).toBeInTheDocument()
+    expect(
+      screen.getByText(/Cartagena and the 1 thing in it go. Tickets after it move up in the route./),
+    ).toBeInTheDocument()
     click('Yes, delete Cartagena')
     await waitFor(() => expect(data.deletePlace).toHaveBeenCalledWith('p1'))
   })
@@ -319,8 +413,24 @@ describe('design review fixes (13 Nov)', () => {
   const trip3 = {
     places: [cartagena],
     items: [
-      { id: 'i1', place_id: 'p1', kind: 'housing', name: 'Casa Lola', status: 'chosen', day_number: null, end_day_number: null },
-      { id: 'i2', place_id: 'p1', kind: 'activity', name: 'Islands', status: 'booked', day_number: 2, end_day_number: null },
+      {
+        id: 'i1',
+        place_id: 'p1',
+        kind: 'housing',
+        name: 'Casa Lola',
+        status: 'chosen',
+        day_number: null,
+        end_day_number: null,
+      },
+      {
+        id: 'i2',
+        place_id: 'p1',
+        kind: 'activity',
+        name: 'Islands',
+        status: 'booked',
+        day_number: 2,
+        end_day_number: null,
+      },
     ],
     amounts: [
       { item_id: 'i1', current: 1200, is_confirmed: false },
@@ -374,8 +484,31 @@ describe('review fixes (13 Nov)', () => {
   const nails = (over: Record<string, unknown> = {}) =>
     detail({
       places: [cartagena],
-      items: [{ id: 'i1', place_id: 'p1', kind: 'activity', name: 'Nails', status: 'chosen', day_number: null, end_day_number: null, ...over }],
-      options: [{ id: 'o1', item_id: 'i1', name: 'Momo Beauty Bar', amount: 615000, currency: 'COP', rate: 0.00027435, is_chosen: true, position: 1, details: {} }],
+      items: [
+        {
+          id: 'i1',
+          place_id: 'p1',
+          kind: 'activity',
+          name: 'Nails',
+          status: 'chosen',
+          day_number: null,
+          end_day_number: null,
+          ...over,
+        },
+      ],
+      options: [
+        {
+          id: 'o1',
+          item_id: 'i1',
+          name: 'Momo Beauty Bar',
+          amount: 615000,
+          currency: 'COP',
+          rate: 0.00027435,
+          is_chosen: true,
+          position: 1,
+          details: {},
+        },
+      ],
       amounts: [{ item_id: 'i1', current: 168.73, is_confirmed: false }],
       shares: [
         { item_id: 'i1', traveller_id: 'a', fraction: 0.5 },
@@ -400,9 +533,33 @@ describe('review fixes (13 Nov)', () => {
       detail({
         places: [cartagena],
         items: [
-          { id: 'h', place_id: 'p1', kind: 'housing', name: 'Hotel', status: 'booked', day_number: null, end_day_number: null },
-          { id: 'm', place_id: 'p1', kind: 'activity', name: 'Museum', status: 'chosen', day_number: null, end_day_number: null },
-          { id: 'n', place_id: 'p1', kind: 'activity', name: 'Nails', status: 'chosen', day_number: null, end_day_number: null },
+          {
+            id: 'h',
+            place_id: 'p1',
+            kind: 'housing',
+            name: 'Hotel',
+            status: 'booked',
+            day_number: null,
+            end_day_number: null,
+          },
+          {
+            id: 'm',
+            place_id: 'p1',
+            kind: 'activity',
+            name: 'Museum',
+            status: 'chosen',
+            day_number: null,
+            end_day_number: null,
+          },
+          {
+            id: 'n',
+            place_id: 'p1',
+            kind: 'activity',
+            name: 'Nails',
+            status: 'chosen',
+            day_number: null,
+            end_day_number: null,
+          },
         ],
         amounts: [
           { item_id: 'h', current: 0, is_confirmed: true },
@@ -428,7 +585,11 @@ describe('review fixes (13 Nov)', () => {
   })
 
   it('a dropped line: greyed, not counted, and it can come back', async () => {
-    data.getTrip.mockResolvedValue({ ...nails({ status: 'dropped' }), options: (nails().options as Record<string, unknown>[]).map((o) => ({ ...o, is_chosen: false })), amounts: [] })
+    data.getTrip.mockResolvedValue({
+      ...nails({ status: 'dropped' }),
+      options: (nails().options as Record<string, unknown>[]).map((o) => ({ ...o, is_chosen: false })),
+      amounts: [],
+    })
     data.setItemDropped.mockResolvedValue(undefined)
     open('/trips/t1')
     expect(await screen.findByText('Dropped')).toBeInTheDocument()
@@ -438,7 +599,10 @@ describe('review fixes (13 Nov)', () => {
   })
 
   it('a dropped line doesn’t leave a “to decide” dot', async () => {
-    data.getTrip.mockResolvedValue({ ...nails({ status: 'dropped' }), options: (nails().options as Record<string, unknown>[]).map((o) => ({ ...o, is_chosen: false })) })
+    data.getTrip.mockResolvedValue({
+      ...nails({ status: 'dropped' }),
+      options: (nails().options as Record<string, unknown>[]).map((o) => ({ ...o, is_chosen: false })),
+    })
     open('/trips/t1/compare?tab=activities&page=p1')
     expect(await screen.findByText(/Kept for the record/)).toBeInTheDocument()
     expect(screen.getByText(/dropped/, { selector: '.compare-item__dropped' })).toBeInTheDocument()

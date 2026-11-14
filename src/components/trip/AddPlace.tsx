@@ -32,23 +32,20 @@ export function AddPlace({
     setErrors(found)
     if (Object.keys(found).length) return
 
-    await run(
-      async () => {
-        const place = await addPlace({
-          tripId,
-          name: city.name.trim(),
-          country: city.country,
-          latitude: city.latitude,
-          longitude: city.longitude,
-          nights: n,
-          position,
-        })
-        onAdded(place)
-        setCity(emptyCity)
-        setNights('')
-      },
-      setFormError,
-    )
+    await run(async () => {
+      const place = await addPlace({
+        tripId,
+        name: city.name.trim(),
+        country: city.country,
+        latitude: city.latitude,
+        longitude: city.longitude,
+        nights: n,
+        position,
+      })
+      onAdded(place)
+      setCity(emptyCity)
+      setNights('')
+    }, setFormError)
   }
 
   return (
@@ -83,7 +80,12 @@ export function AddPlace({
           </p>
         )}
       </div>
-      <button type="submit" className="button button--primary button--wide" disabled={busy} aria-busy={busy || undefined}>
+      <button
+        type="submit"
+        className="button button--primary button--wide"
+        disabled={busy}
+        aria-busy={busy || undefined}
+      >
         {busy ? 'Adding…' : 'Add the place'}
       </button>
     </form>

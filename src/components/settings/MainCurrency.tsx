@@ -47,19 +47,20 @@ export function MainCurrency({ detail, onChanged }: { detail: TripDetail; onChan
 
   async function change() {
     if (!to || rate === null) {
-      setError(text.trim() ? 'That rate doesn’t look right: type it like 1,1531.' : `What’s the rate? 1 ${from} is how many ${to}?`)
+      setError(
+        text.trim()
+          ? 'That rate doesn’t look right: type it like 1,1531.'
+          : `What’s the rate? 1 ${from} is how many ${to}?`,
+      )
       return
     }
     setError(undefined)
-    await run(
-      async () => {
-        await changeTripCurrency(detail.trip.id, to, Math.round(rate * 1e8) / 1e8)
-        setOpen(false)
-        setTo('')
-        onChanged()
-      },
-      setError,
-    )
+    await run(async () => {
+      await changeTripCurrency(detail.trip.id, to, Math.round(rate * 1e8) / 1e8)
+      setOpen(false)
+      setTo('')
+      onChanged()
+    }, setError)
   }
 
   return (
@@ -115,7 +116,9 @@ export function MainCurrency({ detail, onChanged }: { detail: TripDetail; onChan
                   ? 'Getting today’s rate…'
                   : state === 'failed'
                     ? 'Couldn’t get today’s rate: type it.'
-                    : 'Today’s rate. Every price keeps its own currency; the ones in ' + from + ' are converted with it.'}
+                    : 'Today’s rate. Every price keeps its own currency; the ones in ' +
+                      from +
+                      ' are converted with it.'}
                 {target !== null && rate !== null && (
                   <b className="num"> Your target becomes {formatMoney(Math.round(target * rate), to)}.</b>
                 )}
@@ -127,7 +130,12 @@ export function MainCurrency({ detail, onChanged }: { detail: TripDetail; onChan
             <button type="button" className="button button--quiet" onClick={() => setOpen(false)}>
               Cancel
             </button>
-            <button type="button" className="button button--primary" disabled={busy || !to} onClick={() => void change()}>
+            <button
+              type="button"
+              className="button button--primary"
+              disabled={busy || !to}
+              onClick={() => void change()}
+            >
               {busy ? 'Changing…' : to ? `Change to ${to}` : 'Change'}
             </button>
           </div>

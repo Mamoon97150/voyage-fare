@@ -45,7 +45,9 @@ describe('server answers, in words', () => {
   })
 
   it('our database rules speak for themselves', () => {
-    expect(explainAuthError({ code: 'P0001', message: 'Bea has paid or owes money on this trip: settle up first.' })).toEqual({
+    expect(
+      explainAuthError({ code: 'P0001', message: 'Bea has paid or owes money on this trip: settle up first.' }),
+    ).toEqual({
       message: 'Bea has paid or owes money on this trip: settle up first.',
     })
   })

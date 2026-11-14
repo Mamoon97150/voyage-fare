@@ -15,13 +15,10 @@ export function DropControl({ item, onChanged }: { item: Item; onChanged: () => 
 
   async function toggle() {
     setError(undefined)
-    await run(
-      async () => {
-        await setItemDropped(item.id, !dropped)
-        onChanged()
-      },
-      setError,
-    )
+    await run(async () => {
+      await setItemDropped(item.id, !dropped)
+      onChanged()
+    }, setError)
   }
 
   return (

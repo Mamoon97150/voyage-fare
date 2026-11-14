@@ -14,9 +14,26 @@ beforeAll(async () => {
   db = await createDb()
   await db.exec(`insert into auth.users (id) values ('${ana}'), ('${stranger}')`)
   await actAs(db, { user: ana })
-  trip = (await one<{ id: string }>(db, `select create_trip(p_name => 'Colombia', p_me => 'Ana', p_travellers => array['Bea']) as id`)).id
-  cartagena = (await one<{ id: string }>(db, `insert into places (trip_id, name, position) values ($1, 'Cartagena', 1) returning id`, [trip])).id
-  medellin = (await one<{ id: string }>(db, `insert into places (trip_id, name, position) values ($1, 'Medellín', 2) returning id`, [trip])).id
+  trip = (
+    await one<{ id: string }>(
+      db,
+      `select create_trip(p_name => 'Colombia', p_me => 'Ana', p_travellers => array['Bea']) as id`,
+    )
+  ).id
+  cartagena = (
+    await one<{ id: string }>(
+      db,
+      `insert into places (trip_id, name, position) values ($1, 'Cartagena', 1) returning id`,
+      [trip],
+    )
+  ).id
+  medellin = (
+    await one<{ id: string }>(
+      db,
+      `insert into places (trip_id, name, position) values ($1, 'Medellín', 2) returning id`,
+      [trip],
+    )
+  ).id
   await actAs(db, 'owner')
 })
 
@@ -42,13 +59,41 @@ describe('adding a ticket', () => {
        p_round_trip => true, p_return_after_place_id => $2, p_amount => 900`,
       [trip, medellin],
     )
-    const item = await one<Record<string, unknown>>(db, 'select name, kind, category, place_id, status from items where id = $1', [id])
-    expect(item).toEqual({ name: 'St Martin ⇄ Cartagena', kind: 'transport', category: 'main_transport', place_id: null, status: 'chosen' })
+    const item = await one<Record<string, unknown>>(
+      db,
+      'select name, kind, category, place_id, status from items where id = $1',
+      [id],
+    )
+    expect(item).toEqual({
+      name: 'St Martin ⇄ Cartagena',
+      kind: 'transport',
+      category: 'main_transport',
+      place_id: null,
+      status: 'chosen',
+    })
     expect(await legsOf(id)).toEqual([
-      { leg_number: 1, mode: 'plane', from_name: 'St Martin', to_name: 'Cartagena', via: 'Panama', after_place_id: null },
-      { leg_number: 2, mode: 'plane', from_name: 'Cartagena', to_name: 'St Martin', via: 'Panama', after_place_id: medellin },
+      {
+        leg_number: 1,
+        mode: 'plane',
+        from_name: 'St Martin',
+        to_name: 'Cartagena',
+        via: 'Panama',
+        after_place_id: null,
+      },
+      {
+        leg_number: 2,
+        mode: 'plane',
+        from_name: 'Cartagena',
+        to_name: 'St Martin',
+        via: 'Panama',
+        after_place_id: medellin,
+      },
     ])
-    const budget = await one<Record<string, unknown>>(db, 'select current_total from v_trip_budget where trip_id = $1', [trip])
+    const budget = await one<Record<string, unknown>>(
+      db,
+      'select current_total from v_trip_budget where trip_id = $1',
+      [trip],
+    )
     expect(num(budget.current_total)).toBe(900) // not 1 800
   })
 

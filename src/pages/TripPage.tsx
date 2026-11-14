@@ -100,7 +100,13 @@ export function TripPage() {
 
   return (
     <div className="screen screen--trip">
-      <TripTopBar title={trip.name} subtitle={meta} tripId={trip.id} travellers={travellers} userId={session?.user.id} />
+      <TripTopBar
+        title={trip.name}
+        subtitle={meta}
+        tripId={trip.id}
+        travellers={travellers}
+        userId={session?.user.id}
+      />
       <WelcomeNote tripId={trip.id} userId={session?.user.id} createdBy={trip.created_by} travellers={travellers} />
 
       <TripBudget
@@ -128,7 +134,14 @@ export function TripPage() {
           </SketchBox>
         ) : (
           <>
-            <RouteGap detail={detail} legs={legsAfter(detail, null)} viewer={viewer} mode={shownMode} onChanged={reload} onOpen={opened} />
+            <RouteGap
+              detail={detail}
+              legs={legsAfter(detail, null)}
+              viewer={viewer}
+              mode={shownMode}
+              onChanged={reload}
+              onOpen={opened}
+            />
             {places.map((place, i) => {
               const placeItems = items.filter((it) => it.place_id === place.id)
               return (
@@ -145,7 +158,9 @@ export function TripPage() {
                         </h2>
                         <span className="place__total num">
                           {formatWhole(placeTotal(detail, place, viewer, shownMode), trip.currency)}
-                          {placeItems.some((it) => it.package_id && it.status !== 'dropped') && <small className="place__plus">+ package</small>}
+                          {placeItems.some((it) => it.package_id && it.status !== 'dropped') && (
+                            <small className="place__plus">+ package</small>
+                          )}
                         </span>
                         {editingPlace !== place.id && (
                           <button
@@ -193,7 +208,13 @@ export function TripPage() {
                           </ul>
                         </div>
                       ))}
-                      <EstimateRows detail={detail} placeId={place.id} viewer={viewer} mode={shownMode} onChanged={reload} />
+                      <EstimateRows
+                        detail={detail}
+                        placeId={place.id}
+                        viewer={viewer}
+                        mode={shownMode}
+                        onChanged={reload}
+                      />
                       {adding === place.id ? (
                         <AddItem
                           detail={detail}
@@ -204,7 +225,12 @@ export function TripPage() {
                           onCancel={() => setAdding(null)}
                         />
                       ) : adding === `estimate:${place.id}` ? (
-                        <EstimateForm detail={detail} placeId={place.id} onDone={added} onCancel={() => setAdding(null)} />
+                        <EstimateForm
+                          detail={detail}
+                          placeId={place.id}
+                          onDone={added}
+                          onCancel={() => setAdding(null)}
+                        />
                       ) : (
                         <div className="place__adds">
                           <button type="button" className="add-row place__add" onClick={() => setAdding(place.id)}>
@@ -213,7 +239,11 @@ export function TripPage() {
                             </span>
                             Add to {place.name}
                           </button>
-                          <button type="button" className="add-row place__add" onClick={() => setAdding(`estimate:${place.id}`)}>
+                          <button
+                            type="button"
+                            className="add-row place__add"
+                            onClick={() => setAdding(`estimate:${place.id}`)}
+                          >
                             <span className="add-row__plus" aria-hidden="true">
                               +
                             </span>
@@ -223,7 +253,14 @@ export function TripPage() {
                       )}
                     </SketchBox>
                   </section>
-                  <RouteGap detail={detail} legs={legsAfter(detail, place.id)} viewer={viewer} mode={shownMode} onChanged={reload} onOpen={opened} />
+                  <RouteGap
+                    detail={detail}
+                    legs={legsAfter(detail, place.id)}
+                    viewer={viewer}
+                    mode={shownMode}
+                    onChanged={reload}
+                    onOpen={opened}
+                  />
                 </Fragment>
               )
             })}

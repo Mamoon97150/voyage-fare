@@ -77,11 +77,15 @@ export function TripBudget({
         </span>
       </div>
       {view.target !== null && (
-        <p className={`trip-budget__target-text num${over ? ' trip-budget__target-text--over' : ''}`}>{targetText(view, currency)}</p>
+        <p className={`trip-budget__target-text num${over ? ' trip-budget__target-text--over' : ''}`}>
+          {targetText(view, currency)}
+        </p>
       )}
       {view.missing > 0 && (
         <p className="trip-budget__missing">
-          {view.missing === 1 ? '1 chosen item has no price yet: not counted.' : `${view.missing} chosen items have no price yet: not counted.`}
+          {view.missing === 1
+            ? '1 chosen item has no price yet: not counted.'
+            : `${view.missing} chosen items have no price yet: not counted.`}
         </p>
       )}
     </section>
@@ -91,7 +95,9 @@ export function TripBudget({
 function targetText(view: BudgetView, currency: string): string {
   if (view.target === null) return ''
   if (view.difference === null) return `Target ${formatMoney(view.target, currency)}. Nothing priced yet.`
-  if (view.difference > 0) return `${formatMoney(view.difference, currency)} over your ${formatMoney(view.target, currency)} target`
-  if (view.difference < 0) return `${formatMoney(-view.difference, currency)} under your ${formatMoney(view.target, currency)} target`
+  if (view.difference > 0)
+    return `${formatMoney(view.difference, currency)} over your ${formatMoney(view.target, currency)} target`
+  if (view.difference < 0)
+    return `${formatMoney(-view.difference, currency)} under your ${formatMoney(view.target, currency)} target`
   return `Right on your ${formatMoney(view.target, currency)} target`
 }

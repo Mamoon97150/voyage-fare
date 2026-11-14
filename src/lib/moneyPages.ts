@@ -5,7 +5,6 @@ import { shortDay } from './tripText'
 import type { Item, TripDetail, TripMoney } from './trips'
 import { itemLine, itemTitle, leftLine, type Mode } from './tripView'
 
-
 export const CATEGORIES: { key: string; label: string }[] = [
   { key: 'main_transport', label: 'Travel' },
   { key: 'accommodation', label: 'Stay' },
@@ -17,7 +16,15 @@ export const CATEGORIES: { key: string; label: string }[] = [
   { key: 'buffer', label: 'Other' },
 ]
 
-export type MoneyLine = { key: string; name: string; meta: string; amount: number | null; confirmed: number; estimated: number; word?: string }
+export type MoneyLine = {
+  key: string
+  name: string
+  meta: string
+  amount: number | null
+  confirmed: number
+  estimated: number
+  word?: string
+}
 
 /** "67 € confirmed · 255 € estimated", "18 € estimated", "" */
 function split(confirmed: number, estimated: number, currency: string): string {
@@ -48,7 +55,8 @@ export function categoryLines(detail: TripDetail, money: TripMoney, viewer: stri
     const estimated = num(row?.estimated) ?? 0
     const amount = num(row?.current)
     const missing = items.filter((i) => unpriced(detail, i)).length
-    const names = items.length <= 2 && key !== 'package' ? items.map((i) => itemTitle(detail, i).title).join(', ') : null
+    const names =
+      items.length <= 2 && key !== 'package' ? items.map((i) => itemTitle(detail, i).title).join(', ') : null
     const zero = amount === 0 || (amount === null && missing === 0)
     // Every line here is in a package (build 6): say so, not a misleading 0 €.
     const inPackage = items.length > 0 && items.every((i) => i.package_id)
@@ -73,7 +81,11 @@ export function categoryLines(detail: TripDetail, money: TripMoney, viewer: stri
 }
 
 /** Your share (or the whole trip) by place, and what isn't tied to a place (BR-9: no total here). */
-export function placeLines(detail: TripDetail, viewer: string | null, mode: Mode): { lines: MoneyLine[]; untied: number; packages: number } {
+export function placeLines(
+  detail: TripDetail,
+  viewer: string | null,
+  mode: Mode,
+): { lines: MoneyLine[]; untied: number; packages: number } {
   const currency = detail.trip.currency
   const mine = mode === 'mine' && viewer
   const lines = [...detail.places]
@@ -89,7 +101,9 @@ export function placeLines(detail: TripDetail, viewer: string | null, mode: Mode
       return {
         key: p.id,
         name: p.name,
-        meta: [nights, split(confirmed, estimated, currency) || null, inPackageWords(covered)].filter(Boolean).join(' · '),
+        meta: [nights, split(confirmed, estimated, currency) || null, inPackageWords(covered)]
+          .filter(Boolean)
+          .join(' · '),
         amount: num(row?.current),
         confirmed,
         estimated,
@@ -104,7 +118,11 @@ export function placeLines(detail: TripDetail, viewer: string | null, mode: Mode
     .filter((i) => i.kind === 'package' && counted(i))
     .reduce((sum, i) => sum + (itemLine(detail, i, viewer, mode).amount ?? 0), 0)
   const untied = Math.max(0, Math.round(((total ?? 0) - placed) * 100) / 100)
-  return { lines, untied: Math.max(0, Math.round((untied - packages) * 100) / 100), packages: Math.round(packages * 100) / 100 }
+  return {
+    lines,
+    untied: Math.max(0, Math.round((untied - packages) * 100) / 100),
+    packages: Math.round(packages * 100) / 100,
+  }
 }
 
 /** Each traveller's share, with what's only theirs or not theirs (a gift, "just yours: the jet-ski"). */
@@ -115,7 +133,9 @@ export function everyoneLines(detail: TripDetail, viewer: string | null) {
     const on = (i: Item) => detail.shares.some((s) => s.item_id === i.id && s.traveller_id === t.id)
     const sharedBy = (i: Item) => detail.shares.filter((s) => s.item_id === i.id).length
     // Not in: what several others share without them (a gift). A line for one person is "just theirs", not news for everyone else.
-    const notIn = splitItems.filter((i) => !on(i) && sharedBy(i) > 1 && sharedBy(i) < n).map((i) => itemTitle(detail, i).title)
+    const notIn = splitItems
+      .filter((i) => !on(i) && sharedBy(i) > 1 && sharedBy(i) < n)
+      .map((i) => itemTitle(detail, i).title)
     const only = splitItems.filter((i) => on(i) && sharedBy(i) === 1 && n > 1).map((i) => itemTitle(detail, i).title)
     const you = t.id === viewer
     const meta = [
@@ -125,7 +145,12 @@ export function everyoneLines(detail: TripDetail, viewer: string | null) {
     ]
       .filter(Boolean)
       .join(' · ')
-    return { id: t.id, name: t.name, meta, amount: num(detail.travellerShares.find((s) => s.traveller_id === t.id)?.share_current) }
+    return {
+      id: t.id,
+      name: t.name,
+      meta,
+      amount: num(detail.travellerShares.find((s) => s.traveller_id === t.id)?.share_current),
+    }
   })
 }
 
@@ -196,10 +221,19 @@ export function paidLines(detail: TripDetail, viewer: string | null) {
     .map((i) => {
       const amount = num(detail.amounts.find((a) => a.item_id === i.id)?.actual)
       const sharedBy = detail.shares.filter((s) => s.item_id === i.id).length
-      const who = i.paid_each ? 'each paid their own share' : i.paid_by === viewer ? 'paid by you' : `paid by ${nameOf(detail, i.paid_by)}`
+      const who = i.paid_each
+        ? 'each paid their own share'
+        : i.paid_by === viewer
+          ? 'paid by you'
+          : `paid by ${nameOf(detail, i.paid_by)}`
       const when = i.paid_on && !i.paid_each ? ` on ${shortDay(i.paid_on)}` : ''
-      const own = i.actual_currency && i.actual_currency !== detail.trip.currency ? formatMoney(num(i.actual_amount), i.actual_currency) : null
-      const meta = [`${who}${when}`, sharedBy && sharedBy < n ? `split between ${sharedBy}` : null, own].filter(Boolean).join(' · ')
+      const own =
+        i.actual_currency && i.actual_currency !== detail.trip.currency
+          ? formatMoney(num(i.actual_amount), i.actual_currency)
+          : null
+      const meta = [`${who}${when}`, sharedBy && sharedBy < n ? `split between ${sharedBy}` : null, own]
+        .filter(Boolean)
+        .join(' · ')
       return { id: i.id, name: itemTitle(detail, i).title, meta, amount }
     })
 }
@@ -211,7 +245,9 @@ export function bookedLines(detail: TripDetail) {
     .map((i) => ({
       id: i.id,
       name: itemTitle(detail, i).title,
-      amount: num((detail.itemLeft ?? []).find((l) => l.item_id === i.id)?.left_to_pay) ?? num(detail.amounts.find((a) => a.item_id === i.id)?.current),
+      amount:
+        num((detail.itemLeft ?? []).find((l) => l.item_id === i.id)?.left_to_pay) ??
+        num(detail.amounts.find((a) => a.item_id === i.id)?.current),
     }))
     .filter((l) => (l.amount ?? 0) > 0)
 }
@@ -219,7 +255,11 @@ export function bookedLines(detail: TripDetail) {
 export type LeftToPay = { id: string; name: string; amount: number; due: string | null; dueIn: number | null }
 
 /** Budget's "What's left to pay": booked lines with something left, soonest first (no date last). */
-export function leftToPayLines(detail: TripDetail, viewer: string | null, mode: Mode): { lines: LeftToPay[]; total: number; late: number } {
+export function leftToPayLines(
+  detail: TripDetail,
+  viewer: string | null,
+  mode: Mode,
+): { lines: LeftToPay[]; total: number; late: number } {
   const lines = detail.items
     .filter((i) => i.status === 'booked' || i.status === 'paid')
     .flatMap((i) => {
@@ -270,7 +310,14 @@ function packageCovers(detail: TripDetail): string | null {
 function inPackageWords(covered: Item[]): string | null {
   if (covered.length === 0) return null
   if (covered.length === 1) {
-    const what = covered[0].kind === 'housing' ? 'the stay' : covered[0].kind === 'activity' ? 'the activity' : covered[0].kind === 'restaurant' ? 'the meal' : 'the transfer'
+    const what =
+      covered[0].kind === 'housing'
+        ? 'the stay'
+        : covered[0].kind === 'activity'
+          ? 'the activity'
+          : covered[0].kind === 'restaurant'
+            ? 'the meal'
+            : 'the transfer'
     return `+ ${what}, in the package`
   }
   return `+ ${covered.length} lines in the package`

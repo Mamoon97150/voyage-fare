@@ -11,16 +11,19 @@ import { explainAuthError } from './authForm'
  */
 export function useSaving() {
   const [busy, setBusy] = useState(false)
-  const run = useCallback(async <T,>(action: () => Promise<T>, onError: (message: string) => void): Promise<T | undefined> => {
-    setBusy(true)
-    try {
-      return await action()
-    } catch (e) {
-      onError(explainAuthError(e as { message?: string }).message)
-      return undefined
-    } finally {
-      setBusy(false)
-    }
-  }, [])
+  const run = useCallback(
+    async <T>(action: () => Promise<T>, onError: (message: string) => void): Promise<T | undefined> => {
+      setBusy(true)
+      try {
+        return await action()
+      } catch (e) {
+        onError(explainAuthError(e as { message?: string }).message)
+        return undefined
+      } finally {
+        setBusy(false)
+      }
+    },
+    [],
+  )
   return { busy, run }
 }

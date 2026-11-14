@@ -48,26 +48,23 @@ export function NewTrip() {
   async function create(withTarget: boolean) {
     setFormError(undefined)
     if (withTarget && !targetOk()) return
-    await run(
-      async () => {
-        const amount = withTarget && target.trim() ? parseAmount(target) : null
-        const id = await createTrip({
-          name: name.trim(),
-          me,
-          travellers: others.map((o) => o.trim()).filter(Boolean),
-          startDate: noDates ? null : start,
-          endDate: noDates ? null : end,
-          homeCity: home.name.trim() || null,
-          homeLatitude: home.latitude,
-          homeLongitude: home.longitude,
-          currency,
-          targetAmount: amount,
-          targetScope: scope,
-        })
-        navigate(`/trips/${id}`, { replace: true })
-      },
-      setFormError,
-    )
+    await run(async () => {
+      const amount = withTarget && target.trim() ? parseAmount(target) : null
+      const id = await createTrip({
+        name: name.trim(),
+        me,
+        travellers: others.map((o) => o.trim()).filter(Boolean),
+        startDate: noDates ? null : start,
+        endDate: noDates ? null : end,
+        homeCity: home.name.trim() || null,
+        homeLatitude: home.latitude,
+        homeLongitude: home.longitude,
+        currency,
+        targetAmount: amount,
+        targetScope: scope,
+      })
+      navigate(`/trips/${id}`, { replace: true })
+    }, setFormError)
   }
 
   function next(event: FormEvent) {
@@ -85,7 +82,12 @@ export function NewTrip() {
             ✕
           </Link>
         ) : (
-          <button type="button" className="round-button" aria-label="Back" onClick={() => setStep((s) => (s - 1) as Step)}>
+          <button
+            type="button"
+            className="round-button"
+            aria-label="Back"
+            onClick={() => setStep((s) => (s - 1) as Step)}
+          >
             ‹
           </button>
         )}
@@ -133,17 +135,31 @@ export function NewTrip() {
                 placeholder="St Martin"
                 hint="Where the trip starts and ends. Draws the route on the map."
               />
-              <fieldset className={`dates${errors.dates ? ' field--error' : ''}`} aria-describedby={errors.dates ? 'dates-error' : undefined}>
+              <fieldset
+                className={`dates${errors.dates ? ' field--error' : ''}`}
+                aria-describedby={errors.dates ? 'dates-error' : undefined}
+              >
                 <legend className="field__label">Dates</legend>
                 {!noDates && (
                   <div className="row2">
                     <label className="field">
                       <span className="field__hint">From</span>
-                      <input type="date" className="field__input" value={start} onChange={(e) => setStart(e.target.value)} />
+                      <input
+                        type="date"
+                        className="field__input"
+                        value={start}
+                        onChange={(e) => setStart(e.target.value)}
+                      />
                     </label>
                     <label className="field">
                       <span className="field__hint">To</span>
-                      <input type="date" className="field__input" value={end} min={start || undefined} onChange={(e) => setEnd(e.target.value)} />
+                      <input
+                        type="date"
+                        className="field__input"
+                        value={end}
+                        min={start || undefined}
+                        onChange={(e) => setEnd(e.target.value)}
+                      />
                     </label>
                   </div>
                 )}
@@ -232,7 +248,13 @@ export function NewTrip() {
                 <label htmlFor="currency" className="field__label">
                   Main currency
                 </label>
-                <select id="currency" className="field__input" value={currency} onChange={(e) => setCurrency(e.target.value)} aria-describedby="currency-hint">
+                <select
+                  id="currency"
+                  className="field__input"
+                  value={currency}
+                  onChange={(e) => setCurrency(e.target.value)}
+                  aria-describedby="currency-hint"
+                >
                   {CURRENCIES.map((c) => (
                     <option key={c} value={c}>
                       {currencyLabel(c)}
@@ -240,7 +262,8 @@ export function NewTrip() {
                   ))}
                 </select>
                 <p id="currency-hint" className="field__hint">
-                  Totals and who-owes-whom are in this currency. Prices in pesos or dollars are converted. You can change it until the first payment.
+                  Totals and who-owes-whom are in this currency. Prices in pesos or dollars are converted. You can
+                  change it until the first payment.
                 </p>
               </div>
               <div className={`field${errors.target ? ' field--error' : ''}`}>
@@ -266,7 +289,12 @@ export function NewTrip() {
                   </p>
                 )}
                 <div className="switch" role="radiogroup" aria-label="Target for">
-                  <button type="button" role="radio" aria-checked={scope === 'per_person'} onClick={() => setScope('per_person')}>
+                  <button
+                    type="button"
+                    role="radio"
+                    aria-checked={scope === 'per_person'}
+                    onClick={() => setScope('per_person')}
+                  >
                     Per person
                   </button>
                   <button type="button" role="radio" aria-checked={scope === 'total'} onClick={() => setScope('total')}>
@@ -280,7 +308,12 @@ export function NewTrip() {
 
         {formError && <FormMessage tone="error">{formError}</FormMessage>}
 
-        <button type="submit" className="button button--primary button--wide" disabled={busy} aria-busy={busy || undefined}>
+        <button
+          type="submit"
+          className="button button--primary button--wide"
+          disabled={busy}
+          aria-busy={busy || undefined}
+        >
           {step < 3 ? 'Next' : busy ? 'Creating the trip…' : 'Create the trip'}
         </button>
         {step === 3 && (
