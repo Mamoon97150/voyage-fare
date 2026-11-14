@@ -43,6 +43,7 @@ const data = vi.hoisted(() => ({
   setItemStatus: vi.fn(),
   changeTripCurrency: vi.fn(),
   setItemDropped: vi.fn(),
+  setItemSplit: vi.fn(),
   deleteItem: vi.fn(),
   updatePlace: vi.fn(),
   deletePlace: vi.fn(),
@@ -75,6 +76,7 @@ vi.mock('../lib/trips', () => ({
   setItemStatus: data.setItemStatus,
   changeTripCurrency: data.changeTripCurrency,
   setItemDropped: data.setItemDropped,
+  setItemSplit: data.setItemSplit,
   deleteItem: data.deleteItem,
   updatePlace: data.updatePlace,
   deletePlace: data.deletePlace,
@@ -1171,5 +1173,49 @@ describe('Budget and Who paid (build 4)', () => {
     expect(screen.getByText(/nobody owes anything for it/)).toBeInTheDocument()
     click('Save where it stands')
     await waitFor(() => expect(data.setItemStatus).toHaveBeenCalledWith(expect.objectContaining({ status: 'paid', paidBy: null, paidEach: true })))
+  })
+})
+
+describe('who it’s for (split between…)', () => {
+  const three = [...travellers, { id: 'c', name: 'Cleo', user_id: null }]
+  const shoot = (shares: { item_id: string; traveller_id: string; fraction: number }[]) =>
+    detail({
+      travellers: three,
+      places: [cartagena],
+      items: [{ id: 'i1', place_id: 'p1', kind: 'activity', name: 'Photoshoot', status: 'chosen', day_number: null, end_day_number: null }],
+      options: [{ id: 'o1', item_id: 'i1', name: 'Fly Dress', amount: 210, rate: 1, currency: 'EUR', is_chosen: true, position: 1, details: {} }],
+      amounts: [{ item_id: 'i1', current: 210, is_confirmed: false }],
+      shares,
+    })
+
+  it('everyone by default; take one off for a gift', async () => {
+    data.getTrip.mockResolvedValue(shoot([]))
+    data.setItemSplit.mockResolvedValue(undefined)
+    open('/trips/t1')
+    fireEvent.click(await screen.findByRole('button', { name: 'Change Fly Dress' }))
+    expect(screen.getByText('Everyone: split equally.')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Bea' }))
+    expect(screen.getByText('Split between 2: not Bea.')).toBeInTheDocument()
+    await waitFor(() => expect(data.setItemSplit).toHaveBeenCalledWith('i1', ['a', 'c']))
+  })
+
+  it('back to everyone sends an empty list; the last one can’t be taken off', async () => {
+    data.getTrip.mockResolvedValue(shoot([{ item_id: 'i1', traveller_id: 'a', fraction: 1 }]))
+    data.setItemSplit.mockResolvedValue(undefined)
+    open('/trips/t1')
+    fireEvent.click(await screen.findByRole('button', { name: 'Change Fly Dress' }))
+    expect(screen.getByText('Just Ana.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Ana' })).toBeDisabled()
+    fireEvent.click(screen.getByRole('button', { name: 'Bea' }))
+    await waitFor(() => expect(data.setItemSplit).toHaveBeenCalledWith('i1', ['a', 'b']))
+    fireEvent.click(screen.getByRole('button', { name: 'Cleo' }))
+    await waitFor(() => expect(data.setItemSplit).toHaveBeenLastCalledWith('i1', []))
+  })
+
+  it('solo: nothing to split', async () => {
+    data.getTrip.mockResolvedValue({ ...shoot([]), travellers: [travellers[0]] })
+    open('/trips/t1')
+    fireEvent.click(await screen.findByRole('button', { name: 'Change Fly Dress' }))
+    expect(screen.queryByText('Who it’s for')).not.toBeInTheDocument()
   })
 })

@@ -145,3 +145,28 @@ describe('each paid their own share (build 4)', () => {
     expect((await one<{ paid_each: boolean }>(db, 'select paid_each from items where id = $1', [item])).paid_each).toBe(false)
   })
 })
+
+describe('split between… (build 4)', () => {
+  const split = () => db.query<{ traveller_id: string }>('select traveller_id from item_split_travellers where item_id = $1', [item])
+  const bea = async () => (await one<{ id: string }>(db, `select id from travellers where trip_id = $1 and name = 'Bea'`, [trip])).id
+
+  it('just me: only my share; the budget follows', async () => {
+    await db.query('select set_item_split($1, $2)', [item, [me]])
+    expect((await split()).rows.map((r) => r.traveller_id)).toEqual([me])
+    const s = await one<{ share_current: unknown }>(db, 'select share_current from v_traveller_shares where traveller_id = $1', [me])
+    expect(num(s.share_current)).toBe(1000)
+  })
+
+  it('everyone picked = everyone (no rows), and so does an empty list', async () => {
+    await db.query('select set_item_split($1, $2)', [item, [me]])
+    await db.query('select set_item_split($1, $2)', [item, [me, await bea()]])
+    expect((await split()).rows).toHaveLength(0)
+    await db.query('select set_item_split($1, $2)', [item, [me]])
+    await db.query('select set_item_split($1, $2)', [item, []])
+    expect((await split()).rows).toHaveLength(0)
+  })
+
+  it('someone from another trip is refused', async () => {
+    await expect(db.query('select set_item_split($1, $2)', [item, [me, '00000000-0000-0000-0000-00000000dead']])).rejects.toThrow('isn’t on this trip')
+  })
+})

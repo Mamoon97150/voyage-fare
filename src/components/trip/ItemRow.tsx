@@ -7,6 +7,7 @@ import { amountText, priceInCompare, STATUS, priceOf } from './itemShared'
 import { DropControl } from './DropControl'
 import { ItemForm } from './ItemForm'
 import { StatusForm } from './StatusForm'
+import { WhoFor } from './WhoFor'
 
 /**
  * One line of the notebook: a dot (green confirmed, mustard estimated, hollow no price), the name,
@@ -81,6 +82,7 @@ export function ItemRow({
           deleteName={item.name}
           onCancel={() => setEditing(false)}
         />
+        <WhoFor detail={detail} item={item} onChanged={onChanged} />
         <DropControl
           item={item}
           onChanged={() => {

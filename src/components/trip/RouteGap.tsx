@@ -3,6 +3,7 @@ import { deleteItem, updateTicket, type TicketMode, type TripDetail } from '../.
 import { itemLine, MODES, ticketOf, type LegLine, type Mode } from '../../lib/tripView'
 import { amountText, priceInCompare, STATUS, priceOf } from './itemShared'
 import { StatusForm } from './StatusForm'
+import { WhoFor } from './WhoFor'
 import { TicketForm } from './TicketForm'
 
 /**
@@ -52,6 +53,7 @@ export function RouteGap({
                 deleteNote={roundTrip ? 'Both ways go, and its price comes out of the budget.' : undefined}
                 onCancel={() => setEditing(null)}
               />
+              <WhoFor detail={detail} item={item} onChanged={onChanged} />
               {detail.options.some((o) => o.item_id === item.id && o.is_chosen) && (
                 <StatusForm
                   detail={detail}

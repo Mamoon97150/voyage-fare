@@ -297,6 +297,12 @@ export async function setItemDropped(id: string, dropped: boolean): Promise<void
   if (error) throw error
 }
 
+/** Who shares a line (SR-3): some travellers, or everyone (all of them, or an empty list). */
+export async function setItemSplit(id: string, travellers: string[]): Promise<void> {
+  const { error } = await supabase.rpc('set_item_split', { p_item_id: id, p_travellers: travellers })
+  if (error) throw error
+}
+
 export type ItemStatus = 'chosen' | 'booked' | 'paid'
 
 /** Booked or paid, with what was really paid; paid also says who paid (BR-2, BR-3). */
