@@ -2,12 +2,14 @@ import { useState, type FormEvent } from 'react'
 import { explainAuthError } from '../../lib/authForm'
 import { amountForInput, NO_AMOUNT, parseAmount } from '../../lib/money'
 import { detailsOf, type OptionDetails, type Way } from '../../lib/options'
-import type { ItemKind, OptionInput, TicketMode, TripOption } from '../../lib/trips'
+import type { ItemKind, OptionInput, RoomInput, TicketMode, Traveller, TripOption } from '../../lib/trips'
 import { useRate } from '../../lib/rates'
 import { MODES } from '../../lib/tripView'
 import { FormMessage } from '../AuthForm'
 import { FormActions } from '../FormActions'
 import { CurrencyPicker, RateField } from '../RateField'
+import { roomsTotal, type RoomDraft } from '../../lib/rooms'
+import { RoomsEditor } from './RoomsEditor'
 
 const STAY_TYPES = ['Hotel', 'Apartment', 'House', 'Guesthouse', 'Hostel', 'Room']
 
@@ -25,6 +27,8 @@ export function OptionForm({
   onSubmit,
   onCancel,
   onDelete,
+  travellers = [],
+  initialRooms = [],
 }: {
   kind: ItemKind
   roundTrip: boolean
@@ -35,6 +39,9 @@ export function OptionForm({
   onSubmit: (input: OptionInput) => Promise<void>
   onCancel: () => void
   onDelete?: () => Promise<void>
+  /** For a stay by room: who can sleep where, and the option's rooms so far. */
+  travellers?: Traveller[]
+  initialRooms?: RoomInput[]
 }) {
   const d0: OptionDetails = initial ? detailsOf(initial) : {}
   const journey = kind === 'transport'
@@ -60,11 +67,21 @@ export function OptionForm({
   const [formError, setFormError] = useState<string>()
   const [busy, setBusy] = useState(false)
   const id = initial?.id ?? 'new'
+  const [byRoom, setByRoom] = useState(initialRooms.length > 0)
+  const [rooms, setRooms] = useState<RoomDraft[]>(
+    initialRooms.length
+      ? initialRooms.map((r) => ({ name: r.name, price: amountForInput(r.amount), occupants: r.occupants }))
+      : [
+          { name: 'Room 1', price: '', occupants: [] },
+          { name: 'Room 2', price: '', occupants: [] },
+        ],
+  )
   const rate = useRate(currency, initial?.currency ?? currency, initial ? Number(initial.rate) : 1)
   const plane = journey && mode === 'plane'
 
   /** What's typed so far, for the "≈ in the trip's currency" line. */
   const typedAmount = () => {
+    if (stay && byRoom) return roomsTotal(rooms)
     if (journey && roundTrip && two) {
       const a = parseAmount(priceOut)
       const b = parseAmount(priceBack)
@@ -89,6 +106,9 @@ export function OptionForm({
         prices = [a, b]
         amount = a + b
       } else if (a !== null || b !== null) found.priceBack = 'Both tickets need a price, or neither for now.'
+    } else if (stay && byRoom) {
+      amount = roomsTotal(rooms)
+      if (amount === null) found.rooms = 'Each room needs its price, like 640.'
     } else {
       amount = price.trim() ? parseAmount(price) : null
       if (price.trim() && amount === null) found.price = 'Enter an amount, like 1 200 or 1 200,50.'
@@ -128,6 +148,11 @@ export function OptionForm({
       await onSubmit({
         name: name.trim(),
         amount,
+        ...(stay && byRoom
+          ? { rooms: rooms.map((r) => ({ name: r.name.trim(), amount: parseAmount(r.price) as number, occupants: r.occupants })) }
+          : stay && initialRooms.length
+            ? { rooms: null }
+            : {}),
         currency: foreign && rate.rate !== null ? rate.currency : currency,
         rate: foreign && rate.rate !== null ? rate.rate : 1,
         details,
@@ -282,8 +307,25 @@ export function OptionForm({
           {money('priceOut', 'Price out', priceOut, setPriceOut)}
           {money('priceBack', 'Price back', priceBack, setPriceBack)}
         </div>
-      ) : (
+      ) : stay && byRoom ? null : (
         money('price', journey ? 'Price for everyone' : 'Price', price, setPrice)
+      )}
+      {stay && travellers.length > 1 && (
+        <>
+          <div className="switch" role="radiogroup" aria-label="How the stay is split">
+            <button type="button" role="radio" aria-checked={!byRoom} onClick={() => setByRoom(false)}>
+              One price
+            </button>
+            <button type="button" role="radio" aria-checked={byRoom} onClick={() => setByRoom(true)}>
+              By room
+            </button>
+          </div>
+          {byRoom ? (
+            <RoomsEditor id={id} rooms={rooms} onRooms={setRooms} travellers={travellers} currency={rate.currency} error={errors.rooms} />
+          ) : (
+            <p className="field__hint">Split equally. A hotel with a room each? Choose “By room”.</p>
+          )}
+        </>
       )}
       <RateField id={`${id}-rate`} rate={rate} amount={typedAmount()} error={errors.rate} />
 

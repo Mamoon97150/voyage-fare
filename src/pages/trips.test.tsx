@@ -33,6 +33,7 @@ const data = vi.hoisted(() => ({
   addOption: vi.fn(),
   addItemWithOption: vi.fn(),
   updateOption: vi.fn(),
+  setOptionRooms: vi.fn(),
   chooseOption: vi.fn(),
   setFavourite: vi.fn(),
   deleteOption: vi.fn(),
@@ -66,6 +67,7 @@ vi.mock('../lib/trips', () => ({
   addOption: data.addOption,
   addItemWithOption: data.addItemWithOption,
   updateOption: data.updateOption,
+  setOptionRooms: data.setOptionRooms,
   chooseOption: data.chooseOption,
   setFavourite: data.setFavourite,
   deleteOption: data.deleteOption,
@@ -116,6 +118,8 @@ const detail = (over: Record<string, unknown> = {}) => ({
   travellerShares: [],
   placeTotals: [],
   travellerPlaceTotals: [],
+  rooms: [],
+  roomOccupants: [],
   ...over,
 })
 
@@ -1217,5 +1221,78 @@ describe('who it’s for (split between…)', () => {
     open('/trips/t1')
     fireEvent.click(await screen.findByRole('button', { name: 'Change Fly Dress' }))
     expect(screen.queryByText('Who it’s for')).not.toBeInTheDocument()
+  })
+})
+
+describe('rooms (a stay by room)', () => {
+  const three = [...travellers, { id: 'c', name: 'Cleo', user_id: null }]
+  const hotel = (over: Record<string, unknown> = {}) =>
+    detail({
+      travellers: three,
+      places: [cartagena],
+      items: [{ id: 'h', place_id: 'p1', kind: 'housing', name: 'Casona', status: 'chosen', day_number: null, end_day_number: null }],
+      options: [{ id: 'o1', item_id: 'h', name: 'Casona', amount: 1000, rate: 1, currency: 'EUR', is_chosen: true, position: 1, details: {} }],
+      amounts: [{ item_id: 'h', current: 1000, is_confirmed: false }],
+      ...over,
+    })
+
+  it('by room: each room its price and who sleeps there; the stay is the rooms added up', async () => {
+    data.getTrip.mockResolvedValue(hotel())
+    data.updateOption.mockResolvedValue(undefined)
+    open('/trips/t1/compare?tab=stay&page=p1')
+    fireEvent.click(await screen.findByRole('button', { name: 'Change Casona' }))
+    fireEvent.click(screen.getByRole('radio', { name: 'By room' }))
+    fireEvent.change(screen.getAllByLabelText('Room')[0], { target: { value: 'Superior' } })
+    fireEvent.change(screen.getAllByLabelText('Price')[0], { target: { value: '640' } })
+    fireEvent.change(screen.getAllByLabelText('Price')[1], { target: { value: '360' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Ana sleeps in Superior' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Bea sleeps in Room 2' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Cleo sleeps in Room 2' }))
+    expect(screen.getByText('1 000 €', { selector: '.rooms__total b' })).toBeInTheDocument()
+    click('Save')
+    await waitFor(() =>
+      expect(data.updateOption).toHaveBeenCalledWith(
+        'o1',
+        expect.objectContaining({
+          amount: 1000,
+          rooms: [
+            { name: 'Superior', amount: 640, occupants: ['a'] },
+            { name: 'Room 2', amount: 360, occupants: ['b', 'c'] },
+          ],
+        }),
+      ),
+    )
+  })
+
+  it('a room without a price is said', async () => {
+    data.getTrip.mockResolvedValue(hotel())
+    open('/trips/t1/compare?tab=stay&page=p1')
+    fireEvent.click(await screen.findByRole('button', { name: 'Change Casona' }))
+    fireEvent.click(screen.getByRole('radio', { name: 'By room' }))
+    click('Save')
+    expect(await screen.findByText('Each room needs its price, like 640.')).toBeInTheDocument()
+    expect(data.updateOption).not.toHaveBeenCalled()
+  })
+
+  it('shown on the card, and on the trip page “Who it’s for” says who’s where', async () => {
+    const rooms = {
+      rooms: [
+        { id: 'r1', option_id: 'o1', trip_id: 't1', name: 'Superior', amount: 640, position: 1 },
+        { id: 'r2', option_id: 'o1', trip_id: 't1', name: 'Junior suite', amount: 360, position: 2 },
+      ],
+      roomOccupants: [
+        { room_id: 'r1', traveller_id: 'a', trip_id: 't1' },
+        { room_id: 'r2', traveller_id: 'b', trip_id: 't1' },
+        { room_id: 'r2', traveller_id: 'c', trip_id: 't1' },
+      ],
+    }
+    data.getTrip.mockResolvedValue(hotel(rooms))
+    const view = open('/trips/t1/compare?tab=stay&page=p1')
+    expect(await screen.findByText('Superior 640 € · Ana')).toBeInTheDocument()
+    view.unmount()
+    open('/trips/t1')
+    fireEvent.click(await screen.findByRole('button', { name: 'Change Casona' }))
+    expect(screen.getByText(/Split by room: Ana · Bea & Cleo/)).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Bea' })).not.toBeInTheDocument()
   })
 })

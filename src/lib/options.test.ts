@@ -53,6 +53,8 @@ function trip(over: Partial<TripDetail> = {}): TripDetail {
     legs: [],
     amounts: [],
     shares: [],
+    rooms: [],
+    roomOccupants: [],
     ...over,
   } as unknown as TripDetail
 }

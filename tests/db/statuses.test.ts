@@ -170,3 +170,38 @@ describe('split between… (build 4)', () => {
     await expect(db.query('select set_item_split($1, $2)', [item, [me, '00000000-0000-0000-0000-00000000dead']])).rejects.toThrow('isn’t on this trip')
   })
 })
+
+describe('rooms (build 4)', () => {
+  const bea = async () => (await one<{ id: string }>(db, `select id from travellers where trip_id = $1 and name = 'Bea'`, [trip])).id
+  const option = async () => (await one<{ id: string }>(db, 'select id from options where item_id = $1', [item])).id
+  const shares = () => db.query<{ traveller_id: string; fraction: unknown }>('select traveller_id, fraction from v_item_shares where item_id = $1 order by fraction desc', [item])
+
+  it('by room: the price is the rooms added up, each split by who sleeps there', async () => {
+    const o = await option()
+    await db.query('select set_option_rooms($1, $2)', [o, JSON.stringify([
+      { name: 'Superior', amount: 600, occupants: [me] },
+      { name: 'Small', amount: 400, occupants: [await bea()] },
+    ])])
+    expect(num((await one<{ amount: unknown }>(db, 'select amount from options where id = $1', [o])).amount)).toBe(1000)
+    expect((await shares()).rows.map((r) => [r.traveller_id, Math.round(Number(r.fraction) * 100) / 100])).toEqual([
+      [me, 0.6],
+      [await bea(), 0.4],
+    ])
+  })
+
+  it('back to one price: no rooms, split equally again', async () => {
+    const o = await option()
+    await db.query('select set_option_rooms($1, $2)', [o, JSON.stringify([{ name: 'A', amount: 600, occupants: [me] }])])
+    await db.query('select set_option_rooms($1, $2)', [o, JSON.stringify([])])
+    expect((await db.query('select 1 from rooms where option_id = $1', [o])).rows).toHaveLength(0)
+    expect((await shares()).rows.map((r) => Number(r.fraction))).toEqual([0.5, 0.5])
+  })
+
+  it('a room needs its price; someone from elsewhere is refused', async () => {
+    const o = await option()
+    await expect(db.query('select set_option_rooms($1, $2)', [o, JSON.stringify([{ name: 'A', occupants: [me] }])])).rejects.toThrow('needs its price')
+    await expect(
+      db.query('select set_option_rooms($1, $2)', [o, JSON.stringify([{ name: 'A', amount: 10, occupants: ['00000000-0000-0000-0000-00000000dead'] }])]),
+    ).rejects.toThrow('isn’t on this trip')
+  })
+})

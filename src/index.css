@@ -2384,3 +2384,41 @@ select.field__input,
 .chip:disabled {
   cursor: default;
 }
+
+/* A stay by room (build 4, mockup rooms-v4). */
+.rooms {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.room {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) 0;
+  border-top: 1px dashed var(--line);
+}
+
+.room__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 8rem);
+  gap: var(--space-2);
+}
+
+.room__row .field {
+  min-width: 0;
+}
+
+.room__remove {
+  align-self: flex-start;
+  font-size: 0.8125rem;
+}
+
+.rooms__total {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-2) 0 0;
+  border-top: 1.5px solid var(--ink);
+  font-weight: 600;
+}

@@ -1,7 +1,7 @@
 // Options: the candidates for one item, side by side on Compare (mockups 2 and 10).
 // The database keeps their kind-specific details in options.details; this file reads them,
 // works out durations, shares and the order, and groups items into Compare's pages.
-import type { Item, ItemKind, Place, TicketMode, TripDetail, TripOption } from './trips'
+import type { Item, ItemKind, Place, RoomInput, TicketMode, TripDetail, TripOption } from './trips'
 import { addDays, formatShortDates } from './tripText'
 import { legsAfter, type Mode } from './tripView'
 
@@ -227,4 +227,12 @@ export function compareLink(detail: TripDetail, item: Item): string | null {
   if (!tab) return null
   const page = subjectsFor(detail, tab).find((s) => s.items.some((i) => i.id === item.id))
   return `/trips/${detail.trip.id}/compare?tab=${tab}${page ? `&page=${page.key}` : ''}`
+}
+
+/** A stay option's rooms (SR-4), in order, with who sleeps in each. None: one price, split equally. */
+export function roomsOf(detail: Pick<TripDetail, 'rooms' | 'roomOccupants'>, optionId: string): RoomInput[] {
+  return detail.rooms
+    .filter((r) => r.option_id === optionId)
+    .sort((a, b) => a.position - b.position)
+    .map((r) => ({ name: r.name, amount: Number(r.amount), occupants: detail.roomOccupants.filter((o) => o.room_id === r.id).map((o) => o.traveller_id) }))
 }

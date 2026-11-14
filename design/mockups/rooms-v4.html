@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mockup — Rooms on a stay (v4 look)</title>
+    <script type="module">
+      import '/src/index.css'
+      import './forms.css'
+      import './v4.css'
+      import './v4.js'
+    </script>
+    <style>
+      .phone { padding: var(--space-3) var(--space-3) var(--space-6); }
+      .rooms-switch { margin: var(--space-3) 0 var(--space-2); }
+      .room { padding: var(--space-3) 0; border-top: 1px dashed var(--line); display: flex; flex-direction: column; gap: var(--space-2); }
+      .room__row { display: grid; grid-template-columns: minmax(0, 1fr) 8rem; gap: var(--space-2); }
+      .room .chip { min-height: 2.1rem; font-size: 0.8125rem; }
+      .room__names { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+      .sum { display: flex; justify-content: space-between; padding: var(--space-2) 0; border-top: 1.5px solid var(--ink); font-weight: 700; }
+      .mini { margin-top: var(--space-5); }
+      .opt-demo { display: grid; grid-template-columns: auto minmax(0,1fr) auto; gap: 0 var(--space-3); align-items: start; padding: 0.65rem 0; }
+      .pick-demo { width: 1.5rem; height: 1.5rem; border-radius: 50%; background: var(--chosen); color: var(--paper); display: grid; place-items: center; font-size: 0.8rem; }
+      .opt-demo .name { font-weight: 600; color: var(--chosen); }
+      .opt-demo .meta { display: block; font-size: 0.8125rem; color: var(--ink-soft); }
+      h4 { font-size: 0.75rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: var(--space-1); }
+    </style>
+  </head>
+  <body>
+    <div class="phones">
+      <figure>
+        <div class="phone">
+          <div class="sketch-box sketch-box--light card" data-seed="91">
+            <svg class="sketch-box__line" aria-hidden="true"></svg>
+            <header class="card__head"><h2>Change Casona del Porvenir</h2></header>
+            <div class="field"><label class="field__label">Name of the place</label><input class="field__input" value="Hotel Casona del Porvenir" /></div>
+            <div class="rooms-switch"><div class="switch" role="radiogroup"><button role="radio" aria-checked="false">One price</button><button role="radio" aria-checked="true">By room</button></div></div>
+            <p class="field__hint">Each room is split between who sleeps in it. A flat for everyone: keep “One price”.</p>
+
+            <div class="room">
+              <div class="room__row"><div class="field"><label class="field__label">Room</label><input class="field__input" value="Superior" /></div><div class="field"><label class="field__label">Price</label><div class="field__box"><input class="field__input num" value="640" /><span class="field__unit">EUR</span></div></div></div>
+              <span class="field__label">Who sleeps here</span>
+              <div class="room__names"><button class="chip" aria-pressed="true">Djamina</button><button class="chip" aria-pressed="true">Danielle</button><button class="chip" aria-pressed="false">Peggy</button><button class="chip" aria-pressed="false">Gabriel</button></div>
+            </div>
+            <div class="room">
+              <div class="room__row"><div class="field"><label class="field__label">Room</label><input class="field__input" value="Junior suite" /></div><div class="field"><label class="field__label">Price</label><div class="field__box"><input class="field__input num" value="820" /><span class="field__unit">EUR</span></div></div></div>
+              <span class="field__label">Who sleeps here</span>
+              <div class="room__names"><button class="chip" aria-pressed="false">Djamina</button><button class="chip" aria-pressed="false">Danielle</button><button class="chip" aria-pressed="true">Peggy</button><button class="chip" aria-pressed="true">Gabriel</button></div>
+            </div>
+            <button class="add-row" type="button"><span class="add-row__plus">+</span>Add a room</button>
+            <div class="sum"><span>The stay, 2 rooms</span><span class="num">1 460 €</span></div>
+            <div class="add-item__actions"><button class="button button--quiet">Cancel</button><button class="button button--primary">Save</button></div>
+          </div>
+
+          <div class="sketch-box sketch-box--light card mini" data-seed="92">
+            <svg class="sketch-box__line" aria-hidden="true"></svg>
+            <h4>Then on Compare</h4>
+            <div class="opt-demo"><span class="pick-demo">✓</span><span><span class="name">Hotel Casona del Porvenir</span><span class="meta">1 460 € · 2 rooms · 292 € a night</span><span class="meta">Superior 640 € · Djamina, Danielle</span><span class="meta">Junior suite 820 € · Peggy, Gabriel</span></span><b class="num">320 €</b></div>
+            <h4 style="margin-top: var(--space-3)">And on the trip page, open</h4>
+            <p class="field__hint" style="margin:0">Who it’s for → “Split by room: Djamina &amp; Danielle · Peggy &amp; Gabriel. Change the rooms in Compare ›”</p>
+          </div>
+        </div>
+        <figcaption><b>Rooms on a stay.</b> In a stay’s option: “One price” (the default, split equally: your Medellín flat) or “By room”: each room with its price and who sleeps there; the stay’s price is the rooms added up. Your share is your room split with whoever’s in it (Djamina: 640 ÷ 2 = 320 €). <i>Example prices: Colombia’s hotels were in the package.</i></figcaption>
+      </figure>
+    </div>
+  </body>
+</html>

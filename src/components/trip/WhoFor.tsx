@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { explainAuthError } from '../../lib/authForm'
+import { Link } from 'react-router'
+import { compareLink, roomsOf } from '../../lib/options'
 import { setItemSplit, type Item, type TripDetail } from '../../lib/trips'
 import { FormMessage } from '../AuthForm'
 
@@ -15,6 +17,23 @@ export function WhoFor({ detail, item, onChanged }: { detail: TripDetail; item: 
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string>()
   if (detail.travellers.length < 2) return null
+
+  // A stay by room is split by its rooms (SR-4): say who's where, and change it in Compare.
+  const chosen = detail.options.find((o) => o.item_id === item.id && o.is_chosen)
+  const rooms = chosen ? roomsOf(detail, chosen.id) : []
+  if (rooms.length) {
+    const name = (id: string) => detail.travellers.find((t) => t.id === id)?.name
+    const link = compareLink(detail, item)
+    return (
+      <div className="who-for">
+        <p className="field__label">Who it’s for</p>
+        <p className="field__hint">
+          Split by room: {rooms.map((r) => (r.occupants.length ? r.occupants.map(name).join(' & ') : `${r.name}: everyone`)).join(' · ')}.{' '}
+          {link && <Link to={link}>Change the rooms in Compare ›</Link>}
+        </p>
+      </div>
+    )
+  }
 
   async function toggle(id: string) {
     const next = on.includes(id) ? on.filter((x) => x !== id) : [...on, id]

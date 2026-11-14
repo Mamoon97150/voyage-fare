@@ -9,9 +9,10 @@ import { TripTopBar } from '../components/trip/TripTopBar'
 import { TripBudget } from '../components/TripBudget'
 import { TripNav } from '../components/TripNav'
 import { Loading } from '../lib/auth'
+import { formatMoney } from '../lib/money'
 import { useAuth } from '../lib/authContext'
 import { explainAuthError } from '../lib/authForm'
-import { optionLines, subjectsFor, TABS, tabToDecide, type Sort, type Subject, type Tab } from '../lib/options'
+import { optionLines, roomsOf, subjectsFor, TABS, tabToDecide, type Sort, type Subject, type Tab } from '../lib/options'
 import { tripSubtitle } from '../lib/tripText'
 import {
   addItemWithOption,
@@ -255,6 +256,8 @@ function ItemOptions({
         defaultMode={defaultMode}
         currency={detail.trip.currency}
         initial={option}
+        travellers={detail.travellers}
+        initialRooms={option ? roomsOf(detail, option.id) : []}
         submitLabel={option ? 'Save' : 'Add the option'}
         onSubmit={async (input) => {
           if (option) await updateOption(option.id, input)
@@ -317,6 +320,10 @@ function ItemOptions({
               roundTrip={roundTrip}
               busy={busy}
               onEdit={() => setEditing(line.option.id)}
+              rooms={roomsOf(detail, line.option.id).map(
+                (r) =>
+                  `${r.name} ${formatMoney(r.amount, line.option.currency)}${r.occupants.length ? ` · ${r.occupants.map((t) => detail.travellers.find((x) => x.id === t)?.name).join(', ')}` : ''}`,
+              )}
               onChoose={() => void act(() => chooseOption(line.option.id))}
               onFavourite={() => void act(() => setFavourite(line.option.id, !line.option.is_favourite))}
             />
@@ -352,6 +359,7 @@ function EmptyPage({ detail, tab, subject, onChanged }: { detail: TripDetail; ta
           roundTrip={false}
           defaultMode="plane"
           currency={detail.trip.currency}
+          travellers={detail.travellers}
           submitLabel="Add the option"
           onSubmit={async (input) => {
             await addItemWithOption(detail, { placeId: subject.place?.id ?? null, kind: empty.kind, name: input.name }, input)

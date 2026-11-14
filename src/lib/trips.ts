@@ -66,6 +66,8 @@ export async function listTrips(): Promise<TripSummary[]> {
 
 export type Item = Tables<'items'>
 export type TripOption = Tables<'options'>
+export type Room = Tables<'rooms'>
+export type RoomOccupant = Tables<'room_occupants'>
 export type Leg = Tables<'item_legs'>
 export type ItemAmount = Tables<'v_item_amounts'>
 export type ItemShare = Tables<'v_item_shares'>
@@ -87,11 +89,14 @@ export type TripDetail = {
   travellerShares: TravellerShare[]
   placeTotals: PlaceTotal[]
   travellerPlaceTotals: TravellerPlaceTotal[]
+  /** A stay's option by room (SR-4): each room, and who sleeps in it. */
+  rooms: Room[]
+  roomOccupants: RoomOccupant[]
 }
 
 /** null when the trip doesn't exist or isn't shared with this person (privacy hides both the same way). */
 export async function getTrip(id: string): Promise<TripDetail | null> {
-  const [trip, travellers, places, items, options, legs, amounts, shares, budget, travellerShares, placeTotals, travellerPlaceTotals] =
+  const [trip, travellers, places, items, options, legs, amounts, shares, budget, travellerShares, placeTotals, travellerPlaceTotals, rooms, roomOccupants] =
     await Promise.all([
       supabase.from('trips').select('*').eq('id', id).maybeSingle(),
       supabase.from('travellers').select('*').eq('trip_id', id).order('position'),
@@ -105,8 +110,10 @@ export async function getTrip(id: string): Promise<TripDetail | null> {
       supabase.from('v_traveller_shares').select('*').eq('trip_id', id),
       supabase.from('v_budget_by_place').select('*').eq('trip_id', id),
       supabase.from('v_traveller_by_place').select('*').eq('trip_id', id),
+      supabase.from('rooms').select('*').eq('trip_id', id).order('position'),
+      supabase.from('room_occupants').select('*').eq('trip_id', id),
     ])
-  for (const r of [trip, travellers, places, items, options, legs, amounts, shares, budget, travellerShares, placeTotals, travellerPlaceTotals]) {
+  for (const r of [trip, travellers, places, items, options, legs, amounts, shares, budget, travellerShares, placeTotals, travellerPlaceTotals, rooms, roomOccupants]) {
     if (r.error) throw r.error
   }
   if (!trip.data) return null
@@ -123,6 +130,8 @@ export async function getTrip(id: string): Promise<TripDetail | null> {
     travellerShares: travellerShares.data ?? [],
     placeTotals: placeTotals.data ?? [],
     travellerPlaceTotals: travellerPlaceTotals.data ?? [],
+    rooms: rooms.data ?? [],
+    roomOccupants: roomOccupants.data ?? [],
   }
 }
 
@@ -441,9 +450,13 @@ export async function removeTraveller(id: string): Promise<void> {
 
 // ── Options: compare, choose, coup de cœur (build 3) ───────────────────────────
 
+export type RoomInput = { name: string; amount: number; occupants: string[] }
+
 export type OptionInput = {
   name: string
   amount: number | null
+  /** A stay by room (SR-4): its rooms, or null for one price. Left out: the rooms aren't touched. */
+  rooms?: RoomInput[] | null
   /** The price's own currency and the rate saved when it was typed (BR-10). Default: the trip's, 1. */
   currency?: string
   rate?: number
@@ -477,7 +490,14 @@ export async function addOption(detail: TripDetail, itemId: string, input: Optio
     .select('id')
     .single()
   if (error) throw error
+  if (input.rooms !== undefined) await setOptionRooms(data.id, input.rooms)
   return data.id
+}
+
+/** A stay's rooms (SR-4), saved in one step; null or none = one price, split equally. */
+export async function setOptionRooms(optionId: string, rooms: RoomInput[] | null): Promise<void> {
+  const { error } = await supabase.rpc('set_option_rooms', { p_option_id: optionId, p_rooms: (rooms ?? []) as unknown as Json })
+  if (error) throw error
 }
 
 /** A page of Compare with nothing yet (no stay in Medellín): the item and its first option together. */
@@ -503,6 +523,7 @@ export async function updateOption(id: string, input: OptionInput): Promise<void
     })
     .eq('id', id)
   if (error) throw error
+  if (input.rooms !== undefined) await setOptionRooms(id, input.rooms)
 }
 
 /** Choosing one un-chooses the others; the item becomes "chosen" (the database keeps that rule). */

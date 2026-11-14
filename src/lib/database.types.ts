@@ -1112,6 +1112,10 @@ export type Database = {
         Args: { p_dropped: boolean; p_item_id: string }
         Returns: undefined
       }
+      set_option_rooms: {
+        Args: { p_option_id: string; p_rooms: Json }
+        Returns: undefined
+      }
       set_item_split: {
         Args: { p_item_id: string; p_travellers: string[] }
         Returns: undefined

@@ -21,6 +21,7 @@ export function OptionCard({
   onFavourite,
   onEdit,
   busy,
+  rooms = [],
 }: {
   line: OptionLine
   item: Item
@@ -32,6 +33,8 @@ export function OptionCard({
   onFavourite: () => void
   onEdit: () => void
   busy: boolean
+  /** A stay by room: "Superior 640 € · Djamina, Danielle", one per room. */
+  rooms?: string[]
 }) {
   const { option, details, share, more, cheapest, fastest, minutes } = line
   const chosen = option.is_chosen
@@ -51,6 +54,7 @@ export function OptionCard({
     price,
     foreign && whole !== null ? `≈ ${formatWhole(whole, currency)}` : null,
     item.kind === 'transport' ? `${MODES[mode].icon} ${MODES[mode].label}` : null,
+    rooms.length ? `${rooms.length} rooms` : null,
     item.kind === 'housing' && details.type ? details.type : null,
     item.kind === 'housing' && whole !== null && place?.nights ? `${formatWhole(whole / place.nights, currency)} a night` : null,
   ]
@@ -97,6 +101,11 @@ export function OptionCard({
           </span>
         )}
 
+        {rooms.map((r) => (
+          <span key={r} className="opt__meta">
+            {r}
+          </span>
+        ))}
         <Flags item={item} line={line} mode={mode} />
         {option.note && <span className="opt__meta opt__note">{option.note}</span>}
         {fastest && minutes !== null && roundTrip && <span className="opt__meta opt__fast">Fastest · {formatMinutes(minutes)} in all</span>}
