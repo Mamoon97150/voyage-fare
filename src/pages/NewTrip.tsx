@@ -9,6 +9,7 @@ import { createTrip } from '../lib/trips'
 import { parseAmount } from '../lib/money'
 import { CURRENCIES, currencyLabel } from '../lib/tripText'
 import { useSaving } from '../lib/useSaving'
+import { checkNameAndDates, checkTarget } from '../lib/tripFields'
 
 type Step = 1 | 2 | 3
 
@@ -33,28 +34,20 @@ export function NewTrip() {
   const { busy, run } = useSaving()
 
   function checkStep1() {
-    const found: Record<string, string> = {}
-    if (!name.trim()) found.name = 'Give the trip a name.'
-    if (!noDates) {
-      if (!start || !end) found.dates = 'Choose both days, or tick “Dates not decided yet”.'
-      else if (end < start) found.dates = 'The trip ends before it starts.'
-    }
+    const found = checkNameAndDates({ name, noDates, start, end })
     setErrors(found)
     return Object.keys(found).length === 0
   }
 
-  function checkTarget() {
-    if (!target.trim()) return true
-    if (parseAmount(target) === null) {
-      setErrors({ target: 'Enter an amount, like 2500.' })
-      return false
-    }
-    return true
+  function targetOk() {
+    const { error } = checkTarget(target)
+    if (error) setErrors({ target: error })
+    return !error
   }
 
   async function create(withTarget: boolean) {
     setFormError(undefined)
-    if (withTarget && !checkTarget()) return
+    if (withTarget && !targetOk()) return
     await run(
       async () => {
         const amount = withTarget && target.trim() ? parseAmount(target) : null

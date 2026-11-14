@@ -129,7 +129,7 @@ describe('create a trip', () => {
     click('Next')
     type('Target', 'a lot')
     click('Create the trip')
-    expect(screen.getByLabelText('Target')).toHaveAccessibleDescription('Enter an amount, like 2500.')
+    expect(screen.getByLabelText('Target')).toHaveAccessibleDescription('Enter an amount, like 2 500.')
     expect(data.createTrip).not.toHaveBeenCalled()
   })
 })

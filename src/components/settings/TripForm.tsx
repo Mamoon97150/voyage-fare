@@ -2,10 +2,11 @@ import { useState, type FormEvent } from 'react'
 import { FormMessage } from '../AuthForm'
 import { CityField } from '../CityField'
 import { SketchBox } from '../Sketch'
-import { amountForInput, parseAmount } from '../../lib/money'
+import { amountForInput } from '../../lib/money'
 import type { CityValue } from '../../lib/places'
 import { updateTrip, type TripDetail } from '../../lib/trips'
 import { useSaving } from '../../lib/useSaving'
+import { checkNameAndDates, checkTarget } from '../../lib/tripFields'
 
 /** Name, dates, leaving from, and the target: one form, one Save. */
 export function TripForm({ detail, onSaved }: { detail: TripDetail; onSaved: () => void }) {
@@ -29,14 +30,9 @@ export function TripForm({ detail, onSaved }: { detail: TripDetail; onSaved: () 
   async function submit(event: FormEvent) {
     event.preventDefault()
     setMessage(undefined)
-    const found: Record<string, string> = {}
-    if (!name.trim()) found.name = 'Give the trip a name.'
-    if (!noDates) {
-      if (!start || !end) found.dates = 'Choose both days, or tick “Dates not decided yet”.'
-      else if (end < start) found.dates = 'The trip ends before it starts.'
-    }
-    const amount = target.trim() ? parseAmount(target) : null
-    if (target.trim() && amount === null) found.target = 'Enter an amount, like 2 500.'
+    const { amount, error: targetError } = checkTarget(target)
+    const found: Record<string, string> = { ...checkNameAndDates({ name, noDates, start, end }) }
+    if (targetError) found.target = targetError
     setErrors(found)
     if (Object.keys(found).length) return
     await run(
