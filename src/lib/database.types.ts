@@ -378,6 +378,7 @@ export type Database = {
           longitude: number | null
           name: string
           note: string | null
+          package_id: string | null
           paid_by: string | null
           paid_each: boolean
           paid_on: string | null
@@ -401,6 +402,7 @@ export type Database = {
           longitude?: number | null
           name: string
           note?: string | null
+          package_id?: string | null
           paid_by?: string | null
           paid_each?: boolean
           paid_on?: string | null
@@ -424,6 +426,7 @@ export type Database = {
           longitude?: number | null
           name?: string
           note?: string | null
+          package_id?: string | null
           paid_by?: string | null
           paid_each?: boolean
           paid_on?: string | null
@@ -1178,8 +1181,16 @@ export type Database = {
         }
         Returns: string
       }
+      set_item_package: {
+        Args: { p_item_id: string; p_package_id: string | null }
+        Returns: undefined
+      }
       set_item_dropped: {
         Args: { p_dropped: boolean; p_item_id: string }
+        Returns: undefined
+      }
+      set_package_cover: {
+        Args: { p_items: string[]; p_package_id: string }
         Returns: undefined
       }
       set_option_rooms: {

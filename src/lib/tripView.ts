@@ -16,6 +16,7 @@ export const KINDS: Record<ItemKind, { label: string; icon: string }> = {
   restaurant: { label: 'Food', icon: '◍' },
   car_rental: { label: 'Getting around', icon: '⇄' },
   insurance: { label: 'Insurance', icon: '☂' },
+  package: { label: 'Package', icon: '▣' },
   other: { label: 'Other', icon: '•' },
 }
 
@@ -27,7 +28,7 @@ export function kindLabel(kind: ItemKind, inPlace: boolean): { label: string; ic
 
 /** What can be added where: tickets and insurance belong to the whole trip, stays and outings to a place. */
 export const KINDS_FOR_PLACE: ItemKind[] = ['housing', 'activity', 'restaurant', 'transport', 'other']
-export const KINDS_FOR_TRIP: ItemKind[] = ['transport', 'car_rental', 'insurance', 'other']
+export const KINDS_FOR_TRIP: ItemKind[] = ['transport', 'car_rental', 'insurance', 'package', 'other']
 
 /** Kinds that usually last several days. */
 export const SPANS_DAYS: ItemKind[] = ['housing', 'car_rental']
@@ -271,4 +272,41 @@ export function estimateLine(
     mismatch: Boolean(check?.days_mismatch),
     expectedDays: check?.expected_days ?? null,
   }
+}
+
+// ── Agency packages (build 6, mockup package-v4) ────────────────────────────────
+
+/** The packages of a trip (lines of kind "package"). */
+export const packagesOf = (detail: Pick<TripDetail, 'items'>) => detail.items.filter((i) => i.kind === 'package')
+
+/** The lines a package covers. */
+export const coveredBy = (detail: Pick<TripDetail, 'items'>, pkg: Item) => detail.items.filter((i) => i.package_id === pkg.id)
+
+const COVER_WORDS: Record<string, [string, string]> = {
+  ticket: ['ticket', 'tickets'],
+  housing: ['stay', 'stays'],
+  activity: ['activity', 'activities'],
+  restaurant: ['meal', 'meals'],
+  around: ['transfer', 'transfers'],
+  insurance: ['insurance', 'insurances'],
+  other: ['other', 'others'],
+}
+
+/** "covers 2 tickets · 5 stays · 3 transfers" (or null when it covers nothing yet). */
+export function coversText(detail: Pick<TripDetail, 'items'>, pkg: Item): string | null {
+  const counts = new Map<string, number>()
+  for (const i of coveredBy(detail, pkg)) {
+    const key =
+      i.kind === 'transport' ? (i.place_id ? 'around' : 'ticket') : i.kind === 'car_rental' ? 'around' : i.kind in COVER_WORDS ? i.kind : 'other'
+    counts.set(key, (counts.get(key) ?? 0) + 1)
+  }
+  if (counts.size === 0) return null
+  const order = ['ticket', 'housing', 'around', 'activity', 'restaurant', 'insurance', 'other']
+  return `covers ${order
+    .filter((k) => counts.has(k))
+    .map((k) => {
+      const n = counts.get(k)!
+      return `${n} ${COVER_WORDS[k][n === 1 ? 0 : 1]}`
+    })
+    .join(' · ')}`
 }

@@ -15,7 +15,7 @@ export function Budget() {
         const currency = detail.trip.currency
         const cats = categoryLines(detail, money, viewer, mode)
         const scale = Math.max(1, ...cats.map((c) => c.amount ?? 0))
-        const { lines: places, untied } = placeLines(detail, viewer, mode)
+        const { lines: places, untied, packages } = placeLines(detail, viewer, mode)
         const figure = mode === 'mine' && viewer ? detail.travellerShares.find((s) => s.traveller_id === viewer)?.share_current : detail.budget?.current_total
         const whose = solo ? 'the trip' : mode === 'mine' ? 'your share' : 'whole trip'
         const missing = notCounted(detail)
@@ -57,6 +57,7 @@ export function Budget() {
                     </li>
                   ))}
                 </ul>
+                {packages > 0 && <p className="card__note">+ {formatWhole(packages, currency)} package, for the whole trip</p>}
                 {untied > 0 && <p className="card__note">+ {formatWhole(untied, currency)} not tied to a place</p>}
               </Card>
             )}

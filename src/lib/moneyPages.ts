@@ -2,7 +2,7 @@
 // from the trip and its money. The database does the sums (BR-13); this file only picks and words.
 import { formatMoney } from './money'
 import type { Item, TripDetail, TripMoney } from './trips'
-import { itemTitle, type Mode } from './tripView'
+import { itemLine, itemTitle, type Mode } from './tripView'
 
 const num = (v: unknown) => (v === null || v === undefined ? null : Number(v))
 
@@ -13,6 +13,7 @@ export const CATEGORIES: { key: string; label: string }[] = [
   { key: 'activities', label: 'Activities' },
   { key: 'food', label: 'Food' },
   { key: 'insurance', label: 'Insurance' },
+  { key: 'package', label: 'Package' },
   { key: 'buffer', label: 'Other' },
 ]
 
@@ -47,11 +48,20 @@ export function categoryLines(detail: TripDetail, money: TripMoney, viewer: stri
     const estimated = num(row?.estimated) ?? 0
     const amount = num(row?.current)
     const missing = items.filter((i) => unpriced(detail, i)).length
-    const names = items.length <= 2 ? items.map((i) => itemTitle(detail, i).title).join(', ') : null
+    const names = items.length <= 2 && key !== 'package' ? items.map((i) => itemTitle(detail, i).title).join(', ') : null
     const zero = amount === 0 || (amount === null && missing === 0)
-    const word = zero && items.length > 0 ? (items.every((i) => i.status === 'booked' || i.status === 'paid') ? 'Included' : 'Free') : undefined
+    // Every line here is in a package (build 6): say so, not a misleading 0 €.
+    const inPackage = items.length > 0 && items.every((i) => i.package_id)
+    const word =
+      zero && items.length > 0
+        ? inPackage
+          ? 'in the package'
+          : items.every((i) => i.status === 'booked' || i.status === 'paid')
+            ? 'Included'
+            : 'Free'
+        : undefined
     const meta = [
-      names,
+      key === 'package' ? packageCovers(detail) : names,
       split(confirmed, estimated, currency) || null,
       missing ? `${missing} without a price` : null,
     ]
@@ -63,7 +73,7 @@ export function categoryLines(detail: TripDetail, money: TripMoney, viewer: stri
 }
 
 /** Your share (or the whole trip) by place, and what isn't tied to a place (BR-9: no total here). */
-export function placeLines(detail: TripDetail, viewer: string | null, mode: Mode): { lines: MoneyLine[]; untied: number } {
+export function placeLines(detail: TripDetail, viewer: string | null, mode: Mode): { lines: MoneyLine[]; untied: number; packages: number } {
   const currency = detail.trip.currency
   const mine = mode === 'mine' && viewer
   const lines = [...detail.places]
@@ -75,10 +85,11 @@ export function placeLines(detail: TripDetail, viewer: string | null, mode: Mode
       const confirmed = num(row?.confirmed) ?? 0
       const estimated = num(row?.estimated) ?? 0
       const nights = p.nights ? `${p.nights} ${p.nights === 1 ? 'night' : 'nights'}` : null
+      const covered = detail.items.filter((i) => i.place_id === p.id && i.package_id && i.status !== 'dropped')
       return {
         key: p.id,
         name: p.name,
-        meta: [nights, split(confirmed, estimated, currency) || null].filter(Boolean).join(' · '),
+        meta: [nights, split(confirmed, estimated, currency) || null, inPackageWords(covered)].filter(Boolean).join(' · '),
         amount: num(row?.current),
         confirmed,
         estimated,
@@ -88,7 +99,12 @@ export function placeLines(detail: TripDetail, viewer: string | null, mode: Mode
     ? num(detail.travellerShares.find((s) => s.traveller_id === viewer)?.share_current)
     : num(detail.budget?.current_total)
   const placed = lines.reduce((sum, l) => sum + (l.amount ?? 0), 0)
-  return { lines, untied: Math.max(0, Math.round(((total ?? 0) - placed) * 100) / 100) }
+  // The packages' part of what isn't tied to a place (build 6): said apart, once for the whole trip.
+  const packages = detail.items
+    .filter((i) => i.kind === 'package' && counted(i))
+    .reduce((sum, i) => sum + (itemLine(detail, i, viewer, mode).amount ?? 0), 0)
+  const untied = Math.max(0, Math.round(((total ?? 0) - placed) * 100) / 100)
+  return { lines, untied: Math.max(0, Math.round((untied - packages) * 100) / 100), packages: Math.round(packages * 100) / 100 }
 }
 
 /** Each traveller's share, with what's only theirs or not theirs (a gift, "just yours: the jet-ski"). */
@@ -210,4 +226,31 @@ export function repaymentLines(detail: TripDetail, money: TripMoney, viewer: str
     meta: [day.format(new Date(`${r.paid_on}T00:00:00Z`)), r.note].filter(Boolean).join(' · '),
     amount: Number(r.amount),
   }))
+}
+
+const COVER_CATEGORY: Record<string, string> = {
+  main_transport: 'Travel',
+  accommodation: 'Stay',
+  local_transport: 'Getting around',
+  activities: 'Activities',
+  food: 'Food',
+  insurance: 'Insurance',
+  buffer: 'Other',
+}
+
+/** The Package category's meta: "covers Travel · Stay · Getting around". */
+function packageCovers(detail: TripDetail): string | null {
+  const cats = new Set(detail.items.filter((i) => i.package_id && i.status !== 'dropped').map((i) => i.category))
+  const words = CATEGORIES.filter((c) => cats.has(c.key)).map((c) => COVER_CATEGORY[c.key])
+  return words.length ? `covers ${words.join(' · ')}` : null
+}
+
+/** "+ the stay, in the package", "+ 3 lines in the package" (by place). */
+function inPackageWords(covered: Item[]): string | null {
+  if (covered.length === 0) return null
+  if (covered.length === 1) {
+    const what = covered[0].kind === 'housing' ? 'the stay' : covered[0].kind === 'activity' ? 'the activity' : covered[0].kind === 'restaurant' ? 'the meal' : 'the transfer'
+    return `+ ${what}, in the package`
+  }
+  return `+ ${covered.length} lines in the package`
 }

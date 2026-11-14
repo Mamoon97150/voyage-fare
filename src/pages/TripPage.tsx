@@ -165,6 +165,7 @@ export function TripPage() {
                         </h2>
                         <span className="place__total num">
                           {formatWhole(placeTotal(detail, place, viewer, shownMode), trip.currency)}
+                          {placeItems.some((it) => it.package_id && it.status !== 'dropped') && <small className="place__plus">+ package</small>}
                         </span>
                         {editingPlace !== place.id && (
                           <button

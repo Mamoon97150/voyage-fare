@@ -201,7 +201,7 @@ export async function deleteRepayment(id: string): Promise<void> {
   if (error) throw error
 }
 
-export type ItemKind = 'transport' | 'housing' | 'activity' | 'restaurant' | 'car_rental' | 'insurance' | 'other'
+export type ItemKind = 'transport' | 'housing' | 'activity' | 'restaurant' | 'car_rental' | 'insurance' | 'package' | 'other'
 
 /** One step in the database: the item, and with a price its single chosen option. */
 export async function addItem(item: {
@@ -677,5 +677,19 @@ export async function deleteDailyEstimate(id: string): Promise<void> {
 /** "Make it 3 days": only the days change. */
 export async function setEstimateDays(id: string, days: number): Promise<void> {
   const { error } = await supabase.from('daily_estimates').update({ days }).eq('id', id)
+  if (error) throw error
+}
+
+// ── Agency packages (build 6) ───────────────────────────────────────────────────
+
+/** What a package covers: exactly these lines (they count 0 and say "in the package"). */
+export async function setPackageCover(packageId: string, items: string[]): Promise<void> {
+  const { error } = await supabase.rpc('set_package_cover', { p_package_id: packageId, p_items: items })
+  if (error) throw error
+}
+
+/** One line in a package, or out of it (null). */
+export async function setItemPackage(itemId: string, packageId: string | null): Promise<void> {
+  const { error } = await supabase.rpc('set_item_package', { p_item_id: itemId, p_package_id: packageId })
   if (error) throw error
 }

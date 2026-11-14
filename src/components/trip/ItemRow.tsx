@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { amountForInput } from '../../lib/money'
-import { deleteItem, updateItem, type Item, type ItemKind, type TripDetail } from '../../lib/trips'
-import { daysText, itemLine, itemTitle, kindLabel, type Mode } from '../../lib/tripView'
+import { deleteItem, setPackageCover, updateItem, type Item, type ItemKind, type TripDetail } from '../../lib/trips'
+import { coversText, daysText, itemLine, itemTitle, kindLabel, type Mode } from '../../lib/tripView'
+import { PartOfPackage } from './Packages'
 import { optionCount } from '../../lib/options'
-import { amountText, priceInCompare, STATUS, priceOf } from './itemShared'
+import { amountText, priceInCompare, priceOf, statusWord } from './itemShared'
 import { DropControl } from './DropControl'
 import { ItemForm } from './ItemForm'
 import { StatusForm } from './StatusForm'
@@ -62,6 +63,7 @@ export function ItemRow({
           days={days}
           initial={{
             kind: item.kind as ItemKind,
+            covers: detail.items.filter((i) => i.package_id === item.id).map((i) => i.id),
             name: item.name,
             day: item.day_number ? String(item.day_number) : '',
             endDay: item.end_day_number ? String(item.end_day_number) : '',
@@ -70,8 +72,9 @@ export function ItemRow({
           submitLabel="Save"
           options={inCompare}
           nameLabel={decision ? 'What you’re deciding' : 'Name'}
-          onSubmit={async (v) => {
+          onSubmit={async ({ covers, ...v }) => {
             await updateItem({ id: item.id, ...v, keepPrice: inCompare !== undefined })
+            if (v.kind === 'package') await setPackageCover(item.id, covers ?? [])
             setEditing(false)
             onChanged()
           }}
@@ -83,6 +86,7 @@ export function ItemRow({
           onCancel={() => setEditing(false)}
         />
         <WhoFor detail={detail} item={item} onChanged={onChanged} />
+        <PartOfPackage detail={detail} item={item} onChanged={onChanged} />
         <DropControl
           item={item}
           onChanged={() => {
@@ -120,10 +124,11 @@ export function ItemRow({
         <span className="item-row__main">
           <span className="item-row__name">{title}</span>
           {meta && <span className="item-row__meta">{meta}</span>}
+          {item.kind === 'package' && coversText(detail, item) && <span className="item-row__hand">{coversText(detail, item)}</span>}
         </span>
         <span className="item-row__amount num">
           <b>{amountText(line, item, detail.trip.currency)}</b>
-          {STATUS[item.status] && <span className="item-row__status">{STATUS[item.status]}</span>}
+          {statusWord(item) && <span className={statusWord(item)!.className}>{statusWord(item)!.text}</span>}
         </span>
         <span className="item-row__chev" aria-hidden="true">
           ›

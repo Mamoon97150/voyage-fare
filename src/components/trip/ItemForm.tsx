@@ -2,10 +2,11 @@ import { useState, type FormEvent, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import { explainAuthError } from '../../lib/authForm'
 import { NO_AMOUNT, parseAmount } from '../../lib/money'
-import { addItem, addTicket, type ItemKind, type TripDetail } from '../../lib/trips'
+import { addItem, addTicket, setPackageCover, type ItemKind, type TripDetail } from '../../lib/trips'
 import { dayLabel, kindLabel, SPANS_DAYS } from '../../lib/tripView'
 import { FormMessage } from '../AuthForm'
 import { FormActions } from '../FormActions'
+import { CoversPicker } from './Packages'
 import { TicketForm } from './TicketForm'
 
 export type ItemValues = {
@@ -14,6 +15,8 @@ export type ItemValues = {
   dayNumber: number | null
   endDayNumber: number | null
   amount: number | null
+  /** A package's covered lines (build 6). */
+  covers?: string[]
 }
 
 /** Add something to a place or to the whole trip. A price is optional: without one, it's an idea. */
@@ -66,8 +69,9 @@ export function AddItem({
       onKind={setKind}
       title={title}
       submitLabel="Add"
-      onSubmit={async (v) => {
-        await addItem({ tripId: detail.trip.id, placeId, ...v })
+      onSubmit={async ({ covers, ...v }) => {
+        const id = await addItem({ tripId: detail.trip.id, placeId, ...v })
+        if (v.kind === 'package' && covers?.length) await setPackageCover(id, covers)
         onAdded()
       }}
       onCancel={onCancel}
@@ -136,7 +140,7 @@ export function ItemForm({
   formId: string
   kinds: ItemKind[]
   days: number
-  initial?: { kind: ItemKind; name: string; day: string; endDay: string; price: string }
+  initial?: { kind: ItemKind; name: string; day: string; endDay: string; price: string; covers?: string[] }
   kind?: ItemKind
   onKind?: (k: ItemKind) => void
   submitLabel: string
@@ -158,6 +162,7 @@ export function ItemForm({
   const [day, setDay] = useState(initial?.day ?? '')
   const [endDay, setEndDay] = useState(initial?.endDay ?? '')
   const [price, setPrice] = useState(initial?.price ?? '')
+  const [covers, setCovers] = useState<string[]>(initial?.covers ?? [])
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [formError, setFormError] = useState<string>()
   const [busy, setBusy] = useState(false)
@@ -180,7 +185,7 @@ export function ItemForm({
 
     setBusy(true)
     try {
-      await onSubmit({ kind, name: name.trim(), dayNumber: start, endDayNumber: end, amount })
+      await onSubmit({ kind, name: name.trim(), dayNumber: start, endDayNumber: end, amount, covers: kind === 'package' ? covers : undefined })
     } catch (error) {
       setBusy(false)
       setFormError(explainAuthError(error as { message?: string }).message)
@@ -204,7 +209,7 @@ export function ItemForm({
           className="field__input"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder={kind === 'housing' ? 'Casa Lola' : kind === 'transport' ? 'Ferry' : 'Rosario islands'}
+          placeholder={kind === 'housing' ? 'Casa Lola' : kind === 'transport' ? 'Ferry' : kind === 'package' ? 'Agency package' : 'Rosario islands'}
           autoFocus
           aria-invalid={errors.name ? true : undefined}
           aria-describedby={errors.name ? `${id}-name-error` : undefined}
@@ -303,6 +308,8 @@ export function ItemForm({
         )}
       </div>
       )}
+
+      {kind === 'package' && <CoversPicker detail={detail} value={covers} onChange={setCovers} packageId={formId.startsWith('edit-') ? formId.slice(5) : undefined} />}
 
       <FormActions busy={busy} submitLabel={submitLabel} onCancel={onCancel} onDelete={onDelete} deleteName={deleteName} />
     </form>

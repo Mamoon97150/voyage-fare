@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { deleteItem, updateTicket, type TicketMode, type TripDetail } from '../../lib/trips'
 import { itemLine, MODES, ticketOf, type LegLine, type Mode } from '../../lib/tripView'
-import { amountText, priceInCompare, STATUS, priceOf } from './itemShared'
+import { amountText, priceInCompare, priceOf, statusWord } from './itemShared'
 import { StatusForm } from './StatusForm'
 import { WhoFor } from './WhoFor'
 import { TicketForm } from './TicketForm'
@@ -100,8 +100,8 @@ export function RouteGap({
               {!isReturn && (
                 <span className="item-row__amount num">
                   <b>{amountText(line, item, detail.trip.currency)}</b>
-                  <span className="item-row__status">
-                    <i className={`dot ${dot}`} aria-hidden="true" /> {STATUS[item.status]}
+                  <span className={statusWord(item)?.className ?? 'item-row__status'}>
+                    <i className={`dot ${dot}`} aria-hidden="true" /> {statusWord(item)?.text}
                   </span>
                 </span>
               )}

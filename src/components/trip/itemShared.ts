@@ -12,6 +12,8 @@ export const STATUS: Record<string, string | undefined> = { idea: 'Idea', booked
  */
 export function amountText(line: ItemLine, item: Item, currency: string): string {
   if (item.status === 'dropped') return '—'
+  // Covered by a package (build 6): no price of its own.
+  if (item.package_id) return 'in the'
   if (!line.concernsViewer) return 'Not yours'
   if (line.amount === 0) return item.status === 'booked' || item.status === 'paid' ? 'Included' : 'Free'
   return formatWhole(line.amount, currency)
@@ -39,4 +41,11 @@ export function priceInCompare(detail: TripDetail, item: Item): { text: string; 
     parts.push(`${formatMoney(amount, chosen.currency)} ≈ ${formatWhole(amount * Number(chosen.rate), detail.trip.currency)}`)
   }
   return { text: parts.join(' · '), link: compareLink(detail, item) }
+}
+
+/** The small word under the amount: the status, or "Package" (blue) for a line a package covers. */
+export function statusWord(item: Item): { text: string; className: string } | null {
+  if (item.package_id && item.status !== 'dropped') return { text: 'Package', className: 'item-row__status item-row__status--package' }
+  const text = STATUS[item.status]
+  return text ? { text, className: 'item-row__status' } : null
 }

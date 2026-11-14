@@ -31,6 +31,8 @@ import {
   removeTraveller,
   saveDailyEstimate,
   setEstimateDays,
+  setItemPackage,
+  setPackageCover,
   renameTraveller,
   setFavourite,
   updateItem,
@@ -213,6 +215,19 @@ describe('the real queries, end to end', () => {
     expect(detail!.dailyEstimates[0].days).toBe(5)
     await deleteDailyEstimate(id)
     expect((await getTrip(tripId))!.dailyEstimates).toEqual([])
+  })
+
+  it('packages: a package covers a line, which then counts 0', async () => {
+    const hotel = await addItem({ tripId, placeId: null, kind: 'housing', name: 'Hotel in the package', dayNumber: null, endDayNumber: null, amount: 300 })
+    const pkg = await addItem({ tripId, placeId: null, kind: 'package', name: 'Agency package', dayNumber: null, endDayNumber: null, amount: 1000 })
+    await setPackageCover(pkg, [hotel])
+    let detail = await getTrip(tripId)
+    expect(detail!.items.find((i) => i.id === hotel)?.package_id).toBe(pkg)
+    expect(Number(detail!.amounts.find((a) => a.item_id === hotel)?.current)).toBe(0)
+    expect(detail!.items.find((i) => i.id === pkg)?.category).toBe('package')
+    await setItemPackage(hotel, null)
+    detail = await getTrip(tripId)
+    expect(Number(detail!.amounts.find((a) => a.item_id === hotel)?.current)).toBe(300)
   })
 
   it('deleting the trip removes it from the list', async () => {

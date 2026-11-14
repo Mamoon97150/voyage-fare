@@ -5,7 +5,7 @@
 //
 // How it's modelled:
 // - The agency package (2 560 € a person: flights, hotels with breakfast, most transfers) is one
-//   whole-trip line, booked at 10 240 €. Flights and hotels are booked lines at 0 €, "in the package".
+//   whole-trip line (kind "package", build 6), booked at 10 240 €. It covers the flights and hotels.
 // - Extras: the locked day-by-day plan is the chosen option; the alternatives from the shortlist
 //   shown to the sisters sit beside it. Prices are the notes' estimates, for the group of four
 //   unless a line says otherwise. Prices quoted in dollars or pesos stay in them, at the rates of
@@ -381,14 +381,15 @@ it('rebuilds the Colombia & Panama trip in the demo account', async () => {
 
   // The package: one line for the whole trip, booked.
   await addLine(null, {
-    kind: 'other',
-    name: 'Agency package',
+    kind: 'package',
+    name: 'Frégate Agency package',
     note: 'Flights, hotels, transfers · each paid their own share in full',
     booked: 10240,
-    options: [{ name: 'Agency package', amount: 10240, note: '2 560 € a person, booking fees included' }],
+    options: [{ name: 'Frégate Agency package', amount: 10240, note: '2 560 € a person, booking fees included' }],
   })
 
   // The flights: one-way tickets in the route, booked, in the package.
+  const flightIds: string[] = []
   for (const f of FLIGHTS) {
     const itemId = must(
       await supabase.rpc('add_ticket', {
@@ -400,6 +401,7 @@ it('rebuilds the Colombia & Panama trip in the demo account', async () => {
         p_after_place_id: f.after ? placeIds[f.after] : undefined,
       }),
     ) as string
+    flightIds.push(itemId)
     await addOptions(itemId, {
       kind: 'transport',
       name: '',
@@ -419,6 +421,11 @@ it('rebuilds the Colombia & Panama trip in the demo account', async () => {
   }
 
   for (const p of PLACES) for (const line of p.lines) await addLine(placeIds[p.name], line)
+
+  // What the package covers (build 6): the flights and the hotels "in the package".
+  const pkg = must(await supabase.from('items').select('id').eq('trip_id', tripId).eq('kind', 'package').single()) as { id: string }
+  const hotels = must(await supabase.from('items').select('id').eq('trip_id', tripId).eq('note', 'In the package')) as { id: string }[]
+  must(await supabase.rpc('set_package_cover', { p_package_id: pkg.id, p_items: [...flightIds, ...hotels.map((h) => h.id)] }))
 
   const budget = must(await supabase.from('v_trip_budget').select('*').eq('trip_id', tripId).single())
   console.log('Colombia & Panama:', tripId, budget)
