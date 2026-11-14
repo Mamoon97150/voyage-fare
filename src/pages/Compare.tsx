@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router'
 import { FormMessage } from '../components/AuthForm'
 import { FolderTabs } from '../components/compare/FolderTabs'
@@ -9,6 +9,7 @@ import { TripTopBar } from '../components/trip/TripTopBar'
 import { TripBudget } from '../components/TripBudget'
 import { TripNav } from '../components/TripNav'
 import { Loading } from '../lib/auth'
+import { useTrip } from '../lib/useTrip'
 import { formatMoney } from '../lib/money'
 import { useAuth } from '../lib/authContext'
 import { explainAuthError } from '../lib/authForm'
@@ -19,7 +20,6 @@ import {
   addOption,
   chooseOption,
   deleteOption,
-  getTrip,
   setFavourite,
   updateOption,
   type Item,
@@ -45,27 +45,8 @@ export function Compare() {
   const { tripId = '' } = useParams()
   const { session } = useAuth()
   const [params, setParams] = useSearchParams()
-  const [detail, setDetail] = useState<TripDetail | null | undefined>(undefined)
-  const [loadError, setLoadError] = useState<string>()
+  const { detail, loadError, load } = useTrip(tripId)
   const [mode, setMode] = useState<Mode>('mine')
-
-  const load = useCallback(
-    () =>
-      getTrip(tripId)
-        .then(setDetail)
-        .catch((e) => setLoadError(explainAuthError(e).message)),
-    [tripId],
-  )
-
-  useEffect(() => {
-    let active = true
-    getTrip(tripId)
-      .then((d) => active && setDetail(d))
-      .catch((e) => active && setLoadError(explainAuthError(e).message))
-    return () => {
-      active = false
-    }
-  }, [tripId])
 
   if (loadError) {
     return (

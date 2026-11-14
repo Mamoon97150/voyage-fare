@@ -84,7 +84,7 @@ export const optionPrice = (o: Pick<TripOption, 'amount' | 'rate'>) =>
   o.amount === null ? null : Math.round(Number(o.amount) * Number(o.rate) * 100) / 100
 
 /** Your part of an option: the item's split applies to whichever option is chosen. */
-export function optionShare(detail: TripDetail, o: TripOption, viewer: string | null, mode: Mode): number | null {
+function optionShare(detail: TripDetail, o: TripOption, viewer: string | null, mode: Mode): number | null {
   const price = optionPrice(o)
   if (price === null || mode === 'total' || !viewer) return price
   const share = detail.shares.find((s) => s.item_id === o.item_id && s.traveller_id === viewer)
@@ -162,7 +162,7 @@ export type Subject = {
   place: Place | null
 }
 
-export const tabOf = (item: Item): Tab | null => {
+const tabOf = (item: Item): Tab | null => {
   if (item.kind === 'transport') return item.place_id ? 'around' : 'travel'
   if (item.kind === 'housing') return 'stay'
   if (item.kind === 'car_rental') return 'around'

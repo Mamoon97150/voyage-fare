@@ -4,6 +4,9 @@ const day = new Intl.DateTimeFormat('en-GB', { day: 'numeric', timeZone: 'UTC' }
 const dayMonth = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' })
 const full = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })
 
+/** A day of the trip in short: "12 Sept" (an ISO date, read as a calendar day, not a time). */
+export const shortDay = (iso: string) => dayMonth.format(new Date(`${iso}T00:00:00Z`))
+
 /** "12 – 24 May 2027", "28 Apr – 3 May 2027", "28 Dec 2026 – 3 Jan 2027", or null without dates. */
 export function formatDates(start: string | null, end: string | null): string | null {
   if (!start) return null

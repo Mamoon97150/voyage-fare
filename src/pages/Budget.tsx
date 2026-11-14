@@ -2,6 +2,7 @@ import { Link } from 'react-router'
 import { HandBar } from '../components/HandBar'
 import { Card, MoneyScreen } from '../components/MoneyScreen'
 import { formatWhole } from '../lib/money'
+import { shortDay } from '../lib/tripText'
 import { categoryLines, everyoneLines, leftToPayLines, notCounted, placeLines } from '../lib/moneyPages'
 
 /**
@@ -98,8 +99,6 @@ export function Budget() {
   )
 }
 
-const day = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' })
-const dayOf = (iso: string) => day.format(new Date(`${iso}T00:00:00Z`))
 
 /** "What's left to pay" (mockup left-to-pay-v4, step 3): soonest first; a late one gets the mustard dot. */
 function LeftToPayCard({ left, currency, whose }: { left: ReturnType<typeof leftToPayLines>; currency: string; whose: string }) {
@@ -127,10 +126,10 @@ function LeftToPayCard({ left, currency, whose }: { left: ReturnType<typeof left
                   {l.due ? (
                     late ? (
                       <>
-                        was due <span className="circled">{dayOf(l.due)}</span>
+                        was due <span className="circled">{shortDay(l.due)}</span>
                       </>
                     ) : (
-                      `by ${dayOf(l.due)}`
+                      `by ${shortDay(l.due)}`
                     )
                   ) : (
                     'no date'

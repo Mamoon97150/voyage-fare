@@ -1,20 +1,18 @@
-import { Fragment, useEffect, useMemo, useState } from 'react'
+import { Fragment, useMemo } from 'react'
 import { Link, useParams } from 'react-router'
 import { FormMessage } from '../components/AuthForm'
 import { RouteMap } from '../components/RouteMap'
 import { MissingNote } from '../components/trip/RouteCard'
 import { Loading } from '../lib/auth'
+import { useTrip } from '../lib/useTrip'
 import { useAuth } from '../lib/authContext'
-import { explainAuthError } from '../lib/authForm'
 import { formatWhole } from '../lib/money'
 import { routeOf } from '../lib/route'
-import { getTrip, type TripDetail } from '../lib/trips'
-import { plural } from '../lib/tripText'
+import { plural, shortDay } from '../lib/tripText'
 import { legsAfter, MODES, placeTotal, viewerOf } from '../lib/tripView'
 import type { TicketMode } from '../lib/trips'
 
-const short = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' })
-const day = (iso: string | null) => (iso ? short.format(new Date(`${iso}T00:00:00Z`)) : null)
+const day = (iso: string | null) => (iso ? shortDay(iso) : null)
 
 /**
  * The big route map (mockup route-map-v4, step 2): zoom and drag, and under it the stops in order,
@@ -23,18 +21,7 @@ const day = (iso: string | null) => (iso ? short.format(new Date(`${iso}T00:00:0
 export function RoutePage() {
   const { tripId = '' } = useParams()
   const { session } = useAuth()
-  const [detail, setDetail] = useState<TripDetail | null | undefined>(undefined)
-  const [error, setError] = useState<string>()
-
-  useEffect(() => {
-    let active = true
-    getTrip(tripId)
-      .then((d) => active && setDetail(d))
-      .catch((e) => active && setError(explainAuthError(e).message))
-    return () => {
-      active = false
-    }
-  }, [tripId])
+  const { detail, loadError: error } = useTrip(tripId)
 
   const route = useMemo(() => (detail ? routeOf(detail) : null), [detail])
 

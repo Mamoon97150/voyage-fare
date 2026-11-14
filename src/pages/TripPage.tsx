@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useEffect, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router'
 import { FormMessage } from '../components/AuthForm'
 import { Sketch, SketchBox } from '../components/Sketch'
@@ -14,11 +14,10 @@ import { RouteCard } from '../components/trip/RouteCard'
 import { TripTopBar } from '../components/trip/TripTopBar'
 import { WelcomeNote } from '../components/trip/WelcomeNote'
 import { Loading } from '../lib/auth'
+import { useTrip } from '../lib/useTrip'
 import { hintSeen, markHintSeen } from '../lib/hints'
 import { useAuth } from '../lib/authContext'
-import { explainAuthError } from '../lib/authForm'
 import { formatWhole } from '../lib/money'
-import { getTrip, type TripDetail } from '../lib/trips'
 import { plural, tripSubtitle } from '../lib/tripText'
 import {
   budgetView,
@@ -41,31 +40,12 @@ import {
 export function TripPage() {
   const { tripId = '' } = useParams()
   const { session } = useAuth()
-  const [detail, setDetail] = useState<TripDetail | null | undefined>(undefined)
-  const [loadError, setLoadError] = useState<string>()
+  const { detail, loadError, load } = useTrip(tripId)
   const [mode, setMode] = useState<Mode>('mine')
   const [adding, setAdding] = useState<string | null>(null) // a place id, 'trip', or nothing
   const [editingPlace, setEditingPlace] = useState<string | null>(null)
   // Tapping a row opens it for changes: say so once, until the first time it's used (review 13 Nov).
   const [tapHint, setTapHint] = useState(() => !hintSeen('tap-to-change'))
-
-  const load = useCallback(
-    () =>
-      getTrip(tripId)
-        .then((d) => setDetail(d))
-        .catch((e) => setLoadError(explainAuthError(e).message)),
-    [tripId],
-  )
-
-  useEffect(() => {
-    let active = true
-    getTrip(tripId)
-      .then((d) => active && setDetail(d))
-      .catch((e) => active && setLoadError(explainAuthError(e).message))
-    return () => {
-      active = false
-    }
-  }, [tripId])
 
   // Coming from the route map's list of stops (#place-…): go to that place's sheet.
   const loaded = detail !== undefined && detail !== null

@@ -86,3 +86,6 @@ export function amountForInput(amount: number | null | undefined): string {
   const grouped = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
   return cents === '00' ? grouped : `${grouped},${cents}`
 }
+
+/** A number from the database (exact decimals come back as text); null stays null: a dash, not a zero. */
+export const num = (v: unknown): number | null => (v === null || v === undefined ? null : Number(v))

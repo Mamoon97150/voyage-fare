@@ -4,7 +4,7 @@ import type { Item, TripDetail } from '../../lib/trips'
 import type { ItemLine } from '../../lib/tripView'
 
 // "Chosen" is the default and stays silent: the dot already says estimated or confirmed (review 13 Nov).
-export const STATUS: Record<string, string | undefined> = { idea: 'Idea', booked: 'Booked', paid: 'Paid', dropped: 'Dropped' }
+const STATUS: Record<string, string | undefined> = { idea: 'Idea', booked: 'Booked', paid: 'Paid', dropped: 'Dropped' }
 
 /**
  * What a line says on the right: your share in whole units; 0 is "Included" when it's booked

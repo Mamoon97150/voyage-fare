@@ -79,7 +79,7 @@ export function AddItem({
   )
 }
 
-export function KindPicker({ kinds, kind, onKind }: { kinds: ItemKind[]; kind: ItemKind; onKind: (k: ItemKind) => void }) {
+function KindPicker({ kinds, kind, onKind }: { kinds: ItemKind[]; kind: ItemKind; onKind: (k: ItemKind) => void }) {
   // The place's list has stays; the whole trip's doesn't (its transport is a ticket: "Travel").
   const inPlace = kinds.includes('housing')
   return (

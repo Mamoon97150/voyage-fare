@@ -1,5 +1,6 @@
 // What the trip view shows, worked out from the database's numbers.
 // No budget arithmetic here beyond picking the right figure: the database does the sums (BR-13).
+import { num } from './money'
 import type { Item, ItemKind, Leg, Place, TicketChange, TicketMode, TripDetail } from './trips'
 
 export type Mode = 'mine' | 'total'
@@ -33,7 +34,6 @@ export const KINDS_FOR_TRIP: ItemKind[] = ['transport', 'car_rental', 'insurance
 /** Kinds that usually last several days. */
 export const SPANS_DAYS: ItemKind[] = ['housing', 'car_rental']
 
-const num = (v: number | string | null | undefined) => (v === null || v === undefined ? null : Number(v))
 
 /** The traveller who is "you" on this trip, if any. */
 export function viewerOf(detail: Pick<TripDetail, 'travellers'>, userId: string | undefined): string | null {
@@ -280,7 +280,7 @@ export function estimateLine(
 export const packagesOf = (detail: Pick<TripDetail, 'items'>) => detail.items.filter((i) => i.kind === 'package')
 
 /** The lines a package covers. */
-export const coveredBy = (detail: Pick<TripDetail, 'items'>, pkg: Item) => detail.items.filter((i) => i.package_id === pkg.id)
+const coveredBy = (detail: Pick<TripDetail, 'items'>, pkg: Item) => detail.items.filter((i) => i.package_id === pkg.id)
 
 const COVER_WORDS: Record<string, [string, string]> = {
   ticket: ['ticket', 'tickets'],
@@ -314,7 +314,7 @@ export function coversText(detail: Pick<TripDetail, 'items'>, pkg: Item): string
 // ── What's left to pay (build 6, mockup left-to-pay-v4) ─────────────────────────
 
 /** Days from today (local) to an ISO date: negative = late. */
-export function daysUntil(iso: string, today = new Date()): number {
+function daysUntil(iso: string, today = new Date()): number {
   const start = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate())
   return Math.round((Date.parse(`${iso}T00:00:00Z`) - start) / 86_400_000)
 }

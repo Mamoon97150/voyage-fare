@@ -1,10 +1,10 @@
 // Budget and Who paid (build 4, mockups budget-v4 / who-paid-v4): what each card says, worked out
 // from the trip and its money. The database does the sums (BR-13); this file only picks and words.
-import { formatMoney } from './money'
+import { formatMoney, num } from './money'
+import { shortDay } from './tripText'
 import type { Item, TripDetail, TripMoney } from './trips'
 import { itemLine, itemTitle, leftLine, type Mode } from './tripView'
 
-const num = (v: unknown) => (v === null || v === undefined ? null : Number(v))
 
 export const CATEGORIES: { key: string; label: string }[] = [
   { key: 'main_transport', label: 'Travel' },
@@ -191,14 +191,13 @@ export function balanceLines(detail: TripDetail, money: TripMoney) {
 /** What's paid, and how: "paid by you on 1 Sept · split between 3 · 230 $". */
 export function paidLines(detail: TripDetail, viewer: string | null) {
   const n = detail.travellers.length
-  const day = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' })
   return detail.items
     .filter((i) => i.status === 'paid')
     .map((i) => {
       const amount = num(detail.amounts.find((a) => a.item_id === i.id)?.actual)
       const sharedBy = detail.shares.filter((s) => s.item_id === i.id).length
       const who = i.paid_each ? 'each paid their own share' : i.paid_by === viewer ? 'paid by you' : `paid by ${nameOf(detail, i.paid_by)}`
-      const when = i.paid_on && !i.paid_each ? ` on ${day.format(new Date(`${i.paid_on}T00:00:00Z`))}` : ''
+      const when = i.paid_on && !i.paid_each ? ` on ${shortDay(i.paid_on)}` : ''
       const own = i.actual_currency && i.actual_currency !== detail.trip.currency ? formatMoney(num(i.actual_amount), i.actual_currency) : null
       const meta = [`${who}${when}`, sharedBy && sharedBy < n ? `split between ${sharedBy}` : null, own].filter(Boolean).join(' · ')
       return { id: i.id, name: itemTitle(detail, i).title, meta, amount }
@@ -237,7 +236,6 @@ export function leftToPayLines(detail: TripDetail, viewer: string | null, mode: 
 }
 
 export function repaymentLines(detail: TripDetail, money: TripMoney, viewer: string | null) {
-  const day = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' })
   return money.repayments.map((r) => ({
     id: r.id,
     words:
@@ -246,7 +244,7 @@ export function repaymentLines(detail: TripDetail, money: TripMoney, viewer: str
         : r.from_traveller === viewer
           ? `You paid ${nameOf(detail, r.to_traveller)} back`
           : `${nameOf(detail, r.from_traveller)} paid ${nameOf(detail, r.to_traveller)} back`,
-    meta: [day.format(new Date(`${r.paid_on}T00:00:00Z`)), r.note].filter(Boolean).join(' · '),
+    meta: [shortDay(r.paid_on), r.note].filter(Boolean).join(' · '),
     amount: Number(r.amount),
   }))
 }

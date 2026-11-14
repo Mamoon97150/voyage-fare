@@ -4,7 +4,7 @@ import { formatMoney, parseAmount } from '../../lib/money'
 import { useRate } from '../../lib/rates'
 import { addPayment, deletePayment, setItemDue, type Item, type PaymentKind, type TripDetail } from '../../lib/trips'
 import { isSolo, leftLine } from '../../lib/tripView'
-import { localToday } from '../../lib/tripText'
+import { localToday, shortDay } from '../../lib/tripText'
 import { FormMessage } from '../AuthForm'
 import { CurrencyPicker, RateField } from '../RateField'
 
@@ -15,8 +15,6 @@ const KINDS: { key: PaymentKind; label: string }[] = [
 ]
 const KIND_WORD: Record<string, string> = { deposit: 'Deposit', balance: 'Balance', instalment: 'Instalment', payment: 'Paid' }
 const EACH = 'each'
-const day = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' })
-const dayOf = (iso: string) => day.format(new Date(`${iso}T00:00:00Z`))
 
 /**
  * Paid in parts (mockup left-to-pay-v4, step 1): on a booked line, what's been paid (each payment,
@@ -57,7 +55,7 @@ export function PaymentsPanel({ detail, item, viewer, onChanged }: { detail: Tri
                 <span>
                   <span className="payments__kind">{KIND_WORD[p.kind] ?? 'Paid'}</span>
                   <small>
-                    {p.paid_each ? 'each their own share' : name(p.paid_by)} · {dayOf(p.paid_on)}
+                    {p.paid_each ? 'each their own share' : name(p.paid_by)} · {shortDay(p.paid_on)}
                     {p.currency !== currency ? ` · ${formatMoney(Number(p.amount), p.currency)}` : ''}
                   </small>
                 </span>
@@ -127,7 +125,7 @@ function DueDate({ item, onChanged }: { item: Item; onChanged: () => void }) {
   }
   return (
     <label className="payments__due">
-      <span className="hand">{value ? `by ${dayOf(value)}` : 'when? (optional)'}</span>
+      <span className="hand">{value ? `by ${shortDay(value)}` : 'when? (optional)'}</span>
       <input type="date" className="field__input" value={value} onChange={(e) => void save(e.target.value)} aria-label="Balance due on" />
       {error && <FormMessage tone="error">{error}</FormMessage>}
     </label>
