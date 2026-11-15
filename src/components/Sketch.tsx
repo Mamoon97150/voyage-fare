@@ -11,9 +11,11 @@ import { useHandDrawn } from '../lib/useHandDrawn'
  * - light: working sheets (places, trip cards) that stack in long lists.
  * dashed: for what isn't a place (the whole-trip sheet).
  */
+// Fine coloured pencil (14 Nov 2026): a little sketchier than the old pen, corners that overshoot;
+// the grain comes from the #vf-pencil texture (index.html), applied in CSS.
 const WEIGHTS = {
-  strong: { roughness: 1.3, bowing: 1.4, strokeWidth: 1.4 },
-  light: { roughness: 1, bowing: 1, strokeWidth: 1 },
+  strong: { roughness: 1.8, bowing: 0.9, strokeWidth: 1.35, maxRandomnessOffset: 2.2 },
+  light: { roughness: 1.7, bowing: 0.8, strokeWidth: 1, maxRandomnessOffset: 2 },
 } as const
 
 export function SketchBox({
@@ -58,8 +60,10 @@ export function Underlined({ children }: { children: ReactNode }) {
   return (
     <span className="underlined">
       {children}
+      {/* A swipe of crayon (one of the two crayon accents, 14 Nov): two passes, textured in CSS. */}
       <svg viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true">
         <path d="M2 6c20-3 45-4 70-3 9 .4 18 1.3 26 2.4" />
+        <path className="underlined__second" d="M4 7c22-2 50-3 72-3 8 .3 16 .9 21 1.6" />
       </svg>
     </span>
   )

@@ -371,3 +371,23 @@ a {
   stroke-linecap: round;
   vector-effect: non-scaling-stroke;
 }
+
+/* The look (14 Nov 2026): lines in fine coloured pencil, the swipe under a word in crayon.
+   Textures #vf-pencil and #vf-crayon live in index.html. */
+.sketch-box__line,
+.folder-tab__line {
+  filter: url(#vf-pencil);
+}
+
+.underlined svg {
+  filter: url(#vf-crayon);
+}
+
+.underlined path {
+  stroke-width: 5;
+}
+
+.underlined path.underlined__second {
+  stroke-width: 3;
+  opacity: 0.8;
+}

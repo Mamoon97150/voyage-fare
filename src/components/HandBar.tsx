@@ -25,27 +25,49 @@ export function HandBar({
       // The palette's variables (tokens.css): no colour typed here.
       const colour = (name: string) => css.getPropertyValue(name).trim() || 'currentColor'
       const w = width - 4
-      const hatch = { roughness: 1.2, fillStyle: 'hachure', hachureGap: 3, fillWeight: 1.4, stroke: 'none' } as const
+      // Coloured in with crayon (one of the two crayon accents, 14 Nov 2026): broad strokes, crayon
+      // texture; the outline and the target mark stay in fine pencil. Textures live in index.html.
+      const hatch = {
+        roughness: 1.2,
+        fillStyle: 'hachure',
+        hachureGap: bare ? 3 : 4,
+        fillWeight: bare ? 2 : 3.2,
+        hachureAngle: -25,
+        stroke: 'none',
+      } as const
+      const texture = (name: 'vf-crayon' | 'vf-pencil') => (g: SVGElement) => {
+        g.setAttribute('filter', `url(#${name})`)
+        return g
+      }
+      const crayon = texture('vf-crayon')
+      const pencil = texture('vf-pencil')
       const parts: SVGElement[] = []
       if (confirmed > 0)
-        parts.push(pen.rectangle(2, 3, w * confirmed, height - 6, { ...hatch, seed: 3, fill: colour('--confirmed') }))
+        parts.push(
+          crayon(pen.rectangle(2, 3, w * confirmed, height - 6, { ...hatch, seed: 3, fill: colour('--confirmed') })),
+        )
       if (estimated > 0) {
         const fill = over ? colour('--over') : colour('--estimated')
-        parts.push(pen.rectangle(2 + w * confirmed, 3, w * estimated, height - 6, { ...hatch, seed: 4, fill }))
+        parts.push(crayon(pen.rectangle(2 + w * confirmed, 3, w * estimated, height - 6, { ...hatch, seed: 4, fill })))
       }
       if (!bare)
         parts.push(
-          pen.rectangle(2, 2, w, height - 4, {
-            seed: 5,
-            roughness: 0.9,
-            bowing: 1,
-            strokeWidth: 1.1,
-            stroke: colour('--ink-soft'),
-          }),
+          pencil(
+            pen.rectangle(2, 2, w, height - 4, {
+              seed: 5,
+              roughness: 1.6,
+              bowing: 0.8,
+              strokeWidth: 1.05,
+              maxRandomnessOffset: 1.6,
+              stroke: colour('--ink-soft'),
+            }),
+          ),
         )
       if (target !== null) {
         const x = 2 + w * target
-        parts.push(pen.line(x, -2, x, height + 2, { seed: 6, roughness: 0.6, strokeWidth: 2, stroke: colour('--ink') }))
+        parts.push(
+          pencil(pen.line(x, -2, x, height + 2, { seed: 6, roughness: 0.8, strokeWidth: 2, stroke: colour('--ink') })),
+        )
       }
       return parts
     },

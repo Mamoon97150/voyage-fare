@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Look study — pen or pencil (14 Nov)</title>
+    <script type="module">
+      import '/src/index.css'
+      import './forms.css'
+      import './v4.css'
+    </script>
+    <style>
+      .phone { padding: var(--space-4) var(--space-3) var(--space-6); }
+      h2.study { font-family: var(--font-title); font-size: var(--text-lg); text-align: center; margin-bottom: var(--space-1); }
+      p.study-sub { text-align: center; font-family: var(--font-hand); font-size: var(--text-note-l); color: var(--ink-soft); margin-bottom: var(--space-4); }
+      .drawn { position: relative; }
+      .drawn > svg.ink { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+      .sheet-x { padding: var(--space-3) var(--space-4) var(--space-4); margin-bottom: var(--space-4); }
+      .sheet-x h3 { font-family: var(--font-title); font-size: var(--text-lg); display: flex; align-items: baseline; gap: var(--space-2); padding-bottom: var(--space-2); }
+      .sheet-x h3 small { font-family: var(--font-text); font-size: var(--text-sm); color: var(--ink-soft); font-weight: 400; }
+      .sheet-x h3 b { margin-left: auto; font-family: var(--font-text); }
+      .row { display: flex; justify-content: space-between; padding: 0.5rem 0; font-size: var(--text-md); }
+      .row + .row { border-top: 1px solid var(--line); }
+      .row small { display: block; color: var(--ink-soft); font-size: var(--text-xs); }
+      .tag { font-size: var(--text-2xs); letter-spacing: .08em; text-transform: uppercase; font-weight: 600; color: var(--confirmed); display: block; text-align: right; }
+      .figure { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: var(--space-2); }
+      .figure b { font-family: var(--font-title); font-size: var(--text-3xl); font-weight: 600; }
+      .under { position: relative; display: inline-block; font-size: var(--text-md); }
+      .under svg { position: absolute; left: -3px; bottom: -0.5em; width: calc(100% + 6px); height: 10px; overflow: visible; }
+      .bar { height: 18px; margin-bottom: var(--space-4); }
+      .tabs { display: flex; gap: 4px; margin-bottom: var(--space-4); }
+      .tab { padding: 0.45rem 0.7rem 0.35rem; font-size: var(--text-sm); color: var(--ink-soft); }
+      .tab--on { color: var(--ink); font-weight: 600; }
+    </style>
+  </head>
+  <body>
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+      <defs>
+        <!-- Pencil grain: the stroke is eaten by paper texture, like graphite on paper. -->
+        <filter id="grain" x="-5%" y="-20%" width="110%" height="140%">
+          <feTurbulence type="fractalNoise" baseFrequency="1.6" numOctaves="2" seed="4" result="noise" />
+          <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.6 1.35" result="mask" />
+          <feComposite in="SourceGraphic" in2="mask" operator="in" result="grained" />
+          <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="1" seed="9" result="wobble" />
+          <feDisplacementMap in="grained" in2="wobble" scale="1.4" />
+        </filter>
+        <!-- Crayon / charcoal (Djamina's reference, 14 Nov): coarse grain, ragged edges, dark streaks. -->
+        <filter id="crayon" x="-5%" y="-30%" width="110%" height="160%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.32 0.9" numOctaves="3" seed="7" result="noise" />
+          <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.9 1.62" result="mask" />
+          <feComposite in="SourceGraphic" in2="mask" operator="in" result="grained" />
+          <feTurbulence type="fractalNoise" baseFrequency="0.09" numOctaves="2" seed="3" result="rag" />
+          <feDisplacementMap in="grained" in2="rag" scale="2.4" />
+        </filter>
+      </defs>
+    </svg>
+
+    <div class="phones">
+      <figure><div class="phone" data-style="coloured"></div>
+        <figcaption><b>C · Coloured pencils (before).</b> Fine pencil grain, thin lines.</figcaption></figure>
+      <figure><div class="phone" data-style="crayon"></div>
+        <figcaption><b>D · Crayon, medium.</b> Like the reference: wide strokes, coarse grain, ragged edges; outlines about twice a pen's width; the underline is a crayon swipe; the bar is coloured in with broad crayon strokes.</figcaption></figure>
+      <figure><div class="phone" data-style="crayonBold"></div>
+        <figcaption><b>E · Crayon, bold.</b> The same, heavier: outlines three times a pen, darker streaks — closest to charcoal.</figcaption></figure>
+    </div>
+
+    <script type="module">
+      import rough from 'roughjs'
+      const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim()
+      const STYLES = {
+        pen: { title: 'A · Pen', sub: 'what the app draws today', stroke: () => css('--ink-soft'), line: { roughness: 1, bowing: 1, strokeWidth: 1 }, grain: false, barFill: (c) => c, barHatch: { hachureGap: 3, fillWeight: 1.4 } },
+        graphite: { title: 'B · Graphite pencil', sub: 'a drawing pencil, grey and grainy', stroke: () => '#55585c', line: { roughness: 1.9, bowing: 0.8, strokeWidth: 0.9, maxRandomnessOffset: 2.4 }, grain: true, barFill: () => '#6b6f73', barHatch: { hachureGap: 2.2, fillWeight: 0.9, hachureAngle: -50 } },
+        crayon: { title: 'D · Crayon, medium', sub: 'wide, grainy, ragged — in the palette', stroke: () => '#3f4743', line: { roughness: 1.3, bowing: 0.7, strokeWidth: 2.1, maxRandomnessOffset: 1.6 }, grain: 'crayon', underW: 6, barFill: (c) => c, barHatch: { hachureGap: 4, fillWeight: 3.2, hachureAngle: -25 } },
+        crayonBold: { title: 'E · Crayon, bold', sub: 'heavier, closer to charcoal', stroke: () => '#2f3532', line: { roughness: 1.4, bowing: 0.7, strokeWidth: 3.1, maxRandomnessOffset: 1.8 }, grain: 'crayon', underW: 8, barFill: (c) => c, barHatch: { hachureGap: 4.5, fillWeight: 4.2, hachureAngle: -25 } },
+        coloured: { title: 'C · Coloured pencils', sub: 'pencil grain, in the palette', stroke: () => css('--ink-soft'), line: { roughness: 1.7, bowing: 0.8, strokeWidth: 1, maxRandomnessOffset: 2 }, grain: true, barFill: (c) => c, barHatch: { hachureGap: 2.4, fillWeight: 1, fillStyle: 'cross-hatch', hachureAngle: -45 } },
+      }
+
+      function content(s) {
+        return `
+          <h2 class="study">${s.title}</h2><p class="study-sub">${s.sub}</p>
+          <div class="figure"><b>3 519 €</b><span class="under">your share<svg class="u"></svg></span></div>
+          <div class="drawn bar" data-bar><svg class="ink"></svg></div>
+          <div class="tabs">${['Travel', 'Stay', 'Food'].map((t, i) => `<span class="drawn tab${i === 1 ? ' tab--on' : ''}" data-tab="${i === 1}"><svg class="ink"></svg>${t}</span>`).join('')}</div>
+          <div class="drawn sheet-x" data-sheet><svg class="ink"></svg>
+            <h3>Bogotá <small>2 nights</small><b>119 €</b></h3>
+            <div class="row"><span>Grand Hyatt Bogotá<small>Stay · days 1–3</small></span><span>in the<span class="tag" style="color:var(--chosen)">Package</span></span></div>
+            <div class="row"><span>Andrés DC<small>Food · day 2</small></span><span>45 €<span class="tag">Paid</span></span></div>
+          </div>
+          <div class="drawn sheet-x" data-sheet data-strong><svg class="ink"></svg><span class="tape tape--mustard"></span>
+            <p class="hand-note" style="padding-top:var(--space-3)">a strong sheet, with tape</p>
+          </div>`
+      }
+
+      await document.fonts.ready
+      for (const phone of document.querySelectorAll('.phone')) {
+        const s = STYLES[phone.dataset.style]
+        phone.innerHTML = content(s)
+      }
+      await new Promise((r) => requestAnimationFrame(r))
+
+      for (const phone of document.querySelectorAll('.phone')) {
+        const s = STYLES[phone.dataset.style]
+        const stroke = s.stroke()
+        const g = (svg) => { if (s.grain) svg.setAttribute('filter', s.grain === 'crayon' ? 'url(#crayon)' : 'url(#grain)') }
+        let seed = 3
+        for (const el of phone.querySelectorAll('[data-sheet]')) {
+          const svg = el.querySelector('svg'); const { width: w, height: h } = el.getBoundingClientRect()
+          svg.setAttribute('viewBox', `0 0 ${w} ${h}`); g(svg)
+          const strong = el.hasAttribute('data-strong')
+          svg.appendChild(rough.svg(svg).rectangle(2, 2, w - 4, h - 4, { seed: seed++, stroke, ...s.line, strokeWidth: s.line.strokeWidth * (strong ? 1.35 : 1) }))
+        }
+        for (const el of phone.querySelectorAll('[data-tab]')) {
+          const svg = el.querySelector('svg'); const { width: w, height: h } = el.getBoundingClientRect()
+          svg.setAttribute('viewBox', `0 0 ${w} ${h}`); g(svg)
+          svg.appendChild(rough.svg(svg).linearPath([[2, h + 2], [5, 3], [w - 5, 3], [w - 2, h + 2]], { seed: seed++, stroke, ...s.line }))
+        }
+        for (const svg of phone.querySelectorAll('svg.u')) {
+          const w = svg.getBoundingClientRect().width
+          svg.setAttribute('viewBox', `0 0 ${w} 10`); g(svg)
+          const col = s.title.startsWith('B') ? '#6b6f73' : css('--estimated')
+          const width = s.underW || (s.grain ? 2.2 : 1.8)
+          svg.appendChild(rough.svg(svg).curve([[0, 6], [w * 0.4, 4], [w * 0.8, 5], [w, 3]], { seed: 11, roughness: 1, strokeWidth: width, stroke: col }))
+          if (s.underW) svg.appendChild(rough.svg(svg).curve([[2, 7], [w * 0.5, 5.5], [w - 4, 4.5]], { seed: 12, roughness: 1.2, strokeWidth: width * 0.6, stroke: col }))
+        }
+        for (const el of phone.querySelectorAll('[data-bar]')) {
+          const svg = el.querySelector('svg'); const { width: w, height: h } = el.getBoundingClientRect()
+          svg.setAttribute('viewBox', `0 0 ${w} ${h}`); g(svg)
+          const r = rough.svg(svg); const inner = w - 4
+          const hatch = { roughness: 1.2, fillStyle: 'hachure', stroke: 'none', ...s.barHatch }
+          svg.appendChild(r.rectangle(2, 3, inner * 0.82, h - 6, { ...hatch, seed: 3, fill: s.barFill(css('--confirmed')) }))
+          svg.appendChild(r.rectangle(2 + inner * 0.82, 3, inner * 0.1, h - 6, { ...hatch, seed: 4, fill: s.title.startsWith('B') ? '#a3a6a9' : css('--estimated') }))
+          svg.appendChild(r.rectangle(2, 1, inner, h - 2, { seed: 5, stroke, ...s.line }))
+        }
+      }
+    </script>
+  </body>
+</html>

@@ -29,7 +29,14 @@ function FolderTab({ on, todo, label, onClick }: { on: boolean; todo: boolean; l
             [width - 5, 3],
             [width - 2, foot],
           ],
-          { seed: label.length * 7, roughness: 0.9, bowing: 0.6, strokeWidth: 1.1, stroke: 'currentColor' },
+          {
+            seed: label.length * 7,
+            roughness: 1.6,
+            bowing: 0.7,
+            strokeWidth: 1.05,
+            maxRandomnessOffset: 1.8,
+            stroke: 'currentColor',
+          },
         ),
       ]
     },
