@@ -5,10 +5,27 @@ import { useEffect, useState, useSyncExternalStore } from 'react'
 /** Keep the app itself on the phone, so it opens without the internet. Built app only. */
 export function registerServiceWorker() {
   if (!import.meta.env.PROD || !('serviceWorker' in navigator)) return
+  // Already kept on this phone? Then a new service worker taking over means a new version is out.
+  const hadOne = Boolean(navigator.serviceWorker.controller)
+  let reloading = false
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    // Load the new version at once (15 Nov: an old copy left open on the iPhone couldn't sign in).
+    if (!hadOne || reloading) return
+    reloading = true
+    window.location.reload()
+  })
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {
-      // No service worker: the app still works, it just needs the internet to open.
-    })
+    navigator.serviceWorker
+      .register('/sw.js')
+      .then((registration) => {
+        // A home-screen app can stay open for days: look for a new version each time it comes back.
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') registration.update().catch(() => {})
+        })
+      })
+      .catch(() => {
+        // No service worker: the app still works, it just needs the internet to open.
+      })
   })
 }
 
