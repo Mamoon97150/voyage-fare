@@ -8,12 +8,14 @@ import { AddPlace } from '../components/trip/AddPlace'
 import { EstimateForm, EstimateRows } from '../components/trip/DailyEstimates'
 import { AddItem } from '../components/trip/ItemForm'
 import { ItemRow } from '../components/trip/ItemRow'
+import { PlacesWeLoved, ToTryForm, ToTryRow } from '../components/trip/ToTry'
 import { PlaceForm } from '../components/trip/PlaceForm'
 import { RouteGap } from '../components/trip/RouteGap'
 import { RouteCard } from '../components/trip/RouteCard'
 import { TripTopBar } from '../components/trip/TripTopBar'
 import { WelcomeNote } from '../components/trip/WelcomeNote'
 import { Loading } from '../lib/auth'
+import { isToTry } from '../lib/toTry'
 import { useTrip } from '../lib/useTrip'
 import { hintSeen, markHintSeen } from '../lib/hints'
 import { useAuth } from '../lib/authContext'
@@ -154,7 +156,10 @@ export function TripPage() {
                         </span>
                         <h2 id={`place-${place.id}`} className="place__name">
                           {place.name}
-                          <small>{place.nights ? plural(place.nights, 'night') : 'nights not set'}</small>
+                          <small>
+                            {place.nights ? plural(place.nights, 'night') : 'nights not set'}
+                            {placeItems.some(isToTry) && ` · ${placeItems.filter(isToTry).length} to try`}
+                          </small>
                         </h2>
                         <span className="place__total num">
                           {formatWhole(placeTotal(detail, place, viewer, shownMode), trip.currency)}
@@ -189,22 +194,29 @@ export function TripPage() {
                       )}
                       {groupPlaceItems(placeItems).map((group) => (
                         <div key={group.key} className="item-group">
-                          <p className="item-group__label">{group.label}</p>
+                          <p className="item-group__label">
+                            {group.label}
+                            {group.key === 'to-try' && <span className="hand item-group__note">no day yet</span>}
+                          </p>
                           <ul className="item-list">
-                            {group.items.map((it) => (
-                              <ItemRow
-                                key={it.id}
-                                detail={detail}
-                                item={it}
-                                viewer={viewer}
-                                mode={shownMode}
-                                kinds={KINDS_FOR_PLACE}
-                                days={days}
-                                onChanged={reload}
-                                onOpen={opened}
-                                showDays={group.key === 'stay' || group.key === 'ideas'}
-                              />
-                            ))}
+                            {group.items.map((it) =>
+                              group.key === 'to-try' ? (
+                                <ToTryRow key={it.id} detail={detail} item={it} onChanged={reload} />
+                              ) : (
+                                <ItemRow
+                                  key={it.id}
+                                  detail={detail}
+                                  item={it}
+                                  viewer={viewer}
+                                  mode={shownMode}
+                                  kinds={KINDS_FOR_PLACE}
+                                  days={days}
+                                  onChanged={reload}
+                                  onOpen={opened}
+                                  showDays={group.key === 'stay' || group.key === 'ideas'}
+                                />
+                              ),
+                            )}
                           </ul>
                         </div>
                       ))}
@@ -224,6 +236,8 @@ export function TripPage() {
                           onAdded={added}
                           onCancel={() => setAdding(null)}
                         />
+                      ) : adding === `to-try:${place.id}` ? (
+                        <ToTryForm detail={detail} placeId={place.id} onDone={added} onCancel={() => setAdding(null)} />
                       ) : adding === `estimate:${place.id}` ? (
                         <EstimateForm
                           detail={detail}
@@ -238,6 +252,16 @@ export function TripPage() {
                               +
                             </span>
                             Add to {place.name}
+                          </button>
+                          <button
+                            type="button"
+                            className="add-row place__add"
+                            onClick={() => setAdding(`to-try:${place.id}`)}
+                          >
+                            <span className="add-row__plus" aria-hidden="true">
+                              +
+                            </span>
+                            To try
                           </button>
                           <button
                             type="button"
@@ -338,6 +362,7 @@ export function TripPage() {
                 Add a place
               </button>
             )}
+            <PlacesWeLoved detail={detail} />
           </>
         )}
       </div>

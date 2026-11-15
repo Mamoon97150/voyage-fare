@@ -411,7 +411,9 @@ export type Database = {
           id: string
           kind: string
           latitude: number | null
+          link: string | null
           location_name: string | null
+          meal: string | null
           longitude: number | null
           name: string
           note: string | null
@@ -423,6 +425,7 @@ export type Database = {
           position: number
           status: string
           trip_id: string
+          verdict: string | null
         }
         Insert: {
           actual_amount?: number | null
@@ -436,7 +439,9 @@ export type Database = {
           id?: string
           kind: string
           latitude?: number | null
+          link?: string | null
           location_name?: string | null
+          meal?: string | null
           longitude?: number | null
           name: string
           note?: string | null
@@ -448,6 +453,7 @@ export type Database = {
           position?: number
           status?: string
           trip_id: string
+          verdict?: string | null
         }
         Update: {
           actual_amount?: number | null
@@ -461,7 +467,9 @@ export type Database = {
           id?: string
           kind?: string
           latitude?: number | null
+          link?: string | null
           location_name?: string | null
+          meal?: string | null
           longitude?: number | null
           name?: string
           note?: string | null
@@ -473,6 +481,7 @@ export type Database = {
           position?: number
           status?: string
           trip_id?: string
+          verdict?: string | null
         }
         Relationships: [
           {
@@ -1353,6 +1362,16 @@ export type Database = {
       }
     }
     Functions: {
+      add_to_try: {
+        Args: {
+          p_amount?: number
+          p_link?: string
+          p_name: string
+          p_note?: string
+          p_place_id: string
+        }
+        Returns: string
+      }
       accept_invitation: { Args: { p_token: string }; Returns: string }
       add_item: {
         Args: {
@@ -1475,6 +1494,10 @@ export type Database = {
         Args: { p_item_id: string; p_package_id: string }
         Returns: undefined
       }
+      set_restaurant_day: {
+        Args: { p_day: number; p_item_id: string; p_meal?: string }
+        Returns: undefined
+      }
       set_item_split: {
         Args: { p_item_id: string; p_travellers: string[] }
         Returns: undefined
@@ -1529,6 +1552,17 @@ export type Database = {
           from_traveller: string
           to_traveller: string
         }[]
+      }
+      update_to_try: {
+        Args: {
+          p_amount?: number
+          p_item_id: string
+          p_link?: string
+          p_name: string
+          p_note?: string
+          p_place_id: string
+        }
+        Returns: undefined
       }
       update_item: {
         Args: {

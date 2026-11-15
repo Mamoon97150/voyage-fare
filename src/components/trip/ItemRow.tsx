@@ -11,6 +11,9 @@ import { DropControl } from './DropControl'
 import { ItemForm } from './ItemForm'
 import { StatusForm } from './StatusForm'
 import { WhoFor } from './WhoFor'
+import { BackToTry, SourceBadge, VerdictChips } from './ToTry'
+import { dayHasCome, inFoodBudget, MEALS, VERDICTS } from '../../lib/toTry'
+import { todayIso } from '../../lib/shelf'
 
 /**
  * One line of the notebook: a dot (green confirmed, mustard estimated, hollow no price), the name,
@@ -39,18 +42,22 @@ export function ItemRow({
 }) {
   const [editing, setEditing] = useState(false)
   const line = itemLine(detail, item, viewer, mode)
+  const foodBudget = inFoodBudget(detail, item)
   const dot =
     item.status === 'dropped'
       ? 'dot--none'
-      : !line.priced
-        ? 'dot--none'
-        : line.confirmed
-          ? 'dot--confirmed'
-          : 'dot--estimated'
+      : foodBudget
+        ? 'dot--estimated'
+        : !line.priced
+          ? 'dot--none'
+          : line.confirmed
+            ? 'dot--confirmed'
+            : 'dot--estimated'
   const { title, decision } = itemTitle(detail, item)
   const meta = [
     decision ?? kindLabel(item.kind as ItemKind, item.place_id !== null).label,
     showDays ? daysText(item) : null,
+    item.meal ? MEALS.find(([k]) => k === item.meal)?.[1].toLowerCase() : null,
     optionCount(detail, item) >= 2 ? `${optionCount(detail, item)} options compared` : null,
     item.note,
   ]
@@ -96,6 +103,13 @@ export function ItemRow({
         />
         <WhoFor detail={detail} item={item} onChanged={onChanged} />
         <PartOfPackage detail={detail} item={item} onChanged={onChanged} />
+        <BackToTry
+          item={item}
+          onChanged={() => {
+            setEditing(false)
+            onChanged()
+          }}
+        />
         <DropControl
           item={item}
           onChanged={() => {
@@ -135,20 +149,42 @@ export function ItemRow({
         <span className="item-row__main">
           <span className="item-row__name">{title}</span>
           {meta && <span className="item-row__meta">{meta}</span>}
+          {(item.link || item.verdict) && (
+            <span className="item-row__meta item-row__source">
+              <SourceBadge link={item.link} asLink={false} />
+              {item.verdict && (
+                <span className={`verdict-word verdict-word--${item.verdict}`}>
+                  {item.verdict === 'loved'
+                    ? '♥ loved it'
+                    : VERDICTS.find(([k]) => k === item.verdict)?.[1].toLowerCase()}
+                </span>
+              )}
+            </span>
+          )}
           {item.kind === 'package' && coversText(detail, item) && (
             <span className="item-row__hand">{coversText(detail, item)}</span>
           )}
           <LeftWords line={leftLine(detail, item, viewer, mode)} part="reminder" />
         </span>
         <span className="item-row__amount num">
-          <b>{amountText(line, item, detail.trip.currency)}</b>
-          {statusWord(item) && <span className={statusWord(item)!.className}>{statusWord(item)!.text}</span>}
+          <b className={foodBudget ? 'item-row__food' : undefined}>
+            {foodBudget ? 'in your food budget' : amountText(line, item, detail.trip.currency)}
+          </b>
+          {!foodBudget && statusWord(item) && (
+            <span className={statusWord(item)!.className}>{statusWord(item)!.text}</span>
+          )}
           <LeftWords line={leftLine(detail, item, viewer, mode)} currency={detail.trip.currency} part="left" />
         </span>
         <span className="item-row__chev" aria-hidden="true">
           ›
         </span>
       </button>
+      {item.kind === 'restaurant' &&
+        !item.verdict &&
+        item.status !== 'dropped' &&
+        dayHasCome(detail.trip.start_date, item.day_number, todayIso()) && (
+          <VerdictChips item={item} onChanged={onChanged} />
+        )}
     </li>
   )
 }

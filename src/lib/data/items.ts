@@ -1,5 +1,6 @@
 // Lines, tickets and places: add, change, remove.
 import { supabase } from '../supabase'
+import { sqlNull } from './sql'
 import type { Place } from './trips'
 
 export type ItemKind =
@@ -199,5 +200,65 @@ export async function updatePlace(id: string, change: { name: string; nights: nu
 /** The place and its items; tickets after it move up in the route. */
 export async function deletePlace(id: string): Promise<void> {
   const { error } = await supabase.rpc('delete_place', { p_place_id: id })
+  if (error) throw error
+}
+
+// ── The restaurant pool "To try" (mockup to-try-v5, 15 Nov) ──────────────────────
+
+export type Meal = 'breakfast' | 'lunch' | 'dinner'
+export type Verdict = 'loved' | 'fine' | 'skip'
+
+/** A restaurant kept with a place, no day: its link, a note, a price if known (it doesn't count yet). */
+export async function addToTry(entry: {
+  placeId: string
+  name: string
+  link: string | null
+  note: string | null
+  amount: number | null
+}): Promise<string> {
+  const { data, error } = await supabase.rpc('add_to_try', {
+    p_place_id: entry.placeId,
+    p_name: entry.name,
+    p_link: entry.link ?? undefined,
+    p_note: entry.note ?? undefined,
+    p_amount: entry.amount ?? undefined,
+  })
+  if (error) throw error
+  return data
+}
+
+/** On a day (its price starts counting), or back to To try with day null. */
+export async function setRestaurantDay(id: string, day: number | null, meal: Meal | null = null): Promise<void> {
+  const { error } = await supabase.rpc('set_restaurant_day', {
+    p_item_id: id,
+    p_day: sqlNull(day),
+    p_meal: meal ?? undefined,
+  })
+  if (error) throw error
+}
+
+/** "♥ Loved it · Fine · Skip", once you've been; null takes it back. */
+export async function setVerdict(id: string, verdict: Verdict | null): Promise<void> {
+  const { error } = await supabase.from('items').update({ verdict }).eq('id', id)
+  if (error) throw error
+}
+
+/** Change a pool restaurant: its name, place, link, note and price (still not counting). */
+export async function updateToTry(entry: {
+  id: string
+  placeId: string
+  name: string
+  link: string | null
+  note: string | null
+  amount: number | null
+}): Promise<void> {
+  const { error } = await supabase.rpc('update_to_try', {
+    p_item_id: entry.id,
+    p_place_id: entry.placeId,
+    p_name: entry.name,
+    p_link: entry.link ?? undefined,
+    p_note: entry.note ?? undefined,
+    p_amount: entry.amount ?? undefined,
+  })
   if (error) throw error
 }

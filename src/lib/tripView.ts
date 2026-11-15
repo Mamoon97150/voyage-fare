@@ -107,7 +107,7 @@ export function daysText(item: Pick<Item, 'day_number' | 'end_day_number'>): str
 
 export type ItemGroup = { key: string; label: string; items: Item[] }
 
-/** A place's items as in the mockup: the stay first, then day by day, then ideas with no day. */
+/** A place's items as in the mockup: the stay first, then day by day, then To try, then ideas with no day. */
 export function groupPlaceItems(items: Item[]): ItemGroup[] {
   const stays = items.filter((i) => i.kind === 'housing')
   const rest = items.filter((i) => i.kind !== 'housing')
@@ -116,7 +116,10 @@ export function groupPlaceItems(items: Item[]): ItemGroup[] {
   if (stays.length) groups.push({ key: 'stay', label: 'Stay', items: stays })
   for (const d of days)
     groups.push({ key: `day-${d}`, label: `Day ${d}`, items: rest.filter((i) => i.day_number === d) })
-  const ideas = rest.filter((i) => !i.day_number)
+  // Restaurants with no day are the pool "To try" (build 7); other things with no day are ideas.
+  const toTry = rest.filter((i) => !i.day_number && i.kind === 'restaurant' && i.status === 'idea')
+  if (toTry.length) groups.push({ key: 'to-try', label: 'To try', items: toTry })
+  const ideas = rest.filter((i) => !i.day_number && !toTry.includes(i))
   if (ideas.length) groups.push({ key: 'ideas', label: 'Ideas, no day yet', items: ideas })
   return groups
 }

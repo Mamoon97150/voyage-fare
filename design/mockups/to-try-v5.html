@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mockup — Restaurant pool “To try” (v5 look, 15 Nov)</title>
+    <script type="module">
+      import '/src/index.css'
+      import './forms.css'
+      import './v4.css'
+      import './v5.js'
+    </script>
+    <style>
+      .phone { padding: var(--space-3) var(--space-3) var(--space-6); }
+      .hand { font-family: var(--font-hand); color: var(--ink-soft); line-height: 1.2; }
+      .place-no { font-family: var(--font-hand); font-size: 1.2rem; color: var(--ink-soft); }
+      .item-group__label { display: flex; justify-content: space-between; align-items: baseline; }
+      .item-group__label .hand { text-transform: none; letter-spacing: 0; font-weight: 400; font-size: 1.1rem; }
+      .est { border-top: 1px dashed var(--line); }
+      .est .line__name::before { content: '≈ '; color: var(--estimated-ink); }
+      .est-calc { display: block; font-family: var(--font-hand); font-size: 1.1rem; color: var(--ink-soft); line-height: 1.15; }
+      .dot { display: inline-block; width: .55rem; height: .55rem; border-radius: 50%; margin-right: .4rem; vertical-align: .1em; background: var(--confirmed); }
+      .dot--est { background: var(--estimated); }
+      .dot--open { background: transparent; border: 1.5px solid var(--ink-soft); }
+
+      /* The To try group */
+      .try { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0 var(--space-3); align-items: start; padding: .6rem 0; border-top: 1px solid var(--line); }
+      .try:first-of-type { border-top: 0; }
+      .try__name { font-weight: 600; }
+      .source { display: flex; align-items: center; gap: .3rem; margin-top: .2rem; font-size: var(--text-xs); color: var(--ink-soft); }
+      .source i { font-style: normal; display: inline-grid; place-items: center; width: 1rem; height: 1rem; border-radius: 4px; font-size: .55rem; font-weight: 700; color: #fff; }
+      .source .ig { background: linear-gradient(45deg, #f09433, #dc2743 60%, #bc1888); }
+      .source .tt { background: #111; }
+      .source .gm { background: #34a853; }
+      .try .hand { display: block; font-size: 1.15rem; margin-top: .1rem; }
+      .try__side { display: flex; flex-direction: column; align-items: flex-end; gap: .3rem; }
+      .try__price { font-size: var(--text-sm); color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+      .day-btn { display: inline-flex; align-items: center; gap: .25rem; padding: .25rem .65rem; border: 1.5px solid var(--ink); border-radius: 999px; font-size: var(--text-xs); font-weight: 600; background: var(--paper-raised); white-space: nowrap; }
+      .heart { color: var(--estimated); }
+      .adds { display: flex; gap: var(--space-4); padding-top: var(--space-2); flex-wrap: wrap; }
+      .adds span { font-size: .875rem; font-weight: 600; color: var(--confirmed); }
+      .margin-note { font-family: var(--font-hand); font-size: 1.15rem; color: var(--ink-soft); line-height: 1.2; padding: var(--space-3) var(--space-2) 0; transform: rotate(-1deg); }
+      .in-food { font-size: var(--text-xs); color: var(--ink-soft); text-align: right; line-height: 1.25; }
+      .from-try { font-family: var(--font-hand); font-size: 1.05rem; color: var(--confirmed); }
+
+      /* Adding from a link */
+      .field { margin-bottom: var(--space-3); }
+      .pasted { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--space-2); align-items: center; padding: var(--space-2) var(--space-3); border: 1.5px dashed var(--line); border-radius: 10px; background: var(--paper); }
+      .pasted .thumb { width: 3rem; height: 3rem; border-radius: 6px; background: linear-gradient(135deg, #e9c79a, #c46b3c 60%, #6a3b26); }
+      .pasted b { display: block; font-size: var(--text-sm); }
+      .pasted span { font-size: var(--text-xs); color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
+      .chips { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: var(--space-1) 0 var(--space-3); }
+      .chips .chip { min-height: 2.1rem; font-size: .8125rem; }
+      .optional { font-size: var(--text-sm); font-weight: 600; color: var(--confirmed); margin: 0 0 var(--space-3); }
+      .add-item__actions { display: flex; gap: var(--space-2); justify-content: flex-end; }
+      .share-tip { margin-top: var(--space-4); padding: var(--space-3); background: var(--paper-note); border-radius: 10px; box-shadow: 0 1px 0 var(--line), 0 2px 6px rgb(31 42 36 / .08); transform: rotate(-1deg); }
+      .share-tip p { font-size: var(--text-sm); line-height: 1.4; }
+      .share-tip .hand { font-size: 1.15rem; }
+      .share-row { display: flex; gap: var(--space-2); margin-top: var(--space-2); }
+      .share-row span { flex: 1; text-align: center; font-size: .65rem; color: var(--ink-soft); }
+      .share-row b { display: grid; place-items: center; margin: 0 auto .2rem; width: 2.3rem; height: 2.3rem; border-radius: 10px; background: var(--line); font-size: .9rem; color: var(--ink); }
+      .share-row .vf b { background: var(--paper-raised); border: 1.5px solid var(--ink); }
+
+      /* Putting it on a day */
+      .picker { margin: var(--space-2) 0 var(--space-1); padding: var(--space-3); border: 1.5px dashed var(--line); border-radius: 10px; grid-column: 1 / -1; }
+      .picker p.q { font-size: var(--text-sm); font-weight: 600; margin-bottom: var(--space-2); }
+      .days { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-2); }
+      .day { display: flex; flex-direction: column; align-items: center; padding: .45rem .2rem; border: 1.5px solid var(--line); border-radius: 10px; font-size: var(--text-xs); color: var(--ink-soft); background: var(--paper-raised); }
+      .day b { font-size: var(--text-md); color: var(--ink); }
+      .day small { font-size: .65rem; margin-top: .15rem; text-align: center; line-height: 1.2; }
+      .day--on { border-color: var(--chosen); box-shadow: 0 0 0 1.5px var(--chosen); }
+      .day--busy small { color: var(--estimated-text); }
+      .meal { display: flex; gap: var(--space-2); margin-top: var(--space-3); }
+      .meal .chip { flex: 1; min-height: 2.1rem; font-size: .8125rem; }
+      .picker .hand { font-size: 1.1rem; margin-top: var(--space-2); }
+      .picker .add-item__actions { margin-top: var(--space-3); }
+
+      /* Tried it */
+      .tried { display: flex; gap: var(--space-2); margin-top: .35rem; flex-wrap: wrap; }
+      .tried span { padding: .2rem .6rem; border: 1.5px solid var(--line); border-radius: 999px; font-size: var(--text-xs); font-weight: 600; }
+      .tried .on { border-color: var(--estimated); color: var(--estimated-text); }
+      .loved { color: var(--estimated-text); font-size: var(--text-xs); font-weight: 600; }
+      .words { font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; font-weight: 600; color: var(--ink-soft); margin: var(--space-4) 0 var(--space-1); }
+      figcaption ul { margin: var(--space-2) 0 0 1rem; }
+      figcaption li { margin-top: .25rem; }
+    </style>
+  </head>
+  <body>
+    <div class="phones">
+
+      <!-- 1. The pool on the place -->
+      <figure>
+        <div class="phone">
+          <div class="sketch-box sketch-box--light card" data-seed="61">
+            <svg class="sketch-box__line" aria-hidden="true"></svg>
+            <header class="card__head"><h2>Medellín<small>4 nights · 3 to try</small></h2><span class="place-no">3</span></header>
+            <p class="item-group__label">Stay</p>
+            <div class="line"><span><span class="line__name"><span class="dot"></span>Apartment Laureles</span><span class="line__meta">Stay · days 6–10</span></span><span class="line__amount">212 €<span class="line__tag line__tag--ok">Paid</span></span></div>
+            <p class="item-group__label">Day 7</p>
+            <div class="line"><span><span class="line__name"><span class="dot"></span>Comuna 13 tour</span><span class="line__meta">Activities</span></span><span class="line__amount">18 €<span class="line__tag line__tag--ok">Paid</span></span></div>
+            <div class="line"><span><span class="line__name"><span class="dot dot--est"></span>Carmen</span><span class="line__meta">Food · dinner</span><span class="from-try">from To try</span></span><span class="in-food">in your<br />food budget</span></div>
+
+            <p class="item-group__label">To try <span class="hand">no day yet</span></p>
+            <div class="try">
+              <span><span class="try__name">El Cielo</span><span class="source"><i class="ig">IG</i>@elcielomedellin</span><span class="hand">the tasting menu everyone posts</span></span>
+              <span class="try__side"><span class="try__price">≈ 95 € each</span><span class="day-btn">Day ▾</span></span>
+            </div>
+            <div class="try">
+              <span><span class="try__name">Mondongo’s</span><span class="source"><i class="tt">TT</i>@comidascolombia</span><span class="hand">Danielle wants the mondongo</span></span>
+              <span class="try__side"><span class="day-btn">Day ▾</span></span>
+            </div>
+            <div class="try">
+              <span><span class="try__name">Pergamino café</span><span class="source"><i class="gm">G</i>Google Maps</span></span>
+              <span class="try__side"><span class="day-btn">Day ▾</span></span>
+            </div>
+
+            <div class="line est"><span><span class="line__name">Food &amp; drinks</span><span class="est-calc">30 € a day each × 4 days</span></span><span class="line__amount">120 €<span class="line__tag line__tag--owe">Estimated</span></span></div>
+            <div class="adds"><span>+ Add</span><span>+ To try</span><span>+ Daily estimate</span></div>
+          </div>
+          <p class="margin-note">The places you saved on Instagram, kept with the city, not stuck on a day.</p>
+        </div>
+        <figcaption><b>1 · “To try” on each place.</b> The restaurants you find on social media, under the place’s days, with:
+          <ul>
+            <li><b>where you found it</b> (Instagram, TikTok, Google Maps…). Tap it to open the post again.</li>
+            <li>an optional note in handwriting, and an optional price.</li>
+            <li><b>Day ▾</b> to put it on a day in one tap.</li>
+          </ul>
+          They <b>don’t count in the budget</b> while they’re ideas. The place’s title says how many are waiting (“3 to try”). Activities with no day keep their own “Ideas, no day yet” group.</figcaption>
+      </figure>
+
+      <!-- 2. Adding from a link -->
+      <figure>
+        <div class="phone">
+          <div class="sketch-box sketch-box--strong card" data-seed="62">
+            <svg class="sketch-box__line" aria-hidden="true"></svg>
+            <span class="tape tape--mustard" aria-hidden="true"></span>
+            <header class="card__head"><h2>To try<small>Medellín</small></h2></header>
+            <div class="field"><label class="field__label">Link</label><input class="field__input" value="https://www.instagram.com/p/C9xK2…" /></div>
+            <div class="pasted"><span class="thumb"></span><span><b>El Cielo · Instagram</b><span>@elcielomedellin · “The 18-course tasting menu in Medellín…”</span></span></div>
+            <p class="hand" style="font-size:1.1rem;margin:.3rem 0 var(--space-3)">↑ the name and the account filled in from the post</p>
+            <div class="field"><label class="field__label">Name</label><input class="field__input" value="El Cielo" /></div>
+            <span class="field__label">Where</span>
+            <div class="chips"><button class="chip" aria-pressed="false">Bogotá</button><button class="chip" aria-pressed="false">Guatapé</button><button class="chip" aria-pressed="true">Medellín</button><button class="chip" aria-pressed="false">Cartagena</button><button class="chip" aria-pressed="false">Panama</button></div>
+            <div class="field"><label class="field__label">A note <span style="font-weight:400;color:var(--ink-soft)">(optional)</span></label><input class="field__input" value="the tasting menu everyone posts" /></div>
+            <p class="optional">+ A price, if you know it</p>
+            <div class="add-item__actions"><button class="button button--quiet">Cancel</button><button class="button button--primary">Add to To try</button></div>
+          </div>
+          <div class="share-tip">
+            <p class="hand">even quicker, from Instagram:</p>
+            <p>Tap <b>Share</b> on the post, then <b>Voyage Fare</b>. This form opens with the link already in.</p>
+            <div class="share-row"><span><b>💬</b>Messages</span><span><b>✉</b>Mail</span><span class="vf"><b>🧭</b>Voyage Fare</span><span><b>⋯</b>More</span></div>
+          </div>
+        </div>
+        <figcaption><b>2 · Adding one from a link.</b> “+ To try” on a place. Paste the post’s link: the app reads the post’s name and account when the site allows it (Instagram and TikTok often don’t, so the name stays yours to type). Then where it is (the place you came from, by default), an optional note and price.
+          <ul>
+            <li><b>Added:</b> once the app is on the phone (build 7, step 5), <b>Voyage Fare shows up in the phone’s Share menu</b>, so you send a post straight from Instagram without copying the link.</li>
+          </ul>
+        </figcaption>
+      </figure>
+
+      <!-- 3. Putting it on a day -->
+      <figure>
+        <div class="phone">
+          <div class="sketch-box sketch-box--light card" data-seed="63">
+            <svg class="sketch-box__line" aria-hidden="true"></svg>
+            <header class="card__head"><h2>Medellín<small>4 nights · 3 to try</small></h2><span class="place-no">3</span></header>
+            <p class="item-group__label">To try <span class="hand">no day yet</span></p>
+            <div class="try">
+              <span><span class="try__name">Mondongo’s</span><span class="source"><i class="tt">TT</i>@comidascolombia</span><span class="hand">Danielle wants the mondongo</span></span>
+              <span class="try__side"><span class="day-btn" style="border-color:var(--chosen);color:var(--chosen)">Day ▴</span></span>
+              <div class="picker">
+                <p class="q">Which day in Medellín?</p>
+                <div class="days">
+                  <span class="day"><b>6</b>Wed 9<small>arrive</small></span>
+                  <span class="day day--busy"><b>7</b>Thu 10<small>● Carmen</small></span>
+                  <span class="day day--on"><b>8</b>Fri 11<small>free</small></span>
+                  <span class="day"><b>9</b>Sat 12<small>free</small></span>
+                </div>
+                <div class="meal"><button class="chip" aria-pressed="false">Breakfast</button><button class="chip" aria-pressed="true">Lunch</button><button class="chip" aria-pressed="false">Dinner</button></div>
+                <p class="hand">a day already has a dinner? you’ll see it before you choose</p>
+                <div class="add-item__actions"><button class="button button--quiet">Cancel</button><button class="button button--primary">Put on day 8</button></div>
+              </div>
+            </div>
+            <div class="try">
+              <span><span class="try__name">Pergamino café</span><span class="source"><i class="gm">G</i>Google Maps</span></span>
+              <span class="try__side"><span class="day-btn">Day ▾</span></span>
+            </div>
+          </div>
+          <p class="margin-note">Changed your mind? “Back to To try” in the line’s form takes it off the day.</p>
+        </div>
+        <figcaption><b>3 · Putting it on a day.</b> “Day ▾” opens the place’s days right there, each with its date and <b>what’s already planned</b> (Carmen on day 7), so you don’t book two dinners on one night. Then lunch or dinner (optional), and it moves to that day.
+          <ul>
+            <li><b>Budget:</b> on a day, it counts. If the place has a food daily estimate, a restaurant with no price is <b>“in your food budget”</b> (no double counting). Give it a price, like El Cielo, and it counts on top, as a special meal.</li>
+            <li><b>Added:</b> lunch / dinner, and seeing what’s already on each day.</li>
+          </ul>
+        </figcaption>
+      </figure>
+
+      <!-- 4. On the trip: tried it -->
+      <figure>
+        <div class="phone">
+          <div class="sketch-box sketch-box--light card" data-seed="64">
+            <svg class="sketch-box__line" aria-hidden="true"></svg>
+            <header class="card__head"><h2>Medellín<small>4 nights</small></h2><span class="place-no">3</span></header>
+            <p class="item-group__label">Day 8 <span class="hand">today</span></p>
+            <div class="line"><span><span class="line__name"><span class="dot dot--est"></span>Mondongo’s</span><span class="line__meta">Food · lunch</span>
+              <span class="tried"><span class="on">♥ Loved it</span><span>Fine</span><span>Skip</span></span></span><span class="in-food">in your<br />food budget</span></div>
+            <p class="item-group__label">Day 7</p>
+            <div class="line"><span><span class="line__name"><span class="dot"></span>Carmen</span><span class="line__meta">Food · dinner · <span class="loved">♥ loved it</span></span></span><span class="line__amount">64 €<span class="line__tag line__tag--ok">Paid</span></span></div>
+            <p class="item-group__label">To try <span class="hand">no day yet</span></p>
+            <div class="try">
+              <span><span class="try__name">Pergamino café</span><span class="source"><i class="gm">G</i>Google Maps</span></span>
+              <span class="try__side"><span class="day-btn">Day ▾</span></span>
+            </div>
+          </div>
+          <p class="words">After the trip, on Colombia’s last page</p>
+          <div class="sketch-box sketch-box--light card" data-seed="65">
+            <svg class="sketch-box__line" aria-hidden="true"></svg>
+            <header class="card__head"><h2>Places we loved<small>3</small></h2></header>
+            <div class="line"><span><span class="line__name"><span class="heart">♥</span> Carmen</span><span class="line__meta">Medellín · dinner, day 7</span></span><span class="source"><i class="ig">IG</i></span></div>
+            <div class="line"><span><span class="line__name"><span class="heart">♥</span> Mondongo’s</span><span class="line__meta">Medellín · lunch, day 8</span></span><span class="source"><i class="tt">TT</i></span></div>
+            <div class="line"><span><span class="line__name"><span class="heart">♥</span> La Cevichería</span><span class="line__meta">Cartagena · dinner, day 12</span></span><span class="source"><i class="ig">IG</i></span></div>
+          </div>
+        </div>
+        <figcaption><b>4 · On the trip, and after.</b> <b>Added:</b>
+          <ul>
+            <li>On the day, a restaurant asks <b>“♥ Loved it · Fine · Skip”</b>, one tap.</li>
+            <li>After the trip, the ones you loved stay as <b>“Places we loved”</b>, with their link: a list to send to a friend going to Colombia, or for your next time.</li>
+          </ul>
+          What’s still in To try at the end simply stays there, it costs nothing.</figcaption>
+      </figure>
+
+    </div>
+    <script>
+      const only = new URLSearchParams(location.search).get('only')
+      if (only) document.querySelectorAll('.phones > figure').forEach((f, i) => { if (!only.split(',').includes(String(i + 1))) f.remove() })
+    </script>
+  </body>
+</html>
