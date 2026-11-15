@@ -1,0 +1,291 @@
+/* "Your trips" as a shelf of notebooks (mockup trips-welcome-v5, 15 Nov). */
+.trips__head {
+  margin-bottom: var(--space-2);
+}
+
+.trips__hello {
+  font-size: var(--text-xl);
+  color: var(--ink-soft);
+  line-height: 1.2;
+  margin-top: var(--space-1);
+}
+
+.shelf {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding-bottom: var(--space-8);
+}
+
+.shelf__label {
+  display: flex;
+  justify-content: space-between;
+  margin: var(--space-4) var(--space-1) var(--space-2);
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.shelf__label span {
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 500;
+}
+
+.shelf__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.big-trip-link,
+.small-trip-link,
+.new-page-link {
+  display: block;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+/* The next trip, or the one you're on */
+.sketch-box.big-trip {
+  padding: var(--space-6) var(--space-4) var(--space-4);
+}
+
+.big-trip__kicker {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.countdown {
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--estimated-text);
+}
+
+.countdown--now {
+  color: var(--confirmed);
+}
+
+.big-trip__name {
+  font-size: 1.65rem;
+  line-height: 1.1;
+  margin-top: var(--space-2);
+}
+
+.big-trip__dates {
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+  margin-top: 0.2rem;
+}
+
+.route-words {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.15rem 0.4rem;
+  margin-top: var(--space-3);
+  font-size: var(--text-md);
+}
+
+.route-words span {
+  display: inline-flex;
+  gap: 0.4rem;
+}
+
+.route-words i {
+  font-style: normal;
+  color: var(--ink-soft);
+}
+
+.route-words__home {
+  color: var(--ink-soft);
+  font-size: var(--text-sm);
+}
+
+.route-words__today {
+  color: var(--confirmed);
+}
+
+.todo-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-top: var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.todo-lines p {
+  display: flex;
+  align-items: baseline;
+}
+
+.todo-lines .dot-todo,
+.dot-ok {
+  flex: none;
+  display: inline-block;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: var(--radius-round);
+  margin-right: 0.35rem;
+}
+
+.dot-ok {
+  background: var(--confirmed);
+}
+
+.big-trip__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--space-4);
+}
+
+.big-trip__foot .hand {
+  font-size: var(--text-note-l);
+  color: var(--ink-soft);
+}
+
+.big-trip__open {
+  font-size: var(--text-md);
+  font-weight: 600;
+  color: var(--confirmed);
+}
+
+/* Your share on a card */
+.card-share {
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: 1px dashed var(--line);
+}
+
+.card-share__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.card-share__figure {
+  font-family: var(--font-title);
+  font-size: var(--text-2xl);
+  font-weight: 600;
+}
+
+.card-share__words {
+  font-size: var(--text-md);
+}
+
+.card-share .hand-bar {
+  height: 14px;
+}
+
+.card-share__legend {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.3rem;
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+}
+
+.card-share__confirmed {
+  color: var(--confirmed);
+}
+
+.card-share__estimated {
+  color: var(--estimated-text);
+}
+
+/* Smaller cards: after that, dreams, past trips */
+.sketch-box.small-trip {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0 var(--space-3);
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+}
+
+.small-trip__name {
+  display: block;
+  font-family: var(--font-title);
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+.small-trip__meta {
+  display: block;
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+  margin-top: 0.1rem;
+}
+
+.small-trip__side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+}
+
+.small-trip__side b {
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.small-trip__side .hand {
+  font-size: var(--text-note);
+}
+
+.small-trip__bar {
+  grid-column: 1 / -1;
+}
+
+.small-trip__bar .hand-bar--mini {
+  max-width: none;
+}
+
+.small-trip__tag {
+  margin-top: 0.15rem;
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--confirmed);
+}
+
+.small-trip__tag--ok {
+  text-transform: uppercase;
+}
+
+.small-trip__tag--owe {
+  color: var(--estimated-text);
+}
+
+/* A new trip: a blank dashed page */
+.sketch-box.new-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+  padding: var(--space-4);
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+.new-page b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.new-page .hand {
+  font-size: var(--text-note-l);
+}

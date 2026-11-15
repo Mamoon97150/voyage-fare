@@ -6,6 +6,8 @@
 @import './styles/base.css';
 @import './styles/controls.css';
 @import './styles/screens.css';
+@import './styles/shelf.css';
+@import './styles/welcome.css';
 @import './styles/trip-page.css';
 @import './styles/navigation.css';
 @import './styles/compare.css';

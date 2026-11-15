@@ -6,6 +6,11 @@
   margin: var(--space-6) 0 var(--space-6);
 }
 
+.trips__head .trips__title {
+  margin-bottom: 0;
+  line-height: 1.1;
+}
+
 .empty {
   text-align: center;
 }
@@ -380,51 +385,10 @@ select.field__input,
   text-align: left;
 }
 
-/* Your trips */
-.trips__head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-}
-
 .button--small {
   min-height: 2.25rem;
   padding: 0 var(--space-4);
   font-size: var(--text-md);
-}
-
-.tripcards {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.tripcard-link {
-  display: block;
-  color: var(--ink);
-  text-decoration: none;
-}
-
-.sketch-box.tripcard {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  padding: var(--space-4);
-}
-
-.tripcard__name {
-  font-family: var(--font-title);
-  font-size: var(--text-lg);
-  font-weight: 600;
-}
-
-.tripcard__meta {
-  font-size: var(--text-md);
-  color: var(--ink-soft);
 }
 
 /* The budget, always visible at the top of a trip: the notebook's cover (Compare v4, 13 Nov). */

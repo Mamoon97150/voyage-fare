@@ -6,10 +6,29 @@ export type Trip = Tables<'trips'>
 export type Traveller = Tables<'travellers'>
 export type Place = Tables<'places'>
 
-export type TripSummary = Pick<Trip, 'id' | 'name' | 'start_date' | 'end_date' | 'created_at'> & {
-  travellers: number
-  places: number
-  nights: number
+/**
+ * A trip on "Your trips" (mockup trips-welcome-v5, 15 Nov): everything its card says, from one
+ * database call (trip_cards). Amounts are your share, in the trip's currency.
+ */
+export type TripCard = Pick<
+  Trip,
+  'id' | 'name' | 'start_date' | 'end_date' | 'created_at' | 'currency' | 'home_city'
+> & {
+  places: { id: string; name: string; nights: number }[]
+  travellers: { id: string; name: string; me: boolean }[]
+  shareConfirmed: number
+  shareEstimated: number
+  /** The next thing booked with something left to pay by a date. */
+  nextDue: { name: string; dueOn: string; left: number } | null
+  /** The first line with options compared and none chosen, and how many there are. */
+  undecided: { name: string; options: number } | null
+  undecidedCount: number
+  /** While travelling: today's plans. Null otherwise. */
+  today: string[] | null
+  /** Who pays whom, for what concerns you. */
+  settle: { name: string; amount: number; youPay: boolean }[]
+  /** Nobody owes anybody anything on this trip. */
+  settled: boolean
 }
 
 export type NewTrip = {
@@ -45,24 +64,35 @@ export async function createTrip(trip: NewTrip): Promise<string> {
   return data
 }
 
-export async function listTrips(): Promise<TripSummary[]> {
-  const { data, error } = await supabase
-    .from('trips')
-    .select(
-      'id, name, start_date, end_date, created_at, travellers!travellers_trip_id_fkey(id), places!places_trip_id_fkey(nights)',
-    )
-    .order('created_at', { ascending: false })
+export async function listTrips(): Promise<TripCard[]> {
+  const { data, error } = await supabase.rpc('trip_cards')
   if (error) throw error
-  return data.map((t) => ({
-    id: t.id,
-    name: t.name,
-    start_date: t.start_date,
-    end_date: t.end_date,
-    created_at: t.created_at,
-    travellers: t.travellers.length,
-    places: t.places.length,
-    nights: t.places.reduce((sum, p) => sum + p.nights, 0),
-  }))
+  return data.map((t) => {
+    const due = t.next_due as { name: string; due_on: string; left: number } | null
+    return {
+      id: t.id,
+      name: t.name,
+      start_date: t.start_date,
+      end_date: t.end_date,
+      created_at: t.created_at,
+      currency: t.currency,
+      home_city: t.home_city,
+      places: (t.places ?? []) as TripCard['places'],
+      travellers: (t.travellers ?? []) as TripCard['travellers'],
+      shareConfirmed: Number(t.share_confirmed ?? 0),
+      shareEstimated: Number(t.share_estimated ?? 0),
+      nextDue: due ? { name: due.name, dueOn: due.due_on, left: Number(due.left) } : null,
+      undecided: t.undecided as TripCard['undecided'],
+      undecidedCount: t.undecided_count ?? 0,
+      today: t.today ?? null,
+      settle: ((t.settle ?? []) as { name: string; amount: number; you_pay: boolean }[]).map((s) => ({
+        name: s.name,
+        amount: Number(s.amount),
+        youPay: s.you_pay,
+      })),
+      settled: t.settled ?? true,
+    }
+  })
 }
 
 export type TripChange = {

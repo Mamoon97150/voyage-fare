@@ -1,6 +1,11 @@
-import { fireEvent, screen, waitFor } from '@testing-library/react'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
+import { card } from '../test/cards'
+import { todayIso } from '../lib/shelf'
+import { addDays } from '../lib/tripText'
 import { click, data, open, type } from '../test/app'
+
+const plain = (s: string | null) => (s ?? '').replace(/[\u00a0\u202f]/g, ' ')
 
 vi.mock('../lib/supabase', async () => (await import('../test/fakes')).supabaseModule)
 vi.mock('../lib/trips', async () => (await import('../test/fakes')).tripsModule)
@@ -17,24 +22,91 @@ describe('your trips', () => {
     expect(screen.getByRole('link', { name: '+ New trip' })).toHaveAttribute('href', '/trips/new')
   })
 
-  it('lists each trip in a line of words', async () => {
+  it('a shelf: the next trip big, then the dreams, a blank page, the past trips', async () => {
     data.listTrips.mockResolvedValue([
-      {
-        id: 't1',
-        name: 'Colombia',
-        start_date: '2027-05-12',
-        end_date: '2027-05-24',
-        travellers: 4,
-        places: 3,
-        nights: 12,
-      },
-      { id: 't2', name: 'Lisbon', start_date: null, end_date: null, travellers: 1, places: 0, nights: 0 },
+      card({
+        id: 'li',
+        name: 'Lisbon & Porto',
+        start_date: addDays(todayIso(), 148),
+        end_date: addDays(todayIso(), 156),
+        home_city: 'St Martin',
+        places: [
+          { id: 'l', name: 'Lisbon', nights: 3 },
+          { id: 'p', name: 'Porto', nights: 5 },
+        ],
+        travellers: [
+          { id: 'a', name: 'Ana', me: true },
+          { id: 'b', name: 'Bea', me: false },
+        ],
+        shareConfirmed: 770,
+        shareEstimated: 470,
+        nextDue: { name: 'Hotel deposit', dueOn: '2026-12-15', left: 180 },
+        undecided: { name: 'Train', options: 3 },
+        undecidedCount: 1,
+      }),
+      card({ id: 'ja', name: 'Japan', shareEstimated: 2900, places: [{ id: 't', name: 'Tokyo', nights: 5 }] }),
+      card({
+        id: 'co',
+        name: 'Colombia & Panama',
+        start_date: '2026-09-04',
+        end_date: '2026-09-18',
+        shareConfirmed: 3519,
+        settled: false,
+        settle: [{ name: 'Gabriel', amount: 69, youPay: false }],
+        travellers: [
+          { id: 'a', name: 'Ana', me: true },
+          { id: 'g', name: 'Gabriel', me: false },
+        ],
+      }),
     ])
     open('/trips')
-    const colombia = await screen.findByRole('link', { name: /Colombia/ })
-    expect(colombia).toHaveTextContent('12 – 24 May 2027 · 3 places · 12 nights · 4 travellers')
-    expect(colombia).toHaveAttribute('href', '/trips/t1')
-    expect(screen.getByRole('link', { name: /Lisbon/ })).toHaveTextContent('Planning · no dates yet · 1 traveller')
+    expect(await screen.findByText('Hi Ana, 148 days to Lisbon')).toBeInTheDocument()
+
+    const next = screen.getByRole('link', { name: 'Lisbon & Porto: open' })
+    expect(next).toHaveAttribute('href', '/trips/li')
+    expect(next).toHaveTextContent('In 148 days')
+    expect(next).toHaveTextContent('St Martin→Lisbon→Porto→home')
+    expect(plain(next.textContent)).toContain('1 240 €your share')
+    expect(plain(next.textContent)).toContain('Hotel deposit, 180 € · due 15 Dec')
+    expect(next).toHaveTextContent('Train: 3 options, none chosen')
+    expect(next).toHaveTextContent('2 things to sort out')
+    expect(within(next).getByLabelText('Ana (you), Bea')).toBeInTheDocument()
+
+    const dreams = screen.getByRole('region', { name: 'Still a dream' })
+    expect(plain(dreams.textContent)).toContain('≈ 2 900 €')
+    expect(screen.getByRole('link', { name: /\+ A new trip/ })).toHaveAttribute('href', '/trips/new')
+    const past = screen.getByRole('region', { name: 'Past trips' })
+    expect(past).toHaveTextContent('Sept 2026')
+    expect(plain(past.textContent)).toContain('it cost you3 519 €Gabriel owes you 69 €')
+  })
+
+  it('while travelling: the day, where you are, today’s plans; it opens at today’s place', async () => {
+    data.listTrips.mockResolvedValue([
+      card({
+        id: 'co',
+        name: 'Colombia & Panama',
+        start_date: addDays(todayIso(), -5),
+        end_date: addDays(todayIso(), 8),
+        places: [
+          { id: 'b', name: 'Bogotá', nights: 2 },
+          { id: 'g', name: 'Guatapé', nights: 2 },
+          { id: 'm', name: 'Medellín', nights: 9 },
+        ],
+        today: ['Comuna 13 tour', 'Dinner at Carmen'],
+        settled: false,
+        settle: [{ name: 'Danielle', amount: 42, youPay: true }],
+      }),
+    ])
+    open('/trips')
+    expect(await screen.findByText('Day 6, enjoy Medellín!')).toBeInTheDocument()
+    const now = screen.getByRole('link', { name: 'Colombia & Panama: open' })
+    expect(now).toHaveAttribute('href', '/trips/co#place-m')
+    expect(now).toHaveTextContent('Day 6 of 14')
+    expect(now).toHaveTextContent('Medellín ●')
+    expect(now).toHaveTextContent('Today: Comuna 13 tour, Dinner at Carmen')
+    expect(plain(now.textContent)).toContain('You owe Danielle 42 €')
+    expect(now).toHaveTextContent('Open today ›')
+    expect(screen.getByRole('region', { name: 'Travelling now' })).toBeInTheDocument()
   })
 })
 

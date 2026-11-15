@@ -63,7 +63,15 @@ describe('home', () => {
     open('/')
     expect(screen.getByText('Voyage Fare')).toBeInTheDocument()
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/what it really costs/)
-    expect(await screen.findByRole('link', { name: 'Create an account' })).toBeInTheDocument()
+    // Until the demo opens (build 7, step 3), creating a notebook is the main button.
+    const create = await screen.findAllByRole('link', { name: 'Create my notebook' })
+    expect(create[0]).toHaveAttribute('href', '/sign-up')
+    expect(screen.queryByRole('link', { name: 'Try it with a real trip' })).not.toBeInTheDocument()
+    // A real trip as a sample, then how it works in three steps.
+    expect(screen.getByRole('heading', { name: 'Colombia & Panama' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'How it works' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Who paid what, settled' })).toBeInTheDocument()
+    expect(screen.getByText('Made by Djamina, for trips with her sisters.')).toBeInTheDocument()
   })
 })
 

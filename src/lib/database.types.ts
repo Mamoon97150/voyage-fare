@@ -1500,6 +1500,28 @@ export type Database = {
         Args: { p_items: string[]; p_package_id: string }
         Returns: undefined
       }
+      trip_cards: {
+        Args: never
+        Returns: {
+          created_at: string
+          currency: string
+          end_date: string
+          home_city: string
+          id: string
+          name: string
+          next_due: Json
+          places: Json
+          settle: Json
+          settled: boolean
+          share_confirmed: number
+          share_estimated: number
+          start_date: string
+          today: string[]
+          travellers: Json
+          undecided: Json
+          undecided_count: number
+        }[]
+      }
       trip_settlement: {
         Args: { p_trip_id: string }
         Returns: {
