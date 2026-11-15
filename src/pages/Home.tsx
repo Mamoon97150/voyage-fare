@@ -5,7 +5,7 @@ import { Sketch, SketchBox, Underlined } from '../components/Sketch'
 import { useAuth } from '../lib/authContext'
 
 /** The demo trip (build 7, step 3): the main button once it's open. Until then, "Create my notebook". */
-const DEMO_LINK: string | null = null
+const DEMO_LINK: string | null = '/demo'
 /** The case study (portfolio, January): the footer links to it once it's written. */
 const STORY_LINK: string | null = null
 
@@ -79,10 +79,10 @@ export function Home() {
             <SketchBox weight="light" className="welcome-mini" seed={92}>
               <div className="welcome-people">
                 {[
-                  ['A', '2 846 €', 'you'],
-                  ['B', '2 846 €', 'Bea'],
-                  ['C', '2 512 €', 'Cleo'],
-                  ['E', '1 980 €', 'Eva'],
+                  ['A', '3 452 €', 'you'],
+                  ['B', '3 074 €', 'Bea'],
+                  ['C', '2 754 €', 'Cleo'],
+                  ['E', '2 820 €', 'Eva'],
                 ].map(([initial, amount, name]) => (
                   <span key={name}>
                     <span className={`avatar${name === 'you' ? ' avatar--me' : ''}`} aria-hidden="true">
@@ -101,15 +101,15 @@ export function Home() {
             <SketchBox weight="light" className="welcome-mini" seed={93}>
               <p className="welcome-owe">
                 <span className="avatar" aria-hidden="true">
-                  C
+                  B
                 </span>
-                Cleo pays you<b className="num">69 €</b>
+                Bea pays you<b className="num">354 €</b>
               </p>
               <p className="welcome-owe">
                 <span className="avatar" aria-hidden="true">
                   E
                 </span>
-                Eva pays Bea<b className="num">42 €</b>
+                Eva pays you<b className="num">236 €</b>
               </p>
             </SketchBox>
           </Step>
@@ -212,16 +212,16 @@ function SampleTrip() {
       </p>
       <div className="card-share">
         <div className="card-share__row">
-          <span className="card-share__figure num">2 846 €</span>
+          <span className="card-share__figure num">3 452 €</span>
           <span className="card-share__words">your share</span>
         </div>
-        <HandBar confirmed={0.82} estimated={0.18} target={null} over={false} />
+        <HandBar confirmed={0.993} estimated={0.007} target={null} over={false} />
         <div className="card-share__legend num">
           <span>
-            <b className="card-share__confirmed">2 330 €</b> booked
+            <b className="card-share__confirmed">3 428 €</b> confirmed
           </span>
           <span>
-            <b className="card-share__estimated">516 €</b> still estimated
+            <b className="card-share__estimated">25 €</b> still estimated
           </span>
         </div>
       </div>

@@ -83,6 +83,8 @@ export function RouteGap({
               type="button"
               className="leg__tap"
               onClick={() => {
+                // The demo can't be changed (build 7).
+                if (detail.trip.is_demo) return
                 setEditing(item.id)
                 onOpen?.()
               }}

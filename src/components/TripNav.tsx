@@ -1,11 +1,13 @@
 import { NavLink } from 'react-router'
+import { useDemo } from '../lib/demo'
 
 /**
  * The bar at the bottom of a trip (mockup 1): Trip · Compare · Budget · Who paid.
  * A solo trip has nobody to settle up with, so no "Who paid" (13 Nov rule).
  */
 export function TripNav({ tripId, solo }: { tripId: string; solo: boolean }) {
-  const base = `/trips/${tripId}`
+  // Inside the demo, its pages live under /demo (build 7).
+  const base = useDemo() ? '/demo' : `/trips/${tripId}`
   return (
     <nav className="trip-nav" aria-label="Trip">
       <NavLink to={base} end>

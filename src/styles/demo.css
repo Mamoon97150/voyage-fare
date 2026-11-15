@@ -1,0 +1,114 @@
+/* The demo trip (build 7, step 3, mockup demo-v5). */
+.demo-strip {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-2) var(--space-3);
+  align-items: center;
+  max-width: 28rem;
+  margin: var(--space-1) auto var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--paper-note);
+  border: 1.5px dashed var(--estimated);
+  border-radius: var(--radius-lg);
+}
+
+.screen .demo-strip {
+  margin-inline: var(--space-3);
+}
+
+@media (min-width: 30rem) {
+  .screen .demo-strip {
+    margin-inline: auto;
+  }
+}
+
+.demo-strip p {
+  font-size: var(--text-sm);
+  line-height: 1.35;
+}
+
+.demo-strip__kicker {
+  margin-right: 0.35rem;
+  font-size: var(--text-2xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--estimated-text);
+}
+
+.demo-strip__make {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--confirmed);
+  white-space: nowrap;
+}
+
+.demo-strip__who {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+}
+
+.demo-strip__who .chip {
+  min-height: 2rem;
+  padding: 0 0.7rem;
+  font-size: var(--text-xs);
+}
+
+/* Tapping a line in the demo */
+.item-peek {
+  margin: 0 0 var(--space-2) 1.5rem;
+  padding: var(--space-2) var(--space-3);
+  border: 1.5px dashed var(--line);
+  border-radius: var(--radius-lg);
+}
+
+.item-peek dl {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.25rem var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.item-peek dt {
+  color: var(--ink-soft);
+}
+
+.item-peek__note {
+  margin-top: var(--space-2);
+  font-size: var(--text-note);
+  color: var(--ink-soft);
+}
+
+/* At the bottom of every demo page */
+.sketch-box.your-turn {
+  margin: var(--space-6) 0 var(--space-4);
+  padding: var(--space-6) var(--space-4) var(--space-4);
+  text-align: center;
+}
+
+.your-turn h2 {
+  font-size: var(--text-xl);
+}
+
+.your-turn p {
+  margin-top: var(--space-1);
+  font-size: var(--text-md);
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+
+.your-turn .button {
+  width: 100%;
+  margin-top: var(--space-4);
+}
+
+.your-turn__back {
+  display: block;
+  margin-top: var(--space-3);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}

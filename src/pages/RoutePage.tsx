@@ -1,5 +1,6 @@
 import { Fragment, useMemo } from 'react'
-import { Link, useParams } from 'react-router'
+import { Link } from 'react-router'
+import { useDemo, useTripId, useViewer } from '../lib/demo'
 import { FormMessage } from '../components/AuthForm'
 import { RouteMap } from '../components/RouteMap'
 import { MissingNote } from '../components/trip/RouteCard'
@@ -9,7 +10,7 @@ import { useAuth } from '../lib/authContext'
 import { formatWhole } from '../lib/money'
 import { routeOf } from '../lib/route'
 import { plural, shortDay } from '../lib/tripText'
-import { legsAfter, MODES, placeTotal, viewerOf } from '../lib/tripView'
+import { legsAfter, MODES, placeTotal } from '../lib/tripView'
 import type { TicketMode } from '../lib/trips'
 
 const day = (iso: string | null) => (iso ? shortDay(iso) : null)
@@ -19,9 +20,11 @@ const day = (iso: string | null) => (iso ? shortDay(iso) : null)
  * with their nights and your share there. A stop opens its sheet on the trip page.
  */
 export function RoutePage() {
-  const { tripId = '' } = useParams()
+  const tripId = useTripId()
   const { session } = useAuth()
   const { detail, loadError: error } = useTrip(tripId)
+  const viewer = useViewer(detail, session?.user.id)
+  const base = useDemo() ? '/demo' : `/trips/${tripId}`
 
   const route = useMemo(() => (detail ? routeOf(detail) : null), [detail])
 
@@ -42,7 +45,6 @@ export function RoutePage() {
   }
   if (detail === undefined || !route) return <Loading />
 
-  const viewer = viewerOf(detail, session?.user.id)
   const currency = detail.trip.currency
   const via = (afterPlaceId: string | null) =>
     legsAfter(detail, afterPlaceId)
@@ -82,7 +84,7 @@ export function RoutePage() {
                 <span className={s.at ? 'stops__n' : 'stops__n stops__n--off'} aria-hidden="true">
                   {s.n}
                 </span>
-                <Link to={`/trips/${tripId}#place-${s.place.id}`} className="stops__name">
+                <Link to={`${base}#place-${s.place.id}`} className="stops__name">
                   {s.place.name} <small>{s.place.nights ? plural(s.place.nights, 'night') : 'nights not set'}</small>
                 </Link>
                 <small className="num">{total === null ? '' : formatWhole(total, currency)}</small>
@@ -113,10 +115,11 @@ export function RoutePage() {
 }
 
 function Shell({ tripId, children }: { tripId: string; children: React.ReactNode }) {
+  const demo = useDemo()
   return (
     <div className="screen">
       <header className="screen__top">
-        <Link to={`/trips/${tripId}`} className="round-button" aria-label="Back to the trip">
+        <Link to={demo ? '/demo' : `/trips/${tripId}`} className="round-button" aria-label="Back to the trip">
           ‹
         </Link>
         <h1 className="screen__title">The route</h1>

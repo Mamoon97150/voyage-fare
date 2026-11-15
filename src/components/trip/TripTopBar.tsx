@@ -1,5 +1,6 @@
 import { Link } from 'react-router'
 import type { Traveller } from '../../lib/trips'
+import { demoDefault, useDemo } from '../../lib/demo'
 
 const SHOWN = 4
 
@@ -22,18 +23,33 @@ export function TripTopBar({
   travellers?: Traveller[]
   userId?: string
 }) {
+  const demo = useDemo()
   const shown = travellers?.slice(0, SHOWN) ?? []
   const more = (travellers?.length ?? 0) - shown.length
   return (
     <header className="screen__top">
-      <Link to="/trips" className="screen__back" aria-label="All trips">
+      <Link to={demo ? '/' : '/trips'} className="screen__back" aria-label={demo ? 'Welcome page' : 'All trips'}>
         ‹
       </Link>
       <div className="screen__heading">
         <h1 className="screen__title screen__title--trip">{title}</h1>
         {subtitle && <p className="screen__sub">{subtitle}</p>}
       </div>
-      {tripId && travellers && (
+      {/* The demo has no settings: the initials are just who's on it. */}
+      {demo && travellers && (
+        <span className="avatars" aria-label={travellers.map((t) => t.name).join(', ')}>
+          {shown.map((t) => (
+            <span
+              key={t.id}
+              className={`avatar${t.id === (demo.seeAs ?? demoDefault({ travellers })) ? ' avatar--me' : ''}`}
+              aria-hidden="true"
+            >
+              {t.name.slice(0, 1).toUpperCase()}
+            </span>
+          ))}
+        </span>
+      )}
+      {!demo && tripId && travellers && (
         <Link
           to={`/trips/${tripId}/settings`}
           className="avatars"

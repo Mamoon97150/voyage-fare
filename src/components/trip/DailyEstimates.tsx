@@ -61,7 +61,7 @@ export function EstimateRows({
             estimate={e}
             viewer={viewer}
             mode={mode}
-            onOpen={() => setEditing(e.id)}
+            onOpen={() => !detail.trip.is_demo && setEditing(e.id)}
             onChanged={onChanged}
           />
         ),

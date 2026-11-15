@@ -15,6 +15,7 @@ export function TripBudget({
   currency,
   mode,
   onMode,
+  mineLabel = 'your share',
   solo,
 }: {
   view: BudgetView
@@ -22,6 +23,8 @@ export function TripBudget({
   mode: Mode
   onMode: (mode: Mode) => void
   viewerName?: string | null
+  /** In the demo: “Ana’s share” instead of “your share”. */
+  mineLabel?: string
   solo: boolean
 }) {
   const scale = Math.max(view.figure ?? 0, view.target ?? 0)
@@ -56,7 +59,7 @@ export function TripBudget({
         {/* Solo: your share is the total, so there's nothing to switch (13 Nov rule). */}
         {!solo && (
           <div className="words-switch" role="radiogroup" aria-label="Amounts shown">
-            {word('mine', 'your share')}
+            {word('mine', mineLabel)}
             <span aria-hidden="true"> · </span>
             {word('total', 'total')}
           </div>

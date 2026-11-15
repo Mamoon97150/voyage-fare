@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import { hasMap, routeOf, routeSummary } from '../../lib/route'
 import type { TripDetail } from '../../lib/trips'
 import { RouteMap } from '../RouteMap'
+import { tripBase } from '../../lib/demo'
 import { SketchBox } from '../Sketch'
 
 /** The small route map on the trip page, between the budget and the places. */
@@ -14,7 +15,7 @@ export function RouteCard({ detail }: { detail: TripDetail }) {
       <SketchBox weight="light" className="route-card__sheet" seed={51}>
         <header className="route-card__head">
           <h2 id="route-title">The route</h2>
-          <Link to={`/trips/${detail.trip.id}/route`}>Open the map ›</Link>
+          <Link to={`${tripBase(detail.trip)}/route`}>Open the map ›</Link>
         </header>
         <RouteMap route={route} height={180} />
         <p className="route-card__note">{routeSummary(route)}</p>

@@ -29,6 +29,8 @@ function Solo() {
 }
 
 function Pages({ detail, money, viewer, reload }: MoneyPage) {
+  // The demo can't be changed: no recording or removing repayments (build 7).
+  const readOnly = detail.trip.is_demo
   const currency = detail.trip.currency
   const top = headline(detail, money, viewer)
   const paid = paidLines(detail, viewer)
@@ -127,14 +129,16 @@ function Pages({ detail, money, viewer, reload }: MoneyPage) {
                 </span>
                 <span className="line__amount num">
                   <b>{formatMoney(r.amount, currency)}</b>
-                  <button
-                    type="button"
-                    className="link-button line__undo"
-                    onClick={() => void deleteRepayment(r.id).then(reload)}
-                    aria-label={`Remove: ${r.words}, ${formatMoney(r.amount, currency)}`}
-                  >
-                    Remove
-                  </button>
+                  {!readOnly && (
+                    <button
+                      type="button"
+                      className="link-button line__undo"
+                      onClick={() => void deleteRepayment(r.id).then(reload)}
+                      aria-label={`Remove: ${r.words}, ${formatMoney(r.amount, currency)}`}
+                    >
+                      Remove
+                    </button>
+                  )}
                 </span>
               </li>
             ))}
@@ -189,7 +193,7 @@ function SettleRow({ page, from, to, amount }: { page: Ctx; from: string; to: st
       </span>
       <span>
         <span className="line__name">{words}</span>
-        {asking ? (
+        {page.detail.trip.is_demo ? null : asking ? (
           <span className="line__ask">
             <span className="line__meta">Record {formatMoney(amount, currency)} paid back today?</span>
             <button type="button" className="small-button small-button--yes" onClick={() => void record()}>
@@ -245,6 +249,7 @@ function RepaymentForm({ page }: { page: Ctx }) {
     }, setError)
   }
 
+  if (page.detail.trip.is_demo) return null
   if (!open) {
     return (
       <button type="button" className="add-row" onClick={() => setOpen(true)}>

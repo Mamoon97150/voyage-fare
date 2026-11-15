@@ -1,3 +1,4 @@
+import { tripBase } from '../lib/demo'
 import { Link } from 'react-router'
 import { HandBar } from '../components/HandBar'
 import { Card, MoneyScreen } from '../components/MoneyScreen'
@@ -113,7 +114,7 @@ export function Budget() {
             {missing.length > 0 && (
               <Card title="Not counted yet" small={`${missing.length} without a price`} dashed seed={74}>
                 <p className="card__note">{missing.join(' · ')}</p>
-                <Link to={`/trips/${detail.trip.id}/compare`} className="quiet-link">
+                <Link to={`${tripBase(detail.trip)}/compare`} className="quiet-link">
                   Price them in Compare ›
                 </Link>
               </Card>

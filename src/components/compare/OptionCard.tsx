@@ -21,6 +21,7 @@ export function OptionCard({
   onFavourite,
   onEdit,
   busy,
+  readOnly = false,
   rooms = [],
 }: {
   line: OptionLine
@@ -33,6 +34,8 @@ export function OptionCard({
   onFavourite: () => void
   onEdit: () => void
   busy: boolean
+  /** The demo (build 7): shown, not changed. */
+  readOnly?: boolean
   /** A stay by room: "Superior 640 € · Djamina, Danielle", one per room. */
   rooms?: string[]
 }) {
@@ -70,15 +73,20 @@ export function OptionCard({
       <button
         type="button"
         className="opt__pick"
-        onClick={chosen ? undefined : onChoose}
-        disabled={busy}
+        onClick={chosen || readOnly ? undefined : onChoose}
+        disabled={busy || (readOnly && !chosen)}
         aria-pressed={chosen}
         aria-label={chosen ? `${option.name}: chosen` : `Choose ${option.name}`}
       >
         {chosen && <span aria-hidden="true">✓</span>}
       </button>
 
-      <button type="button" className="opt__tap" onClick={onEdit} aria-label={`Change ${option.name}`}>
+      <button
+        type="button"
+        className="opt__tap"
+        onClick={onEdit}
+        aria-label={readOnly ? option.name : `Change ${option.name}`}
+      >
         <span className="opt__name">
           {chosen ? <Underlined>{option.name}</Underlined> : option.name}
           {details.prices && <span className="opt__pill">2 one-way tickets</span>}
@@ -131,8 +139,8 @@ export function OptionCard({
         <button
           type="button"
           className={`opt__heart${option.is_favourite ? ' opt__heart--on' : ''}`}
-          onClick={onFavourite}
-          disabled={busy}
+          onClick={readOnly ? undefined : onFavourite}
+          disabled={busy || readOnly}
           aria-pressed={option.is_favourite}
           aria-label={option.is_favourite ? `Not my coup de cœur: ${option.name}` : `My coup de cœur: ${option.name}`}
         >

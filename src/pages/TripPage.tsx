@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router'
+import { Link } from 'react-router'
 import { FormMessage } from '../components/AuthForm'
 import { Sketch, SketchBox } from '../components/Sketch'
 import { TripBudget } from '../components/TripBudget'
@@ -17,6 +17,8 @@ import { WelcomeNote } from '../components/trip/WelcomeNote'
 import { Loading } from '../lib/auth'
 import { isToTry } from '../lib/toTry'
 import { useTrip } from '../lib/useTrip'
+import { isReadOnly, useTripId, useViewer } from '../lib/demo'
+import { DemoStrip, YourTurn } from '../components/DemoParts'
 import { hintSeen, markHintSeen } from '../lib/hints'
 import { useAuth } from '../lib/authContext'
 import { formatWhole } from '../lib/money'
@@ -31,7 +33,6 @@ import {
   KINDS_FOR_TRIP,
   placeTotal,
   tripDays,
-  viewerOf,
   type Mode,
 } from '../lib/tripView'
 
@@ -40,9 +41,10 @@ import {
  * numbered sheet with its stay, its days and its ideas; whole-trip items have their own sheet.
  */
 export function TripPage() {
-  const { tripId = '' } = useParams()
+  const tripId = useTripId()
   const { session } = useAuth()
   const { detail, loadError, load } = useTrip(tripId)
+  const viewer = useViewer(detail, session?.user.id)
   const [mode, setMode] = useState<Mode>('mine')
   const [adding, setAdding] = useState<string | null>(null) // a place id, 'trip', or nothing
   const [editingPlace, setEditingPlace] = useState<string | null>(null)
@@ -81,7 +83,7 @@ export function TripPage() {
   }
 
   const { trip, travellers, places, items } = detail
-  const viewer = viewerOf(detail, session?.user.id)
+  const readOnly = isReadOnly(detail)
   const solo = isSolo(detail)
   const shownMode: Mode = solo ? 'total' : mode
   const viewerName = travellers.find((t) => t.id === viewer)?.name ?? null
@@ -109,7 +111,10 @@ export function TripPage() {
         travellers={travellers}
         userId={session?.user.id}
       />
-      <WelcomeNote tripId={trip.id} userId={session?.user.id} createdBy={trip.created_by} travellers={travellers} />
+      <DemoStrip detail={detail} />
+      {!readOnly && (
+        <WelcomeNote tripId={trip.id} userId={session?.user.id} createdBy={trip.created_by} travellers={travellers} />
+      )}
 
       <TripBudget
         view={budgetView(detail, viewer, shownMode)}
@@ -117,12 +122,13 @@ export function TripPage() {
         mode={shownMode}
         onMode={setMode}
         viewerName={viewerName}
+        mineLabel={readOnly && viewerName ? `${viewerName}’s share` : undefined}
         solo={solo}
       />
 
       <div className="screen__body">
         <RouteCard detail={detail} />
-        {tapHint && items.length > 0 && (
+        {tapHint && !readOnly && items.length > 0 && (
           <p className="tap-hint">
             <span className="hand">tap anything to change it</span>
           </p>
@@ -167,7 +173,7 @@ export function TripPage() {
                             <small className="place__plus">+ package</small>
                           )}
                         </span>
-                        {editingPlace !== place.id && (
+                        {!readOnly && editingPlace !== place.id && (
                           <button
                             type="button"
                             className="place__edit"
@@ -245,7 +251,7 @@ export function TripPage() {
                           onDone={added}
                           onCancel={() => setAdding(null)}
                         />
-                      ) : (
+                      ) : readOnly ? null : (
                         <div className="place__adds">
                           <button type="button" className="add-row place__add" onClick={() => setAdding(place.id)}>
                             <span className="add-row__plus" aria-hidden="true">
@@ -326,7 +332,7 @@ export function TripPage() {
                   />
                 ) : adding === 'estimate:trip' ? (
                   <EstimateForm detail={detail} placeId={null} onDone={added} onCancel={() => setAdding(null)} />
-                ) : (
+                ) : readOnly ? null : (
                   <div className="place__adds">
                     <button type="button" className="add-row place__add" onClick={() => setAdding('trip')}>
                       <span className="add-row__plus" aria-hidden="true">
@@ -354,7 +360,7 @@ export function TripPage() {
                   Cancel
                 </button>
               </SketchBox>
-            ) : (
+            ) : readOnly ? null : (
               <button type="button" className="add-row" onClick={() => setAdding('place')}>
                 <span className="add-row__plus" aria-hidden="true">
                   +
@@ -363,6 +369,7 @@ export function TripPage() {
               </button>
             )}
             <PlacesWeLoved detail={detail} />
+            <YourTurn detail={detail} />
           </>
         )}
       </div>

@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useState, type ReactNode } from 'react'
-import { Link, useParams } from 'react-router'
+import { Link } from 'react-router'
+import { useTripId, useViewer } from '../lib/demo'
+import { DemoStrip, YourTurn, demoShare } from './DemoParts'
 import { useAuth } from '../lib/authContext'
 import { explainAuthError } from '../lib/authForm'
 import { Loading } from '../lib/auth'
 import { getMoney, getTrip, type TripDetail, type TripMoney } from '../lib/trips'
 import { tripSubtitle } from '../lib/tripText'
-import { budgetView, isSolo, viewerOf, type Mode } from '../lib/tripView'
+import { budgetView, isSolo, type Mode } from '../lib/tripView'
 import { FormMessage } from './AuthForm'
 import { SketchBox } from './Sketch'
 import { TripTopBar } from './trip/TripTopBar'
@@ -26,11 +28,12 @@ export type MoneyPage = {
  * page's cards. Loads the trip and its money side together.
  */
 export function MoneyScreen({ children }: { children: (page: MoneyPage) => ReactNode }) {
-  const { tripId = '' } = useParams()
+  const tripId = useTripId()
   const { session } = useAuth()
   const [data, setData] = useState<{ detail: TripDetail | null; money: TripMoney | null } | undefined>(undefined)
   const [error, setError] = useState<string>()
   const [mode, setMode] = useState<Mode>('mine')
+  const viewer = useViewer(data?.detail, session?.user.id)
 
   const fetchAll = useCallback(async () => {
     const detail = await getTrip(tripId)
@@ -77,7 +80,6 @@ export function MoneyScreen({ children }: { children: (page: MoneyPage) => React
     )
   }
 
-  const viewer = viewerOf(detail, session?.user.id)
   const solo = isSolo(detail)
   const shownMode: Mode = solo ? 'total' : mode
   return (
@@ -89,14 +91,19 @@ export function MoneyScreen({ children }: { children: (page: MoneyPage) => React
         travellers={detail.travellers}
         userId={session?.user.id}
       />
+      <DemoStrip detail={detail} />
       <TripBudget
         view={budgetView(detail, viewer, shownMode)}
         currency={detail.trip.currency}
         mode={shownMode}
         onMode={setMode}
+        mineLabel={detail.trip.is_demo ? demoShare(detail, viewer) : undefined}
         solo={solo}
       />
-      <div className="cards">{children({ detail, money, viewer, mode: shownMode, solo, reload })}</div>
+      <div className="cards">
+        {children({ detail, money, viewer, mode: shownMode, solo, reload })}
+        <YourTurn detail={detail} />
+      </div>
       <TripNav tripId={detail.trip.id} solo={solo} />
     </div>
   )

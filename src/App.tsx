@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router'
 import { AuthProvider, RequireAuth, SignedOutOnly } from './lib/auth'
 import { Account } from './pages/Account'
 import { Compare } from './pages/Compare'
+import { Demo } from './pages/Demo'
 import { ForgotPassword } from './pages/ForgotPassword'
 import { Home } from './pages/Home'
 import { JoinTrip } from './pages/JoinTrip'
@@ -39,6 +40,7 @@ export function AppRoutes() {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/join/:token" element={<JoinTrip />} />
+      <Route path="/demo/*" element={<Demo />} />
       <Route
         path="/trips"
         element={

@@ -155,3 +155,10 @@ export async function removeTraveller(id: string): Promise<void> {
   const { error } = await supabase.rpc('remove_traveller', { p_traveller_id: id })
   if (error) throw error
 }
+
+/** The public demo trip's id (build 7), or null when there's none. Readable without signing in. */
+export async function getDemoTripId(): Promise<string | null> {
+  const { data, error } = await supabase.from('trips').select('id').eq('is_demo', true).limit(1).maybeSingle()
+  if (error) throw error
+  return data?.id ?? null
+}

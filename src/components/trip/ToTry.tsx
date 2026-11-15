@@ -56,6 +56,7 @@ const priceEach = (detail: TripDetail, item: Item) => {
 export function ToTryRow({ detail, item, onChanged }: { detail: TripDetail; item: Item; onChanged: () => void }) {
   const [mode, setMode] = useState<'view' | 'day' | 'edit'>('view')
   const each = priceEach(detail, item)
+  const readOnly = detail.trip.is_demo
 
   if (mode === 'edit')
     return (
@@ -89,15 +90,17 @@ export function ToTryRow({ detail, item, onChanged }: { detail: TripDetail; item
       </span>
       <span className="to-try__side">
         {each !== null && <span className="to-try__price num">≈ {formatWhole(each, detail.trip.currency)} each</span>}
-        <button
-          type="button"
-          className={`day-button${mode === 'day' ? ' day-button--open' : ''}`}
-          aria-expanded={mode === 'day'}
-          aria-label={`Put ${item.name} on a day`}
-          onClick={() => setMode(mode === 'day' ? 'view' : 'day')}
-        >
-          Day {mode === 'day' ? '▴' : '▾'}
-        </button>
+        {!readOnly && (
+          <button
+            type="button"
+            className={`day-button${mode === 'day' ? ' day-button--open' : ''}`}
+            aria-expanded={mode === 'day'}
+            aria-label={`Put ${item.name} on a day`}
+            onClick={() => setMode(mode === 'day' ? 'view' : 'day')}
+          >
+            Day {mode === 'day' ? '▴' : '▾'}
+          </button>
+        )}
       </span>
       {mode === 'day' && (
         <DayPicker

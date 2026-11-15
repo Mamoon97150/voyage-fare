@@ -1,5 +1,7 @@
+import { tripBase, useTripId, useViewer } from '../lib/demo'
+import { DemoStrip, YourTurn, demoShare } from '../components/DemoParts'
 import { useState } from 'react'
-import { Link, useParams, useSearchParams } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 import { FormMessage } from '../components/AuthForm'
 import { FolderTabs } from '../components/compare/FolderTabs'
 import { OptionCard } from '../components/compare/OptionCard'
@@ -26,7 +28,7 @@ import {
   type TicketMode,
   type TripDetail,
 } from '../lib/trips'
-import { budgetView, daysText, isSolo, viewerOf, type Mode } from '../lib/tripView'
+import { budgetView, daysText, isSolo, type Mode } from '../lib/tripView'
 import { useSaving } from '../lib/useSaving'
 
 const EMPTY: Record<Tab, { kind: ItemKind; add: string; none: (where: string) => string }> = {
@@ -42,10 +44,11 @@ const EMPTY: Record<Tab, { kind: ItemKind; add: string; none: (where: string) =>
  * categories, "turn the page" between journeys or places, the options side by side.
  */
 export function Compare() {
-  const { tripId = '' } = useParams()
+  const tripId = useTripId()
   const { session } = useAuth()
   const [params, setParams] = useSearchParams()
   const { detail, loadError, load } = useTrip(tripId)
+  const viewer = useViewer(detail, session?.user.id)
   const [mode, setMode] = useState<Mode>('mine')
 
   if (loadError) {
@@ -79,7 +82,6 @@ export function Compare() {
     subjects.findIndex((s) => s.key === params.get('page')),
   )
   const subject = subjects[index]
-  const viewer = viewerOf(detail, session?.user.id)
   const solo = isSolo(detail)
   const shownMode: Mode = solo ? 'total' : mode
   const go = (next: { tab?: Tab; page?: string }) => {
@@ -98,11 +100,13 @@ export function Compare() {
         travellers={detail.travellers}
         userId={session?.user.id}
       />
+      <DemoStrip detail={detail} />
       <TripBudget
         view={budgetView(detail, viewer, shownMode)}
         currency={detail.trip.currency}
         mode={shownMode}
         onMode={setMode}
+        mineLabel={detail.trip.is_demo ? demoShare(detail, viewer) : undefined}
         solo={solo}
       />
 
@@ -173,13 +177,16 @@ export function Compare() {
                 ? 'Add a ticket from the trip page (Whole trip → Transport): it becomes a journey here, with its options.'
                 : 'Places are added on the trip page.'}
             </p>
-            <Link to={`/trips/${detail.trip.id}`} className="button button--quiet">
+            <Link to={tripBase(detail.trip)} className="button button--quiet">
               Go to the trip
             </Link>
           </SketchBox>
         </div>
       )}
 
+      <div className="screen__body">
+        <YourTurn detail={detail} />
+      </div>
       <TripNav tripId={detail.trip.id} solo={solo} />
     </div>
   )
@@ -204,6 +211,8 @@ function ItemOptions({
   onChanged: () => void
 }) {
   const [sort, setSort] = useState<Sort>('cheapest')
+  // The demo: look at the options and which one is circled, but no circling another (build 7).
+  const readOnly = detail.trip.is_demo
   const [editing, setEditing] = useState<string | null>(null) // an option id, 'new', or nothing
   const { busy, run } = useSaving()
   const [error, setError] = useState<string>()
@@ -306,7 +315,8 @@ function ItemOptions({
               travellers={detail.shares.filter((s) => s.item_id === item.id).length || detail.travellers.length}
               roundTrip={roundTrip}
               busy={busy}
-              onEdit={() => setEditing(line.option.id)}
+              readOnly={readOnly}
+              onEdit={() => !readOnly && setEditing(line.option.id)}
               rooms={roomsOf(detail, line.option.id).map(
                 (r) =>
                   `${r.name} ${formatMoney(r.amount, line.option.currency)}${r.occupants.length ? ` · ${r.occupants.map((t) => detail.travellers.find((x) => x.id === t)?.name).join(', ')}` : ''}`,
@@ -319,7 +329,7 @@ function ItemOptions({
       </ul>
       {editing === 'new' ? (
         form()
-      ) : (
+      ) : readOnly ? null : (
         <button type="button" className="add-row" onClick={() => setEditing('new')}>
           <span className="add-row__plus" aria-hidden="true">
             +

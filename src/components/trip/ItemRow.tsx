@@ -11,6 +11,8 @@ import { DropControl } from './DropControl'
 import { ItemForm } from './ItemForm'
 import { StatusForm } from './StatusForm'
 import { WhoFor } from './WhoFor'
+import { ItemPeek } from './ItemPeek'
+import { isReadOnly } from '../../lib/demo'
 import { BackToTry, SourceBadge, VerdictChips } from './ToTry'
 import { dayHasCome, inFoodBudget, MEALS, VERDICTS } from '../../lib/toTry'
 import { todayIso } from '../../lib/shelf'
@@ -41,6 +43,9 @@ export function ItemRow({
   onOpen?: () => void
 }) {
   const [editing, setEditing] = useState(false)
+  // The demo can't be changed: a tap shows the line's details instead (mockup demo-v5).
+  const readOnly = isReadOnly(detail)
+  const [peek, setPeek] = useState(false)
   const line = itemLine(detail, item, viewer, mode)
   const foodBudget = inFoodBudget(detail, item)
   const dot =
@@ -140,10 +145,12 @@ export function ItemRow({
         type="button"
         className="item-row__tap"
         onClick={() => {
+          if (readOnly) return setPeek(!peek)
           setEditing(true)
           onOpen?.()
         }}
-        aria-label={`Change ${title}`}
+        aria-expanded={readOnly ? peek : undefined}
+        aria-label={readOnly ? `Details of ${title}` : `Change ${title}`}
       >
         <i className={`dot ${dot}`} aria-hidden="true" />
         <span className="item-row__main">
@@ -179,7 +186,9 @@ export function ItemRow({
           ›
         </span>
       </button>
+      {peek && <ItemPeek detail={detail} item={item} />}
       {item.kind === 'restaurant' &&
+        !readOnly &&
         !item.verdict &&
         item.status !== 'dropped' &&
         dayHasCome(detail.trip.start_date, item.day_number, todayIso()) && (
