@@ -64,6 +64,7 @@ beforeEach(() => {
   data.getTrip.mockResolvedValue(detail())
   data.listOpenInvitations.mockResolvedValue([])
   data.amIAdmin.mockResolvedValue(false)
+  data.inboxThreads.mockResolvedValue([])
   data.removeFilesOfMyOwnTrips.mockResolvedValue(undefined)
   data.getMyWelcome.mockResolvedValue(null)
 })

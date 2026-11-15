@@ -82,3 +82,44 @@ export async function removeAdmin(userId: string): Promise<void> {
   const { error } = await supabase.rpc('admin_remove', { p_user_id: userId })
   if (error) throw error
 }
+
+// ── hello@ inside Admin (stage B): through the admin-inbox server function, which holds the
+// Resend key and checks that the caller is an admin. ─────────────────────────────────────────
+
+export type InboxThread = {
+  id: string
+  subject: string | null
+  from: string
+  emails: number
+  read: boolean
+  done: boolean
+  received_at: string
+}
+export type InboxEmail = {
+  id: string
+  direction: 'inbound' | 'outbound'
+  from: string
+  subject: string | null
+  text: string
+  attachments: string[]
+  received_at: string
+}
+
+async function inbox<T>(body: Record<string, unknown>): Promise<T> {
+  const { data, error } = await supabase.functions.invoke('admin-inbox', { body })
+  if (error) {
+    // The function's own words ("The Resend key isn't set up yet.") when it gives some.
+    const context = (error as { context?: Response }).context
+    const said = context ? await context.json().catch(() => null) : null
+    throw new Error(said?.error ?? error.message)
+  }
+  return data as T
+}
+
+export const inboxThreads = () => inbox<{ threads: InboxThread[] }>({ action: 'list' }).then((r) => r.threads)
+export const inboxRead = (threadId: string) =>
+  inbox<{ emails: InboxEmail[] }>({ action: 'read', threadId }).then((r) => r.emails)
+export const inboxReply = (threadId: string, emailId: string, text: string) =>
+  inbox<{ id: string }>({ action: 'reply', threadId, emailId, text, key: crypto.randomUUID() })
+export const inboxDone = (threadId: string, done: boolean) =>
+  inbox<{ ok: boolean }>({ action: done ? 'done' : 'undone', threadId })

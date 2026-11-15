@@ -12,11 +12,17 @@ import {
   adminOverview,
   adminPeople,
   amIAdmin,
+  inboxDone,
+  inboxRead,
+  inboxReply,
+  inboxThreads,
   markMessage,
   removeAdmin,
   type AdminEntry,
   type AdminMessage,
   type AdminPerson,
+  type InboxEmail,
+  type InboxThread,
   type Overview,
 } from '../lib/trips'
 import { useSaving } from '../lib/useSaving'
@@ -191,7 +197,9 @@ function Meter({ label, used, limit }: { label: string; used: number; limit: num
 
 function MessagesTab({ onChanged }: { onChanged: () => void }) {
   const [messages, setMessages] = useState<AdminMessage[]>()
-  const [filter, setFilter] = useState<'new' | 'done'>('new')
+  const [threads, setThreads] = useState<InboxThread[] | null>()
+  const [inboxError, setInboxError] = useState<string>()
+  const [filter, setFilter] = useState<'new' | 'done' | 'app' | 'mail'>('new')
   const [error, setError] = useState<string>()
   const { run } = useSaving()
 
@@ -199,81 +207,212 @@ function MessagesTab({ onChanged }: { onChanged: () => void }) {
     adminMessages()
       .then(setMessages)
       .catch((e) => setError(explainAuthError(e).message))
+    inboxThreads()
+      .then((t) => {
+        setThreads(t)
+        setInboxError(undefined)
+      })
+      .catch((e: Error) => {
+        setThreads(null)
+        setInboxError(e.message)
+      })
   }, [])
   useEffect(load, [load])
 
   if (!messages) return error ? <FormMessage tone="error">{error}</FormMessage> : <Loading />
-  const shown = messages.filter((m) => m.status === filter)
-  const count = (s: string) => messages.filter((m) => m.status === s).length
+
+  // One list: the app's feedback and hello@, newest first.
+  type Row = { at: string; app?: AdminMessage; mail?: InboxThread }
+  const rows: Row[] = [
+    ...messages.map((m) => ({ at: m.created_at, app: m })),
+    ...(threads ?? []).map((t) => ({ at: t.received_at, mail: t })),
+  ].sort((a, b) => b.at.localeCompare(a.at))
+  const isDone = (r: Row) => (r.app ? r.app.status === 'done' : Boolean(r.mail?.done))
+  const shown = rows.filter((r) =>
+    filter === 'new' ? !isDone(r) : filter === 'done' ? isDone(r) : filter === 'app' ? Boolean(r.app) : Boolean(r.mail),
+  )
+  const filters: [typeof filter, string][] = [
+    ['new', `New · ${rows.filter((r) => !isDone(r)).length}`],
+    ['done', 'Done'],
+    ['app', 'App'],
+    ['mail', 'hello@'],
+  ]
 
   return (
     <>
       <div className="chips admin__filters" role="radiogroup" aria-label="Messages">
-        <button
-          type="button"
-          role="radio"
-          className="chip"
-          aria-checked={filter === 'new'}
-          onClick={() => setFilter('new')}
-        >
-          New · {count('new')}
-        </button>
-        <button
-          type="button"
-          role="radio"
-          className="chip"
-          aria-checked={filter === 'done'}
-          onClick={() => setFilter('done')}
-        >
-          Done · {count('done')}
-        </button>
+        {filters.map(([key, label]) => (
+          <button
+            key={key}
+            type="button"
+            role="radio"
+            className="chip"
+            aria-checked={filter === key}
+            onClick={() => setFilter(key)}
+          >
+            {label}
+          </button>
+        ))}
       </div>
       {error && <FormMessage tone="error">{error}</FormMessage>}
+      {inboxError && (
+        <p className="form-message form-message--error admin__inbox-off">hello@ couldn’t be read: {inboxError}</p>
+      )}
       {shown.length === 0 && (
         <p className="admin__empty hand">{filter === 'new' ? 'nothing new' : 'nothing here yet'}</p>
       )}
-      {shown.map((m, i) => (
-        <SketchBox key={m.id} weight="light" className="admin__msg" seed={90 + i}>
-          <p className="admin__msg-head">
-            <span className="admin__kind">
-              <span className="admin__src">App</span>
-              {m.status === 'new' && <span className="admin__dot" aria-hidden="true" />}
-              {KIND[m.kind] ?? m.kind}
-            </span>
-            <span className="admin__when">{when.format(new Date(m.created_at))}</span>
-          </p>
-          <p className="admin__text">{m.message}</p>
-          <p className="admin__meta">
-            {[m.first_name ?? 'Someone', m.email ?? 'doesn’t want a reply', m.page, m.device]
-              .filter(Boolean)
-              .join(' · ')}
-          </p>
-          <p className="admin__actions">
-            {m.email && (
-              <a href={`mailto:${m.email}?subject=${encodeURIComponent('About your Voyage Fare feedback')}`}>
-                Reply by email
-              </a>
-            )}
+      {shown.map((r, i) =>
+        r.app ? (
+          <AppMessage
+            key={r.app.id}
+            m={r.app}
+            seed={90 + i}
+            onToggle={() =>
+              void run(async () => {
+                await markMessage(r.app!.id, r.app!.status === 'new' ? 'done' : 'new')
+                load()
+                onChanged()
+              }, setError)
+            }
+          />
+        ) : (
+          <MailThread key={r.mail!.id} t={r.mail!} seed={90 + i} onChanged={load} />
+        ),
+      )}
+    </>
+  )
+}
+
+function AppMessage({ m, seed, onToggle }: { m: AdminMessage; seed: number; onToggle: () => void }) {
+  return (
+    <SketchBox weight="light" className="admin__msg" seed={seed}>
+      <p className="admin__msg-head">
+        <span className="admin__kind">
+          <span className="admin__src">App</span>
+          {m.status === 'new' && <span className="admin__dot" aria-hidden="true" />}
+          {KIND[m.kind] ?? m.kind}
+        </span>
+        <span className="admin__when">{when.format(new Date(m.created_at))}</span>
+      </p>
+      <p className="admin__text">{m.message}</p>
+      <p className="admin__meta">
+        {[m.first_name ?? 'Someone', m.email ?? 'doesn’t want a reply', m.page, m.device].filter(Boolean).join(' · ')}
+      </p>
+      <p className="admin__actions">
+        {m.email && (
+          <a href={`mailto:${m.email}?subject=${encodeURIComponent('About your Voyage Fare feedback')}`}>
+            Reply by email
+          </a>
+        )}
+        <button type="button" className="link-button" onClick={onToggle}>
+          {m.status === 'new' ? 'Done' : 'Back to new'}
+        </button>
+      </p>
+    </SketchBox>
+  )
+}
+
+/** "Talisa <talisa@…>" → "Talisa". */
+const nameOf = (from: string) => from.replace(/<.*>/, '').replace(/"/g, '').trim() || from
+
+function MailThread({ t, seed, onChanged }: { t: InboxThread; seed: number; onChanged: () => void }) {
+  const [emails, setEmails] = useState<InboxEmail[]>()
+  const [open, setOpen] = useState(false)
+  const [reply, setReply] = useState('')
+  const [sent, setSent] = useState(false)
+  const [error, setError] = useState<string>()
+  const { busy, run } = useSaving()
+  const last = emails?.filter((e) => e.direction === 'inbound').at(-1)
+
+  function toggle() {
+    const next = !open
+    setOpen(next)
+    if (next && !emails)
+      inboxRead(t.id)
+        .then(setEmails)
+        .catch((e: Error) => setError(e.message))
+  }
+
+  return (
+    <SketchBox weight="light" className="admin__msg" seed={seed}>
+      <p className="admin__msg-head">
+        <span className="admin__kind">
+          <span className="admin__src admin__src--mail">@</span>
+          {!t.done && !t.read && <span className="admin__dot" aria-hidden="true" />}
+          {nameOf(t.from)} · hello@
+        </span>
+        <span className="admin__when">{when.format(new Date(t.received_at))}</span>
+      </p>
+      <p className="admin__text">
+        <b>{t.subject ?? '(no subject)'}</b>
+        {t.emails > 1 && ` · ${t.emails} emails`}
+      </p>
+      {open && !emails && !error && <p className="loading">Opening it…</p>}
+      {open &&
+        emails?.map((e) => (
+          <div key={e.id} className={`admin__mail${e.direction === 'outbound' ? ' admin__mail--ours' : ''}`}>
+            <p className="admin__meta">
+              {e.direction === 'outbound' ? 'You, from hello@' : nameOf(e.from)} ·{' '}
+              {when.format(new Date(e.received_at))}
+              {e.attachments.length > 0 && ` · 📎 ${e.attachments.join(', ')}`}
+            </p>
+            <p className="admin__text">{e.text}</p>
+          </div>
+        ))}
+      {open && last && !sent && (
+        <div className="admin__reply">
+          <label className="visually-hidden" htmlFor={`reply-${t.id}`}>
+            Your reply
+          </label>
+          <textarea
+            id={`reply-${t.id}`}
+            className="field__input admin__reply-box"
+            placeholder={`Hi ${nameOf(last.from).split(' ')[0]}…`}
+            value={reply}
+            onChange={(e) => setReply(e.target.value)}
+          />
+          <p className="admin__reply-acts">
+            <span>from hello@voyagefare.app</span>
             <button
               type="button"
-              className="link-button"
+              className="button button--primary"
+              disabled={busy || !reply.trim()}
               onClick={() =>
                 void run(async () => {
-                  await markMessage(m.id, m.status === 'new' ? 'done' : 'new')
-                  load()
+                  await inboxReply(t.id, last.id, reply)
+                  setSent(true)
+                  setReply('')
+                  setEmails(undefined)
                   onChanged()
                 }, setError)
               }
             >
-              {m.status === 'new' ? 'Done' : 'Back to new'}
+              {busy ? 'Sending…' : 'Send'}
             </button>
           </p>
-        </SketchBox>
-      ))}
-      <p className="admin__later">
-        Emails to hello@ join this list in the next stage; until then they’re in your pro brief.
+        </div>
+      )}
+      {sent && <p className="admin__meta">✓ Sent from hello@voyagefare.app</p>}
+      {error && <FormMessage tone="error">{error}</FormMessage>}
+      <p className="admin__actions">
+        <button type="button" className="link-button" onClick={toggle}>
+          {open ? 'Close' : 'Open'}
+        </button>
+        <button
+          type="button"
+          className="link-button"
+          disabled={busy}
+          onClick={() =>
+            void run(async () => {
+              await inboxDone(t.id, !t.done)
+              onChanged()
+            }, setError)
+          }
+        >
+          {t.done ? 'Back to new' : 'Done'}
+        </button>
       </p>
-    </>
+    </SketchBox>
   )
 }
 

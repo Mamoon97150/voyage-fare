@@ -1361,3 +1361,45 @@ button.screen__back {
   flex: 1;
   min-width: 0;
 }
+
+/* hello@ in Admin (stage B) */
+.admin__src--mail {
+  background: color-mix(in srgb, var(--chosen) 12%, transparent);
+  color: var(--chosen);
+}
+
+.admin__mail {
+  margin-top: var(--space-3);
+  padding-top: var(--space-2);
+  border-top: 1px dashed var(--line);
+}
+
+.admin__mail--ours {
+  padding-left: var(--space-3);
+  border-left: 0;
+  opacity: 0.85;
+}
+
+.admin__reply {
+  margin-top: var(--space-3);
+}
+
+.admin__reply-box {
+  width: 100%;
+  min-height: 5rem;
+  resize: vertical;
+}
+
+.admin__reply-acts {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+}
+
+.admin__inbox-off {
+  margin-top: var(--space-3);
+}

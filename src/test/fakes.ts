@@ -23,6 +23,10 @@ export const data = {
   adminList: vi.fn(),
   addAdmin: vi.fn(),
   removeAdmin: vi.fn(),
+  inboxThreads: vi.fn(),
+  inboxRead: vi.fn(),
+  inboxReply: vi.fn(),
+  inboxDone: vi.fn(),
   listTrips: vi.fn(),
   getDemoTripId: vi.fn(),
   getTrip: vi.fn(),
@@ -104,6 +108,10 @@ export const tripsModule = {
   adminList: data.adminList,
   addAdmin: data.addAdmin,
   removeAdmin: data.removeAdmin,
+  inboxThreads: data.inboxThreads,
+  inboxRead: data.inboxRead,
+  inboxReply: data.inboxReply,
+  inboxDone: data.inboxDone,
   fileProblem: (f: { size: number; type: string }) =>
     ['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'image/heic'].includes(f.type)
       ? f.size > 10 * 1024 * 1024

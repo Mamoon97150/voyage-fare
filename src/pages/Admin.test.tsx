@@ -122,3 +122,59 @@ describe('the Admin dashboard (admins only)', () => {
     await waitFor(() => expect(data.addAdmin).toHaveBeenCalledWith('jo@mail.test'))
   })
 })
+
+describe('hello@ inside Admin (stage B)', () => {
+  it('emails to hello@ in the same list: open, reply from hello@, done', async () => {
+    data.amIAdmin.mockResolvedValue(true)
+    data.adminOverview.mockResolvedValue(overview)
+    data.adminMessages.mockResolvedValue([])
+    data.inboxThreads.mockResolvedValue([
+      {
+        id: 'th1',
+        subject: 'Group trip to Dubai',
+        from: 'Talisa <talisa@mail.test>',
+        emails: 1,
+        read: false,
+        done: false,
+        received_at: '2026-11-15T19:05:00Z',
+      },
+    ])
+    data.inboxRead.mockResolvedValue([
+      {
+        id: 'e1',
+        direction: 'inbound',
+        from: 'Talisa <talisa@mail.test>',
+        subject: 'Group trip to Dubai',
+        text: 'Could I test it with my girls’ trip?',
+        attachments: [],
+        received_at: '2026-11-15T19:05:00Z',
+      },
+    ])
+    data.inboxReply.mockResolvedValue({ id: 'sent1' })
+    data.inboxDone.mockResolvedValue({ ok: true })
+    open('/admin')
+    await screen.findByText('+2 this week')
+    click(/Messages/)
+    expect(await screen.findByText('Talisa · hello@')).toBeInTheDocument()
+    click('Open')
+    expect(await screen.findByText('Could I test it with my girls’ trip?')).toBeInTheDocument()
+    expect(screen.getByText('from hello@voyagefare.app')).toBeInTheDocument()
+    type('Your reply', 'With pleasure!')
+    click('Send')
+    await waitFor(() => expect(data.inboxReply).toHaveBeenCalledWith('th1', 'e1', 'With pleasure!'))
+    expect(await screen.findByText('✓ Sent from hello@voyagefare.app')).toBeInTheDocument()
+    click('Done')
+    await waitFor(() => expect(data.inboxDone).toHaveBeenCalledWith('th1', true))
+  })
+
+  it('the key isn’t set up yet: the app’s feedback still shows, and it says why hello@ is missing', async () => {
+    data.amIAdmin.mockResolvedValue(true)
+    data.adminOverview.mockResolvedValue(overview)
+    data.adminMessages.mockResolvedValue([])
+    data.inboxThreads.mockRejectedValue(new Error('The Resend key isn’t set up yet.'))
+    open('/admin')
+    await screen.findByText('+2 this week')
+    click(/Messages/)
+    expect(await screen.findByText(/hello@ couldn’t be read: The Resend key isn’t set up yet./)).toBeInTheDocument()
+  })
+})
