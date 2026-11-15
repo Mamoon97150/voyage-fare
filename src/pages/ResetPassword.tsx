@@ -4,7 +4,15 @@ import { AuthSheet, FormMessage, SubmitButton, TextField } from '../components/A
 import { SketchBox } from '../components/Sketch'
 import { Loading } from '../lib/auth'
 import { useAuth } from '../lib/authContext'
-import { MIN_PASSWORD, checkPassword, explainAuthError, onlyErrors, type FieldErrors } from '../lib/authForm'
+import {
+  LEAKED_PASSWORD,
+  MIN_PASSWORD,
+  checkPassword,
+  explainAuthError,
+  onlyErrors,
+  type FieldErrors,
+} from '../lib/authForm'
+import { isPwned } from '../lib/pwned'
 import { supabase } from '../lib/supabase'
 
 /** Reached from the "choose a new password" email: the link signs the person in for this. */
@@ -36,6 +44,11 @@ export function ResetPassword() {
     if (Object.keys(found).length) return
 
     setBusy(true)
+    if (await isPwned(password)) {
+      setBusy(false)
+      setErrors({ password: LEAKED_PASSWORD })
+      return
+    }
     const { error } = await supabase.auth.updateUser({ password })
     setBusy(false)
     if (error) {

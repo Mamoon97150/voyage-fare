@@ -37,6 +37,8 @@ const fake = vi.hoisted(() => {
 })
 
 vi.mock('./lib/supabase', () => ({ supabase: { auth: fake.auth, rpc: fake.rpc } }))
+const pwned = vi.hoisted(() => ({ isPwned: vi.fn(async () => false) }))
+vi.mock('./lib/pwned', () => pwned)
 
 const session = { user: { email: 'dana@mail.com' } }
 
@@ -230,6 +232,13 @@ describe('create an account', () => {
     type('Password', password)
     fireEvent.click(screen.getByRole('button', { name: 'Create account' }))
   }
+
+  it('our own leak check: a leaked password is refused before the account is made', async () => {
+    pwned.isPwned.mockResolvedValueOnce(true)
+    await fillSignUp('Dana', 'dana@mail.com', 'password')
+    expect(await screen.findByText(/appeared in a data leak/)).toBeInTheDocument()
+    expect(fake.auth.signUp).not.toHaveBeenCalled()
+  })
 
   it('a password from a data leak gets its own message', async () => {
     fake.auth.signUp.mockResolvedValue({

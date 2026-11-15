@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router'
 import { AuthSheet, FormMessage, JustLooking, SubmitButton, TextField } from '../components/AuthForm'
 import { SketchBox } from '../components/Sketch'
 import {
+  LEAKED_PASSWORD,
   MIN_PASSWORD,
   checkEmail,
   checkFirstName,
@@ -12,6 +13,7 @@ import {
   safeNext,
   type FieldErrors,
 } from '../lib/authForm'
+import { isPwned } from '../lib/pwned'
 import { supabase } from '../lib/supabase'
 
 export function SignUp() {
@@ -38,6 +40,12 @@ export function SignUp() {
     if (Object.keys(found).length) return
 
     setBusy(true)
+    // Our own leak check (Supabase's is Pro-only): only a piece of the password's hash is sent.
+    if (await isPwned(password)) {
+      setBusy(false)
+      setErrors({ password: LEAKED_PASSWORD })
+      return
+    }
     const { data, error } = await supabase.auth.signUp({
       email: email.trim(),
       password,

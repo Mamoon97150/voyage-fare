@@ -4,6 +4,7 @@ import { FormMessage, TextField } from '../components/AuthForm'
 import { SketchBox } from '../components/Sketch'
 import { useAuth } from '../lib/authContext'
 import {
+  LEAKED_PASSWORD,
   MIN_PASSWORD,
   checkEmail,
   checkFirstName,
@@ -12,6 +13,7 @@ import {
   onlyErrors,
   type FieldErrors,
 } from '../lib/authForm'
+import { isPwned } from '../lib/pwned'
 import { supabase } from '../lib/supabase'
 
 /**
@@ -54,6 +56,11 @@ export function Account() {
     setErrors(found)
     if (Object.keys(found).length) return
     setBusy('password')
+    if (await isPwned(password)) {
+      setBusy(null)
+      setErrors({ password: LEAKED_PASSWORD })
+      return
+    }
     const { error } = await supabase.auth.updateUser({ password })
     setBusy(null)
     if (error) {

@@ -6,6 +6,10 @@ export type FieldErrors = Partial<Record<Field, string>>
 
 export const MIN_PASSWORD = 8
 
+/** A password known from a data leak (our own check, or Supabase's on the Pro plan). */
+export const LEAKED_PASSWORD =
+  'This password has appeared in a data leak on another site. Choose another one: a short sentence works well.'
+
 export function checkEmail(email: string): string | undefined {
   const value = email.trim()
   if (!value) return 'Enter your email address.'
@@ -58,11 +62,7 @@ export function explainAuthError(error: { message?: string; code?: string; statu
   }
   // Leaked password protection (Supabase checks Have I Been Pwned): the password is known to attackers.
   if (error.reasons?.includes('pwned') || text.includes('pwned') || text.includes('leaked')) {
-    return {
-      field: 'password',
-      message:
-        'This password has appeared in a data leak on another site. Choose another one: a short sentence works well.',
-    }
+    return { field: 'password', message: LEAKED_PASSWORD }
   }
   if (code === 'weak_password' || text.includes('password should')) {
     return { field: 'password', message: 'This password is too weak. Try a longer one.' }
