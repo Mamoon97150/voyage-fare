@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import { useAuth } from '../lib/authContext'
 import { useInstallCard } from '../lib/pwa'
 import { SketchBox } from './Sketch'
-import { DEMO_LINK, feedbackLink } from '../lib/site'
+import { DEMO_LINK } from '../lib/site'
+import { adminOverview, amIAdmin } from '../lib/trips'
+import { FeedbackSheet } from './FeedbackSheet'
 import { supabase } from '../lib/supabase'
 
 /**
@@ -15,10 +17,33 @@ export function AccountMenu() {
   const [open, setOpen] = useState(false)
   const [busy, setBusy] = useState(false)
   const box = useRef<HTMLDivElement>(null)
-  const location = useLocation()
   const navigate = useNavigate()
   const { canInstall, install, card, showAgain } = useInstallCard()
+  const [feedback, setFeedback] = useState(false)
+  const [thanks, setThanks] = useState(false)
+  const [admin, setAdmin] = useState<{ fresh: number } | null>(null)
   const firstName = (session?.user.user_metadata?.first_name as string | undefined) ?? session?.user.email ?? ''
+
+  // Admins get an "Admin" line, with how many new messages (checked by the database).
+  useEffect(() => {
+    let active = true
+    amIAdmin()
+      .then(async (yes) => {
+        if (!yes || !active) return
+        const o = await adminOverview().catch(() => null)
+        if (active) setAdmin({ fresh: o?.new_messages ?? 0 })
+      })
+      .catch(() => {})
+    return () => {
+      active = false
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!thanks) return
+    const t = setTimeout(() => setThanks(false), 5000)
+    return () => clearTimeout(t)
+  }, [thanks])
   const email = session?.user.email ?? ''
 
   useEffect(() => {
@@ -63,6 +88,7 @@ export function AccountMenu() {
         onClick={() => setOpen((o) => !o)}
       >
         {firstName.slice(0, 1).toUpperCase()}
+        {admin && admin.fresh > 0 && <i className="account-menu__dot" aria-hidden="true" />}
       </button>
       {open && <div className="account-menu__scrim" aria-hidden="true" onClick={close} />}
       {open && (
@@ -78,14 +104,28 @@ export function AccountMenu() {
             <Link to={DEMO_LINK} role="menuitem" className="account-menu__item" onClick={close}>
               <Icon>◎</Icon>See the demo
             </Link>
-            <a
-              href={feedbackLink(window.location.origin + location.pathname)}
+            <button
+              type="button"
               role="menuitem"
               className="account-menu__item"
-              onClick={close}
+              onClick={() => {
+                setOpen(false)
+                setFeedback(true)
+              }}
             >
               <Icon>✎</Icon>Send feedback
-            </a>
+            </button>
+            {admin && (
+              <Link
+                to="/admin"
+                role="menuitem"
+                className="account-menu__item account-menu__item--admin"
+                onClick={close}
+              >
+                <Icon>✉</Icon>Admin
+                {admin.fresh > 0 && <small className="account-menu__count">{admin.fresh} new</small>}
+              </Link>
+            )}
             {canInstall && (
               <button type="button" role="menuitem" className="account-menu__item" onClick={putOnPhone}>
                 <Icon>⬇</Icon>Put it on my phone
@@ -109,6 +149,21 @@ export function AccountMenu() {
               {busy ? 'Signing out…' : 'Sign out'}
             </button>
           </SketchBox>
+        </div>
+      )}
+      {feedback && (
+        <FeedbackSheet
+          onClose={() => setFeedback(false)}
+          onSent={() => {
+            setFeedback(false)
+            setThanks(true)
+          }}
+        />
+      )}
+      {thanks && (
+        <div className="copied-note" role="status">
+          <b>Thank you{firstName ? `, ${firstName}` : ''}!</b>
+          <p>It’s with Djamina. If you said she can, she’ll write back to you by email.</p>
         </div>
       )}
     </div>

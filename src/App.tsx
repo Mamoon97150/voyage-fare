@@ -4,6 +4,7 @@ import { clearLinkErrorAtStart, linkError, linkErrorAtStart, linkKind } from './
 import { AuthProvider, RequireAuth, SignedOutOnly } from './lib/auth'
 import { OfflineStrip } from './components/PhoneApp'
 import { Account } from './pages/Account'
+import { Admin } from './pages/Admin'
 import { Compare } from './pages/Compare'
 import { Demo } from './pages/Demo'
 import { ForgotPassword } from './pages/ForgotPassword'
@@ -155,6 +156,14 @@ export function AppRoutes() {
           element={
             <RequireAuth>
               <SharePage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <RequireAuth>
+              <Admin />
             </RequireAuth>
           }
         />

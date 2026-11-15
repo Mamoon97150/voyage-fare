@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mockup — The Admin dashboard (v5 look, 15 Nov)</title>
+    <script type="module">
+      import '/src/index.css'
+      import './forms.css'
+      import './v4.css'
+      import './v5.js'
+    </script>
+    <style>
+      .hand { font-family: var(--font-hand); color: var(--ink-soft); line-height: 1.2; }
+      .top { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-4); border-bottom: 1px solid var(--line); }
+      .top .back { font-size: 1.5rem; }
+      .top b { font-family: var(--font-title); font-size: var(--text-xl); flex: 1; }
+      .tabsbar { display: flex; gap: var(--space-1); padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--line); overflow: hidden; }
+      .tabsbar span { padding: .45rem .7rem; border-radius: 999px; font-size: var(--text-sm); font-weight: 600; color: var(--ink-soft); white-space: nowrap; }
+      .tabsbar span.on { background: var(--ink); color: var(--paper); }
+      .tabsbar small { margin-left: .25rem; padding: 0 .35rem; border-radius: 999px; background: var(--estimated); color: var(--ink); font-size: .65rem; }
+      .pad { padding: var(--space-4); }
+      .kicker { font-size: var(--text-2xs); letter-spacing: .08em; text-transform: uppercase; font-weight: 700; color: var(--ink-soft); margin-top: var(--space-4); }
+      .stats { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); margin-top: var(--space-2); }
+      .stat { padding: var(--space-3); border: 1px solid var(--line); border-radius: 10px; background: var(--paper-raised); }
+      .stat b { display: block; font-family: var(--font-title); font-size: var(--text-2xl); }
+      .stat span { font-size: var(--text-xs); color: var(--ink-soft); }
+      .stat em { display: block; font-style: normal; font-size: var(--text-xs); color: var(--confirmed); margin-top: 2px; }
+      .meter { margin-top: var(--space-2); }
+      .meter p { display: flex; justify-content: space-between; font-size: var(--text-sm); }
+      .meter p span { color: var(--ink-soft); }
+      .bar { height: .45rem; border-radius: 999px; background: var(--line); margin-top: .3rem; overflow: hidden; }
+      .bar i { display: block; height: 100%; background: var(--confirmed); border-radius: 999px; }
+      .switch-row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-3) 0; border-bottom: 1px solid var(--line); font-size: var(--text-md); }
+      .switch-row small { display: block; color: var(--ink-soft); font-size: var(--text-xs); }
+      .sw { width: 2.6rem; height: 1.5rem; border-radius: 999px; background: var(--confirmed); position: relative; flex: none; }
+      .sw::after { content: ''; position: absolute; top: 3px; right: 3px; width: 1.1rem; height: 1.1rem; border-radius: 50%; background: var(--paper-raised); }
+      .sw--off { background: var(--line); } .sw--off::after { right: auto; left: 3px; }
+      .seg { display: flex; gap: var(--space-2); margin-top: var(--space-3); }
+      .msg { margin-top: var(--space-3); padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4); }
+      .msg .head { display: flex; justify-content: space-between; gap: var(--space-2); align-items: baseline; }
+      .msg .kind { font-size: var(--text-2xs); letter-spacing: .08em; text-transform: uppercase; font-weight: 700; }
+      .msg .when { font-size: var(--text-xs); color: var(--ink-soft); }
+      .msg p { font-size: var(--text-sm); line-height: 1.45; margin-top: var(--space-1); }
+      .msg .meta { font-size: var(--text-xs); color: var(--ink-soft); margin-top: var(--space-2); }
+      .msg .row { display: flex; gap: var(--space-3); margin-top: var(--space-2); font-size: var(--text-sm); font-weight: 600; }
+      .msg .row a { color: var(--chosen); }
+      .src { display: inline-grid; place-items: center; min-width: 1.3rem; height: 1.3rem; padding: 0 .3rem; border-radius: 4px; font-size: .62rem; font-weight: 700; margin-right: .35rem; vertical-align: 1px; }
+      .src--app { background: var(--wash-confirmed); color: var(--confirmed); }
+      .src--mail { background: color-mix(in srgb, var(--chosen) 12%, transparent); color: var(--chosen); }
+      .dot { display: inline-block; width: .55rem; height: .55rem; border-radius: 50%; background: var(--estimated); margin-right: .3rem; }
+      .reply { margin-top: var(--space-2); border: 1px solid var(--line); border-radius: 10px; background: var(--paper); padding: var(--space-2) var(--space-3); font-size: var(--text-sm); min-height: 4rem; color: var(--ink-soft); }
+      .reply-acts { display: flex; justify-content: space-between; align-items: center; margin-top: var(--space-2); font-size: var(--text-xs); color: var(--ink-soft); }
+      .person { display: grid; grid-template-columns: 2.2rem minmax(0, 1fr) auto; gap: var(--space-3); align-items: center; padding: var(--space-3) 0; border-bottom: 1px solid var(--line); }
+      .av { width: 2.2rem; height: 2.2rem; border-radius: 50%; display: grid; place-items: center; background: var(--line); font-weight: 700; font-size: var(--text-sm); }
+      .person b { font-size: var(--text-md); display: block; }
+      .person small { font-size: var(--text-xs); color: var(--ink-soft); display: block; }
+      .person .right { text-align: right; font-size: var(--text-xs); color: var(--ink-soft); }
+      .tag { display: inline-block; padding: 0 .4rem; border-radius: 4px; background: var(--ink); color: var(--paper); font-size: .6rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; margin-left: .3rem; vertical-align: 1px; }
+      .note { margin-top: var(--space-4); }
+      .add { display: flex; gap: var(--space-2); margin-top: var(--space-3); }
+      .add .field__input { flex: 1; min-width: 0; display: flex; align-items: center; color: var(--ink-soft); }
+      .push { margin: var(--space-6) var(--space-3) 0; padding: var(--space-3); border-radius: 18px; background: rgba(255,255,255,.92); box-shadow: 0 6px 20px rgb(0 0 0 / .18); display: grid; grid-template-columns: 2.4rem 1fr; gap: var(--space-3); align-items: center; }
+      .push img { width: 2.4rem; height: 2.4rem; border-radius: 22%; background: var(--paper); padding: 4px; }
+      .push b { font-size: var(--text-sm); display: flex; justify-content: space-between; }
+      .push b span { font-weight: 400; color: #888; font-size: var(--text-xs); }
+      .push p { font-size: var(--text-sm); color: #333; margin-top: 2px; }
+      .lock { background: linear-gradient(160deg, #2c4a7a 0%, #2f6b4f 100%); min-height: 24rem; padding-top: var(--space-6); }
+      .lock .time { text-align: center; color: #fff; font-size: 3.2rem; font-weight: 300; }
+    </style>
+  </head>
+  <body>
+    <div class="phones">
+
+      <!-- 1. Overview -->
+      <figure>
+        <div class="phone" style="padding-bottom:0">
+          <div class="top"><span class="back">‹</span><b>Admin</b></div>
+          <div class="tabsbar"><span class="on">Overview</span><span>Messages<small>3</small></span><span>People</span><span>Admins</span></div>
+          <div class="pad">
+            <p class="hand">how Voyage Fare is doing</p>
+            <div class="stats">
+              <div class="stat"><b>6</b><span>accounts</span><em>+2 this week</em></div>
+              <div class="stat"><b>9</b><span>trips</span><em>+3 this week</em></div>
+              <div class="stat"><b>4</b><span>active this week</span></div>
+              <div class="stat"><b>3</b><span>new messages</span></div>
+            </div>
+            <p class="kicker">Free plans</p>
+            <div class="meter"><p>Emails this month <span>41 / 3 000</span></p><div class="bar"><i style="width:2%"></i></div></div>
+            <div class="meter"><p>Files stored <span>12 MB / 1 GB</span></p><div class="bar"><i style="width:2%"></i></div></div>
+            <div class="meter"><p>Database <span>18 MB / 500 MB</span></p><div class="bar"><i style="width:4%"></i></div></div>
+            <p class="kicker">On this phone</p>
+            <div class="switch-row"><span>Notify me<small>new feedback, new email to hello@</small></span><span class="sw"></span></div>
+          </div>
+        </div>
+        <figcaption><b>1 · Overview.</b> Accounts, trips, who was active this week, new messages (with the week’s change); the <b>free-plan limits</b> (emails, files, database) so nothing surprises you; and <b>Notify me</b> on this phone.</figcaption>
+      </figure>
+
+      <!-- 2. Messages -->
+      <figure>
+        <div class="phone" style="padding-bottom:0">
+          <div class="top"><span class="back">‹</span><b>Admin</b></div>
+          <div class="tabsbar"><span>Overview</span><span class="on">Messages<small>3</small></span><span>People</span><span>Admins</span></div>
+          <div class="pad" style="padding-top:var(--space-2)">
+            <div class="seg"><button class="chip" aria-pressed="true">New · 3</button><button class="chip">Done</button><button class="chip">App</button><button class="chip">hello@</button></div>
+            <div class="sketch-box sketch-box--light msg" data-seed="91">
+              <svg class="sketch-box__line" aria-hidden="true"></svg>
+              <div class="head"><span class="kind"><span class="src src--mail">@</span><span class="dot"></span>Talisa · hello@</span><span class="when">today 19:05</span></div>
+              <p><b>Group trip to Dubai</b> — Hi! Danielle told me about the app, could I test it with my girls’ trip in March?</p>
+              <div class="reply">Hi Talisa! With pleasure, I’ll send you an invitation…</div>
+              <div class="reply-acts"><span>from hello@voyagefare.app</span><span style="display:flex;gap:var(--space-2)"><a class="button button--quiet" style="min-height:2.2rem">Done</a><a class="button button--primary" style="min-height:2.2rem">Send</a></span></div>
+            </div>
+            <div class="sketch-box sketch-box--light msg" data-seed="92">
+              <svg class="sketch-box__line" aria-hidden="true"></svg>
+              <div class="head"><span class="kind"><span class="src src--app">App</span><span class="dot"></span>Something’s broken</span><span class="when">today 18:42</span></div>
+              <p>The Budget page shows 0 € for Medellín but I added the hotel…</p>
+              <p class="meta">Ana · Budget · Colombia &amp; Panama · iPhone, Safari</p>
+              <div class="row"><a>Reply</a><a>Done</a></div>
+            </div>
+          </div>
+        </div>
+        <figcaption><b>2 · Messages: both in one list.</b>
+          <ul>
+            <li><b>App</b> = feedback sent in the app; <b>@</b> = emails to hello@. Filters: New · Done · App · hello@.</li>
+            <li><b>Reply</b> writes under the message and goes out <b>from hello@voyagefare.app</b> (not your Gmail); you press Send.</li>
+            <li>Feedback replies only when the person said you can write back.</li>
+          </ul>
+        </figcaption>
+      </figure>
+
+      <!-- 3. People -->
+      <figure>
+        <div class="phone" style="padding-bottom:0">
+          <div class="top"><span class="back">‹</span><b>Admin</b></div>
+          <div class="tabsbar"><span>Overview</span><span>Messages<small>3</small></span><span class="on">People</span><span>Admins</span></div>
+          <div class="pad" style="padding-top:var(--space-2)">
+            <div class="person"><span class="av">D</span><span><b>Djamina <span class="tag">admin</span></b><small>djamina@… · since 12 Nov</small></span><span class="right">4 trips<br />today</span></div>
+            <div class="person"><span class="av">D</span><span><b>Danielle</b><small>danielle@… · since 15 Nov</small></span><span class="right">1 trip<br />today</span></div>
+            <div class="person"><span class="av">T</span><span><b>Talisa</b><small>talisa@… · since 20 Nov</small></span><span class="right">1 trip<br />2 days ago</span></div>
+            <div class="person"><span class="av">A</span><span><b>Ana</b><small>ana@… · since 18 Nov · email not confirmed</small></span><span class="right">0 trips<br />5 days ago</span></div>
+            <p class="form-message form-message--info note">You see who has an account and how many trips they have, <b>never what’s in their trips</b>.</p>
+          </div>
+        </div>
+        <figcaption><b>3 · People.</b> First name, email, since when, trips, last visit, and a flag if the email isn’t confirmed (the robots show up here too). <b>No access to the trips themselves</b>: the Privacy page gets a line saying admins see your email and how many trips you have.</figcaption>
+      </figure>
+
+      <!-- 4. Admins -->
+      <figure>
+        <div class="phone" style="padding-bottom:0">
+          <div class="top"><span class="back">‹</span><b>Admin</b></div>
+          <div class="tabsbar"><span>Overview</span><span>Messages<small>3</small></span><span>People</span><span class="on">Admins</span></div>
+          <div class="pad" style="padding-top:var(--space-2)">
+            <div class="person"><span class="av">D</span><span><b>Djamina</b><small>first admin · can’t be removed</small></span><span class="right"></span></div>
+            <div class="person"><span class="av">J</span><span><b>Jo</b><small>added by Djamina · 2 Dec</small></span><span class="right"><a style="color:var(--ink-soft)">Remove</a></span></div>
+            <p class="kicker">Add an admin</p>
+            <div class="add"><div class="field__input">their email</div><a class="button button--primary">Add</a></div>
+            <p class="hand" style="margin-top:var(--space-2)">they need a Voyage Fare account first</p>
+          </div>
+        </div>
+        <figcaption><b>4 · Admins.</b> You’re the first admin (can’t be removed by mistake). Add one by their email (they need an account); remove one any time. A real role checked by the database.</figcaption>
+      </figure>
+
+      <!-- 5. Notification -->
+      <figure>
+        <div class="phone lock" style="padding-bottom:var(--space-6)">
+          <p class="time">9:41</p>
+          <div class="push"><img src="/illustrations/compass.svg" alt="" /><span><b>Voyage Fare <span>now</span></b><p>📮 New email to hello@ from Talisa: “Group trip to Dubai”</p></span></div>
+          <div class="push" style="margin-top:var(--space-2)"><img src="/illustrations/compass.svg" alt="" /><span><b>Voyage Fare <span>18:42</span></b><p>🔔 New feedback from Ana: “The Budget page shows 0 €…”</p></span></div>
+        </div>
+        <figcaption><b>5 · The notification</b> on your phone (Android, or iPhone with the app on the home screen). Tapping it opens the message in Admin. Only for admins who turned on <b>Notify me</b>.</figcaption>
+      </figure>
+
+    </div>
+  </body>
+</html>

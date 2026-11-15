@@ -17,7 +17,7 @@ export function Privacy() {
       <SiteBar />
       <main className="privacy">
         <h1>Privacy</h1>
-        <p className="privacy__lede">In plain words. Last changed 15 November 2026.</p>
+        <p className="privacy__lede">In plain words. Last changed 15 November 2026 (who sees what).</p>
         <SketchBox weight="light" className="privacy__sheet" seed={35}>
           <h2>What we keep</h2>
           <ul>
@@ -40,6 +40,12 @@ export function Privacy() {
               A question, or want a copy of your data? Write to <a href={`mailto:${CONTACT}`}>{CONTACT}</a>.
             </li>
           </ul>
+          <h2>Who sees what</h2>
+          <p>
+            Your trips are seen only by the travellers you invite. Voyage Fare’s admins can see your first name, your
+            email, when you joined and how many trips you have, to run the service and answer you, never what’s in your
+            trips. Feedback you send goes to the admins, with the page you were on and your phone and browser.
+          </p>
           <h2>Who’s behind it</h2>
           <p>Voyage Fare is made by Djamina, an independent maker in Saint-Martin.</p>
         </SketchBox>

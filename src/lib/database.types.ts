@@ -188,6 +188,42 @@ export type Database = {
           },
         ]
       }
+      feedback: {
+        Row: {
+          can_reply: boolean
+          created_at: string
+          device: string | null
+          id: string
+          kind: string
+          message: string
+          page: string | null
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          can_reply?: boolean
+          created_at?: string
+          device?: string | null
+          id?: string
+          kind: string
+          message: string
+          page?: string | null
+          status?: string
+          user_id?: string | null
+        }
+        Update: {
+          can_reply?: boolean
+          created_at?: string
+          device?: string | null
+          id?: string
+          kind?: string
+          message?: string
+          page?: string | null
+          status?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       invitations: {
         Row: {
           accepted_at: string | null
@@ -1417,6 +1453,49 @@ export type Database = {
       }
       accept_invitation: { Args: { p_token: string }; Returns: string }
       import_lines: { Args: { p_payload: Json; p_trip_id: string }; Returns: Json }
+      am_i_admin: { Args: never; Returns: boolean }
+      admin_overview: { Args: never; Returns: Json }
+      admin_people: {
+        Args: never
+        Returns: {
+          confirmed: boolean
+          created_at: string
+          email: string
+          first_name: string | null
+          is_admin: boolean
+          is_first: boolean
+          last_seen: string | null
+          trips: number
+          user_id: string
+        }[]
+      }
+      admin_feedback: {
+        Args: never
+        Returns: {
+          can_reply: boolean
+          created_at: string
+          device: string | null
+          email: string | null
+          first_name: string | null
+          id: string
+          kind: string
+          message: string
+          page: string | null
+          status: string
+        }[]
+      }
+      admin_add: { Args: { p_email: string }; Returns: string }
+      admin_remove: { Args: { p_user_id: string }; Returns: undefined }
+      admin_list: {
+        Args: never
+        Returns: {
+          added_by_name: string | null
+          created_at: string
+          first_name: string | null
+          is_first: boolean
+          user_id: string
+        }[]
+      }
       duplicate_trip: {
         Args: { p_all_options?: boolean; p_name: string; p_travellers?: string[]; p_trip_id: string }
         Returns: string

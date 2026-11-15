@@ -274,9 +274,8 @@ describe('the account menu (menus-v5)', () => {
     const menu = screen.getByRole('menu')
     expect(within(menu).getByRole('menuitem', { name: 'Your trips' })).toHaveAttribute('href', '/trips')
     expect(within(menu).getByRole('menuitem', { name: 'See the demo' })).toHaveAttribute('href', '/demo')
-    expect(within(menu).getByRole('menuitem', { name: 'Send feedback' }).getAttribute('href')).toMatch(
-      /^mailto:hello@voyagefare\.app\?subject=Voyage%20Fare%3A%20feedback&body=.*%2Ftrips$/,
-    )
+    // Feedback opens a sheet in the app (feedback-admin-v5), no email app.
+    expect(within(menu).getByRole('menuitem', { name: 'Send feedback' }).tagName).toBe('BUTTON')
     expect(within(menu).getByRole('menuitem', { name: 'Your account' })).toHaveAttribute('href', '/account')
     expect(within(menu).getByRole('menuitem', { name: 'Privacy' })).toHaveAttribute('href', '/privacy')
     expect(within(menu).getByRole('menuitem', { name: 'Sign out' })).toBeInTheDocument()
