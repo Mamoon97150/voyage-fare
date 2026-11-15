@@ -44,6 +44,8 @@ export function OptionCard({
   const foreign = own !== currency
   const mode = (details.mode ?? 'plane') as TicketMode
   const settled = chosen && (item.status === 'booked' || item.status === 'paid')
+  // Covered by a package (build 6): the chosen one has no price of its own, like on the trip page.
+  const covered = chosen && !!item.package_id && item.status !== 'dropped'
 
   const price = details.prices
     ? `${formatMoney(details.prices[0], own)} + ${formatMoney(details.prices[1], own)}`
@@ -116,8 +118,10 @@ export function OptionCard({
       </button>
 
       <span className="opt__side">
-        <b className="opt__amount num">{share === null ? '—' : formatWhole(share, currency)}</b>
-        {settled ? (
+        <b className="opt__amount num">{covered ? 'in the' : share === null ? '—' : formatWhole(share, currency)}</b>
+        {covered ? (
+          <span className="opt__tag opt__tag--package">Package</span>
+        ) : settled ? (
           <span className="opt__tag opt__tag--settled">● {item.status === 'paid' ? 'Paid' : 'Booked'}</span>
         ) : cheapest ? (
           <span className="opt__tag opt__tag--best">Cheapest</span>

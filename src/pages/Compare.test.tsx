@@ -122,6 +122,20 @@ describe('Compare', () => {
     await waitFor(() => expect(data.setFavourite).toHaveBeenCalledWith('avianca', true))
   })
 
+  it('a journey a package covers: the chosen one says “in the Package”, not 0 €', async () => {
+    const covered = {
+      ...journey,
+      items: [{ ...journey.items[0], package_id: 'pk', status: 'booked' }],
+      options: journey.options.map((o) => (o.is_chosen ? { ...o, amount: 0 } : o)),
+    }
+    data.getTrip.mockResolvedValue(detail(covered))
+    open('/trips/t1/compare')
+    await screen.findByRole('heading', { name: 'St Martin ⇄ Cartagena' })
+    expect(screen.getByText('in the')).toBeInTheDocument()
+    expect(screen.getByText('Package', { selector: '.opt__tag' })).toBeInTheDocument()
+    expect(screen.queryByText('0 €')).not.toBeInTheDocument()
+  })
+
   it('sort by speed', async () => {
     data.getTrip.mockResolvedValue(detail(journey))
     open('/trips/t1/compare')

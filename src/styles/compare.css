@@ -315,6 +315,10 @@
   color: var(--confirmed);
 }
 
+.opt__tag--package {
+  color: var(--chosen);
+}
+
 .opt__heart {
   min-width: 2.25rem;
   min-height: 2.25rem;
