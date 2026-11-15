@@ -27,6 +27,8 @@ import { useSaving } from '../lib/useSaving'
  * /trips/:tripId/import adds to one. Ask, paste, preview; nothing is saved before the preview.
  */
 
+const ESTIMATED = 'Everything is estimated: mark what’s booked as you go.'
+
 export function ImportNewTrip() {
   return <ImportFromAi target={null} />
 }
@@ -226,7 +228,7 @@ function PreviewStep({
         await importLines(target.trip.id, asJson(preview.payload))
         navigate(`/trips/${target.trip.id}`, {
           state: {
-            imported: `${preview.newPlaces ? `${plural(preview.newPlaces, 'place')}, ` : ''}${plural(preview.newLines, 'line')}`,
+            note: `Added from your AI: ${preview.newPlaces ? `${plural(preview.newPlaces, 'place')}, ` : ''}${plural(preview.newLines, 'line')}. ${ESTIMATED}`,
           },
         })
         return
@@ -252,7 +254,9 @@ function PreviewStep({
         throw e
       }
       navigate(`/trips/${id}`, {
-        state: { imported: `${plural(preview.newPlaces, 'place')}, ${plural(preview.newLines, 'line')}` },
+        state: {
+          note: `Added from your AI: ${plural(preview.newPlaces, 'place')}, ${plural(preview.newLines, 'line')}. ${ESTIMATED}`,
+        },
       })
     }, setError)
   }

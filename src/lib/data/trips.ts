@@ -162,3 +162,20 @@ export async function getDemoTripId(): Promise<string | null> {
   if (error) throw error
   return data?.id ?? null
 }
+
+/** Start a new trip from this one (build 8 step 3): no dates, nothing booked or paid. */
+export async function duplicateTrip(change: {
+  tripId: string
+  name: string
+  travellers: string[]
+  allOptions: boolean
+}): Promise<string> {
+  const { data, error } = await supabase.rpc('duplicate_trip', {
+    p_trip_id: change.tripId,
+    p_name: change.name,
+    p_travellers: change.travellers,
+    p_all_options: change.allOptions,
+  })
+  if (error) throw error
+  return data
+}

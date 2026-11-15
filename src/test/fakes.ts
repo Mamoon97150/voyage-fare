@@ -8,6 +8,7 @@ export const session = { user: { id: 'u-ana', email: 'ana@mail.com', user_metada
 export const data = {
   createTrip: vi.fn(),
   importLines: vi.fn(),
+  duplicateTrip: vi.fn(),
   listTrips: vi.fn(),
   getDemoTripId: vi.fn(),
   getTrip: vi.fn(),
@@ -74,6 +75,7 @@ export const supabaseModule = {
 export const tripsModule = {
   createTrip: data.createTrip,
   importLines: data.importLines,
+  duplicateTrip: data.duplicateTrip,
   listTrips: data.listTrips,
   getDemoTripId: data.getDemoTripId,
   getTrip: data.getTrip,

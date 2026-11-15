@@ -380,15 +380,15 @@ export function TripPage() {
   )
 }
 
-/** Back from "Import from my AI": what was added, and that it's all estimated (mockup import-ai-v5). */
+/** Back from "Import from my AI" or "A new trip from this one": what happened, in one note. */
 function ImportedNote() {
   const location = useLocation()
-  const imported = (location.state as { imported?: string } | null)?.imported
-  if (!imported) return null
+  const note = (location.state as { note?: string } | null)?.note
+  if (!note) return null
   return (
     <div className="screen__body screen__body--note">
       <p className="form-message form-message--info" role="status">
-        Added from your AI: {imported}. Everything is estimated: mark what’s booked as you go.
+        {note}
       </p>
     </div>
   )

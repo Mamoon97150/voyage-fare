@@ -643,3 +643,29 @@ describe('the trip menu ⋯: copy the trip for my AI (build 8)', () => {
     expect(screen.queryByRole('dialog')).toBeNull()
   })
 })
+
+describe('start a new trip from this one (build 8 step 3)', () => {
+  it('a name, who comes, the options; then the new trip opens with a note', async () => {
+    data.getTrip.mockResolvedValue(detail())
+    data.duplicateTrip.mockResolvedValue('t2')
+    open('/trips/t1')
+    fireEvent.click(await screen.findByRole('button', { name: 'Trip menu' }))
+    fireEvent.click(screen.getByRole('menuitem', { name: /Start a new trip from this one/ }))
+    const dialog = screen.getByRole('dialog', { name: 'A new trip from this one' })
+    expect(dialog).toHaveTextContent('Nothing changes in Colombia.')
+    expect(screen.getByLabelText('Name')).toHaveValue('Colombia again')
+    type('Name', 'Colombia 2027')
+    fireEvent.click(screen.getByRole('button', { name: 'Bea' })) // Bea stays home
+    fireEvent.click(screen.getByRole('switch', { name: /The options you compared/ }))
+    click('Start the new trip')
+    await waitFor(() =>
+      expect(data.duplicateTrip).toHaveBeenCalledWith({
+        tripId: 't1',
+        name: 'Colombia 2027',
+        travellers: [],
+        allOptions: false,
+      }),
+    )
+    expect(await screen.findByText(/A new trip from Colombia: 0 places, 0 lines, all estimated/)).toBeInTheDocument()
+  })
+})

@@ -855,3 +855,32 @@ button.screen__back {
   color: inherit;
   cursor: pointer;
 }
+
+/* A new trip from this one (build 8 step 3, mockup duplicate-v5) */
+.again__name {
+  width: 100%;
+  margin-top: var(--space-1);
+}
+
+.chip:disabled {
+  opacity: 1;
+  cursor: default;
+}
+
+.again__keeps {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+  margin: var(--space-3) 0 var(--space-4);
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+  line-height: 1.45;
+}
+
+.again__keeps b {
+  display: block;
+  font-size: var(--text-2xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink);
+}

@@ -1375,6 +1375,10 @@ export type Database = {
       }
       accept_invitation: { Args: { p_token: string }; Returns: string }
       import_lines: { Args: { p_payload: Json; p_trip_id: string }; Returns: Json }
+      duplicate_trip: {
+        Args: { p_all_options?: boolean; p_name: string; p_travellers?: string[]; p_trip_id: string }
+        Returns: string
+      }
       add_item: {
         Args: {
           p_amount?: number

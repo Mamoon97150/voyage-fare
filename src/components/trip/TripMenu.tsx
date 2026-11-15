@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import { AI_QUESTIONS, aiTextSize, tripForAi } from '../../lib/aiText'
 import { copyText } from '../../lib/clipboard'
 import { useAuth } from '../../lib/authContext'
 import { useDemo, useViewer } from '../../lib/demo'
-import { getMoney, type TripDetail, type TripMoney } from '../../lib/trips'
+import { duplicateTrip, getMoney, type TripDetail, type TripMoney } from '../../lib/trips'
+import { useSaving } from '../../lib/useSaving'
+import { plural } from '../../lib/tripText'
 import { SketchBox } from '../Sketch'
 
 /*
@@ -16,19 +18,21 @@ export function TripMenu({ detail }: { detail: TripDetail }) {
   const demo = useDemo()
   const [open, setOpen] = useState(false)
   const [sheet, setSheet] = useState(false)
+  const [again, setAgain] = useState(false)
   const [copied, setCopied] = useState(false)
   const box = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (!open && !sheet) return
+    if (!open && !sheet && !again) return
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return
       setOpen(false)
       setSheet(false)
+      setAgain(false)
     }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
-  }, [open, sheet])
+  }, [open, sheet, again])
 
   useEffect(() => {
     if (!copied) return
@@ -73,6 +77,17 @@ export function TripMenu({ detail }: { detail: TripDetail }) {
                 >
                   <i aria-hidden="true">⇣</i>Import from my AI
                 </Link>
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="trip-menu__item"
+                  onClick={() => {
+                    setOpen(false)
+                    setAgain(true)
+                  }}
+                >
+                  <i aria-hidden="true">⧉</i>Start a new trip from this one
+                </button>
                 <hr className="trip-menu__rule" />
                 <Link
                   to={`/trips/${detail.trip.id}/settings`}
@@ -97,6 +112,7 @@ export function TripMenu({ detail }: { detail: TripDetail }) {
           }}
         />
       )}
+      {again && <NewTripFromThis detail={detail} onClose={() => setAgain(false)} />}
       {copied && (
         <div className="copied-note" role="status">
           <b>Copied</b>
@@ -222,5 +238,114 @@ function Switch({
       </span>
       <span className={`switch${on ? ' switch--on' : ''}`} aria-hidden="true" />
     </button>
+  )
+}
+
+/** "A new trip from this one" (mockup duplicate-v5): a name, who comes, the options or only what was chosen. */
+function NewTripFromThis({ detail, onClose }: { detail: TripDetail; onClose: () => void }) {
+  const { session } = useAuth()
+  const navigate = useNavigate()
+  const { busy, run } = useSaving()
+  const me = detail.travellers.find((t) => t.user_id && t.user_id === session?.user.id) ?? null
+  const others = detail.travellers.filter((t) => t.id !== me?.id)
+  const [name, setName] = useState(`${detail.trip.name} again`)
+  const [coming, setComing] = useState<string[]>(others.map((t) => t.id))
+  const [allOptions, setAllOptions] = useState(true)
+  const [error, setError] = useState<string>()
+  const lines = detail.items.filter((i) => i.status !== 'dropped').length
+  const places = detail.places.length
+
+  async function start() {
+    setError(undefined)
+    if (!name.trim()) {
+      setError('Give the new trip a name.')
+      return
+    }
+    await run(async () => {
+      const id = await duplicateTrip({ tripId: detail.trip.id, name: name.trim(), travellers: coming, allOptions })
+      onClose()
+      navigate(`/trips/${id}`, {
+        state: {
+          note: `A new trip from ${detail.trip.name}: ${plural(places, 'place')}, ${plural(lines, 'line')}, all estimated. Add the dates when you know them.`,
+        },
+      })
+    }, setError)
+  }
+
+  return (
+    <>
+      <div className="trip-menu__scrim" aria-hidden="true" onClick={onClose} />
+      <div className="copy-ai" role="dialog" aria-modal="true" aria-labelledby="again-title">
+        <SketchBox tape="mustard" className="copy-ai__sheet" seed={61}>
+          <button type="button" className="copy-ai__close" aria-label="Close" onClick={onClose}>
+            ✕
+          </button>
+          <h2 id="again-title" className="copy-ai__title">
+            A new trip from this one
+          </h2>
+          <p className="copy-ai__lead">
+            Same places and lines, ready to plan again. Nothing changes in {detail.trip.name}.
+          </p>
+          <label className="copy-ai__label" htmlFor="again-name">
+            Name
+          </label>
+          <input
+            id="again-name"
+            className="field__input again__name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          {others.length > 0 && (
+            <>
+              <p className="copy-ai__label" id="again-who">
+                Who comes
+              </p>
+              <div className="chips" role="group" aria-labelledby="again-who">
+                {me && (
+                  <button type="button" className="chip" aria-pressed="true" disabled>
+                    {me.name} · you
+                  </button>
+                )}
+                {others.map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    className="chip"
+                    aria-pressed={coming.includes(t.id)}
+                    onClick={() => setComing((c) => (c.includes(t.id) ? c.filter((x) => x !== t.id) : [...c, t.id]))}
+                  >
+                    {t.name}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+          <Switch
+            label="The options you compared"
+            hint="off: only what you chose"
+            on={allOptions}
+            onChange={setAllOptions}
+          />
+          <div className="again__keeps">
+            <p>
+              <b>Comes along</b>places, nights, the route, lines and their days, prices, notes, links, To try, daily
+              estimates, rooms
+            </p>
+            <p>
+              <b>Starts fresh</b>dates, bookings and payments (all back to estimated), who paid, the invitations
+            </p>
+          </div>
+          {error && <p className="field__error">{error}</p>}
+          <button
+            type="button"
+            className="button button--primary button--wide"
+            disabled={busy}
+            onClick={() => void start()}
+          >
+            {busy ? 'Starting it…' : 'Start the new trip'}
+          </button>
+        </SketchBox>
+      </div>
+    </>
   )
 }
