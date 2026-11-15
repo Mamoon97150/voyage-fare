@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import type { Field, FieldErrors } from '../lib/authForm'
 import { Sketch, Underlined, type Drawing } from './Sketch'
+import { sendLink } from '../lib/authLinks'
 
 /** The account pages: the compass, a drawing, the title, then the form (mockup 6, look B). */
 export function AuthSheet({
@@ -110,5 +111,49 @@ export function SubmitButton({ busy, label, busyLabel }: { busy: boolean; label:
     <button type="submit" className="button button--primary button--wide" disabled={busy} aria-busy={busy || undefined}>
       {busy ? busyLabel : label}
     </button>
+  )
+}
+
+/**
+ * "Send the link again": a new confirmation email (sign-up) or a new reset link. The answer is the
+ * same whether the account exists or not, so nobody can test which emails are signed up.
+ */
+export function ResendLink({
+  email,
+  kind,
+  next = '/trips',
+  label = 'Send the link again',
+}: {
+  email: string
+  kind: 'signup' | 'recovery'
+  next?: string
+  label?: string
+}) {
+  const [state, setState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
+  async function send() {
+    setState('sending')
+    const error = await sendLink(kind, email, next)
+    setState(error ? 'error' : 'sent')
+  }
+  if (state === 'sent') return <span className="resend resend--sent">A new link is on its way.</span>
+  return (
+    <span className="resend">
+      <button type="button" className="link-button" onClick={send} disabled={state === 'sending' || !email.trim()}>
+        {state === 'sending' ? 'Sending…' : label}
+      </button>
+      {state === 'error' && (
+        <span className="resend__error"> Couldn’t send it. Wait a few minutes, then try again.</span>
+      )}
+    </span>
+  )
+}
+
+/** "just looking? Try it with a real trip ›" under the account forms (sign-in polish, 15 Nov). */
+export function JustLooking() {
+  return (
+    <p className="just-looking">
+      <span className="hand">just looking?</span>
+      <Link to="/demo">Try it with a real trip ›</Link>
+    </p>
   )
 }

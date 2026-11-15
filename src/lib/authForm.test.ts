@@ -39,7 +39,13 @@ describe('server answers, in words', () => {
 
   it('points at the right field', () => {
     expect(explainAuthError({ code: 'user_already_exists' }).field).toBe('email')
-    expect(explainAuthError({ code: 'email_not_confirmed' }).field).toBe('email')
+    expect(explainAuthError({ code: 'email_not_confirmed' }).unconfirmed).toBe(true)
+    // Leaked password protection (15 Nov): its own message, on the password.
+    expect(explainAuthError({ code: 'weak_password', reasons: ['pwned'] })).toMatchObject({
+      field: 'password',
+      message: expect.stringContaining('data leak'),
+    })
+    expect(explainAuthError({ code: 'weak_password', reasons: ['length'] }).message).toContain('too weak')
     expect(explainAuthError({ code: 'weak_password' }).field).toBe('password')
     expect(explainAuthError({ code: 'same_password' }).field).toBe('password')
   })

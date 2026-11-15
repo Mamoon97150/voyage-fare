@@ -88,7 +88,7 @@ describe('trip settings', () => {
     expect(screen.getByText(/Everything in Colombia goes/)).toBeInTheDocument()
     click('Yes, delete Colombia')
     await waitFor(() => expect(data.deleteTrip).toHaveBeenCalledWith('t1'))
-    expect(await screen.findByText('No trips yet')).toBeInTheDocument()
+    expect(await screen.findByText('Your first trip')).toBeInTheDocument()
   })
 })
 

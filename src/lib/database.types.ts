@@ -1362,6 +1362,7 @@ export type Database = {
       }
     }
     Functions: {
+      delete_my_account: { Args: never; Returns: undefined }
       add_to_try: {
         Args: {
           p_amount?: number

@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router'
-import { AuthSheet, FormMessage, SubmitButton, TextField } from '../components/AuthForm'
+import { AuthSheet, FormMessage, JustLooking, ResendLink, SubmitButton, TextField } from '../components/AuthForm'
 import { SketchBox } from '../components/Sketch'
 import { checkEmail, checkPassword, explainAuthError, onlyErrors, safeNext, type FieldErrors } from '../lib/authForm'
 import { supabase } from '../lib/supabase'
@@ -14,10 +14,12 @@ export function SignIn() {
   const [errors, setErrors] = useState<FieldErrors>({})
   const [formError, setFormError] = useState<string>()
   const [busy, setBusy] = useState(false)
+  const [unconfirmed, setUnconfirmed] = useState(false)
 
   async function submit(event: FormEvent) {
     event.preventDefault()
     setFormError(undefined)
+    setUnconfirmed(false)
     const found = onlyErrors({
       email: checkEmail(email),
       password: checkPassword(password, { isNew: false }),
@@ -29,9 +31,10 @@ export function SignIn() {
     const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
     setBusy(false)
     if (error) {
-      const { field, message } = explainAuthError(error)
+      const { field, message, unconfirmed } = explainAuthError(error)
       if (field) setErrors({ [field]: message })
       else setFormError(message)
+      setUnconfirmed(Boolean(unconfirmed))
       return
     }
     navigate(next, { replace: true })
@@ -43,7 +46,17 @@ export function SignIn() {
         {params.get('reset') === 'done' && (
           <FormMessage tone="info">Your password is changed. Sign in with the new one.</FormMessage>
         )}
-        {formError && <FormMessage tone="error">{formError}</FormMessage>}
+        {formError && (
+          <FormMessage tone="error">
+            {formError}
+            {unconfirmed && (
+              <>
+                {' '}
+                <ResendLink email={email} kind="signup" next={next} />
+              </>
+            )}
+          </FormMessage>
+        )}
         <SketchBox tape="mustard" className="form__sheet">
           <TextField
             field="email"
@@ -74,6 +87,7 @@ export function SignIn() {
         New here?{' '}
         <Link to={`/sign-up${params.get('next') ? `?next=${encodeURIComponent(next)}` : ''}`}>Create an account</Link>
       </p>
+      <JustLooking />
     </AuthSheet>
   )
 }

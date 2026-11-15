@@ -32,10 +32,11 @@ const fake = vi.hoisted(() => {
       resend: vi.fn(),
       signOut: vi.fn(async () => emit('SIGNED_OUT', null)),
     },
+    rpc: vi.fn(),
   }
 })
 
-vi.mock('./lib/supabase', () => ({ supabase: { auth: fake.auth } }))
+vi.mock('./lib/supabase', () => ({ supabase: { auth: fake.auth, rpc: fake.rpc } }))
 
 const session = { user: { email: 'dana@mail.com' } }
 
@@ -150,7 +151,7 @@ describe('sign in', () => {
     expect(screen.getByRole('button', { name: 'Sign in' })).toBeEnabled()
   })
 
-  it('an address not confirmed yet is explained on the email field', async () => {
+  it('an address not confirmed yet: explained, with the link sent again right there', async () => {
     fake.auth.signInWithPassword.mockResolvedValue({
       data: {},
       error: { code: 'email_not_confirmed', message: 'Email not confirmed' },
@@ -161,7 +162,62 @@ describe('sign in', () => {
     type('Password', 'anything')
     fireEvent.click(screen.getByRole('button', { name: 'Sign in' }))
     expect(await screen.findByText(/Confirm your email first/)).toBeInTheDocument()
-    expect(screen.getByLabelText('Email')).toHaveAttribute('aria-invalid', 'true')
+    fake.auth.resend.mockResolvedValue({ error: null })
+    fireEvent.click(screen.getByRole('button', { name: 'Send the link again' }))
+    expect(await screen.findByText('A new link is on its way.')).toBeInTheDocument()
+    expect(fake.auth.resend).toHaveBeenCalledWith(expect.objectContaining({ type: 'signup', email: 'dana@mail.com' }))
+  })
+
+  it('just looking: the demo is one tap away', async () => {
+    open('/sign-in')
+    expect(await screen.findByRole('link', { name: 'Try it with a real trip ›' })).toHaveAttribute('href', '/demo')
+  })
+})
+
+describe('email links (sign-in polish, 15 Nov)', () => {
+  it('an old confirmation link: said, and a new one sent', async () => {
+    fake.auth.resend.mockResolvedValue({ error: null })
+    open('/trips#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired')
+    expect(await screen.findByRole('heading', { name: 'This link has expired' })).toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText('Your email'), { target: { value: 'dana@mail.com' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Send me a new link' }))
+    expect(await screen.findByRole('heading', { name: 'Check your inbox' })).toBeInTheDocument()
+    expect(fake.auth.resend).toHaveBeenCalledWith(expect.objectContaining({ type: 'signup', email: 'dana@mail.com' }))
+  })
+
+  it('an old reset link: a new reset link', async () => {
+    fake.auth.resetPasswordForEmail.mockResolvedValue({ error: null })
+    open('/reset-password#error_code=otp_expired')
+    expect(await screen.findByRole('heading', { name: 'This link has expired' })).toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText('Your email'), { target: { value: 'dana@mail.com' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Send me a new link' }))
+    await screen.findByRole('heading', { name: 'Check your inbox' })
+    expect(fake.auth.resetPasswordForEmail).toHaveBeenCalledWith('dana@mail.com', expect.anything())
+  })
+})
+
+describe('your account (sign-in polish, 15 Nov)', () => {
+  beforeEach(() => fake.emit('SIGNED_IN', session))
+
+  it('change my email: a link to the new address', async () => {
+    fake.auth.updateUser.mockResolvedValue({ error: null })
+    open('/account')
+    fireEvent.click(await screen.findByRole('button', { name: 'Change my email' }))
+    fireEvent.change(screen.getByLabelText('New email'), { target: { value: 'dana@new.com' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Send the link' }))
+    expect(await screen.findByText(/We sent a link to dana@new.com/)).toBeInTheDocument()
+    expect(fake.auth.updateUser).toHaveBeenCalledWith({ email: 'dana@new.com' }, expect.anything())
+  })
+
+  it('delete my account: asked once, then gone and signed out', async () => {
+    fake.rpc.mockResolvedValue({ error: null })
+    open('/account')
+    fireEvent.click(await screen.findByRole('button', { name: 'Delete my account…' }))
+    expect(screen.getByText('The trips only you are on are deleted.')).toBeInTheDocument()
+    expect(fake.rpc).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByRole('button', { name: 'Yes, delete it' }))
+    await vi.waitFor(() => expect(fake.auth.signOut).toHaveBeenCalled())
+    expect(fake.rpc).toHaveBeenCalledWith('delete_my_account')
   })
 })
 
@@ -174,6 +230,17 @@ describe('create an account', () => {
     type('Password', password)
     fireEvent.click(screen.getByRole('button', { name: 'Create account' }))
   }
+
+  it('a password from a data leak gets its own message', async () => {
+    fake.auth.signUp.mockResolvedValue({
+      data: {},
+      error: { code: 'weak_password', message: 'Password is known to be weak', reasons: ['pwned'] },
+    })
+    await fillSignUp('Dana', 'dana@mail.com', 'sunshine2024')
+    expect(await screen.findByText(/appeared in a data leak/)).toBeInTheDocument()
+    expect(screen.getByLabelText('Password')).toHaveAttribute('aria-invalid', 'true')
+    expect(screen.getByText(/We use your email only to sign you in/)).toBeInTheDocument()
+  })
 
   it('checks every field before sending', async () => {
     await fillSignUp(' ', 'dana@mail.com', 'short')

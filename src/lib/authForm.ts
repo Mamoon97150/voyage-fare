@@ -33,9 +33,11 @@ export function onlyErrors(errors: FieldErrors): FieldErrors {
 }
 
 /** What Supabase answered, turned into a message for a person, on the right field when there is one. */
-export function explainAuthError(error: { message?: string; code?: string; status?: number }): {
+export function explainAuthError(error: { message?: string; code?: string; status?: number; reasons?: string[] }): {
   field?: Field
   message: string
+  /** The email isn't confirmed yet: the page offers to send the link again. */
+  unconfirmed?: boolean
 } {
   const code = error.code ?? ''
   // Our own database rules explain themselves ("Bea has paid or owes money…"): show them as they are.
@@ -47,12 +49,20 @@ export function explainAuthError(error: { message?: string; code?: string; statu
   }
   if (code === 'email_not_confirmed' || text.includes('email not confirmed')) {
     return {
-      field: 'email',
-      message: 'Confirm your email first: open the link we sent you, then sign in.',
+      message: 'Confirm your email first: open the link we sent you when you signed up, then sign in.',
+      unconfirmed: true,
     }
   }
   if (code === 'user_already_exists' || code === 'email_exists' || text.includes('already registered')) {
     return { field: 'email', message: 'An account already exists with this email. Sign in instead.' }
+  }
+  // Leaked password protection (Supabase checks Have I Been Pwned): the password is known to attackers.
+  if (error.reasons?.includes('pwned') || text.includes('pwned') || text.includes('leaked')) {
+    return {
+      field: 'password',
+      message:
+        'This password has appeared in a data leak on another site. Choose another one: a short sentence works well.',
+    }
   }
   if (code === 'weak_password' || text.includes('password should')) {
     return { field: 'password', message: 'This password is too weak. Try a longer one.' }

@@ -6,6 +6,7 @@ import { HandBar } from '../components/HandBar'
 import { Sketch, SketchBox, Underlined } from '../components/Sketch'
 import { Loading } from '../lib/auth'
 import { useAuth } from '../lib/authContext'
+import { hintSeen, markHintSeen } from '../lib/hints'
 import { explainAuthError } from '../lib/authForm'
 import { formatWhole } from '../lib/money'
 import {
@@ -65,15 +66,21 @@ export function Trips() {
             <p className="hand trips__hello">{greeting(shelf, firstName, today)}</p>
           )}
         </div>
+        <WelcomeSlip />
         {error && <FormMessage tone="error">{error}</FormMessage>}
         {!error && trips === undefined && <Loading />}
         {trips?.length === 0 && (
           <SketchBox tape="green" className="empty">
             <Sketch name="no-trips" width={240} />
-            <h2 className="empty__title">No trips yet</h2>
-            <p className="hand empty__note">the first page is the hardest</p>
+            <h2 className="empty__title">Your first trip</h2>
+            <p className="empty__lead">
+              Where to? Add the places, then what you’re thinking of: the app adds it up, for each of you.
+            </p>
             <Link to="/trips/new" className="button button--primary button--wide">
-              + New trip
+              + Start a trip
+            </Link>
+            <Link to="/demo" className="empty__demo">
+              or look at a real trip first ›
             </Link>
           </SketchBox>
         )}
@@ -346,5 +353,27 @@ function Avatars({ travellers }: { travellers: TripCard['travellers'] }) {
         </span>
       )}
     </span>
+  )
+}
+
+/**
+ * Once, right after confirming the email (sign-in polish, 15 Nov): "Email confirmed, welcome Dana!"
+ * A note slipped into the notebook, remembered on this device.
+ */
+function WelcomeSlip() {
+  const { session } = useAuth()
+  const user = session?.user
+  const confirmed = user?.email_confirmed_at ? Date.parse(user.email_confirmed_at) : null
+  const key = `welcome:${user?.id}`
+  const [show] = useState(() => confirmed !== null && Date.now() - confirmed < 30 * 60_000 && !hintSeen(key))
+  useEffect(() => {
+    if (show) markHintSeen(key)
+  }, [show, key])
+  if (!show) return null
+  const name = user?.user_metadata?.first_name as string | undefined
+  return (
+    <div className="welcome-slip" role="status">
+      <p>Email confirmed, welcome{name ? ` ${name}` : ''}! Your notebook is ready.</p>
+    </div>
   )
 }

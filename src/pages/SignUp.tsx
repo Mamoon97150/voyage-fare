@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router'
-import { AuthSheet, FormMessage, SubmitButton, TextField } from '../components/AuthForm'
+import { AuthSheet, FormMessage, JustLooking, SubmitButton, TextField } from '../components/AuthForm'
 import { SketchBox } from '../components/Sketch'
 import {
   MIN_PASSWORD,
@@ -96,6 +96,10 @@ export function SignUp() {
             autoComplete="new-password"
             hint={`At least ${MIN_PASSWORD} characters.`}
           />
+          <p className="form__privacy">
+            We use your email only to sign you in and send you your links. Your trips are private: only the people you
+            invite see them.
+          </p>
         </SketchBox>
         <SubmitButton busy={busy} label="Create account" busyLabel="Creating your account…" />
       </form>
@@ -103,6 +107,7 @@ export function SignUp() {
         Already have an account?{' '}
         <Link to={`/sign-in${params.get('next') ? `?next=${encodeURIComponent(next)}` : ''}`}>Sign in</Link>
       </p>
+      <JustLooking />
     </AuthSheet>
   )
 }

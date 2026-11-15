@@ -4,6 +4,7 @@ import { card } from '../test/cards'
 import { todayIso } from '../lib/shelf'
 import { addDays } from '../lib/tripText'
 import { click, data, open, type } from '../test/app'
+import { session } from '../test/fakes'
 
 const plain = (s: string | null) => (s ?? '').replace(/[\u00a0\u202f]/g, ' ')
 
@@ -18,8 +19,22 @@ describe('your trips', () => {
   it('empty: the notebook, and a way to start', async () => {
     data.listTrips.mockResolvedValue([])
     open('/trips')
-    expect(await screen.findByText('No trips yet')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: '+ New trip' })).toHaveAttribute('href', '/trips/new')
+    expect(await screen.findByText('Your first trip')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: '+ Start a trip' })).toHaveAttribute('href', '/trips/new')
+    expect(screen.getByRole('link', { name: 'or look at a real trip first ›' })).toHaveAttribute('href', '/demo')
+  })
+
+  it('right after confirming the email: a welcome note, once', async () => {
+    const user = session.user as Record<string, unknown>
+    user.email_confirmed_at = new Date().toISOString()
+    data.listTrips.mockResolvedValue([])
+    const first = open('/trips')
+    expect(await screen.findByText('Email confirmed, welcome Ana! Your notebook is ready.')).toBeInTheDocument()
+    first.unmount()
+    open('/trips')
+    await screen.findByText('Your first trip')
+    expect(screen.queryByText(/Email confirmed/)).not.toBeInTheDocument()
+    delete user.email_confirmed_at
   })
 
   it('a shelf: the next trip big, then the dreams, a blank page, the past trips', async () => {
