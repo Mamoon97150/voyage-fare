@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import { AccountMenu } from '../components/AccountMenu'
 import { FormMessage } from '../components/AuthForm'
 import { HandBar } from '../components/HandBar'
+import { InstallCard, NoConnection } from '../components/PhoneApp'
 import { Sketch, SketchBox, Underlined } from '../components/Sketch'
 import { Loading } from '../lib/auth'
 import { useAuth } from '../lib/authContext'
@@ -35,16 +36,28 @@ export function Trips() {
   const { session } = useAuth()
   const [trips, setTrips] = useState<TripCard[]>()
   const [error, setError] = useState<string>()
+  const [offline, setOffline] = useState(false)
+  const [attempt, setAttempt] = useState(0)
 
   useEffect(() => {
     let active = true
     listTrips()
-      .then((t) => active && setTrips(t))
-      .catch((e) => active && setError(explainAuthError(e).message))
+      .then((t) => {
+        if (!active) return
+        setTrips(t)
+        setError(undefined)
+        setOffline(false)
+      })
+      .catch((e) => {
+        if (!active) return
+        // Opened with no connection: "No connection" and Try again, not an error message.
+        if (!navigator.onLine) setOffline(true)
+        else setError(explainAuthError(e).message)
+      })
     return () => {
       active = false
     }
-  }, [])
+  }, [attempt])
 
   const today = todayIso()
   const shelf = useMemo(() => (trips ? shelve(trips, today) : null), [trips, today])
@@ -67,8 +80,10 @@ export function Trips() {
           )}
         </div>
         <WelcomeSlip />
+        {trips && trips.length > 0 && <InstallCard />}
         {error && <FormMessage tone="error">{error}</FormMessage>}
-        {!error && trips === undefined && <Loading />}
+        {offline && trips === undefined && <NoConnection onRetry={() => setAttempt((n) => n + 1)} />}
+        {!error && !offline && trips === undefined && <Loading />}
         {trips?.length === 0 && (
           <SketchBox tape="green" className="empty">
             <Sketch name="no-trips" width={240} />

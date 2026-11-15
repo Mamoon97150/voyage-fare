@@ -13,6 +13,7 @@ import {
 } from '../../lib/trips'
 import { dayDate, MEALS, placeDays, plannedOn, sourceOf, VERDICTS } from '../../lib/toTry'
 import { useSaving } from '../../lib/useSaving'
+import { canPaste, isIos } from '../../lib/pwa'
 import { FormMessage } from '../AuthForm'
 import { FormActions } from '../FormActions'
 import { SketchBox } from '../Sketch'
@@ -233,6 +234,18 @@ export function ToTryForm({
     if (found?.name && !name.trim()) setName(found.name)
   }
 
+  /** 📋 Paste (mockup pwa-v5): one tap after "Copy link" in Instagram, mainly for iPhones. */
+  async function pasteLink() {
+    try {
+      const text = await navigator.clipboard.readText()
+      const found = text.match(/https?:\/\/[^\s<>"]+/)?.[0]
+      if (found) pasted(found)
+      else setErrors((e) => ({ ...e, link: 'No link copied yet: in the post, tap ⋯ then Copy link.' }))
+    } catch {
+      setErrors((e) => ({ ...e, link: 'The phone didn’t allow pasting: press and hold in the box, then Paste.' }))
+    }
+  }
+
   async function submit(event: FormEvent) {
     event.preventDefault()
     setFormError(undefined)
@@ -266,16 +279,26 @@ export function ToTryForm({
           <label htmlFor={`${id}-link`} className="field__label">
             Link
           </label>
-          <input
-            id={`${id}-link`}
-            className="field__input"
-            inputMode="url"
-            placeholder="Paste the post: Instagram, TikTok, Google Maps…"
-            value={link}
-            onChange={(e) => pasted(e.target.value)}
-            aria-invalid={errors.link ? true : undefined}
-          />
+          <div className="link-row">
+            <input
+              id={`${id}-link`}
+              className="field__input"
+              inputMode="url"
+              placeholder="Paste the post: Instagram, TikTok, Google Maps…"
+              value={link}
+              onChange={(e) => pasted(e.target.value)}
+              aria-invalid={errors.link ? true : undefined}
+            />
+            {canPaste() && (
+              <button type="button" className="paste-button" onClick={() => void pasteLink()}>
+                <span aria-hidden="true">📋</span> Paste
+              </button>
+            )}
+          </div>
           {errors.link && <p className="field__error">{errors.link}</p>}
+          {!link && isIos(navigator.userAgent, navigator.maxTouchPoints) && (
+            <p className="hand paste-hint">in Instagram: ⋯ → Copy link, then Paste here</p>
+          )}
         </div>
         {source && (
           <p className="pasted">

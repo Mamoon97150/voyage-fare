@@ -1,0 +1,185 @@
+/* The app on the phone (build 7 step 5, mockup pwa-v5, 15 Nov): install card, offline, sharing. */
+
+/* Phones with a notch, in landscape: keep the page clear of it (viewport-fit=cover). */
+body {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* "Keep it on your phone": at the top of Your trips */
+.install-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-1) var(--space-3);
+  align-items: start;
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.app-icon {
+  width: 3.2rem;
+  height: 3.2rem;
+  border-radius: 22%;
+  background: var(--paper-raised);
+  border: 1px solid var(--line);
+  display: grid;
+  place-items: center;
+  box-shadow: var(--shadow-1);
+}
+
+.app-icon img {
+  width: 76%;
+}
+
+.install-card__title {
+  font-family: var(--font-title);
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+.install-card__lead {
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+  line-height: 1.4;
+}
+
+.install-card__ios {
+  grid-column: 1 / -1;
+  margin-top: var(--space-2);
+  padding: var(--space-3);
+  border: 1.5px dashed var(--line);
+  border-radius: 10px;
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+.install-card__ios ol {
+  margin: 0 0 0 1.1rem;
+}
+
+.install-card__sym {
+  display: inline-grid;
+  place-items: center;
+  width: 1.3rem;
+  height: 1.3rem;
+  border: 1.5px solid var(--chosen);
+  border-radius: 5px;
+  color: var(--chosen);
+  font-size: 0.7rem;
+  vertical-align: middle;
+}
+
+.install-card__actions {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.install-card__actions .button {
+  flex: 1;
+}
+
+/* Lost the connection: a note at the top, what's on screen stays */
+.offline-strip {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  margin: 0 auto;
+  max-width: 40rem;
+  padding: var(--space-2) var(--space-3);
+  padding-top: calc(var(--space-2) + env(safe-area-inset-top));
+  background: var(--paper-note);
+  border-bottom: 1.5px dashed var(--ink-soft);
+  font-size: var(--text-sm);
+  line-height: 1.4;
+}
+
+.offline-strip b {
+  white-space: nowrap;
+}
+
+/* Opened with no connection */
+.no-connection {
+  padding: var(--space-6) var(--space-4);
+}
+
+.no-connection .button {
+  margin-top: var(--space-4);
+}
+
+/* 📋 Paste, next to the link in the To try form */
+.link-row {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.link-row .field__input {
+  flex: 1;
+  min-width: 0;
+}
+
+.paste-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 2.75rem;
+  padding: 0 0.8rem;
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  background: var(--paper-raised);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  cursor: pointer;
+  flex: none;
+}
+
+.paste-hint {
+  font-size: var(--text-note);
+  color: var(--ink-soft);
+  margin-top: 0.3rem;
+}
+
+/* A post shared from another app (Android's Share menu) */
+.share-page {
+  max-width: 28rem;
+  margin: 0 auto;
+  padding: var(--space-4) var(--space-3) var(--space-8);
+}
+
+.share-sheet {
+  padding: var(--space-6) var(--space-4) var(--space-4);
+}
+
+.share-sheet__title {
+  font-family: var(--font-title);
+  font-size: var(--text-xl);
+  font-weight: 600;
+  margin-bottom: var(--space-3);
+}
+
+.share-sheet__title small {
+  font-family: var(--font-hand);
+  font-size: var(--text-note-l);
+  color: var(--ink-soft);
+  font-weight: 400;
+  margin-left: 0.4rem;
+}
+
+.share-sheet .pasted {
+  margin-top: 0;
+}
+
+.pasted__link {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pasted > span {
+  min-width: 0;
+}

@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-route
 import { useEffect } from 'react'
 import { clearLinkErrorAtStart, linkError, linkErrorAtStart, linkKind } from './lib/linkAtStart'
 import { AuthProvider, RequireAuth, SignedOutOnly } from './lib/auth'
+import { OfflineStrip } from './components/PhoneApp'
 import { Account } from './pages/Account'
 import { Compare } from './pages/Compare'
 import { Demo } from './pages/Demo'
@@ -12,6 +13,7 @@ import { LinkExpired } from './pages/LinkExpired'
 import { RoutePage } from './pages/RoutePage'
 import { NewTrip } from './pages/NewTrip'
 import { ResetPassword } from './pages/ResetPassword'
+import { SharePage } from './pages/SharePage'
 import { SignIn } from './pages/SignIn'
 import { SignUp } from './pages/SignUp'
 import { TripPage } from './pages/TripPage'
@@ -41,6 +43,7 @@ export function AppRoutes() {
   return (
     <>
       <LinkErrors />
+      <OfflineStrip />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route
@@ -125,6 +128,14 @@ export function AppRoutes() {
           element={
             <RequireAuth>
               <TripSettings />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/share"
+          element={
+            <RequireAuth>
+              <SharePage />
             </RequireAuth>
           }
         />

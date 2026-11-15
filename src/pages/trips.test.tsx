@@ -230,3 +230,37 @@ describe('create a trip', () => {
     expect(data.createTrip).not.toHaveBeenCalled()
   })
 })
+
+describe('the app on the phone (pwa-v5)', () => {
+  const tripSoon = () =>
+    card({ id: 'li', name: 'Lisbon & Porto', start_date: addDays(todayIso(), 30), end_date: addDays(todayIso(), 38) })
+
+  it('on an iPhone, once there is a trip: "Keep it on your phone" with the 2 steps; Not now hides it', async () => {
+    const ua = vi.spyOn(navigator, 'userAgent', 'get').mockReturnValue('Mozilla/5.0 (iPhone; CPU iPhone OS 18_0)')
+    localStorage.clear()
+    data.listTrips.mockResolvedValue([tripSoon()])
+    const first = open('/trips')
+    expect(await screen.findByText('Keep it on your phone')).toBeInTheDocument()
+    expect(screen.getByText('Add to Home Screen')).toBeInTheDocument()
+    click('Not now')
+    expect(screen.queryByText('Keep it on your phone')).not.toBeInTheDocument()
+    first.unmount()
+    open('/trips')
+    await screen.findAllByText('Lisbon & Porto')
+    expect(screen.queryByText('Keep it on your phone')).not.toBeInTheDocument()
+    ua.mockRestore()
+    localStorage.clear()
+  })
+
+  it('opened with no connection: "No connection" and Try again', async () => {
+    const online = vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false)
+    data.listTrips.mockRejectedValueOnce(new TypeError('Failed to fetch')).mockResolvedValueOnce([tripSoon()])
+    open('/trips')
+    expect(await screen.findByText('No connection')).toBeInTheDocument()
+    expect(screen.getByText(/● Offline\./)).toBeInTheDocument()
+    online.mockReturnValue(true)
+    click('Try again')
+    expect(await screen.findAllByText('Lisbon & Porto')).not.toHaveLength(0)
+    online.mockRestore()
+  })
+})
