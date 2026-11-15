@@ -53,6 +53,8 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: './src/test/setup.ts',
+    // The "not a robot" check stays off in tests, even with the key in .env.local.
+    env: { VITE_TURNSTILE_SITE_KEY: '' },
     // The smoke test talks to the real Supabase project with the demo account: run it on demand.
     exclude: [...configDefaults.exclude, 'tests/smoke/**'],
   },
