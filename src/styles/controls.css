@@ -279,10 +279,8 @@ a {
 
 .form-message {
   /* A note slipped into the notebook (15 Nov: no side bars, red only for over budget). */
-  display: flex;
-  gap: var(--space-2);
-  align-items: baseline;
-  padding: var(--space-3) var(--space-4);
+  position: relative;
+  padding: var(--space-3) var(--space-4) var(--space-3) calc(var(--space-4) + 1.85rem);
   background: var(--paper-note);
   border: 1.5px dashed var(--ink-soft);
   border-radius: 10px;
@@ -293,16 +291,18 @@ a {
   color: var(--ink);
 }
 
+/* The mark sits in the margin, so links and bold words inside flow as normal text. */
 .form-message::before {
-  flex: none;
-  display: inline-grid;
+  position: absolute;
+  left: var(--space-3);
+  top: calc(var(--space-3) + 0.1rem);
+  display: grid;
   place-items: center;
   width: 1.25rem;
   height: 1.25rem;
   border-radius: 50%;
   font-size: var(--text-xs);
   font-weight: 700;
-  transform: translateY(-1px);
 }
 
 .form-message--error::before {

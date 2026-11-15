@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useState } from 'react'
-import { Link } from 'react-router'
+import { Link, useLocation } from 'react-router'
 import { FormMessage } from '../components/AuthForm'
 import { Sketch, SketchBox } from '../components/Sketch'
 import { TripBudget } from '../components/TripBudget'
@@ -113,6 +113,7 @@ export function TripPage() {
         detail={detail}
       />
       <DemoStrip detail={detail} />
+      <ImportedNote />
       {!readOnly && (
         <WelcomeNote tripId={trip.id} userId={session?.user.id} createdBy={trip.created_by} travellers={travellers} />
       )}
@@ -375,6 +376,20 @@ export function TripPage() {
         )}
       </div>
       <TripNav tripId={trip.id} solo={solo} />
+    </div>
+  )
+}
+
+/** Back from "Import from my AI": what was added, and that it's all estimated (mockup import-ai-v5). */
+function ImportedNote() {
+  const location = useLocation()
+  const imported = (location.state as { imported?: string } | null)?.imported
+  if (!imported) return null
+  return (
+    <div className="screen__body screen__body--note">
+      <p className="form-message form-message--info" role="status">
+        Added from your AI: {imported}. Everything is estimated: mark what’s booked as you go.
+      </p>
     </div>
   )
 }

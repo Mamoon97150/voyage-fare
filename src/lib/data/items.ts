@@ -1,4 +1,5 @@
 // Lines, tickets and places: add, change, remove.
+import type { Json } from '../database.types'
 import { supabase } from '../supabase'
 import { sqlNull } from './sql'
 import type { Place } from './trips'
@@ -261,4 +262,11 @@ export async function updateToTry(entry: {
     p_amount: entry.amount ?? undefined,
   })
   if (error) throw error
+}
+
+/** Import from my AI (build 8): new places, lines with their options, tickets, in one go. */
+export async function importLines(tripId: string, payload: Json): Promise<{ places: number; lines: number }> {
+  const { data, error } = await supabase.rpc('import_lines', { p_trip_id: tripId, p_payload: payload })
+  if (error) throw error
+  return data as { places: number; lines: number }
 }

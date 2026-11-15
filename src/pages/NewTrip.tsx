@@ -105,6 +105,18 @@ export function NewTrip() {
       <form onSubmit={next} noValidate className="screen__body">
         {step === 1 && (
           <>
+            <SketchBox weight="light" className="import-card" seed={51}>
+              <p className="import__kicker">Already planned it with your AI?</p>
+              <h2 className="import-card__title">Bring it from my AI</h2>
+              <p className="import-card__lead">
+                Claude, ChatGPT, Gemini… Your AI writes the trip in our format, you paste it here: places, nights,
+                hotels and ideas, with their prices.
+              </p>
+              <Link to="/trips/import" className="button button--primary button--wide">
+                Bring it from my AI
+              </Link>
+            </SketchBox>
+            <p className="hand import-card__or">or start from a blank page</p>
             <h1 className="screen__lead">Where are you going?</h1>
             <SketchBox tape="mustard" className="form__sheet" seed={11}>
               <div className={`field${errors.name ? ' field--error' : ''}`}>

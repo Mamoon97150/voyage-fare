@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router'
 import { AI_QUESTIONS, aiTextSize, tripForAi } from '../../lib/aiText'
+import { copyText } from '../../lib/clipboard'
 import { useAuth } from '../../lib/authContext'
 import { useDemo, useViewer } from '../../lib/demo'
 import { getMoney, type TripDetail, type TripMoney } from '../../lib/trips'
@@ -64,6 +65,14 @@ export function TripMenu({ detail }: { detail: TripDetail }) {
             </button>
             {!demo && (
               <>
+                <Link
+                  to={`/trips/${detail.trip.id}/import`}
+                  role="menuitem"
+                  className="trip-menu__item"
+                  onClick={() => setOpen(false)}
+                >
+                  <i aria-hidden="true">⇣</i>Import from my AI
+                </Link>
                 <hr className="trip-menu__rule" />
                 <Link
                   to={`/trips/${detail.trip.id}/settings`}
@@ -214,27 +223,4 @@ function Switch({
       <span className={`switch${on ? ' switch--on' : ''}`} aria-hidden="true" />
     </button>
   )
-}
-
-/** The clipboard, with the old way as a fallback (some phones refuse the new one). */
-async function copyText(text: string): Promise<boolean> {
-  try {
-    await navigator.clipboard.writeText(text)
-    return true
-  } catch {
-    try {
-      const area = document.createElement('textarea')
-      area.value = text
-      area.setAttribute('readonly', '')
-      area.style.position = 'fixed'
-      area.style.opacity = '0'
-      document.body.appendChild(area)
-      area.select()
-      const ok = document.execCommand('copy')
-      area.remove()
-      return ok
-    } catch {
-      return false
-    }
-  }
 }

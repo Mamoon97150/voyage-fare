@@ -12,6 +12,7 @@ import { JoinTrip } from './pages/JoinTrip'
 import { LinkExpired } from './pages/LinkExpired'
 import { RoutePage } from './pages/RoutePage'
 import { NewTrip } from './pages/NewTrip'
+import { ImportIntoTrip, ImportNewTrip } from './pages/ImportFromAi'
 import { Privacy } from './pages/Privacy'
 import { ResetPassword } from './pages/ResetPassword'
 import { SharePage } from './pages/SharePage'
@@ -82,6 +83,22 @@ export function AppRoutes() {
           element={
             <RequireAuth>
               <NewTrip />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/trips/import"
+          element={
+            <RequireAuth>
+              <ImportNewTrip />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/trips/:tripId/import"
+          element={
+            <RequireAuth>
+              <ImportIntoTrip />
             </RequireAuth>
           }
         />

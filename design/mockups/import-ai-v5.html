@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mockup — Import from my AI (v5 look, 15 Nov)</title>
+    <script type="module">
+      import '/src/index.css'
+      import './forms.css'
+      import './v4.css'
+      import './v5.js'
+    </script>
+    <style>
+      .hand { font-family: var(--font-hand); color: var(--ink-soft); line-height: 1.2; }
+      .pad { padding: var(--space-4); }
+      .top { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-6) var(--space-4) var(--space-2); }
+      .top .back { font-size: 1.6rem; color: var(--ink); }
+      .top h1 { font-family: var(--font-title); font-size: var(--text-xl); font-weight: 600; line-height: 1.15; }
+      .top .sub { font-family: var(--font-hand); font-size: var(--text-note-l); color: var(--ink-soft); }
+      .grow { flex: 1; min-width: 0; }
+      .ghost { opacity: .35; }
+      h2.t { font-family: var(--font-title); font-size: var(--text-xl); font-weight: 600; }
+      .lead { font-size: var(--text-sm); color: var(--ink-soft); line-height: 1.45; margin-top: var(--space-1); }
+      .ask-steps { list-style: none; margin: var(--space-4) 0 0; padding: 0; display: grid; gap: var(--space-4); }
+      .ask-steps li > div { min-width: 0; }
+      .ask-steps li { display: grid; grid-template-columns: 1.8rem minmax(0, 1fr); gap: var(--space-2) var(--space-3); align-items: start; }
+      .n { width: 1.8rem; height: 1.8rem; border-radius: 50%; display: grid; place-items: center; background: var(--ink); color: var(--paper); font-weight: 700; font-size: var(--text-sm); }
+      .ask-steps b { display: block; font-size: var(--text-md); }
+      .ask-steps p { font-size: var(--text-sm); color: var(--ink-soft); line-height: 1.45; margin-top: 2px; }
+      .ask-steps .button { margin-top: var(--space-2); }
+      .paste-box { margin-top: var(--space-2); min-height: 6.5rem; border: 1.5px dashed var(--line); border-radius: 10px; padding: var(--space-2) var(--space-3); font-family: ui-monospace, Menlo, monospace; font-size: .68rem; color: var(--ink-soft); line-height: 1.5; position: relative; background: var(--paper-raised); white-space: pre-wrap; overflow: hidden; max-height: 7rem; }
+      .paste-box .ph { font-family: var(--font-body, inherit); font-size: var(--text-sm); }
+      .paste-btn { position: absolute; right: var(--space-2); bottom: var(--space-2); display: inline-flex; align-items: center; gap: .3rem; padding: .35rem .75rem; border: 1.5px solid var(--ink); border-radius: 999px; background: var(--paper-raised); font-size: var(--text-xs); font-weight: 600; color: var(--ink); font-family: inherit; }
+      .choice { display: flex; gap: var(--space-2); margin-top: var(--space-2); flex-wrap: wrap; }
+      .acts { display: flex; gap: var(--space-2); justify-content: flex-end; margin-top: var(--space-4); }
+
+      /* preview */
+      .kicker { font-size: var(--text-2xs); letter-spacing: .08em; text-transform: uppercase; font-weight: 700; color: var(--ink-soft); }
+      .cover { padding: var(--space-6) var(--space-4) var(--space-4); }
+      .cover h3 { font-family: var(--font-title); font-size: var(--text-2xl); font-weight: 600; margin-top: var(--space-1); }
+      .cover p { font-size: var(--text-sm); color: var(--ink-soft); margin-top: 2px; }
+      .counts { display: flex; gap: var(--space-4); margin-top: var(--space-3); font-size: var(--text-sm); }
+      .counts b { display: block; font-family: var(--font-title); font-size: var(--text-xl); }
+      .place { margin-top: var(--space-4); }
+      .place h4 { font-family: var(--font-title); font-size: var(--text-lg); font-weight: 600; display: flex; justify-content: space-between; align-items: baseline; }
+      .place h4 small { font-family: var(--font-body, inherit); font-size: var(--text-xs); color: var(--ink-soft); font-weight: 400; }
+      .row { display: grid; grid-template-columns: 1fr auto; gap: 2px var(--space-3); padding: var(--space-2) 0; border-bottom: 1px solid var(--line); font-size: var(--text-sm); }
+      .row .w { font-size: var(--text-2xs); color: var(--ink-soft); letter-spacing: .06em; text-transform: uppercase; font-weight: 700; }
+      .row .p { text-align: right; font-weight: 600; white-space: nowrap; }
+      .row .o { grid-column: 1 / -1; font-size: var(--text-xs); color: var(--ink-soft); }
+      .tag { display: inline-block; margin-left: .35rem; padding: 0 .4rem; border-radius: 4px; font-size: .62rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; vertical-align: 1px; }
+      .tag--new { background: var(--wash-confirmed, #e6efe9); color: var(--confirmed); }
+      .tag--there { background: var(--line); color: var(--ink-soft); }
+      .dash { color: var(--ink-soft); font-weight: 400; }
+      .row--there { opacity: .5; }
+      .row--there span:first-child { text-decoration: line-through; }
+      .notes { margin-top: var(--space-4); display: grid; gap: var(--space-2); }
+      .note { display: flex; gap: var(--space-2); align-items: baseline; padding: var(--space-2) var(--space-3); background: var(--paper-note); border: 1.5px dashed var(--ink-soft); border-radius: 10px; font-size: var(--text-sm); line-height: 1.45; }
+      .note i { font-style: normal; flex: none; display: inline-grid; place-items: center; width: 1.2rem; height: 1.2rem; border-radius: 50%; background: var(--ink); color: var(--paper); font-size: .65rem; font-weight: 700; }
+      .note--ok i { background: var(--confirmed); }
+      .sticky { position: sticky; bottom: 0; background: var(--paper); padding: var(--space-3) var(--space-4); border-top: 1px solid var(--line); display: grid; gap: var(--space-2); }
+
+      .wide { width: min(100%, 46rem); }
+      .phones figure.wide .phone { width: 100%; max-width: none; padding: var(--space-4); }
+      .text { font-family: ui-monospace, Menlo, monospace; font-size: .72rem; line-height: 1.55; white-space: pre-wrap; color: var(--ink); background: var(--paper-raised); border: 1px solid var(--line); border-radius: 10px; padding: var(--space-4); }
+      .text .c { color: var(--ink-soft); }
+    </style>
+  </head>
+  <body>
+    <div class="phones">
+
+      <!-- 1. Where it starts -->
+      <figure>
+        <div class="phone" style="padding-bottom:0">
+          <div class="top"><a class="back">‹</a><div class="grow"><h1>New trip</h1><p class="sub">where are you going?</p></div></div>
+          <div class="pad">
+            <div class="sketch-box sketch-box--strong" data-seed="51" style="padding:var(--space-6) var(--space-4) var(--space-4)">
+              <svg class="sketch-box__line" aria-hidden="true"></svg>
+              <span class="tape tape--mustard" aria-hidden="true"></span>
+              <p class="kicker">Already planned it with your AI?</p>
+              <h2 class="t" style="margin-top:var(--space-1)">Bring it from my AI</h2>
+              <p class="lead">Claude, ChatGPT, Gemini… Your AI writes the trip in our format, you paste it here: places, nights, hotels and ideas, with their prices.</p>
+              <a class="button button--primary button--wide" style="margin-top:var(--space-3)">Bring it from my AI</a>
+            </div>
+            <p class="hand" style="text-align:center;margin:var(--space-4) 0">or start from a blank page</p>
+            <div class="ghost">
+              <div class="sketch-box sketch-box--light" data-seed="52" style="padding:var(--space-4)"><svg class="sketch-box__line" aria-hidden="true"></svg><p class="field__label">Trip name</p><div class="field__input" style="height:2.6rem"></div><p class="field__label" style="margin-top:var(--space-3)">Leaving from</p><div class="field__input" style="height:2.6rem"></div></div>
+            </div>
+          </div>
+        </div>
+        <figcaption><b>1 · Two ways in.</b>
+          <ul>
+            <li><b>New trip</b>: a card at the top, “Bring it from my AI”, before the blank form.</li>
+            <li><b>Inside a trip</b>: the trip menu ⋯ → <b>Import from my AI</b>, to add places and lines to it.</li>
+          </ul>
+        </figcaption>
+      </figure>
+
+      <!-- 2. Ask, then paste -->
+      <figure>
+        <div class="phone" style="padding-bottom:0">
+          <div class="top"><a class="back">‹</a><div class="grow"><h1>Bring it from my AI</h1><p class="sub">two steps, then a preview</p></div></div>
+          <div class="pad">
+            <div class="sketch-box sketch-box--strong" data-seed="53" style="padding:var(--space-6) var(--space-4) var(--space-4)">
+              <svg class="sketch-box__line" aria-hidden="true"></svg>
+              <ol class="ask-steps">
+                <li><span class="n">1</span><div><b>Ask your AI</b><p>Copy this request and paste it at the end of the chat where you planned the trip.</p><a class="button button--quiet">Copy the request</a></div></li>
+                <li><span class="n">2</span><div><b>Paste its answer</b><p>All of it, even if there’s text around: we find the trip inside.</p>
+                  <div class="paste-box"><span class="ph">Paste your AI’s answer…</span><span class="paste-btn">📋 Paste</span></div></div></li>
+              </ol>
+              <div class="acts"><a class="button button--quiet">Cancel</a><a class="button button--primary">See what it gives</a></div>
+            </div>
+            <p class="hand" style="margin-top:var(--space-3);text-align:center">nothing is saved before the preview</p>
+          </div>
+        </div>
+        <figcaption><b>2 · Ask, then paste.</b> One page for both steps.
+          <ul>
+            <li><b>Copy the request</b>: the format and its rules (6 · below), ready for any AI.</li>
+            <li><b>Paste its answer</b>, with 📋 Paste for the phone. Text around the trip (“Here’s your trip!”) doesn’t matter.</li>
+            <li><b>See what it gives</b> opens the preview: nothing is saved yet.</li>
+          </ul>
+        </figcaption>
+      </figure>
+
+      <!-- 3. Preview: a new trip -->
+      <figure>
+        <div class="phone" style="padding-bottom:0">
+          <div class="top"><a class="back">‹</a><div class="grow"><h1>What your AI gave</h1><p class="sub">check, then create it</p></div></div>
+          <div class="pad" style="padding-bottom:0">
+            <div class="sketch-box sketch-box--strong cover" data-seed="54">
+              <svg class="sketch-box__line" aria-hidden="true"></svg>
+              <span class="tape tape--mustard" aria-hidden="true"></span>
+              <p class="kicker">A new trip</p>
+              <h3>Japan in spring</h3>
+              <p>2 – 12 Apr 2027 · from Paris · Ana, Bea</p>
+              <div class="counts"><span><b>3</b>places</span><span><b>14</b>lines</span><span><b>≈ 2 480 €</b>each</span></div>
+            </div>
+            <div class="place"><h4>1. Tokyo <small>4 nights</small></h4>
+              <div class="row"><span><span class="w">Stay</span><br />Hotel Gracery Shinjuku</span><span class="p">640 €</span><span class="o">4 nights × 160 € · and 1 other option</span></div>
+              <div class="row"><span><span class="w">Day 2</span><br />teamLab Planets</span><span class="p">64 €</span></div>
+              <div class="row"><span><span class="w">Day 3</span><br />Day in Nikko</span><span class="p"><span class="dash">—</span></span><span class="o">no price: shows a dash until you add one</span></div>
+            </div>
+            <div class="place"><h4>2. Kyoto <small>3 nights</small></h4>
+              <div class="row"><span><span class="w">Stay</span><br />Ryokan or hotel?</span><span class="p">from 450 €</span><span class="o">2 options to compare: Ryokan Yachiyo 780 € · Hotel Kanra 450 €</span></div>
+              <div class="row"><span><span class="w">To try</span><br />Kikunoi</span><span class="p">≈ 180 €</span></div>
+            </div>
+            <div class="notes">
+              <div class="note"><i>!</i><span>3 prices in yen: saved with <b>today’s rate</b> (1 € = 162 ¥). You can change it on the line.</span></div>
+              <div class="note note--ok"><i>✓</i><span>Everything comes in as <b>estimated</b>: you mark what’s booked yourself.</span></div>
+            </div>
+          </div>
+          <div class="sticky"><a class="button button--primary button--wide">Create the trip</a><a class="button button--quiet button--wide">Back to the answer</a></div>
+        </div>
+        <figcaption><b>3 · The preview (a new trip).</b> The heart of it.
+          <ul>
+            <li>The cover: name, dates, from where, who; how many places and lines, and what it comes to <b>each</b>.</li>
+            <li>Place by place, line by line: <b>stay first, then day by day</b>, To try apart; options to compare stay options (nothing chosen for you).</li>
+            <li>What to know, in notes: other currencies (today’s rate), no price (a dash), and that <b>nothing arrives as booked</b>.</li>
+          </ul>
+        </figcaption>
+      </figure>
+
+      <!-- 4. Preview: adding to a trip -->
+      <figure>
+        <div class="phone" style="padding-bottom:0">
+          <div class="top"><a class="back">‹</a><div class="grow"><h1>Add to Lisbon &amp; Porto</h1><p class="sub">only what’s new</p></div></div>
+          <div class="pad" style="padding-bottom:0">
+            <div class="place" style="margin-top:0"><h4>Lisbon <small>already in the trip</small></h4>
+              <div class="row"><span><span class="w">Day 2</span><br />Belém tower <span class="tag tag--new">new</span></span><span class="p">10 €</span></div>
+              <div class="row row--there"><span><span class="w">Stay</span><br />Memmo Alfama <span class="tag tag--there">already there</span></span><span class="p">540 €</span></div>
+            </div>
+            <div class="place"><h4>Sintra <small>already in the trip</small></h4>
+              <div class="row"><span><span class="w">Day 4</span><br />Pena Palace <span class="tag tag--new">new</span></span><span class="p">20 €</span></div>
+            </div>
+            <div class="place"><h4>Évora <span class="tag tag--new">new place</span><small>1 night</small></h4>
+              <div class="row"><span><span class="w">Stay</span><br />Albergaria do Calvário <span class="tag tag--new">new</span></span><span class="p">110 €</span></div>
+            </div>
+            <div class="notes">
+              <div class="note"><i>!</i><span>Évora goes <b>after Porto</b>, at the end of the route: move it if it’s not the right order.</span></div>
+              <div class="note"><i>!</i><span>1 line already there is <b>left as it is</b> (yours wins): Memmo Alfama.</span></div>
+            </div>
+          </div>
+          <div class="sticky"><a class="button button--primary button--wide">Add 3 lines and 1 place</a><a class="button button--quiet button--wide">Back to the answer</a></div>
+        </div>
+        <figcaption><b>4 · The preview (adding to a trip).</b>
+          <ul>
+            <li>Places matched by name: lines go to the right place; a <b>new place</b> goes at the end of the route.</li>
+            <li>A line with the same name in the same place is <b>already there</b>: kept as yours, not doubled.</li>
+            <li>The button says what will happen: “Add 3 lines and 1 place”.</li>
+          </ul>
+        </figcaption>
+      </figure>
+
+      <!-- 5. Not in the format -->
+      <figure>
+        <div class="phone" style="padding-bottom:0">
+          <div class="top"><a class="back">‹</a><div class="grow"><h1>Bring it from my AI</h1></div></div>
+          <div class="pad">
+            <p class="form-message form-message--error" role="alert">We couldn’t find the trip in this answer. Your AI may have answered in its own words.</p>
+            <div class="sketch-box sketch-box--light" data-seed="55" style="padding:var(--space-4);margin-top:var(--space-4)">
+              <svg class="sketch-box__line" aria-hidden="true"></svg>
+              <b>Try this</b>
+              <ol style="margin:var(--space-2) 0 0 1.1rem;font-size:var(--text-sm);line-height:1.55">
+                <li>Copy the request again and send it to your AI.</li>
+                <li>Ask it to answer with <b>only</b> the trip, nothing around it.</li>
+              </ol>
+              <a class="button button--quiet button--wide" style="margin-top:var(--space-3)">Copy the request again</a>
+              <p class="hand" style="margin-top:var(--space-3)">soon: Voyage Fare reads it for you (step 5)</p>
+            </div>
+            <div class="sketch-box sketch-box--light" data-seed="56" style="padding:var(--space-4);margin-top:var(--space-4)">
+              <svg class="sketch-box__line" aria-hidden="true"></svg>
+              <b>Part of it was read</b>
+              <p style="font-size:var(--text-sm);color:var(--ink-soft);margin-top:var(--space-1)">2 lines couldn’t be read and are left out: “Day 5: something nice” (no name), “Hotel ???” (price isn’t a number). The rest is in the preview.</p>
+            </div>
+          </div>
+        </div>
+        <figcaption><b>5 · When it doesn’t fit.</b>
+          <ul>
+            <li>No trip found: say so plainly, and what to do (copy the request again, “only the trip”). Later, AI reading (step 5) takes over here.</li>
+            <li>Some lines broken: the rest still comes in, and the preview says which lines were left out and why.</li>
+          </ul>
+        </figcaption>
+      </figure>
+
+    </div>
+
+    <!-- 6. The request -->
+    <div class="phones" style="justify-content:center">
+      <figure class="wide">
+        <div class="phone">
+<div class="text">I keep my trips in Voyage Fare (an app for the budget of a trip). Write the trip we just planned in the format below, so I can paste it into the app. Answer with the JSON only, nothing before or after it.
+
+{
+  "voyage_fare": 1,
+  "trip": {
+    "name": "Japan in spring",
+    "start": "2027-04-02",        <span class="c">// or null if no dates yet</span>
+    "end": "2027-04-12",
+    "from": "Paris",              <span class="c">// where the trip starts and ends</span>
+    "currency": "EUR",            <span class="c">// the main currency</span>
+    "travellers": ["Ana", "Bea"]
+  },
+  "tickets": [
+    { "from": "Paris", "to": "Tokyo", "mode": "plane", "day": 1,
+      "options": [ { "name": "Air France", "price": 890, "currency": "EUR", "per": "total" } ] }
+  ],
+  "places": [
+    { "name": "Tokyo", "nights": 4,
+      "lines": [
+        { "type": "stay", "name": "Where we sleep",
+          "options": [ { "name": "Hotel Gracery Shinjuku", "price": 160, "currency": "EUR", "per": "night",
+                         "link": "https://…", "note": "next to the station" } ] },
+        { "type": "activity", "name": "teamLab Planets", "day": 2,
+          "options": [ { "name": "teamLab Planets", "price": 32, "currency": "EUR", "per": "person" } ] },
+        { "type": "food", "name": "Kikunoi", "day": null, "note": "kaiseki, book ahead" }
+      ] }
+  ]
+}
+
+Rules:
+- type is one of: stay, activity, food, transport, other. mode is one of: plane, train, bus, car, boat.
+- price is a number (no symbol); per is "total", "night" or "person". Leave price out if you don’t know it: never guess.
+- When we hesitated between several, put them all in options. Don’t choose for me.
+- day is the day of the trip (1 = the first day), or null if it’s just an idea for that place.
+- A restaurant with no day is kept in “To try”.</div>
+        </div>
+        <figcaption style="max-width:40rem"><b>6 · The request</b> (what “Copy the request” copies). A short sentence, an example of the trip in our format, and the rules. JSON because every AI writes it well and the app can read it exactly. <b>per</b> lets the AI give a price per night or per person: the app works out the total. Unknown prices are left out (“never guess”), and the AI never chooses for you.</figcaption>
+      </figure>
+    </div>
+
+    <script>
+      const only = new URLSearchParams(location.search).get('only')
+      if (only) document.querySelectorAll('.phones > figure').forEach((f, i) => { if (!only.split(',').includes(String(i + 1))) f.remove() })
+    </script>
+  </body>
+</html>

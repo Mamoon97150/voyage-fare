@@ -600,3 +600,258 @@
   height: 2.25rem;
   font-size: 1.1rem;
 }
+
+/* Import from my AI (build 8 step 2, mockup import-ai-v5) */
+.import-card {
+  margin-bottom: var(--space-2);
+  padding: var(--space-4);
+}
+
+.import__kicker {
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.import-card__title {
+  margin-top: var(--space-1);
+  font-family: var(--font-title);
+  font-size: var(--text-xl);
+  font-weight: 600;
+}
+
+.import-card__lead {
+  margin: var(--space-1) 0 var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+  line-height: 1.45;
+}
+
+.import-card__or {
+  margin: var(--space-3) 0 var(--space-1);
+  text-align: center;
+  font-size: var(--text-note);
+}
+
+.sketch-box.import__sheet {
+  padding: var(--space-6) var(--space-4) var(--space-4);
+}
+
+.import__steps {
+  list-style: none;
+  margin: 0 0 var(--space-4);
+  padding: 0;
+  display: grid;
+  gap: var(--space-4);
+}
+
+.import__steps li {
+  display: grid;
+  grid-template-columns: 1.8rem minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: start;
+}
+
+.import__steps b {
+  display: block;
+  font-size: var(--text-md);
+}
+
+.import__steps p {
+  margin-top: 2px;
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+  line-height: 1.45;
+}
+
+.import__n {
+  width: 1.8rem;
+  height: 1.8rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+
+.import__copy {
+  margin-top: var(--space-2);
+}
+
+.import__paste {
+  position: relative;
+  margin-top: var(--space-2);
+}
+
+.import__answer {
+  width: 100%;
+  min-height: 8rem;
+  resize: vertical;
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 0.75rem;
+  padding-bottom: 3rem;
+}
+
+.import__paste-button {
+  position: absolute;
+  right: var(--space-2);
+  bottom: var(--space-2);
+}
+
+.import__hint {
+  margin-top: var(--space-3);
+  text-align: center;
+  font-size: var(--text-note);
+}
+
+.sketch-box.import__cover {
+  padding: var(--space-6) var(--space-4) var(--space-4);
+}
+
+.import__name {
+  margin-top: var(--space-1);
+  font-family: var(--font-title);
+  font-size: var(--text-2xl);
+  font-weight: 600;
+}
+
+.import__meta {
+  margin-top: 2px;
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+}
+
+.import__counts {
+  display: flex;
+  gap: var(--space-4);
+  margin-top: var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.import__counts b {
+  display: block;
+  font-family: var(--font-title);
+  font-size: var(--text-xl);
+}
+
+.import__place {
+  margin-top: var(--space-4);
+}
+
+.import__place h3 {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  font-family: var(--font-title);
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+.import__place h3 small {
+  margin-left: auto;
+  font-family: inherit;
+  font-size: var(--text-xs);
+  font-weight: 400;
+  color: var(--ink-soft);
+}
+
+.import__lines {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.import__line {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px var(--space-3);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--line);
+  font-size: var(--text-sm);
+}
+
+.import__line--there {
+  opacity: 0.55;
+}
+
+.import__line--there .import__what {
+  text-decoration: line-through;
+}
+
+.import__when {
+  display: block;
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.import__price {
+  text-align: right;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.import__sub {
+  grid-column: 1 / -1;
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+}
+
+.import__tag {
+  display: inline-block;
+  margin-left: 0.35rem;
+  padding: 0 0.4rem;
+  border-radius: 4px;
+  background: var(--line);
+  color: var(--ink-soft);
+  font-family: inherit;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  vertical-align: 1px;
+  text-decoration: none;
+}
+
+.import__tag--new {
+  background: var(--wash-confirmed);
+  color: var(--confirmed);
+}
+
+.import__notes {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.import__bar {
+  position: sticky;
+  bottom: 0;
+  display: grid;
+  gap: var(--space-2);
+  max-width: 28rem;
+  margin: var(--space-4) auto 0;
+  padding: var(--space-3) var(--space-4) calc(var(--space-3) + env(safe-area-inset-bottom));
+  background: var(--paper);
+  border-top: 1px solid var(--line);
+}
+
+.screen__body--note {
+  padding-bottom: 0;
+}
+
+/* "‹" as a button (the import preview's back): looks like the link it stands for */
+button.screen__back {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
