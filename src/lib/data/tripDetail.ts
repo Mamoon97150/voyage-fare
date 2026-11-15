@@ -14,6 +14,7 @@ export type EstimatePeople = Tables<'v_daily_estimate_people'>
 export type EstimateCheck = Tables<'v_daily_estimate_checks'>
 export type Payment = Tables<'payments'>
 export type ItemLeft = Tables<'v_item_left'>
+export type ItemFile = Tables<'item_files'>
 export type ItemShare = Tables<'v_item_shares'>
 export type TripBudget = Tables<'v_trip_budget'>
 export type TravellerShare = Tables<'v_traveller_shares'>
@@ -43,6 +44,8 @@ export type TripDetail = {
   /** Payments in parts (build 6) and, per booked line, paid so far / left to pay. */
   payments: Payment[]
   itemLeft: ItemLeft[]
+  /** Tickets and vouchers on booked lines (build 8 step 4). */
+  files?: ItemFile[]
 }
 
 /** null when the trip doesn't exist or isn't shared with this person (privacy hides both the same way). */
@@ -67,6 +70,7 @@ export async function getTrip(id: string): Promise<TripDetail | null> {
     estimateChecks,
     payments,
     itemLeft,
+    files,
   ] = await Promise.all([
     supabase.from('trips').select('*').eq('id', id).maybeSingle(),
     supabase.from('travellers').select('*').eq('trip_id', id).order('position'),
@@ -87,6 +91,7 @@ export async function getTrip(id: string): Promise<TripDetail | null> {
     supabase.from('v_daily_estimate_checks').select('*').eq('trip_id', id),
     supabase.from('payments').select('*').eq('trip_id', id).order('paid_on').order('created_at'),
     supabase.from('v_item_left').select('*').eq('trip_id', id),
+    supabase.from('item_files').select('*').eq('trip_id', id).order('created_at'),
   ])
   for (const r of [
     trip,
@@ -108,6 +113,7 @@ export async function getTrip(id: string): Promise<TripDetail | null> {
     estimateChecks,
     payments,
     itemLeft,
+    files,
   ]) {
     if (r.error) throw r.error
   }
@@ -132,5 +138,6 @@ export async function getTrip(id: string): Promise<TripDetail | null> {
     estimateChecks: estimateChecks.data ?? [],
     payments: payments.data ?? [],
     itemLeft: itemLeft.data ?? [],
+    files: files.data ?? [],
   }
 }

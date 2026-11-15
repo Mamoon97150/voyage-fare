@@ -9,6 +9,11 @@ export const data = {
   createTrip: vi.fn(),
   importLines: vi.fn(),
   duplicateTrip: vi.fn(),
+  saveBooking: vi.fn(),
+  addFile: vi.fn(),
+  fileUrl: vi.fn(),
+  removeFile: vi.fn(),
+  removeFilesOfMyOwnTrips: vi.fn(async () => {}),
   listTrips: vi.fn(),
   getDemoTripId: vi.fn(),
   getTrip: vi.fn(),
@@ -76,6 +81,17 @@ export const tripsModule = {
   createTrip: data.createTrip,
   importLines: data.importLines,
   duplicateTrip: data.duplicateTrip,
+  saveBooking: data.saveBooking,
+  addFile: data.addFile,
+  fileUrl: data.fileUrl,
+  removeFile: data.removeFile,
+  removeFilesOfMyOwnTrips: data.removeFilesOfMyOwnTrips,
+  fileProblem: (f: { size: number; type: string }) =>
+    ['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'image/heic'].includes(f.type)
+      ? f.size > 10 * 1024 * 1024
+        ? 'This file is over 10 MB: try a smaller one, or a screenshot of it.'
+        : null
+      : 'Add a PDF or a photo (JPG, PNG, WebP, HEIC).',
   listTrips: data.listTrips,
   getDemoTripId: data.getDemoTripId,
   getTrip: data.getTrip,

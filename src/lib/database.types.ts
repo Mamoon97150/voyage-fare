@@ -263,6 +263,42 @@ export type Database = {
           },
         ]
       }
+      item_files: {
+        Row: {
+          added_by: string | null
+          created_at: string
+          id: string
+          item_id: string
+          mime: string
+          name: string
+          path: string
+          size: number
+          trip_id: string
+        }
+        Insert: {
+          added_by?: string | null
+          created_at?: string
+          id?: string
+          item_id: string
+          mime: string
+          name: string
+          path: string
+          size: number
+          trip_id: string
+        }
+        Update: {
+          added_by?: string | null
+          created_at?: string
+          id?: string
+          item_id?: string
+          mime?: string
+          name?: string
+          path?: string
+          size?: number
+          trip_id?: string
+        }
+        Relationships: []
+      }
       item_legs: {
         Row: {
           after_place_id: string | null
@@ -403,6 +439,8 @@ export type Database = {
           actual_amount: number | null
           actual_currency: string | null
           actual_rate: number
+          booking_link: string | null
+          booking_ref: string | null
           category: string
           created_at: string
           day_number: number | null
@@ -431,6 +469,8 @@ export type Database = {
           actual_amount?: number | null
           actual_currency?: string | null
           actual_rate?: number
+          booking_link?: string | null
+          booking_ref?: string | null
           category: string
           created_at?: string
           day_number?: number | null
@@ -459,6 +499,8 @@ export type Database = {
           actual_amount?: number | null
           actual_currency?: string | null
           actual_rate?: number
+          booking_link?: string | null
+          booking_ref?: string | null
           category?: string
           created_at?: string
           day_number?: number | null

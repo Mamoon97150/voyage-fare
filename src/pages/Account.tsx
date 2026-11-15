@@ -15,6 +15,7 @@ import {
 } from '../lib/authForm'
 import { isPwned } from '../lib/pwned'
 import { supabase } from '../lib/supabase'
+import { removeFilesOfMyOwnTrips } from '../lib/trips'
 
 /**
  * Your account (mockup 9): your first name, your email (and changing it), a new password, sign
@@ -103,6 +104,8 @@ export function Account() {
   async function deleteAccount() {
     setMessage(undefined)
     setBusy('delete')
+    // Tickets and vouchers of the trips that go with the account (Storage doesn't follow on its own).
+    if (user?.id) await removeFilesOfMyOwnTrips(user.id).catch(() => {})
     const { error } = await supabase.rpc('delete_my_account')
     if (error) {
       setBusy(null)

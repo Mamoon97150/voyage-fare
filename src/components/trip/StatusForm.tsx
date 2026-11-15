@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { amountForInput, parseAmount } from '../../lib/money'
-import { setItemStatus, type Item, type ItemStatus, type TripDetail } from '../../lib/trips'
+import { setItemStatus, type Item, type ItemStatus, type TripDetail, saveBooking } from '../../lib/trips'
 import { isSolo } from '../../lib/tripView'
 import { FormMessage } from '../AuthForm'
 import { useRate } from '../../lib/rates'
@@ -49,6 +49,9 @@ export function StatusForm({
     item.paid_each ? EACH : (item.paid_by ?? viewer ?? detail.travellers[0]?.id ?? ''),
   )
   const [paidOn, setPaidOn] = useState(() => item.paid_on ?? localToday())
+  // Booking details (build 8 step 4): optional, when it's booked or paid.
+  const [ref, setRef] = useState(item.booking_ref ?? '')
+  const [link, setLink] = useState(item.booking_link ?? '')
   const { busy, run } = useSaving()
   const [error, setError] = useState<string>()
   const solo = isSolo(detail)
@@ -75,8 +78,14 @@ export function StatusForm({
       )
       return
     }
+    if (status !== 'chosen' && link.trim() && !/^https?:\/\//i.test(link.trim())) {
+      setError('Paste the whole booking link, starting with https://')
+      return
+    }
     setError(undefined)
     await run(async () => {
+      if (status !== 'chosen' && (ref.trim() !== (item.booking_ref ?? '') || link.trim() !== (item.booking_link ?? '')))
+        await saveBooking(item.id, ref, link)
       await setItemStatus({
         id: item.id,
         status,
@@ -158,6 +167,30 @@ export function StatusForm({
             <option value={EACH}>Each paid their own share</option>
           </select>
         </div>
+      )}
+      {status !== 'chosen' && (
+        <>
+          <div className="field">
+            <label className="field__label" htmlFor={`${id}-ref`}>
+              Confirmation number <span className="field__optional">(optional)</span>
+            </label>
+            <input id={`${id}-ref`} className="field__input" value={ref} onChange={(e) => setRef(e.target.value)} />
+          </div>
+          <div className="field">
+            <label className="field__label" htmlFor={`${id}-link`}>
+              Booking link <span className="field__optional">(optional)</span>
+            </label>
+            <input
+              id={`${id}-link`}
+              className="field__input"
+              inputMode="url"
+              placeholder="https://…"
+              value={link}
+              onChange={(e) => setLink(e.target.value)}
+            />
+          </div>
+          <p className="hand status-form__later">tickets and vouchers: add them on the line, now or later</p>
+        </>
       )}
       <p className="field__hint">
         {status === 'chosen'

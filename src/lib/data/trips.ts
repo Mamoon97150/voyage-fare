@@ -1,6 +1,7 @@
 // Trips: create, list, settings, travellers.
 import type { Tables } from '../database.types'
 import { supabase } from '../supabase'
+import { removeTripFiles } from './bookings'
 
 export type Trip = Tables<'trips'>
 export type Traveller = Tables<'travellers'>
@@ -136,6 +137,8 @@ export async function isTripOwner(tripId: string, userId: string): Promise<boole
 }
 
 export async function deleteTrip(id: string): Promise<void> {
+  // Its tickets and vouchers first: Storage doesn't follow the database on its own.
+  await removeTripFiles(id).catch(() => {})
   const { error } = await supabase.from('trips').delete().eq('id', id)
   if (error) throw error
 }

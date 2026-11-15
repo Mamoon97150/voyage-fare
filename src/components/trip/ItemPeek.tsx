@@ -67,6 +67,20 @@ export function ItemPeek({ detail, item }: { detail: TripDetail; item: Item }) {
             <dd>{paid}</dd>
           </>
         )}
+        {(item.booking_ref || item.booking_link) && (
+          <>
+            <dt>Booking</dt>
+            <dd>
+              {item.booking_ref && `#${item.booking_ref}`}
+              {item.booking_ref && item.booking_link && ' · '}
+              {item.booking_link && (
+                <a href={item.booking_link} target="_blank" rel="noopener noreferrer">
+                  the booking ↗
+                </a>
+              )}
+            </dd>
+          </>
+        )}
       </dl>
       <p className="hand item-peek__note">in your own notebook, this is where you’d change it</p>
     </div>

@@ -1,3 +1,4 @@
+import { BookingMarks, BookingPart } from './Booking'
 import { useState } from 'react'
 import { amountForInput } from '../../lib/money'
 import { deleteItem, setPackageCover, updateItem, type Item, type ItemKind, type TripDetail } from '../../lib/trips'
@@ -135,6 +136,7 @@ export function ItemRow({
           />
         )}
         <PaymentsPanel detail={detail} item={item} viewer={viewer} onChanged={onChanged} />
+        <BookingPart detail={detail} item={item} onChanged={onChanged} />
       </li>
     )
   }
@@ -172,6 +174,7 @@ export function ItemRow({
             <span className="item-row__hand">{coversText(detail, item)}</span>
           )}
           <LeftWords line={leftLine(detail, item, viewer, mode)} part="reminder" />
+          <BookingMarks detail={detail} item={item} />
         </span>
         <span className="item-row__amount num">
           <b className={foodBudget ? 'item-row__food' : undefined}>
