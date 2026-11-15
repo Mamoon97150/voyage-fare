@@ -56,3 +56,34 @@ self.addEventListener('fetch', (event) => {
     ),
   )
 })
+
+// Admin notifications (Admin stage C): show them, and open the right page when tapped.
+self.addEventListener('push', (event) => {
+  let message = { title: 'Voyage Fare', body: '', url: '/admin', tag: 'voyage-fare' }
+  try {
+    message = { ...message, ...event.data.json() }
+  } catch {
+    // Not JSON: keep the default words.
+  }
+  event.waitUntil(
+    self.registration.showNotification(message.title, {
+      body: message.body,
+      tag: message.tag,
+      icon: '/icons/icon-192.png',
+      badge: '/icons/icon-192.png',
+      data: { url: message.url },
+    }),
+  )
+})
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close()
+  const url = new URL(event.notification.data?.url ?? '/admin', self.location.origin).href
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windows) => {
+      const open = windows.find((w) => w.url.startsWith(self.location.origin))
+      if (open) return open.navigate(url).then((w) => (w ?? open).focus())
+      return self.clients.openWindow(url)
+    }),
+  )
+})

@@ -100,6 +100,8 @@ describe('the Admin dashboard (admins only)', () => {
     expect(await screen.findByText('6')).toBeInTheDocument()
     expect(screen.getByText('+2 this week')).toBeInTheDocument()
     expect(screen.getByRole('meter', { name: 'Files stored' })).toBeInTheDocument()
+    // Notify me: this test browser can't show notifications, so it says how to get them.
+    expect(await screen.findByRole('switch', { name: /Notify me/ })).toBeDisabled()
 
     click(/Messages/)
     expect(await screen.findByText('Budget shows 0 € for Medellín')).toBeInTheDocument()

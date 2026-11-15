@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Link } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 import { FormMessage } from '../components/AuthForm'
 import { SketchBox } from '../components/Sketch'
 import { Loading } from '../lib/auth'
@@ -26,6 +26,7 @@ import {
   type Overview,
 } from '../lib/trips'
 import { useSaving } from '../lib/useSaving'
+import { pushState, turnOff, turnOn, type PushState } from '../lib/push'
 
 /*
  * The Admin dashboard, stage A (build 8, mockup admin-v5, 15 Nov): Overview · Messages · People ·
@@ -58,7 +59,9 @@ const mb = (bytes: number) =>
 
 export function Admin() {
   const [allowed, setAllowed] = useState<boolean>()
-  const [tab, setTab] = useState<Tab>('overview')
+  const [params] = useSearchParams()
+  // A notification opens /admin?tab=messages.
+  const [tab, setTab] = useState<Tab>(() => (params.get('tab') === 'messages' ? 'messages' : 'overview'))
   const [overview, setOverview] = useState<Overview>()
   const [error, setError] = useState<string>()
 
@@ -164,9 +167,8 @@ function OverviewTab({ overview: o }: { overview: Overview | undefined }) {
       <p className="admin__kicker">Free plans</p>
       <Meter label="Files stored" used={o.files_bytes} limit={FREE.files} />
       <Meter label="Database" used={o.database_bytes} limit={FREE.database} />
-      <p className="admin__later">
-        Emails sent and received, and “Notify me” on this phone, arrive with the next stages.
-      </p>
+      <p className="admin__kicker">On this phone</p>
+      <NotifyMe />
     </>
   )
 }
@@ -541,6 +543,52 @@ function AdminsTab() {
         </div>
         <p className="hand admin__hint">they need a Voyage Fare account first</p>
       </form>
+      {error && <FormMessage tone="error">{error}</FormMessage>}
+    </>
+  )
+}
+
+/** "Notify me" on this phone: new feedback, new email to hello@ (stage C). */
+function NotifyMe() {
+  const [state, setState] = useState<PushState>()
+  const [error, setError] = useState<string>()
+  const { busy, run } = useSaving()
+  useEffect(() => {
+    pushState()
+      .then(setState)
+      .catch(() => setState('unsupported'))
+  }, [])
+  if (!state) return null
+  const hint: Record<PushState, string> = {
+    on: 'new feedback, new email to hello@',
+    off: 'new feedback, new email to hello@',
+    unsupported: 'this browser can’t show notifications: open Voyage Fare from your phone’s home screen',
+    'needs-home-screen': 'on iPhone, add Voyage Fare to your home screen first, then open it from there',
+    blocked: 'notifications are blocked for Voyage Fare in this phone’s settings',
+  }
+  const usable = state === 'on' || state === 'off'
+  return (
+    <>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={state === 'on'}
+        className="copy-ai__switch"
+        disabled={!usable || busy}
+        onClick={() =>
+          void run(async () => {
+            if (state === 'on') await turnOff()
+            else await turnOn()
+            setState(await pushState())
+          }, setError)
+        }
+      >
+        <span>
+          Notify me
+          <small>{busy ? 'one moment…' : hint[state]}</small>
+        </span>
+        <span className={`switch${state === 'on' ? ' switch--on' : ''}`} aria-hidden="true" />
+      </button>
       {error && <FormMessage tone="error">{error}</FormMessage>}
     </>
   )
