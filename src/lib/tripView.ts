@@ -1,5 +1,6 @@
 // What the trip view shows, worked out from the database's numbers.
 // No budget arithmetic here beyond picking the right figure: the database does the sums (BR-13).
+import { addDays, formatShortDates } from './tripText'
 import { num } from './money'
 import type { Item, ItemKind, Leg, Place, TicketChange, TicketMode, TripDetail } from './trips'
 
@@ -98,24 +99,37 @@ export function dayLabel(n: number, startDate: string | null): string {
   return `Day ${n} · ${short.format(d)}`
 }
 
-export function daysText(item: Pick<Item, 'day_number' | 'end_day_number'>): string | null {
+/** A day of the trip as a date once the trip has dates: "Thu 10 Sept" (null without dates). */
+export const dayDateText = (start: string | null, day: number) =>
+  start ? short.format(new Date(`${addDays(start, day - 1)}T00:00:00Z`)) : null
+
+/**
+ * When a line happens. Without dates: "Day 7", "Days 9–14". With dates (15 Nov): the day and its
+ * date, "Day 7 · Thu 10 Sept", and a stay as its dates, "9 – 14 Sept".
+ */
+export function daysText(
+  item: Pick<Item, 'day_number' | 'end_day_number'>,
+  start: string | null = null,
+): string | null {
   if (!item.day_number) return null
-  if (item.end_day_number && item.end_day_number !== item.day_number)
-    return `Days ${item.day_number}–${item.end_day_number}`
-  return `Day ${item.day_number}`
+  const end = item.end_day_number
+  const several = end && end !== item.day_number
+  if (!start) return several ? `Days ${item.day_number}–${end}` : `Day ${item.day_number}`
+  if (several) return formatShortDates(addDays(start, item.day_number - 1), addDays(start, end - 1))
+  return dayLabel(item.day_number, start)
 }
 
 export type ItemGroup = { key: string; label: string; items: Item[] }
 
 /** A place's items as in the mockup: the stay first, then day by day, then To try, then ideas with no day. */
-export function groupPlaceItems(items: Item[]): ItemGroup[] {
+export function groupPlaceItems(items: Item[], start: string | null = null): ItemGroup[] {
   const stays = items.filter((i) => i.kind === 'housing')
   const rest = items.filter((i) => i.kind !== 'housing')
   const days = [...new Set(rest.filter((i) => i.day_number).map((i) => i.day_number as number))].sort((a, b) => a - b)
   const groups: ItemGroup[] = []
   if (stays.length) groups.push({ key: 'stay', label: 'Stay', items: stays })
   for (const d of days)
-    groups.push({ key: `day-${d}`, label: `Day ${d}`, items: rest.filter((i) => i.day_number === d) })
+    groups.push({ key: `day-${d}`, label: dayLabel(d, start), items: rest.filter((i) => i.day_number === d) })
   // Restaurants with no day are the pool "To try" (build 7); other things with no day are ideas.
   const toTry = rest.filter((i) => !i.day_number && i.kind === 'restaurant' && i.status === 'idea')
   if (toTry.length) groups.push({ key: 'to-try', label: 'To try', items: toTry })

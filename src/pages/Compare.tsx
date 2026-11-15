@@ -223,7 +223,7 @@ function ItemOptions({
   // The group's label, like the trip page's "DAY 1": its day, the decision, who it's for, what's left.
   const sharedBy = detail.shares.filter((x) => x.item_id === item.id).length
   const label: { text: string; tone?: 'what' | 'todo' | 'dropped' }[] = [
-    daysText(item) ? { text: daysText(item) as string } : null,
+    daysText(item, detail.trip.start_date) ? { text: daysText(item, detail.trip.start_date) as string } : null,
     showName ? { text: item.name, tone: 'what' as const } : null,
     sharedBy > 0 && sharedBy < detail.travellers.length ? { text: `for ${sharedBy}` } : null,
     item.status === 'dropped'

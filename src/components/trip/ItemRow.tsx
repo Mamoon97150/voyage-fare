@@ -61,7 +61,7 @@ export function ItemRow({
   const { title, decision } = itemTitle(detail, item)
   const meta = [
     decision ?? kindLabel(item.kind as ItemKind, item.place_id !== null).label,
-    showDays ? daysText(item) : null,
+    showDays ? daysText(item, detail.trip.start_date) : null,
     item.meal ? MEALS.find(([k]) => k === item.meal)?.[1].toLowerCase() : null,
     optionCount(detail, item) >= 2 ? `${optionCount(detail, item)} options compared` : null,
     item.note,

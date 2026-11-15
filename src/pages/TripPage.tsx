@@ -198,7 +198,7 @@ export function TripPage() {
                           onCancel={() => setEditingPlace(null)}
                         />
                       )}
-                      {groupPlaceItems(placeItems).map((group) => (
+                      {groupPlaceItems(placeItems, trip.start_date).map((group) => (
                         <div key={group.key} className="item-group">
                           <p className="item-group__label">
                             {group.label}

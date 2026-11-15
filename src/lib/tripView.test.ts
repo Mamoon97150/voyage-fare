@@ -12,6 +12,7 @@ import {
   suggestedRoute,
   tripDays,
   viewerOf,
+  dayDateText,
 } from './tripView'
 
 const item = (over: Partial<Item>): Item =>
@@ -198,5 +199,31 @@ describe('tickets in the route', () => {
   it('a ticket in the route is not listed twice', () => {
     expect(hasLegs(d, flights)).toBe(true)
     expect(hasLegs(d, item({ id: 'insurance' }))).toBe(false)
+  })
+})
+
+describe('days and their dates (15 Nov)', () => {
+  const line = (day_number: number | null, end_day_number: number | null = null) =>
+    ({ day_number, end_day_number }) as never
+
+  it('without dates: the day numbers', () => {
+    expect(daysText(line(7))).toBe('Day 7')
+    expect(daysText(line(9, 14))).toBe('Days 9–14')
+    expect(daysText(line(null))).toBeNull()
+    expect(dayLabel(7, null)).toBe('Day 7')
+  })
+
+  it('with dates: the day and its date; a stay as its dates', () => {
+    expect(daysText(line(7), '2026-09-04')).toBe('Day 7 · Thu 10 Sept')
+    expect(daysText(line(9, 14), '2026-09-04')).toBe('12 – 17 Sept')
+    expect(daysText(line(28, 30), '2026-09-04')).toBe('1 – 3 Oct')
+    expect(dayLabel(7, '2026-09-04')).toBe('Day 7 · Thu 10 Sept')
+    expect(dayDateText('2026-09-04', 1)).toBe('Fri 4 Sept')
+  })
+
+  it('the place’s day headings follow', () => {
+    const items = [{ id: 'x', kind: 'activity', day_number: 2, end_day_number: null }] as never[]
+    expect(groupPlaceItems(items, '2026-09-04').map((g) => g.label)).toEqual(['Day 2 · Sat 5 Sept'])
+    expect(groupPlaceItems(items).map((g) => g.label)).toEqual(['Day 2'])
   })
 })
