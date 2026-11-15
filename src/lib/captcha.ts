@@ -5,7 +5,7 @@
 
 const SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY as string | undefined
 const SCRIPT = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit'
-const WAIT = 20_000
+const WAIT = 60_000 // time to tap the box if Cloudflare asks
 
 type Turnstile = {
   render: (el: HTMLElement, options: Record<string, unknown>) => string
@@ -73,6 +73,7 @@ export async function captchaToken(): Promise<string | undefined> {
     widget = turnstile.render(host, {
       sitekey: SITE_KEY,
       appearance: 'interaction-only',
+      theme: 'light', // the notebook's paper, not Cloudflare's dark box
       callback: (token: string) => finish(token),
       'error-callback': () => finish(undefined),
       'expired-callback': () => finish(undefined),
