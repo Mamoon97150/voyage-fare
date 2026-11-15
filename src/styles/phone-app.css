@@ -183,3 +183,12 @@ body {
 .pasted > span {
   min-width: 0;
 }
+
+/* The "not a robot" check (Turnstile): only shows when Cloudflare needs a tap */
+.captcha-box {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--space-4) + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 60;
+}

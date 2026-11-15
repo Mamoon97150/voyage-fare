@@ -1,8 +1,9 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { Link } from 'react-router'
 import { AuthSheet, FormMessage, SubmitButton, TextField } from '../components/AuthForm'
 import { SketchBox } from '../components/Sketch'
 import { checkEmail, explainAuthError, onlyErrors, type FieldErrors } from '../lib/authForm'
+import { captchaToken, preloadCaptcha } from '../lib/captcha'
 import { supabase } from '../lib/supabase'
 
 export function ForgotPassword() {
@@ -11,6 +12,7 @@ export function ForgotPassword() {
   const [formError, setFormError] = useState<string>()
   const [busy, setBusy] = useState(false)
   const [sentTo, setSentTo] = useState<string>()
+  useEffect(preloadCaptcha, [])
 
   async function submit(event: FormEvent) {
     event.preventDefault()
@@ -22,6 +24,7 @@ export function ForgotPassword() {
     setBusy(true)
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
       redirectTo: `${window.location.origin}/reset-password`,
+      captchaToken: await captchaToken(),
     })
     setBusy(false)
     if (error) {

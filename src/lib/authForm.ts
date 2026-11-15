@@ -73,6 +73,10 @@ export function explainAuthError(error: { message?: string; code?: string; statu
   if (code === 'email_address_invalid') {
     return { field: 'email', message: 'This email address can’t be used. Try another one.' }
   }
+  // The "not a robot" check (Turnstile) didn't pass or couldn't load.
+  if (code === 'captcha_failed' || text.includes('captcha')) {
+    return { message: 'We couldn’t check that you’re not a robot. Wait a moment, then try again.' }
+  }
   if (code === 'over_email_send_rate_limit' || code === 'over_request_rate_limit' || error.status === 429) {
     return { message: 'Too many attempts. Wait a few minutes, then try again.' }
   }

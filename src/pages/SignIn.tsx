@@ -1,8 +1,9 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router'
 import { AuthSheet, FormMessage, JustLooking, ResendLink, SubmitButton, TextField } from '../components/AuthForm'
 import { SketchBox } from '../components/Sketch'
 import { checkEmail, checkPassword, explainAuthError, onlyErrors, safeNext, type FieldErrors } from '../lib/authForm'
+import { captchaToken, preloadCaptcha } from '../lib/captcha'
 import { supabase } from '../lib/supabase'
 
 export function SignIn() {
@@ -15,6 +16,7 @@ export function SignIn() {
   const [formError, setFormError] = useState<string>()
   const [busy, setBusy] = useState(false)
   const [unconfirmed, setUnconfirmed] = useState(false)
+  useEffect(preloadCaptcha, [])
 
   async function submit(event: FormEvent) {
     event.preventDefault()
@@ -28,7 +30,11 @@ export function SignIn() {
     if (Object.keys(found).length) return
 
     setBusy(true)
-    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
+    const { error } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+      options: { captchaToken: await captchaToken() },
+    })
     setBusy(false)
     if (error) {
       const { field, message, unconfirmed } = explainAuthError(error)

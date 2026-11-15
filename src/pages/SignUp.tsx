@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router'
 import { AuthSheet, FormMessage, JustLooking, SubmitButton, TextField } from '../components/AuthForm'
 import { SketchBox } from '../components/Sketch'
@@ -14,6 +14,7 @@ import {
   type FieldErrors,
 } from '../lib/authForm'
 import { isPwned } from '../lib/pwned'
+import { captchaToken, preloadCaptcha } from '../lib/captcha'
 import { supabase } from '../lib/supabase'
 
 export function SignUp() {
@@ -27,6 +28,7 @@ export function SignUp() {
   const [formError, setFormError] = useState<string>()
   const [busy, setBusy] = useState(false)
   const [sentTo, setSentTo] = useState<string>()
+  useEffect(preloadCaptcha, [])
 
   async function submit(event: FormEvent) {
     event.preventDefault()
@@ -53,6 +55,7 @@ export function SignUp() {
         // Used as "you" in the travellers of every new trip.
         data: { first_name: firstName.trim() },
         emailRedirectTo: `${window.location.origin}${next}`,
+        captchaToken: await captchaToken(),
       },
     })
     setBusy(false)
@@ -128,7 +131,7 @@ function CheckInbox({ email, next }: { email: string; next: string }) {
     const { error } = await supabase.auth.resend({
       type: 'signup',
       email,
-      options: { emailRedirectTo: `${window.location.origin}${next}` },
+      options: { emailRedirectTo: `${window.location.origin}${next}`, captchaToken: await captchaToken() },
     })
     setState(error ? 'error' : 'sent')
   }

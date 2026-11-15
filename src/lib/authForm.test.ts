@@ -77,3 +77,11 @@ describe('where to go after signing in', () => {
     expect(safeNext(null)).toBe('/trips')
   })
 })
+
+describe('the "not a robot" check (Turnstile)', () => {
+  it('a failed check says what to do', () => {
+    expect(
+      explainAuthError({ code: 'captcha_failed', message: 'captcha protection: request disallowed' }).message,
+    ).toBe('We couldn’t check that you’re not a robot. Wait a moment, then try again.')
+  })
+})
