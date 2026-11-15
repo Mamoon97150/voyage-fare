@@ -12,6 +12,7 @@ import { JoinTrip } from './pages/JoinTrip'
 import { LinkExpired } from './pages/LinkExpired'
 import { RoutePage } from './pages/RoutePage'
 import { NewTrip } from './pages/NewTrip'
+import { Privacy } from './pages/Privacy'
 import { ResetPassword } from './pages/ResetPassword'
 import { SharePage } from './pages/SharePage'
 import { SignIn } from './pages/SignIn'
@@ -67,6 +68,7 @@ export function AppRoutes() {
         <Route path="/join/:token" element={<JoinTrip />} />
         <Route path="/demo/*" element={<Demo />} />
         <Route path="/link-expired" element={<LinkExpired />} />
+        <Route path="/privacy" element={<Privacy />} />
         <Route
           path="/trips"
           element={

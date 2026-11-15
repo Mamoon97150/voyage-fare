@@ -120,17 +120,29 @@ export function useInstallCard() {
   )
   const [snoozedUntil, setSnoozedUntil] = useState(() => Number(read(SNOOZE_KEY)) || null)
   const [now] = useState(() => Date.now())
-  const card = installCard({
+  const state = {
     standalone: isStandalone(),
     installed: read(INSTALLED_KEY) === '1',
     canPrompt,
     ios: isIos(navigator.userAgent, navigator.maxTouchPoints),
     snoozedUntil,
     now,
-  })
+  }
+  const card = installCard(state)
 
   return {
     card,
+    /** "Put it on my phone" in the account menu: offered even after "Not now". */
+    canInstall: installCard({ ...state, snoozedUntil: null }) !== null,
+    /** Bring the card back on Your trips (the account menu's "Put it on my phone"). */
+    showAgain() {
+      try {
+        window.localStorage.removeItem(SNOOZE_KEY)
+      } catch {
+        // Not stored: nothing to undo.
+      }
+      setSnoozedUntil(null)
+    },
     notNow() {
       const until = Date.now() + MONTH
       write(SNOOZE_KEY, String(until))

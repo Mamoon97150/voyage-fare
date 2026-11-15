@@ -257,3 +257,68 @@
 .trip-budget--compact .trip-budget__missing {
   display: none;
 }
+
+/* The account menu as a sheet of the notebook (mockup menus-v5, 15 Nov) */
+.account-menu .account-menu__list {
+  min-width: 16.5rem;
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  z-index: 41;
+}
+
+.account-menu__scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: color-mix(in srgb, var(--ink) 18%, transparent);
+}
+
+.sketch-box.account-menu__sheet {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-2);
+}
+
+.account-menu__who {
+  padding: var(--space-2) var(--space-3) var(--space-3);
+}
+
+.account-menu__who b {
+  display: block;
+  font-family: var(--font-title);
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.account-menu__who span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-menu__item {
+  gap: var(--space-3);
+  font-size: var(--text-md);
+}
+
+.account-menu__icon {
+  width: 1.2rem;
+  text-align: center;
+  font-style: normal;
+  color: var(--ink-soft);
+}
+
+.account-menu__rule {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: var(--space-1) 0;
+}
+
+.account-menu__item--quiet {
+  color: var(--ink-soft);
+}

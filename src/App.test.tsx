@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { AppRoutes } from './App'
@@ -64,7 +64,7 @@ const type = (label: string | RegExp, value: string) =>
 describe('home', () => {
   it('shows the name and the promise', async () => {
     open('/')
-    expect(screen.getByText('Voyage Fare')).toBeInTheDocument()
+    expect(screen.getAllByText('Voyage Fare')).toHaveLength(2) // the bar and the footer
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/what it really costs/)
     // The demo is the main button (build 7, step 3); creating a notebook comes next.
     const demo = await screen.findAllByRole('link', { name: 'Try it with a real trip' })
@@ -355,5 +355,30 @@ describe('your account', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Change password' }))
     expect(screen.getByLabelText('New password')).toHaveAccessibleDescription('Use at least 8 characters.')
     expect(fake.auth.updateUser).not.toHaveBeenCalled()
+  })
+
+  it('menus-v5: the bar, ☰ and the footer', async () => {
+    open('/')
+    expect(screen.getAllByRole('link', { name: 'Try the demo' })[0]).toHaveAttribute('href', '/demo')
+    fireEvent.click(screen.getByRole('button', { name: 'Menu' }))
+    const menu = document.getElementById('site-menu') as HTMLElement
+    expect(within(menu).getByRole('link', { name: /How it works/ })).toHaveAttribute('href', '/#how')
+    expect(within(menu).getByRole('link', { name: /See a real trip/ })).toHaveAttribute('href', '/demo')
+    expect(within(menu).getByText('soon')).toBeInTheDocument() // the story, until it's written
+    expect(within(menu).getByRole('link', { name: /Contact/ })).toHaveAttribute('href', 'mailto:hello@voyagefare.app')
+    expect(within(menu).getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/sign-in')
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(document.getElementById('site-menu')).toBeNull()
+    const footer = screen.getByRole('contentinfo')
+    expect(within(footer).getByRole('link', { name: 'Privacy' })).toHaveAttribute('href', '/privacy')
+  })
+})
+
+describe('privacy', () => {
+  it('in plain words: what we keep, why, who helps, your choices', () => {
+    open('/privacy')
+    expect(screen.getByRole('heading', { level: 1, name: 'Privacy' })).toBeInTheDocument()
+    for (const h of ['What we keep', 'Why', 'Who helps us', 'Your choices', 'Who’s behind it'])
+      expect(screen.getByRole('heading', { name: h })).toBeInTheDocument()
   })
 })

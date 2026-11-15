@@ -1,0 +1,297 @@
+/* The public pages' bar, menu and footer (mockup menus-v5, 15 Nov). Phone first; links in the bar from 48rem. */
+
+.site-bar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  /* Edge to edge: the page's own padding is var(--space-4). */
+  margin: calc(-1 * var(--space-4)) calc(-1 * var(--space-4)) 0;
+  padding: var(--space-3) var(--space-4);
+  padding-top: calc(var(--space-3) + env(safe-area-inset-top));
+  background: color-mix(in srgb, var(--paper) 92%, transparent);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--line);
+}
+
+.site-bar__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1;
+  min-width: max-content;
+  color: var(--ink);
+  text-decoration: none;
+  font-family: var(--font-title);
+  font-size: var(--text-lg);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.site-bar__links {
+  display: none;
+}
+
+.site-bar__acts {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.site-bar .site-bar__signin,
+.site-bar .site-bar__join {
+  display: none;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.5rem;
+  padding: 0 0.9rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--ink);
+  background: var(--paper-raised);
+  color: var(--ink);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.pill--dark {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.site-bar__burger {
+  width: 2.75rem;
+  height: 2.75rem;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font-size: 1.35rem;
+  cursor: pointer;
+}
+
+/* ☰ open: a sheet of the notebook under the bar */
+.site-menu__scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 38;
+  background: color-mix(in srgb, var(--ink) 18%, transparent);
+}
+
+.site-menu {
+  position: fixed;
+  z-index: 39;
+  left: var(--space-3);
+  right: var(--space-3);
+  top: calc(4.6rem + env(safe-area-inset-top));
+  max-width: 26rem;
+  margin-inline: auto;
+}
+
+.sketch-box.site-menu__sheet {
+  padding: var(--space-4) var(--space-4) var(--space-4);
+}
+
+.site-menu ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.site-menu li > a,
+.site-menu li > span {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 48px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+  text-decoration: none;
+  font-size: var(--text-base);
+  font-weight: 600;
+}
+
+.site-menu li:last-child > a {
+  border-bottom: 0;
+}
+
+.site-menu small {
+  font-weight: 400;
+  color: var(--ink-soft);
+  font-size: var(--text-sm);
+}
+
+.site-link--soon {
+  color: var(--ink-soft);
+}
+
+.site-link--soon .hand {
+  font-size: var(--text-note);
+  font-weight: 400;
+}
+
+.site-menu__acts {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+/* Footer */
+.site-foot {
+  max-width: 40rem;
+  margin: var(--space-8) auto 0;
+  padding: var(--space-6) 0 calc(var(--space-6) + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line);
+}
+
+.site-foot__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--ink);
+  text-decoration: none;
+  font-family: var(--font-title);
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+.site-foot__cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.site-foot__cols p {
+  margin-bottom: var(--space-2);
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.site-foot__cols a,
+.site-foot__cols .site-link--soon {
+  display: block;
+  padding: 0.35rem 0;
+  font-size: var(--text-md);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.site-foot__cols .site-link--soon {
+  color: var(--ink-soft);
+}
+
+.site-foot__made {
+  margin-top: var(--space-6);
+  font-family: var(--font-hand);
+  font-size: var(--text-note-l);
+  color: var(--ink-soft);
+}
+
+.site-foot__small {
+  margin-top: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+}
+
+/* On a computer: the links in the bar, no ☰ */
+@media (min-width: 48rem) {
+  .site-bar {
+    gap: var(--space-6);
+    padding-inline: var(--space-6);
+  }
+
+  .site-bar__brand {
+    flex: none;
+  }
+
+  .site-bar__links {
+    display: flex;
+    flex: 1;
+    justify-content: center;
+    gap: var(--space-6);
+  }
+
+  .site-bar__links a {
+    color: var(--ink);
+    text-decoration: none;
+    font-size: var(--text-md);
+    font-weight: 600;
+  }
+
+  .site-bar .site-bar__demo,
+  .site-bar .site-bar__burger {
+    display: none;
+  }
+
+  .site-bar .site-bar__signin {
+    display: inline;
+    margin-right: var(--space-2);
+    font-size: var(--text-md);
+    font-weight: 600;
+  }
+
+  .site-bar .site-bar__join {
+    display: inline-flex;
+  }
+}
+
+/* Privacy */
+.privacy {
+  max-width: 34rem;
+  margin: var(--space-6) auto 0;
+}
+
+.privacy h1 {
+  font-family: var(--font-title);
+  font-size: var(--text-3xl);
+  font-weight: 600;
+}
+
+.privacy__lede {
+  margin-top: var(--space-1);
+  color: var(--ink-soft);
+  font-size: var(--text-md);
+}
+
+.sketch-box.privacy__sheet {
+  margin-top: var(--space-4);
+  padding: var(--space-6) var(--space-4) var(--space-4);
+}
+
+.privacy__sheet h2 {
+  margin-top: var(--space-4);
+  font-family: var(--font-title);
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+.privacy__sheet h2:first-child {
+  margin-top: 0;
+}
+
+.privacy__sheet p,
+.privacy__sheet li {
+  font-size: var(--text-body);
+  line-height: 1.55;
+}
+
+.privacy__sheet ul {
+  margin: var(--space-1) 0 0 1.2rem;
+}
+
+/* "How it works" from the menu: land below the bar, not under it */
+#how {
+  scroll-margin-top: 5rem;
+}

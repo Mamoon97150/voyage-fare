@@ -264,3 +264,23 @@ describe('the app on the phone (pwa-v5)', () => {
     online.mockRestore()
   })
 })
+
+describe('the account menu (menus-v5)', () => {
+  it('your trips, the demo, feedback, account, privacy, sign out', async () => {
+    data.listTrips.mockResolvedValue([])
+    open('/trips')
+    await screen.findByText('Your first trip')
+    fireEvent.click(screen.getByRole('button', { name: /Your account/ }))
+    const menu = screen.getByRole('menu')
+    expect(within(menu).getByRole('menuitem', { name: 'Your trips' })).toHaveAttribute('href', '/trips')
+    expect(within(menu).getByRole('menuitem', { name: 'See the demo' })).toHaveAttribute('href', '/demo')
+    expect(within(menu).getByRole('menuitem', { name: 'Send feedback' }).getAttribute('href')).toMatch(
+      /^mailto:hello@voyagefare\.app\?subject=Voyage%20Fare%3A%20feedback&body=.*%2Ftrips$/,
+    )
+    expect(within(menu).getByRole('menuitem', { name: 'Your account' })).toHaveAttribute('href', '/account')
+    expect(within(menu).getByRole('menuitem', { name: 'Privacy' })).toHaveAttribute('href', '/privacy')
+    expect(within(menu).getByRole('menuitem', { name: 'Sign out' })).toBeInTheDocument()
+    // Not on a phone that can install it: no "Put it on my phone".
+    expect(within(menu).queryByRole('menuitem', { name: 'Put it on my phone' })).toBeNull()
+  })
+})

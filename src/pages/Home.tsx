@@ -1,13 +1,10 @@
-import type { ReactNode } from 'react'
-import { Link } from 'react-router'
+import { useEffect, type ReactNode } from 'react'
+import { Link, useLocation } from 'react-router'
 import { HandBar } from '../components/HandBar'
+import { SiteBar, SiteFooter } from '../components/SiteNav'
+import { DEMO_LINK } from '../lib/site'
 import { Sketch, SketchBox, Underlined } from '../components/Sketch'
 import { useAuth } from '../lib/authContext'
-
-/** The demo trip (build 7, step 3): the main button once it's open. Until then, "Create my notebook". */
-const DEMO_LINK: string | null = '/demo'
-/** The case study (portfolio, January): the footer links to it once it's written. */
-const STORY_LINK: string | null = null
 
 /**
  * The welcome page, before signing in (mockup trips-welcome-v5, 15 Nov): the palm-tree sketch, what
@@ -16,15 +13,14 @@ const STORY_LINK: string | null = null
  */
 export function Home() {
   const { session } = useAuth()
+  const { hash } = useLocation()
+  // "How it works" from the menu or the footer: scroll to it.
+  useEffect(() => {
+    if (hash) document.getElementById(hash.slice(1))?.scrollIntoView({ behavior: 'smooth' })
+  }, [hash])
   return (
     <div className="page welcome-page">
-      <header className="app-header">
-        <img src="/illustrations/compass.svg" width={28} height={28} alt="" />
-        <span className="app-header__name">Voyage Fare</span>
-        <span className="app-header__account">
-          {session ? <Link to="/trips">Your trips</Link> : <Link to="/sign-in">Sign in</Link>}
-        </span>
-      </header>
+      <SiteBar />
 
       <main>
         <div className="welcome-top">
@@ -42,7 +38,7 @@ export function Home() {
           <SampleTrip />
         </div>
 
-        <section className="welcome-how" aria-labelledby="how-title">
+        <section id="how" className="welcome-how" aria-labelledby="how-title">
           <h2 id="how-title">How it works</h2>
           <p className="hand welcome-how__note">three pages of the notebook</p>
 
@@ -133,12 +129,8 @@ export function Home() {
         <div className="welcome-end">
           <Actions signedIn={Boolean(session)} end />
         </div>
-
-        <footer className="welcome-foot">
-          <span>Made by Djamina, for trips with her sisters.</span>
-          {STORY_LINK && <a href={STORY_LINK}>The story behind it ›</a>}
-        </footer>
       </main>
+      <SiteFooter />
     </div>
   )
 }
