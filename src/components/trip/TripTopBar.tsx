@@ -1,5 +1,6 @@
 import { Link } from 'react-router'
-import type { Traveller } from '../../lib/trips'
+import type { Traveller, TripDetail } from '../../lib/trips'
+import { TripMenu } from './TripMenu'
 import { demoDefault, useDemo } from '../../lib/demo'
 
 const SHOWN = 4
@@ -15,6 +16,7 @@ export function TripTopBar({
   tripId,
   travellers,
   userId,
+  detail,
 }: {
   title: string
   /** By hand under the name: dates, where from, how many (Compare v4: the notebook's cover). */
@@ -22,9 +24,12 @@ export function TripTopBar({
   tripId?: string
   travellers?: Traveller[]
   userId?: string
+  /** The whole trip: shows the trip's menu ⋯ (build 8). */
+  detail?: TripDetail
 }) {
   const demo = useDemo()
-  const shown = travellers?.slice(0, SHOWN) ?? []
+  // With the trip menu ⋯ next to them, one initial fewer, so the name keeps its room on a phone.
+  const shown = travellers?.slice(0, detail ? SHOWN - 1 : SHOWN) ?? []
   const more = (travellers?.length ?? 0) - shown.length
   return (
     <header className="screen__top">
@@ -47,6 +52,11 @@ export function TripTopBar({
               {t.name.slice(0, 1).toUpperCase()}
             </span>
           ))}
+          {more > 0 && (
+            <span className="avatar avatar--more" aria-hidden="true">
+              +{more}
+            </span>
+          )}
         </span>
       )}
       {!demo && tripId && travellers && (
@@ -71,6 +81,7 @@ export function TripTopBar({
           )}
         </Link>
       )}
+      {detail && <TripMenu detail={detail} />}
     </header>
   )
 }

@@ -90,6 +90,7 @@ export function MoneyScreen({ children }: { children: (page: MoneyPage) => React
         tripId={detail.trip.id}
         travellers={detail.travellers}
         userId={session?.user.id}
+        detail={detail}
       />
       <DemoStrip detail={detail} />
       <TripBudget

@@ -609,3 +609,37 @@ describe('review fixes (13 Nov)', () => {
     expect(screen.queryByText('(something to decide)')).not.toBeInTheDocument()
   })
 })
+
+describe('the trip menu ⋯: copy the trip for my AI (build 8)', () => {
+  it('two switches, a question, one button; the text goes to the clipboard; a note says where to paste', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true })
+    data.getMoney.mockResolvedValue({
+      categories: [],
+      travellerCategories: [],
+      balances: [],
+      repayments: [],
+      settlement: [{ from_traveller: 'b', to_traveller: 'a', amount: 40 }],
+    })
+    open('/trips/t1')
+    await screen.findByRole('heading', { name: 'Colombia' })
+    fireEvent.click(screen.getByRole('button', { name: 'Trip menu' }))
+    expect(screen.getByRole('menuitem', { name: /Trip settings/ })).toHaveAttribute('href', '/trips/t1/settings')
+    fireEvent.click(screen.getByRole('menuitem', { name: /Copy the trip for my AI/ }))
+    const dialog = screen.getByRole('dialog', { name: 'Copy the trip for my AI' })
+    expect(dialog).toHaveTextContent('Nothing is sent from here')
+    fireEvent.click(screen.getByRole('switch', { name: /Real names/ }))
+    fireEvent.click(screen.getByRole('radio', { name: 'What’s left to book?' }))
+    expect(screen.getByLabelText('The start of the text')).toHaveTextContent('# Colombia')
+    // Who owes whom comes from Who paid: the button waits for it.
+    fireEvent.click(await screen.findByRole('button', { name: 'Copy the trip' }))
+    await waitFor(() => expect(writeText).toHaveBeenCalled())
+    const copied = writeText.mock.calls[0][0] as string
+    expect(copied).toContain('Travellers: Traveller A (me), Traveller B')
+    expect(copied).toMatch(/Traveller B pays Traveller A 40\s€/) // amounts keep their no-break space
+    expect(copied).not.toContain('Ana')
+    expect(copied.endsWith('Question: What’s left to book, and what should I book first?')).toBe(true)
+    expect(await screen.findByRole('status')).toHaveTextContent('Copied')
+    expect(screen.queryByRole('dialog')).toBeNull()
+  })
+})

@@ -110,6 +110,7 @@ export function TripPage() {
         tripId={trip.id}
         travellers={travellers}
         userId={session?.user.id}
+        detail={detail}
       />
       <DemoStrip detail={detail} />
       {!readOnly && (

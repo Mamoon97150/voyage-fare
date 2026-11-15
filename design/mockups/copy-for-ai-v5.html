@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mockup — Copy the trip for my AI (v5 look, 15 Nov)</title>
+    <script type="module">
+      import '/src/index.css'
+      import './forms.css'
+      import './v4.css'
+      import './v5.js'
+    </script>
+    <style>
+      .hand { font-family: var(--font-hand); color: var(--ink-soft); line-height: 1.2; }
+      .scrim { position: absolute; inset: 0; background: color-mix(in srgb, var(--ink) 18%, transparent); z-index: 4; }
+      .top { display: flex; align-items: flex-start; padding-top: var(--space-6) !important; gap: var(--space-3); padding: var(--space-4) var(--space-4) var(--space-2); }
+      .top .back { font-size: 1.6rem; color: var(--ink); }
+      .top h1 { font-family: var(--font-title); font-size: var(--text-xl); font-weight: 600; line-height: 1.1; }
+      .top .sub { font-family: var(--font-hand); font-size: var(--text-note-l); color: var(--ink-soft); }
+      .top .grow { flex: 1; min-width: 0; }
+      .dots { width: 2.5rem; height: 2.5rem; border-radius: 50%; display: grid; place-items: center; border: 1.5px solid var(--ink); background: var(--paper-raised); font-size: 1.2rem; font-weight: 700; line-height: 1; }
+      .dots--on { box-shadow: 0 0 0 3px var(--estimated); }
+      .ghost { opacity: .35; }
+      .ghost-page { padding: var(--space-2) var(--space-4); }
+      .ghost-page .bar { height: .7rem; border-radius: 4px; background: var(--line); margin-top: var(--space-3); }
+      .ghost-page .card { height: 7rem; border: 1px solid var(--line); border-radius: 10px; margin-top: var(--space-4); }
+
+      /* 1 · the trip's menu */
+      .sketch-box.trip-menu { margin: 0; position: absolute; right: var(--space-3); top: 4.6rem; z-index: 6; width: 17.5rem; padding: var(--space-2); }
+      .trip-menu a { display: flex; align-items: center; gap: var(--space-3); min-height: 48px; padding: 0 var(--space-3); font-size: var(--text-md); color: var(--ink); }
+      .trip-menu a i { width: 1.2rem; text-align: center; font-style: normal; color: var(--ink-soft); }
+      .trip-menu a small { margin-left: auto; font-family: var(--font-hand); font-size: var(--text-note); color: var(--ink-soft); }
+      .trip-menu a.later { color: var(--ink-soft); }
+      .trip-menu a.new { font-weight: 600; }
+      .trip-menu hr { border: 0; border-top: 1px solid var(--line); margin: var(--space-1) 0; }
+
+      /* 2 · the sheet */
+      .sketch-box.sheet-up { margin: 0; position: absolute; left: var(--space-2); right: var(--space-2); bottom: var(--space-2); z-index: 6; padding: var(--space-6) var(--space-4) var(--space-4); }
+      .sheet-up h2 { font-family: var(--font-title); font-size: var(--text-xl); font-weight: 600; }
+      .sheet-up .lead { font-size: var(--text-sm); color: var(--ink-soft); line-height: 1.45; margin-top: var(--space-1); }
+      .switch-row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-2) 0; border-bottom: 1px solid var(--line); font-size: var(--text-md); }
+      .switch-row small { display: block; color: var(--ink-soft); font-size: var(--text-xs); }
+      .sw { width: 2.6rem; height: 1.5rem; border-radius: 999px; background: var(--line); position: relative; flex: none; }
+      .sw::after { content: ''; position: absolute; top: 3px; left: 3px; width: 1.1rem; height: 1.1rem; border-radius: 50%; background: var(--paper-raised); box-shadow: var(--shadow-1); }
+      .sw--on { background: var(--confirmed); }
+      .sw--on::after { left: auto; right: 3px; }
+      .label { margin-top: var(--space-3); font-size: var(--text-2xs); letter-spacing: .08em; text-transform: uppercase; font-weight: 700; color: var(--ink-soft); }
+      .chips { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-2); }
+      .chips .chip { min-height: 2.1rem; font-size: .8125rem; }
+      .peek { margin-top: var(--space-3); padding: var(--space-2) var(--space-3); border: 1.5px dashed var(--line); border-radius: 10px; font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: .7rem; line-height: 1.5; color: var(--ink-soft); max-height: 6.2rem; overflow: hidden; position: relative; white-space: pre-wrap; }
+      .peek::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 2rem; background: linear-gradient(transparent, var(--paper-raised)); }
+      .peek-size { font-size: var(--text-xs); color: var(--ink-soft); margin-top: var(--space-1); }
+      .acts { margin-top: var(--space-3); display: grid; gap: var(--space-2); }
+
+      /* 3 · copied */
+      .copied { position: absolute; left: var(--space-3); right: var(--space-3); bottom: var(--space-4); z-index: 6; padding: var(--space-3) var(--space-4); background: var(--paper-note); border: 1.5px dashed var(--ink-soft); border-radius: 10px; box-shadow: var(--shadow-1); transform: rotate(-.4deg); }
+      .copied b { display: flex; align-items: center; gap: var(--space-2); }
+      .copied b::before { content: '✓'; display: inline-grid; place-items: center; width: 1.25rem; height: 1.25rem; border-radius: 50%; background: var(--confirmed); color: var(--paper); font-size: var(--text-xs); }
+      .copied p { font-size: var(--text-sm); color: var(--ink-soft); margin-top: var(--space-1); line-height: 1.45; }
+      .copied .hand { font-size: var(--text-note); margin-top: var(--space-2); }
+
+      /* 4 · the text */
+      .wide { width: min(100%, 44rem); }
+      .phones figure.wide .phone { width: 100%; max-width: none; padding: var(--space-4); }
+      .text { font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: .74rem; line-height: 1.55; white-space: pre-wrap; color: var(--ink); background: var(--paper-raised); border: 1px solid var(--line); border-radius: 10px; padding: var(--space-4); }
+      .text .c { color: var(--ink-soft); }
+    </style>
+  </head>
+  <body>
+    <div class="phones">
+
+      <!-- 1. The trip's menu -->
+      <figure>
+        <div class="phone" style="min-height:36rem;padding-bottom:0">
+          <div class="top"><a class="back">‹</a><div class="grow"><h1>Colombia &amp; Panama</h1><p class="sub">4 – 18 Sept · 4 of us</p></div><span class="dots dots--on" aria-label="Trip menu">⋯</span></div>
+          <div class="ghost ghost-page"><div class="bar" style="width:70%"></div><div class="card"></div><div class="card"></div></div>
+          <div class="scrim" style="top:4.4rem"></div>
+          <div class="sketch-box sketch-box--strong trip-menu" data-seed="41">
+            <svg class="sketch-box__line" aria-hidden="true"></svg>
+            <a class="new"><i>✦</i>Copy the trip for my AI</a>
+            <a class="later"><i>⇣</i>Import from my AI <small>step 2</small></a>
+            <a class="later"><i>⧉</i>Duplicate this trip <small>step 3</small></a>
+            <a class="later"><i>↗</i>Share a read-only link <small>step 6</small></a>
+            <hr />
+            <a><i>⚙</i>Trip settings</a>
+          </div>
+        </div>
+        <figcaption><b>1 · A menu for the trip</b> (new): <b>⋯</b> at the top right of every trip page, next to the name.
+          <ul>
+            <li>Build 8 gathers there: <b>Copy the trip for my AI</b> (now), then Import from my AI, Duplicate, Share a link as they’re built (greyed here, they won’t show until they exist).</li>
+            <li><b>Trip settings</b> stays reachable from the travellers’ initials too.</li>
+          </ul>
+        </figcaption>
+      </figure>
+
+      <!-- 2. The sheet -->
+      <figure>
+        <div class="phone" style="min-height:36rem;padding-bottom:0">
+          <div class="top ghost"><a class="back">‹</a><div class="grow"><h1>Colombia &amp; Panama</h1></div><span class="dots">⋯</span></div>
+          <div class="scrim"></div>
+          <div class="sketch-box sketch-box--strong sheet-up" data-seed="42">
+            <svg class="sketch-box__line" aria-hidden="true"></svg>
+            <span class="tape tape--mustard" aria-hidden="true"></span>
+            <h2>Copy the trip for my AI</h2>
+            <p class="lead">The whole trip as text, to paste into Claude, ChatGPT or any AI. Nothing is sent from here: you choose where you paste it.</p>
+            <div class="switch-row"><span>Who paid what<small>payments and who owes whom</small></span><span class="sw sw--on"></span></div>
+            <div class="switch-row"><span>Real names<small>off: Traveller A, B, C…</small></span><span class="sw sw--on"></span></div>
+            <p class="label">Add a question (optional)</p>
+            <div class="chips">
+              <button class="chip" aria-pressed="true">What’s left to book?</button>
+              <button class="chip">Cheaper ideas</button>
+              <button class="chip">Plan a free day</button>
+              <button class="chip">Check the budget</button>
+            </div>
+            <div class="peek"># Colombia &amp; Panama
+Fri 4 – Fri 18 Sept 2026 · 14 nights · from St Martin
+Travellers: Ana (me), Bea, Cleo, Eva
+Budget, my share: 3 452 € (3 428 € confirmed, 25 € estimated)
+## 1. Bogotá — 2 nights</div>
+            <p class="peek-size">≈ 2 pages · 39 lines · 5 places</p>
+            <div class="acts"><a class="button button--primary button--wide">Copy the trip</a></div>
+          </div>
+        </div>
+        <figcaption><b>2 · Copy the trip for my AI.</b> One sheet, one button.
+          <ul>
+            <li><b>Who paid what</b> (on by default) and <b>Real names</b> (turn off to share with an AI without names).</li>
+            <li><b>A question</b>, if you want one: it’s added at the end, so the AI knows what to do. One tap each, none needed.</li>
+            <li>A peek at the start of the text, and how long it is.</li>
+          </ul>
+        </figcaption>
+      </figure>
+
+      <!-- 3. Copied -->
+      <figure>
+        <div class="phone" style="min-height:36rem;padding-bottom:0">
+          <div class="top"><a class="back">‹</a><div class="grow"><h1>Colombia &amp; Panama</h1><p class="sub">4 – 18 Sept · 4 of us</p></div><span class="dots">⋯</span></div>
+          <div class="ghost ghost-page"><div class="bar" style="width:70%"></div><div class="card"></div><div class="card"></div><div class="card"></div></div>
+          <div class="copied" role="status">
+            <b>Copied</b>
+            <p>Open Claude, ChatGPT or any AI, and paste it in a new chat.</p>
+            <p class="hand">it doesn’t change anything here: your AI just reads it</p>
+          </div>
+        </div>
+        <figcaption><b>3 · Copied.</b> A note slipped into the notebook for a few seconds, the same family as the other messages: where to paste it, and that it changes nothing in the app.</figcaption>
+      </figure>
+
+    </div>
+
+    <!-- 4. The text -->
+    <div class="phones" style="justify-content:center">
+      <figure class="wide">
+        <div class="phone">
+<div class="text"># Colombia &amp; Panama
+Fri 4 – Fri 18 Sept 2026 · 14 nights · from St Martin, back to St Martin
+Travellers: Ana (me), Bea, Cleo, Eva
+Main currency: EUR. Prices in other currencies show the euro amount saved with them.
+Statuses: idea → chosen → booked → paid. “In the package” = covered by the Frégate Agency package.
+
+Budget, my share: 3 452 € · 3 428 € confirmed · 25 € still estimated
+Whole trip: 13 807 € · 2 lines with no price yet
+
+## Getting there and around
+- St Martin → Bogotá · flight · Copa Airlines · booked · in the package
+- Bogotá → Guatapé · …
+- Guatapé → Medellín · private transfer via The Boato · 70 € · chosen
+- Panama City → St Martin · flight · Copa Airlines · booked · in the package
+- Frégate Agency package · 10 240 € · paid by Ana · for all 4
+
+## 1. Bogotá — 2 nights (Fri 4 – Sun 6 Sept)
+- Stay: Grand Hyatt Bogotá · booked · in the package
+- Day 1 · dinner: At the hotel (Grand Hyatt) · 317 921 COP (≈ 81 €) · paid by Bea · for all 4
+- Day 2 · Monserrate at sunset: Monserrate cable car · 28 € · chosen
+- Day 2 · Quick bite at Monserrate · no price yet
+- Day 2 · dinner: Andrés DC · 162 823 COP (≈ 41 €) · paid by Ana
+
+## 3. Medellín — 4 nights (Tue 8 – Sat 12 Sept)
+- Stay: Nock Reserved Residences · booked · in the package
+- Day 6 · Comuna 13 tour: Casa Kolacho · 84 USD (≈ 76 €) · paid by Cleo
+- Day 7 · The thrill day · chosen: Sabaneta, Pueblito Paisa, Laureles · free ♥
+    other options: Coffee finca, half day · 312 USD — Paragliding, GTOPIK · 315 USD
+- Day 8 · Spa: Spa Bonanova · 157 500 COP (≈ 40 €) · each paid their own
+<span class="c">…</span>
+
+## To try (restaurants kept for later, not counted)
+- Cartagena: Carmen (Instagram, @carmencartagena) · “the tasting menu” · ≈ 95 € each
+
+## Still to decide or pay
+- 1 decision left: Boat tour: the sunken village (2 options)
+- Left to pay: none
+
+## Who paid what
+- Bea pays Ana 354 €
+- Eva pays Ana 236 €
+
+---
+Copied from Voyage Fare (voyagefare.app) on 15 Nov 2026.
+
+Question: What’s left to book, and what should I book first?</div>
+        </div>
+        <figcaption style="max-width:40rem"><b>4 · What gets copied</b> (the demo trip, shortened here). Plain text with simple headings, which every AI reads well: the trip, the budget, how to read the statuses, then <b>each place in order with its days</b>, the options still compared, To try, what’s left, who owes whom, and your question last. Amounts keep their own currency with the euro next to it.</figcaption>
+      </figure>
+    </div>
+
+    <script>
+      const only = new URLSearchParams(location.search).get('only')
+      if (only) document.querySelectorAll('.phones > figure').forEach((f, i) => { if (!only.split(',').includes(String(i + 1))) f.remove() })
+    </script>
+  </body>
+</html>
