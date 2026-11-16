@@ -467,3 +467,8 @@
   outline-offset: 2px;
   border-radius: 8px;
 }
+
+/* Dark mode: the same paper-toned map, at night (any map: route, day, stays). */
+:root[data-theme='dark'] .leaflet-tile-pane {
+  filter: grayscale(1) invert(1) sepia(0.45) brightness(0.8) contrast(0.95);
+}

@@ -29,10 +29,15 @@ export function useHandDrawn<E extends HTMLElement>(
       svg.replaceChildren(...draw(rough.svg(svg), width, height, el))
     }
     redraw()
-    if (typeof ResizeObserver === 'undefined') return
+    // Day ↔ night (dark mode): drawings that read the palette are drawn again in the new colours.
+    window.addEventListener('vf-theme', redraw)
+    if (typeof ResizeObserver === 'undefined') return () => window.removeEventListener('vf-theme', redraw)
     const watcher = new ResizeObserver(redraw)
     watcher.observe(el)
-    return () => watcher.disconnect()
+    return () => {
+      watcher.disconnect()
+      window.removeEventListener('vf-theme', redraw)
+    }
     // The drawing depends on what the caller says (deps), not on the function's identity.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps)

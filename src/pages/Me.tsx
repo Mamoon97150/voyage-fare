@@ -8,6 +8,7 @@ import { keepTrips, setKeepTrips, useInstallCard } from '../lib/pwa'
 import { pushState, turnOff, turnOn, type PushState } from '../lib/push'
 import { FormMessage } from '../components/AuthForm'
 import { useSaving } from '../lib/useSaving'
+import { setThemeChoice, themeChoice, type ThemeChoice } from '../lib/theme'
 import { DEMO_LINK } from '../lib/site'
 import { supabase } from '../lib/supabase'
 import { useAdmin } from '../lib/useAdmin'
@@ -80,6 +81,7 @@ export function Me() {
           <h2 className="me__title">The app</h2>
           <ul className="me__rows">
             {canInstall && <Row onClick={putOnPhone} label="Put it on my phone" />}
+            <LookPicker />
             <RemindersSwitch />
             <KeepTripsSwitch />
             <Row onClick={() => setFeedback(true)} label="Send feedback" sub="something broken, unclear, an idea" />
@@ -209,6 +211,41 @@ function KeepTripsSwitch() {
         </span>
         <span className={`toggle-pill${on ? ' toggle-pill--on' : ''}`} aria-hidden="true" />
       </button>
+    </li>
+  )
+}
+
+/** Look (dark mode, 16 Nov): Auto follows the phone's own day / night setting. */
+function LookPicker() {
+  const [choice, setChoice] = useState<ThemeChoice>(themeChoice)
+  const options: { key: ThemeChoice; label: string }[] = [
+    { key: 'auto', label: 'Auto' },
+    { key: 'light', label: 'Light' },
+    { key: 'dark', label: 'Dark' },
+  ]
+  return (
+    <li className="me__look">
+      <span>
+        Look
+        <small>Auto follows your phone’s day and night</small>
+      </span>
+      <span className="me__look-choices" role="radiogroup" aria-label="Look">
+        {options.map((o) => (
+          <button
+            key={o.key}
+            type="button"
+            role="radio"
+            aria-checked={choice === o.key}
+            className="chip"
+            onClick={() => {
+              setThemeChoice(o.key)
+              setChoice(o.key)
+            }}
+          >
+            {o.label}
+          </button>
+        ))}
+      </span>
     </li>
   )
 }

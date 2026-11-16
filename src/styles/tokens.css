@@ -83,3 +83,41 @@
   --radius-pen: 50% 45% 55% 48% / 60% 50% 55% 45%; /* a circle drawn by hand around a word */
   --page-width: 44rem;
 }
+
+/* Dark mode (decided 16 Nov, mockup dark-v6, direction A "Lamp-lit"): the notebook at night under a
+   desk lamp. Warm walnut paper, cream chalk ink, the same pens a little brighter; every text colour
+   reads at 5.8:1 or better. <html data-theme> is set before the first paint (index.html) from Me →
+   Look: Auto (the phone's own setting), Light or Dark. */
+:root[data-theme='dark'] {
+  --paper: #1c1814;
+  --paper-raised: #26201b;
+  --line: #3b332b;
+  --map-bg: #2a241e;
+
+  --ink: #f0e6d4;
+  --ink-soft: #a99a86;
+  --pen: #93abe3;
+
+  --confirmed: #93bb7c;
+  --estimated: #d9a94e;
+  --estimated-ink: #e0b25a;
+  --estimated-text: #e6bf6f;
+  --over: #e3806a;
+
+  --cat-travel: #6aa19e;
+  --cat-stay: #b98ea6;
+  --cat-activity: #d08d6f;
+  --cat-food: #a3ad74;
+  --cat-other: #a69a87;
+
+  --tape: #6e5844;
+  --tape-2: #4d5b46;
+
+  /* The pen-and-wash sketches keep their own light paper, glued into the night notebook. */
+  --sketch-paper: #f3ead9;
+
+  --shadow-1: 0 2px 6px rgb(0 0 0 / 0.35);
+  --shadow-2: 0 6px 16px rgb(0 0 0 / 0.4);
+  --shadow-3: 0 8px 24px rgb(0 0 0 / 0.5);
+  color-scheme: dark;
+}

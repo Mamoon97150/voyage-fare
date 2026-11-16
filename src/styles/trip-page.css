@@ -703,3 +703,12 @@
 .screen__top > .trip-tools {
   align-self: center;
 }
+
+/* Three prompts on a day (What we do · Where we eat · Cash, build 10): one line on a phone. */
+.day-prompts {
+  gap: var(--space-1);
+}
+.day-prompt {
+  white-space: nowrap;
+  padding: 0 var(--space-1);
+}

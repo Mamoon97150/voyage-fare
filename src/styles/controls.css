@@ -519,3 +519,17 @@ a {
 .cat-dot--restaurant {
   background: var(--cat-food);
 }
+
+/* Dark mode: a sketch can't melt into dark paper; it stays on its own light paper, glued in. */
+:root[data-theme='dark'] .sketch {
+  mix-blend-mode: normal;
+  background: var(--sketch-paper);
+  border-radius: var(--radius-2xs);
+  padding: var(--space-2);
+  box-shadow: var(--shadow-1);
+}
+
+/* Dark mode: the compass logo in chalk ink (its own night copy; same drawing). */
+:root[data-theme='dark'] img[src$='/illustrations/compass.svg'] {
+  content: url('/illustrations/compass-night.svg');
+}

@@ -1952,3 +1952,20 @@ button.screen__back {
 .home-nav__brand {
   display: none;
 }
+
+/* Me → Look (dark mode, 16 Nov): Auto · Light · Dark */
+.me__look {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+  border-top: 1px solid var(--line);
+}
+.me__look small {
+  display: block;
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+}
+.me__look-choices {
+  display: flex;
+  gap: var(--space-1);
+}
