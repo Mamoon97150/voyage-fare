@@ -461,3 +461,31 @@ input[type='radio'] {
 .stops__n {
   background: var(--ink);
 }
+
+/* The trip's top bar (16 Nov): back, initials and ☰ on one centre line, ☰ the same size as back,
+   a little air between the initials and the menu. */
+.screen__top > .screen__back,
+.screen__top > .avatars,
+.screen__top > .trip-menu {
+  align-self: center;
+}
+
+.screen__top > .trip-menu {
+  margin-left: var(--space-1);
+}
+
+.trip-menu__button {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+/* A place's actions: spread over the whole line; when one drops to a second line, it's centred. */
+.place__adds {
+  justify-content: space-evenly;
+}
+
+.screen__top > .avatars,
+.screen__top:has(.screen__heading) > .avatars {
+  min-height: 2.5rem;
+  margin: 0;
+}
