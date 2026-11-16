@@ -70,6 +70,14 @@ export function TripMenu({ detail }: { detail: TripDetail }) {
             {!demo && (
               <>
                 <Link
+                  to={`/trips/${detail.trip.id}/booking-email`}
+                  role="menuitem"
+                  className="trip-menu__item"
+                  onClick={() => setOpen(false)}
+                >
+                  <i aria-hidden="true">✉</i>Paste a booking email
+                </Link>
+                <Link
                   to={`/trips/${detail.trip.id}/import`}
                   role="menuitem"
                   className="trip-menu__item"

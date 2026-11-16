@@ -102,6 +102,14 @@ describe('the Admin dashboard (admins only)', () => {
     expect(screen.getByRole('meter', { name: 'Files stored' })).toBeInTheDocument()
     // Notify me: this test browser can't show notifications, so it says how to get them.
     expect(await screen.findByRole('switch', { name: /Notify me/ })).toBeDisabled()
+    // AI reading (step 5a): this month's use of the cap, and the switch for everyone.
+    expect(screen.getByRole('meter', { name: 'AI reading used' })).toHaveAttribute('aria-valuenow', '21')
+    expect(screen.getByText('$1.24 / $5.80')).toBeInTheDocument()
+    expect(screen.getByText('212')).toBeInTheDocument()
+    data.setAiEnabled.mockResolvedValue(undefined)
+    fireEvent.click(screen.getByRole('switch', { name: /AI reading on for everyone/ }))
+    await waitFor(() => expect(data.setAiEnabled).toHaveBeenCalledWith(false))
+    expect(await screen.findByRole('switch', { name: /AI reading off for everyone/ })).not.toBeChecked()
 
     click(/Messages/)
     expect(await screen.findByText('Budget shows 0 € for Medellín')).toBeInTheDocument()

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
+import { AiProblem, Reading, WhereItGoes } from '../components/AiReading'
 import { FormMessage } from '../components/AuthForm'
 import { SketchBox } from '../components/Sketch'
 import {
@@ -17,7 +18,8 @@ import { copyText } from '../lib/clipboard'
 import { formatMoney } from '../lib/money'
 import { canPaste } from '../lib/pwa'
 import { fetchRate } from '../lib/rates'
-import { createTrip, deleteTrip, importLines, type TripDetail } from '../lib/trips'
+import { AiError } from '../lib/aiError'
+import { createTrip, deleteTrip, importLines, readTrip, type TripDetail } from '../lib/trips'
 import { formatDates, plural } from '../lib/tripText'
 import { useTrip } from '../lib/useTrip'
 import { useSaving } from '../lib/useSaving'
@@ -25,6 +27,8 @@ import { useSaving } from '../lib/useSaving'
 /*
  * "Import from my AI" (build 8 step 2, mockup import-ai-v5, 15 Nov). /trips/import makes a new trip,
  * /trips/:tripId/import adds to one. Ask, paste, preview; nothing is saved before the preview.
+ * Not in our format? "Read it for me" (step 5a, mockup ai-reading-v5): Claude turns it into our
+ * format through the ai-read server function, then the same preview.
  */
 
 const ESTIMATED = 'Everything is estimated: mark what’s booked as you go.'
@@ -65,10 +69,31 @@ function ImportFromAi({ target }: { target: TripDetail | null }) {
   const [answer, setAnswer] = useState('')
   const [parsed, setParsed] = useState<ParsedAnswer | null>(null)
   const [notFound, setNotFound] = useState(false)
+  const [reading, setReading] = useState(false)
+  const [aiError, setAiError] = useState<unknown>(null)
+  const [readByAi, setReadByAi] = useState(false)
   const back = target ? `/trips/${target.trip.id}` : '/trips/new'
   const title = target ? `Add to ${target.trip.name}` : 'Bring it from my AI'
 
-  if (parsed) return <PreviewStep parsed={parsed} target={target} title={title} onBack={() => setParsed(null)} />
+  if (parsed)
+    return (
+      <PreviewStep parsed={parsed} target={target} title={title} readByAi={readByAi} onBack={() => setParsed(null)} />
+    )
+
+  async function readIt() {
+    setReading(true)
+    setAiError(null)
+    try {
+      const found = parseAiAnswer(await readTrip(answer))
+      if (!found) throw new AiError('nothing', 'We couldn’t find a trip in this text: places, nights, hotels or ideas.')
+      setReadByAi(true)
+      setParsed(found)
+    } catch (e) {
+      setAiError(e)
+    } finally {
+      setReading(false)
+    }
+  }
 
   return (
     <div className="screen import">
@@ -83,10 +108,27 @@ function ImportFromAi({ target }: { target: TripDetail | null }) {
       </header>
       <div className="screen__body">
         {notFound && (
-          <FormMessage tone="error">
-            We couldn’t find the trip in this answer. Your AI may have answered in its own words: copy the request
-            again, and ask it to answer with only the trip.
-          </FormMessage>
+          <SketchBox className="import__sheet ai-offer" seed={81}>
+            <p className="import__kicker">Not in our format</p>
+            <h2 className="ai-offer__title">Your AI answered in its own words</h2>
+            <p className="ai-offer__lead">
+              Voyage Fare can read it for you and turn it into lines. You check everything in the preview before
+              anything is saved.
+            </p>
+            {aiError !== null && <AiProblem error={aiError} />}
+            {reading ? (
+              <Reading />
+            ) : (
+              <button type="button" className="button button--primary button--wide" onClick={() => void readIt()}>
+                <span className="ai-icon" aria-hidden="true">
+                  ✎
+                </span>
+                Read it for me
+              </button>
+            )}
+            <WhereItGoes />
+            <CopyRequest again />
+          </SketchBox>
         )}
         <SketchBox tape="mustard" className="import__sheet" seed={53}>
           <ol className="import__steps">
@@ -97,7 +139,7 @@ function ImportFromAi({ target }: { target: TripDetail | null }) {
               <div>
                 <b>Ask your AI</b>
                 <p>Copy this request and paste it at the end of the chat where you planned the trip.</p>
-                <CopyRequest again={notFound} />
+                <CopyRequest again={false} />
               </div>
             </li>
             <li>
@@ -118,6 +160,7 @@ function ImportFromAi({ target }: { target: TripDetail | null }) {
                     onChange={(e) => {
                       setAnswer(e.target.value)
                       setNotFound(false)
+                      setAiError(null)
                     }}
                   />
                   {canPaste() && (
@@ -127,7 +170,11 @@ function ImportFromAi({ target }: { target: TripDetail | null }) {
                       onClick={() =>
                         void navigator.clipboard
                           .readText()
-                          .then((t) => setAnswer(t))
+                          .then((t) => {
+                            setAnswer(t)
+                            setNotFound(false)
+                            setAiError(null)
+                          })
                           .catch(() => {})
                       }
                     >
@@ -148,6 +195,7 @@ function ImportFromAi({ target }: { target: TripDetail | null }) {
               disabled={!answer.trim()}
               onClick={() => {
                 const found = parseAiAnswer(answer)
+                setReadByAi(false)
                 if (found) setParsed(found)
                 else setNotFound(true)
               }}
@@ -179,11 +227,13 @@ function PreviewStep({
   parsed,
   target,
   title,
+  readByAi,
   onBack,
 }: {
   parsed: ParsedAnswer
   target: TripDetail | null
   title: string
+  readByAi: boolean
   onBack: () => void
 }) {
   const { session } = useAuth()
@@ -294,6 +344,11 @@ function PreviewStep({
                 .filter(Boolean)
                 .join(' · ')}
             </p>
+            {readByAi && (
+              <p className="ai-mark">
+                <span aria-hidden="true">✎</span> read by AI · check the prices
+              </p>
+            )}
             {preview && (
               <p className="import__counts">
                 <span>
@@ -357,6 +412,11 @@ function PreviewStep({
                 {n}
               </p>
             ))}
+            {readByAi && target && (
+              <p className="form-message form-message--info">
+                Read by AI from your text: <b>check the prices</b> before adding them.
+              </p>
+            )}
             <p className="form-message form-message--info">
               Everything comes in as <b>estimated</b>: you mark what’s booked yourself.
             </p>

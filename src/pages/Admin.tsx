@@ -7,6 +7,7 @@ import { useAuth } from '../lib/authContext'
 import { explainAuthError } from '../lib/authForm'
 import {
   addAdmin,
+  adminAi,
   adminList,
   adminMessages,
   adminOverview,
@@ -18,7 +19,9 @@ import {
   inboxThreads,
   markMessage,
   removeAdmin,
+  setAiEnabled,
   type AdminEntry,
+  type AiUsage,
   type AdminMessage,
   type AdminPerson,
   type InboxEmail,
@@ -167,8 +170,85 @@ function OverviewTab({ overview: o }: { overview: Overview | undefined }) {
       <p className="admin__kicker">Free plans</p>
       <Meter label="Files stored" used={o.files_bytes} limit={FREE.files} />
       <Meter label="Database" used={o.database_bytes} limit={FREE.database} />
+      <AiMeter />
       <p className="admin__kicker">On this phone</p>
       <NotifyMe />
+    </>
+  )
+}
+
+const monthName = new Intl.DateTimeFormat('en-GB', { month: 'long' })
+const usd = (n: number) => '$' + n.toFixed(2)
+
+/** AI reading this month (step 5a): what's used of the cap, how many readings, the switch. */
+function AiMeter() {
+  const [ai, setAi] = useState<AiUsage | null>()
+  const [month] = useState(() => monthName.format(new Date()))
+  const { busy, run } = useSaving()
+  const [error, setError] = useState<string>()
+  useEffect(() => {
+    adminAi()
+      .then(setAi)
+      .catch(() => setAi(null))
+  }, [])
+  if (ai === undefined) return null
+  if (ai === null) return <p className="admin__hint">AI reading: not set up yet.</p>
+  const share = ai.cap_usd > 0 ? Math.min(1, ai.used_usd / ai.cap_usd) : 1
+  return (
+    <>
+      <p className="admin__kicker">AI reading · {month}</p>
+      <div className="admin__meter">
+        <p>
+          Used of the monthly cap
+          <span className="num">
+            {usd(ai.used_usd)} / {usd(ai.cap_usd)}
+          </span>
+        </p>
+        <div
+          className="admin__bar"
+          role="meter"
+          aria-label="AI reading used"
+          aria-valuenow={Math.round(share * 100)}
+          aria-valuemin={0}
+          aria-valuemax={100}
+        >
+          <i
+            style={{ width: `${Math.max(share * 100, 1)}%` }}
+            className={share > 0.8 ? 'admin__bar--high' : undefined}
+          />
+        </div>
+      </div>
+      <div className="admin__stats admin__stats--small">
+        <div className="admin__stat">
+          <b className="num">{ai.readings}</b>
+          <span>{ai.readings === 1 ? 'reading' : 'readings'}</span>
+        </div>
+        <div className="admin__stat">
+          <b className="num">{ai.bookings}</b>
+          <span>{ai.bookings === 1 ? 'booking email' : 'booking emails'}</span>
+        </div>
+        <div className="admin__stat">
+          <b className="num">{ai.people}</b>
+          <span>{ai.people === 1 ? 'person used it' : 'people used it'}</span>
+        </div>
+      </div>
+      {error && <FormMessage tone="error">{error}</FormMessage>}
+      <label className="admin__switch">
+        <span>AI reading {ai.enabled ? 'on' : 'off'} for everyone</span>
+        <input
+          type="checkbox"
+          role="switch"
+          checked={ai.enabled}
+          disabled={busy}
+          onChange={(e) => {
+            const enabled = e.target.checked
+            void run(async () => {
+              await setAiEnabled(enabled)
+              setAi({ ...ai, enabled })
+            }, setError)
+          }}
+        />
+      </label>
     </>
   )
 }

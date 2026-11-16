@@ -21,6 +21,7 @@ import { SignIn } from './pages/SignIn'
 import { SignUp } from './pages/SignUp'
 import { TripPage } from './pages/TripPage'
 import { Budget } from './pages/Budget'
+import { BookingEmail } from './pages/BookingEmail'
 import { WhoPaid } from './pages/WhoPaid'
 import { TripSettings } from './pages/TripSettings'
 import { Trips } from './pages/Trips'
@@ -100,6 +101,14 @@ export function AppRoutes() {
           element={
             <RequireAuth>
               <ImportIntoTrip />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/trips/:tripId/booking-email"
+          element={
+            <RequireAuth>
+              <BookingEmail />
             </RequireAuth>
           }
         />

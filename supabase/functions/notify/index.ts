@@ -1,6 +1,7 @@
 // Phone notifications for admins (Admin stage C, mockup admin-v5, 15 Nov 2026).
 // Called three ways:
-//  · by the database on new feedback (header x-hook-token, a secret only the database knows);
+//  · by the database on new feedback, and by ai-read when 80 % of the AI cap is used (header
+//    x-hook-token, a secret only the server knows);
 //  · by Resend when hello@ receives an email (it only triggers a check: we ask Resend for unread
 //    conversations we haven't announced yet, so a fake call can't invent a notification);
 //  · by an admin's app: "key" (the public key to subscribe a phone) and "test".
@@ -114,6 +115,16 @@ Deno.serve(async (req) => {
       const s = await settings()
       if (token !== s.hook_token) return reply({ error: 'Not allowed' }, 403)
       if (input.type === 'feedback' && typeof input.id === 'string') return reply({ sent: await newFeedback(input.id) })
+      // ai-read: 80 % of this month's AI reading cap is used (sent once a month).
+      if (input.type === 'ai_budget')
+        return reply({
+          sent: await send({
+            title: '✎ AI reading: 80 % used',
+            body: 'This month’s AI reading cap is almost reached. See Admin → Overview.',
+            url: '/admin',
+            tag: 'ai-budget',
+          }),
+        })
       return reply({ error: 'Unknown event' }, 400)
     }
 

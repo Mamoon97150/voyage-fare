@@ -65,6 +65,14 @@ beforeEach(() => {
   data.listOpenInvitations.mockResolvedValue([])
   data.amIAdmin.mockResolvedValue(false)
   data.inboxThreads.mockResolvedValue([])
+  data.adminAi.mockResolvedValue({
+    enabled: true,
+    cap_usd: 5.8,
+    used_usd: 1.24,
+    readings: 212,
+    bookings: 38,
+    people: 14,
+  })
   data.removeFilesOfMyOwnTrips.mockResolvedValue(undefined)
   data.getMyWelcome.mockResolvedValue(null)
 })

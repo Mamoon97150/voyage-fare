@@ -32,6 +32,10 @@ export function Privacy() {
             <li>Vercel serves the website.</li>
             <li>Resend sends our emails (confirm your email, a new password).</li>
             <li>Cloudflare runs the “not a robot” check when you sign in.</li>
+            <li>
+              Anthropic (Claude) reads the text you ask it to read (“Read it for me”, a booking email), only then. It
+              isn’t used to train their AI. We keep how many readings there were, never the text.
+            </li>
           </ul>
           <h2>Your choices</h2>
           <ul>

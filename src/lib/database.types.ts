@@ -1491,6 +1491,25 @@ export type Database = {
         }[]
       }
       admin_add: { Args: { p_email: string }; Returns: string }
+      admin_ai: { Args: never; Returns: Json }
+      admin_set_ai: { Args: { p_enabled: boolean }; Returns: undefined }
+      apply_booking: {
+        Args: {
+          p_trip_id: string
+          p_item_id?: string
+          p_kind?: string
+          p_name?: string
+          p_place_id?: string
+          p_day_number?: number
+          p_option_name?: string
+          p_amount?: number
+          p_currency?: string
+          p_rate?: number
+          p_ref?: string
+          p_link?: string
+        }
+        Returns: string
+      }
       admin_remove: { Args: { p_user_id: string }; Returns: undefined }
       admin_list: {
         Args: never

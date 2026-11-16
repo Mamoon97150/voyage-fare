@@ -1,6 +1,7 @@
 // Fakes for the screen tests: the signed-in session and every data function, as spies.
 // Kept apart from the app on purpose: the mocked modules load it while the app is loading.
 import { vi } from 'vitest'
+import { AiError } from '../lib/aiError'
 
 /** Signed in as Ana. */
 export const session = { user: { id: 'u-ana', email: 'ana@mail.com', user_metadata: { first_name: 'Ana' } } }
@@ -27,6 +28,11 @@ export const data = {
   inboxRead: vi.fn(),
   inboxReply: vi.fn(),
   inboxDone: vi.fn(),
+  readTrip: vi.fn(),
+  readBooking: vi.fn(),
+  applyBooking: vi.fn(),
+  adminAi: vi.fn(),
+  setAiEnabled: vi.fn(),
   listTrips: vi.fn(),
   getDemoTripId: vi.fn(),
   getTrip: vi.fn(),
@@ -112,6 +118,12 @@ export const tripsModule = {
   inboxRead: data.inboxRead,
   inboxReply: data.inboxReply,
   inboxDone: data.inboxDone,
+  readTrip: data.readTrip,
+  readBooking: data.readBooking,
+  applyBooking: data.applyBooking,
+  adminAi: data.adminAi,
+  setAiEnabled: data.setAiEnabled,
+  AiError,
   fileProblem: (f: { size: number; type: string }) =>
     ['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'image/heic'].includes(f.type)
       ? f.size > 10 * 1024 * 1024

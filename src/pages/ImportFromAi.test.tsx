@@ -1,5 +1,6 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
+import { AiError } from '../lib/aiError'
 import { click, data, detail, open, type } from '../test/app'
 
 vi.mock('../lib/supabase', async () => (await import('../test/fakes')).supabaseModule)
@@ -57,13 +58,16 @@ describe('import from my AI (build 8 step 2)', () => {
     expect(await screen.findByText(/Added from your AI: 1 place, 2 lines/)).toBeInTheDocument()
   })
 
-  it('an answer with no trip in it: say so, and offer the request again', async () => {
+  it('an answer with no trip in it: offer AI reading, and the request again', async () => {
     open('/trips/import')
     await screen.findByLabelText('Paste its answer')
     type('Paste its answer', 'I planned a lovely trip to Japan for you!')
     click('See what it gives')
-    expect(await screen.findByText(/We couldn’t find the trip in this answer/)).toBeInTheDocument()
+    expect(await screen.findByText('Your AI answered in its own words')).toBeInTheDocument()
+    expect(screen.getByText(/sent to/)).toHaveTextContent('Claude (Anthropic)')
+    expect(screen.getByRole('button', { name: /Read it for me/ })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Copy the request again' })).toBeInTheDocument()
+    expect(data.readTrip).not.toHaveBeenCalled()
   })
 
   it('from a trip’s menu: add to it, only what’s new', async () => {
@@ -88,5 +92,73 @@ describe('import from my AI (build 8 step 2)', () => {
     expect(payload.places).toEqual([
       expect.objectContaining({ id: 'p1', lines: [expect.objectContaining({ name: 'Where we sleep' })] }),
     ])
+  })
+})
+
+describe('AI reading (build 8 step 5a)', () => {
+  const words = 'Days 1–4: Tokyo, Hotel Gracery Shinjuku (~160€/night). Day 2, teamLab Planets.'
+
+  it('Read it for me: the text goes to the server function, then the same preview, marked “read by AI”', async () => {
+    data.readTrip.mockResolvedValue(
+      JSON.stringify({
+        voyage_fare: 1,
+        trip: { name: 'Japan', start: null, end: null, from: null, currency: 'EUR', travellers: [] },
+        tickets: [],
+        places: [
+          {
+            name: 'Tokyo',
+            nights: 4,
+            lines: [
+              {
+                type: 'stay',
+                name: 'Hotel Gracery Shinjuku',
+                day: null,
+                note: null,
+                options: [{ name: null, price: 160, currency: 'EUR', per: 'night', link: null, note: null }],
+              },
+            ],
+          },
+        ],
+      }),
+    )
+    open('/trips/import')
+    await screen.findByLabelText('Paste its answer')
+    type('Paste its answer', words)
+    click('See what it gives')
+    fireEvent.click(await screen.findByRole('button', { name: /Read it for me/ }))
+    expect(await screen.findByRole('heading', { name: 'Japan' })).toBeInTheDocument()
+    expect(data.readTrip).toHaveBeenCalledWith(words)
+    expect(screen.getByText(/read by AI/)).toBeInTheDocument()
+    expect(screen.getByText('4 nights × 160 €')).toBeInTheDocument()
+  })
+
+  it('paused this month: says so plainly, with the day it’s back; the request still works', async () => {
+    data.readTrip.mockRejectedValue(new AiError('paused', 'AI reading is paused this month.', '2026-12-01'))
+    open('/trips/import')
+    await screen.findByLabelText('Paste its answer')
+    type('Paste its answer', words)
+    click('See what it gives')
+    fireEvent.click(await screen.findByRole('button', { name: /Read it for me/ }))
+    expect((await screen.findByText(/AI reading is paused this month/)).closest('p')).toHaveTextContent(
+      'back on 1 December',
+    )
+    expect(screen.getByRole('button', { name: 'Copy the request again' })).toBeInTheDocument()
+  })
+
+  it('nothing like a trip in it: says so', async () => {
+    data.readTrip.mockResolvedValue(
+      JSON.stringify({
+        voyage_fare: 1,
+        trip: { name: null, start: null, end: null, from: null, currency: null, travellers: [] },
+        tickets: [],
+        places: [],
+      }),
+    )
+    open('/trips/import')
+    await screen.findByLabelText('Paste its answer')
+    type('Paste its answer', 'Dear Ana, your parcel has shipped.')
+    click('See what it gives')
+    fireEvent.click(await screen.findByRole('button', { name: /Read it for me/ }))
+    expect(await screen.findByText(/We couldn’t find a trip in this text/)).toBeInTheDocument()
   })
 })
