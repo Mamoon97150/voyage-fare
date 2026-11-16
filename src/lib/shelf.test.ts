@@ -4,6 +4,7 @@ import {
   dayOfTrip,
   greeting,
   monthYear,
+  needsYou,
   placeOn,
   settleLines,
   shelve,
@@ -11,6 +12,7 @@ import {
   toSortOut,
 } from './shelf'
 import { card } from '../test/cards'
+import type { TripCard } from './trips'
 
 const colombia = card({
   id: 'co',
@@ -92,5 +94,62 @@ describe('the shelf', () => {
     expect(sortOutNote(0)).toBe('all sorted')
     expect(settleLines(t).map((l) => plain(l.text))).toEqual(['You owe Danielle 42 €', 'Peggy owes you 69 €'])
     expect(monthYear('2026-09-04')).toBe('Sept 2026')
+  })
+})
+
+describe('Needs you (build 8½)', () => {
+  const trip = (over: Partial<TripCard>): TripCard =>
+    ({
+      id: 't',
+      name: 'Japan',
+      start_date: '2027-04-02',
+      end_date: '2027-04-12',
+      currency: 'EUR',
+      places: [],
+      travellers: [],
+      shareConfirmed: 0,
+      shareEstimated: 0,
+      nextDue: null,
+      undecided: null,
+      undecidedCount: 0,
+      today: null,
+      settle: [],
+      settled: true,
+      ...over,
+    }) as TripCard
+
+  it('money first, the soonest first, then what to decide; far-off payments wait', () => {
+    const needs = needsYou(
+      [
+        trip({
+          id: 'a',
+          nextDue: { name: 'Hotel Kanra', dueOn: '2027-03-06', left: 225 },
+          undecidedCount: 2,
+          undecided: { name: 'Where we sleep', options: 2 },
+        }),
+        trip({ id: 'b', name: 'Lisbon', nextDue: { name: 'Flat', dueOn: '2027-03-02', left: 90 } }),
+        trip({ id: 'c', name: 'Far', nextDue: { name: 'Villa', dueOn: '2027-06-01', left: 900 } }),
+        trip({
+          id: 'd',
+          name: 'Colombia',
+          start_date: '2026-09-04',
+          end_date: '2026-09-18',
+          settle: [{ name: 'Bea', amount: 40, youPay: true }],
+          undecidedCount: 3,
+        }),
+      ],
+      '2027-03-01',
+    )
+    expect(needs.map((n) => [n.text.replace(/\s/g, ' '), n.sub, n.to])).toEqual([
+      ['Flat: 90 € to pay', 'Lisbon · due tomorrow', '/trips/b/budget'],
+      ['Hotel Kanra: 225 € to pay', 'Japan · due in 5 days', '/trips/a/budget'],
+      ['You owe Bea 40 €', 'Colombia', '/trips/d/who-paid'],
+      ['2 lines to decide', 'Japan · Where we sleep and more', '/trips/a/compare'],
+    ])
+  })
+
+  it('a late payment says so', () => {
+    const [n] = needsYou([trip({ nextDue: { name: 'Hotel', dueOn: '2027-02-20', left: 100 } })], '2027-03-01')
+    expect(n.sub).toBe('Japan · was due on 20 Feb')
   })
 })

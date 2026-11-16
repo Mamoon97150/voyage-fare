@@ -4,6 +4,7 @@ import { compareLink, optionCount } from '../../lib/options'
 import { deleteItem, type Item, type TripDetail } from '../../lib/trips'
 import { leftLine } from '../../lib/tripView'
 import { useSaving } from '../../lib/useSaving'
+import { useWide } from '../../lib/useWide'
 import { FormMessage } from '../AuthForm'
 import { BookingPart } from './Booking'
 import { DropControl } from './DropControl'
@@ -53,7 +54,10 @@ export function LineSheet({
   onClose: () => void
 }) {
   const [pane, setPane] = useState<Pane>('summary')
-  const [more, setMore] = useState(false)
+  const [moreAsked, setMore] = useState(false)
+  // On a computer the panel has room: everything shows, no More/Less (16 Nov).
+  const wide = useWide()
+  const more = moreAsked || wide
   const back = () => setPane('summary')
   const saved = () => {
     setPane('summary')
@@ -233,11 +237,18 @@ export function LineSheet({
         )}
       </ul>
 
-      <div className="line-sheet__more">
-        <button type="button" className="button button--small" aria-expanded={more} onClick={() => setMore((m) => !m)}>
-          {more ? 'Less ▴' : 'More ▾'}
-        </button>
-      </div>
+      {!wide && (
+        <div className="line-sheet__more">
+          <button
+            type="button"
+            className="button button--small"
+            aria-expanded={more}
+            onClick={() => setMore((m) => !m)}
+          >
+            {more ? 'Less ▴' : 'More ▾'}
+          </button>
+        </div>
+      )}
       {more && (
         <div className="line-sheet__fold">
           <PartOfPackage detail={detail} item={item} onChanged={onChanged} />

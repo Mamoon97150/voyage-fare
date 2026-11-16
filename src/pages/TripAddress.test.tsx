@@ -72,12 +72,15 @@ describe('the trip’s email address (build 8 step 5b)', () => {
     expect(data.tripMailAddress).toHaveBeenLastCalledWith('t1', true)
   })
 
-  it('the trip menu: Forward a booking opens it', async () => {
+  it('“Bring things in”, at the end of the trip: the address, to copy (build 8½)', async () => {
+    data.getTrip.mockResolvedValue(detail({ places: [cartagena] }))
+    data.tripMailAddress.mockResolvedValue('colombia-k7q2@voyagefare.app')
     open('/trips/t1')
-    fireEvent.click(await screen.findByRole('button', { name: 'Trip menu' }))
-    expect(screen.getByRole('menuitem', { name: /Forward a booking/ })).toHaveAttribute(
+    const card = (await screen.findByRole('heading', { name: 'Bring things in' })).parentElement!
+    expect(await within(card).findByText(/colombia-k7q2@voyagefare\.app/)).toBeInTheDocument()
+    expect(within(card).getByRole('link', { name: /Paste a booking email/ })).toHaveAttribute(
       'href',
-      '/trips/t1/settings#trip-address',
+      '/trips/t1/booking-email',
     )
   })
 

@@ -614,3 +614,92 @@
 .when-chips > .chip {
   padding: 0 0.75rem;
 }
+
+/* The trip's tools, top right (build 8½, menus-home-v6): initials · ↗ Share · ⚙. */
+.trip-tools {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: none;
+}
+
+.trip-tools .round-button {
+  width: 2.25rem;
+  height: 2.25rem;
+  font-size: 0.95rem;
+  text-decoration: none;
+  color: var(--ink);
+}
+
+.share-hub__group {
+  margin-top: var(--space-4);
+}
+
+.share-hub__group h3 {
+  font-family: var(--font-title);
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+.share-hub__group p {
+  margin: var(--space-1) 0 var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+}
+
+.share-hub__acts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* "Bring things in", at the end of the trip: dashed, an invitation. */
+.sketch-box.bring-in {
+  margin-top: var(--space-4);
+  padding: var(--space-4);
+  background: transparent;
+}
+
+.bring-in__title {
+  font-family: var(--font-title);
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+.bring-in__rows {
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bring-in__rows li {
+  display: grid;
+  grid-template-columns: 1.4rem minmax(0, 1fr) auto;
+  gap: var(--space-2);
+  align-items: center;
+  min-height: 2.9rem;
+  padding: var(--space-1) 0;
+  border-top: 1px solid var(--line);
+  font-size: var(--text-sm);
+}
+
+.bring-in__rows small {
+  display: block;
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+  overflow-wrap: anywhere;
+}
+
+.bring-in__link {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.bring-in__go {
+  color: var(--ink-soft);
+  text-decoration: none;
+}
+
+.screen__top > .trip-tools {
+  align-self: center;
+}

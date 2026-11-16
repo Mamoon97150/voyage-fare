@@ -8,10 +8,20 @@ import type { DayMapView } from '../../lib/dayMap'
  * order, in their category's colour, joined by a dotted line. The same paper-toned free map as
  * the route. Drag and pinch to look closer.
  */
-export function DayMap({ view, label }: { view: DayMapView; label: string }) {
+export function DayMap({ view, label, height = 170 }: { view: DayMapView; label: string; height?: number }) {
   const box = useRef<HTMLDivElement>(null)
+  // Drawn again only when the places change, not each time the page redraws.
+  const current = useRef(view)
+  useEffect(() => {
+    current.current = view
+  })
+  const key = [
+    view.stay ? `${view.stay.latitude},${view.stay.longitude}` : '',
+    ...view.stops.map((s) => `${s.n}:${s.item.kind}:${s.at.latitude},${s.at.longitude}`),
+  ].join('|')
 
   useEffect(() => {
+    const view = current.current
     const el = box.current
     if (!el || view.stops.length === 0) return
     const map = L.map(el, {
@@ -51,9 +61,9 @@ export function DayMap({ view, label }: { view: DayMapView; label: string }) {
     return () => {
       map.remove()
     }
-  }, [view])
+  }, [key])
 
-  return <div ref={box} className="route-map day-map" style={{ height: 170 }} role="img" aria-label={label} />
+  return <div ref={box} className="route-map day-map" style={{ height }} role="img" aria-label={label} />
 }
 
 const pin = (text: string, className: string) =>

@@ -17,16 +17,13 @@ const overview = {
 }
 
 describe('send feedback (any signed-in person)', () => {
-  it('from the account menu: kind, message, what goes with it, then a thank-you', async () => {
-    data.listTrips.mockResolvedValue([])
+  it('from Me: kind, message, what goes with it, then a thank-you', async () => {
     data.sendFeedback.mockResolvedValue(undefined)
-    open('/trips')
-    await screen.findByText('Your first trip')
-    fireEvent.click(screen.getByRole('button', { name: /Your account/ }))
-    expect(screen.queryByRole('menuitem', { name: /Admin/ })).toBeNull() // not an admin
-    fireEvent.click(screen.getByRole('menuitem', { name: /Send feedback/ }))
+    open('/me')
+    fireEvent.click(await screen.findByRole('button', { name: /Send feedback/ }))
+    expect(screen.queryByRole('heading', { name: /Admin/ })).toBeNull() // not an admin
     const sheet = screen.getByRole('dialog', { name: 'Send feedback' })
-    expect(sheet).toHaveTextContent('the page you’re on (Your trips)')
+    expect(sheet).toHaveTextContent('the page you’re on (Me)')
     click('Send')
     expect(await screen.findByText('What kind of message is it?')).toBeInTheDocument()
     fireEvent.click(within(sheet).getByRole('radio', { name: 'An idea' }))
@@ -38,7 +35,7 @@ describe('send feedback (any signed-in person)', () => {
         expect.objectContaining({
           kind: 'idea',
           message: 'Hotels on a map, please',
-          page: 'Your trips',
+          page: 'Me',
           canReply: false,
         }),
       ),
@@ -57,11 +54,11 @@ describe('the Admin dashboard (admins only)', () => {
   it('an admin: the menu line with new messages; Overview, Messages, People, Admins', async () => {
     data.amIAdmin.mockResolvedValue(true)
     data.adminOverview.mockResolvedValue(overview)
-    data.listTrips.mockResolvedValue([])
-    open('/trips')
-    await screen.findByText('Your first trip')
-    fireEvent.click(screen.getByRole('button', { name: /Your account/ }))
-    expect(await screen.findByRole('menuitem', { name: /Admin\s*1 new/ })).toHaveAttribute('href', '/admin')
+    open('/me')
+    // Admins only: a block on top of Me, with what's new; a dot on the Me tab.
+    expect(await screen.findByRole('heading', { name: /Admin\s*● 1 new/ })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /Admin dashboard/ })).toHaveAttribute('href', '/admin')
+    expect(screen.getByLabelText('1 new for Admin')).toBeInTheDocument()
 
     data.adminMessages.mockResolvedValue([
       {

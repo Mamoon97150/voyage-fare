@@ -15,6 +15,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      someday_ideas: {
+        Row: {
+          id: string
+          user_id: string
+          place_name: string | null
+          place_country: string | null
+          place_latitude: number | null
+          place_longitude: number | null
+          kind: string
+          name: string
+          link: string | null
+          note: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string
+          place_name?: string | null
+          place_country?: string | null
+          place_latitude?: number | null
+          place_longitude?: number | null
+          kind?: string
+          name: string
+          link?: string | null
+          note?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          place_name?: string | null
+          place_country?: string | null
+          place_latitude?: number | null
+          place_longitude?: number | null
+          kind?: string
+          name?: string
+          link?: string | null
+          note?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
       daily_estimate_travellers: {
         Row: {
           daily_estimate_id: string
@@ -1537,6 +1579,8 @@ export type Database = {
         Returns: string
       }
       accept_invitation: { Args: { p_token: string }; Returns: string }
+      start_trip_from_someday: { Args: { p_place_name: string; p_me?: string }; Returns: string }
+      someday_into_place: { Args: { p_place_id: string }; Returns: number }
       import_lines: { Args: { p_payload: Json; p_trip_id: string }; Returns: Json }
       am_i_admin: { Args: never; Returns: boolean }
       admin_overview: { Args: never; Returns: Json }

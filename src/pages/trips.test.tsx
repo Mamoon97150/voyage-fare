@@ -265,21 +265,28 @@ describe('the app on the phone (pwa-v5)', () => {
   })
 })
 
-describe('the account menu (menus-v5)', () => {
-  it('your trips, the demo, feedback, account, privacy, sign out', async () => {
+describe('Your trips · Someday · Me (build 8½, menus-home-v6)', () => {
+  it('a bar at the bottom of Your trips', async () => {
     data.listTrips.mockResolvedValue([])
     open('/trips')
     await screen.findByText('Your first trip')
-    fireEvent.click(screen.getByRole('button', { name: /Your account/ }))
-    const menu = screen.getByRole('menu')
-    expect(within(menu).getByRole('menuitem', { name: 'Your trips' })).toHaveAttribute('href', '/trips')
-    expect(within(menu).getByRole('menuitem', { name: 'See the demo' })).toHaveAttribute('href', '/demo')
+    const bar = screen.getByRole('navigation', { name: 'Main' })
+    expect(within(bar).getByRole('link', { name: 'Your trips' })).toHaveAttribute('href', '/trips')
+    expect(within(bar).getByRole('link', { name: 'Someday' })).toHaveAttribute('href', '/someday')
+    expect(within(bar).getByRole('link', { name: 'Me' })).toHaveAttribute('href', '/me')
+  })
+
+  it('Me, a full page: your account, the app, sign out; no admin for most people', async () => {
+    open('/me')
+    expect(await screen.findByRole('heading', { name: 'Me' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /Name, email, password/ })).toHaveAttribute('href', '/account')
+    expect(screen.getByRole('link', { name: 'See the demo' })).toHaveAttribute('href', '/demo')
+    expect(screen.getByRole('link', { name: 'Privacy' })).toHaveAttribute('href', '/privacy')
     // Feedback opens a sheet in the app (feedback-admin-v5), no email app.
-    expect(within(menu).getByRole('menuitem', { name: 'Send feedback' }).tagName).toBe('BUTTON')
-    expect(within(menu).getByRole('menuitem', { name: 'Your account' })).toHaveAttribute('href', '/account')
-    expect(within(menu).getByRole('menuitem', { name: 'Privacy' })).toHaveAttribute('href', '/privacy')
-    expect(within(menu).getByRole('menuitem', { name: 'Sign out' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Send feedback/ })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Delete my account' })).toHaveAttribute('href', '/account#delete')
+    expect(screen.queryByRole('heading', { name: /Admin/ })).toBeNull()
     // Not on a phone that can install it: no "Put it on my phone".
-    expect(within(menu).queryByRole('menuitem', { name: 'Put it on my phone' })).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Put it on my phone' })).toBeNull()
   })
 })

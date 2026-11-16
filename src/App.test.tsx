@@ -92,7 +92,7 @@ describe('pages that need an account', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Sign in' }))
 
     expect(await screen.findByRole('heading', { name: 'Your trips' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Your account (dana@mail.com)' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Me' })).toHaveAttribute('href', '/me')
   })
 
   it('after signing in, back to the exact page asked for (not just Your trips)', async () => {
@@ -117,9 +117,8 @@ describe('pages that need an account', () => {
 
   it('signing out goes back to sign in', async () => {
     fake.state.session = session
-    open('/trips')
-    fireEvent.click(await screen.findByRole('button', { name: /Your account/ }))
-    fireEvent.click(screen.getByRole('menuitem', { name: 'Sign out' }))
+    open('/me')
+    fireEvent.click(await screen.findByRole('button', { name: 'Sign out' }))
     expect(await screen.findByRole('heading', { name: 'Sign in' })).toBeInTheDocument()
   })
 
@@ -327,11 +326,11 @@ describe('forgot password', () => {
 })
 
 describe('your account', () => {
-  it('the menu on Your trips leads to your account', async () => {
+  it('Me (the bar at the bottom of Your trips) leads to your account', async () => {
     fake.state.session = session
     open('/trips')
-    fireEvent.click(await screen.findByRole('button', { name: /Your account/ }))
-    expect(screen.getByRole('menuitem', { name: 'Your account' })).toHaveAttribute('href', '/account')
+    fireEvent.click(await screen.findByRole('link', { name: 'Me' }))
+    expect(await screen.findByRole('link', { name: /Name, email, password/ })).toHaveAttribute('href', '/account')
   })
 
   it('change your first name, used in new trips', async () => {

@@ -14,7 +14,7 @@ export function InstallCard() {
   const { card, notNow, install } = useInstallCard()
   if (!card) return null
   return (
-    <SketchBox tape="mustard" className="install-card" seed={21}>
+    <SketchBox weight="light" dashed className="install-card" seed={21}>
       <span className="app-icon" aria-hidden="true">
         <img src="/illustrations/compass.svg" alt="" />
       </span>

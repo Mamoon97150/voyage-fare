@@ -68,7 +68,7 @@ export function Travellers({
   return (
     <>
       <SketchBox weight="strong" tape="green" className="form__sheet settings__travellers" seed={73}>
-        <h2 className="sheet-title">
+        <h2 className="sheet-title" id="travellers">
           Travellers <small className="sheet-title__note hand-note">each has their own share</small>
         </h2>
         <ul className="people">

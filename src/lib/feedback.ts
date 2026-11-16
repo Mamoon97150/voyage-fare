@@ -39,6 +39,8 @@ const PAGES: [RegExp, string][] = [
   [/^\/trips$/, 'Your trips'],
   [/^\/demo/, 'The demo'],
   [/^\/account/, 'Your account'],
+  [/^\/me$/, 'Me'],
+  [/^\/someday/, 'Someday'],
   [/^\/admin/, 'Admin'],
 ]
 

@@ -10,10 +10,11 @@ vi.mock('../lib/places', async (original) => ({
 }))
 
 describe('trip settings', () => {
-  it('the initials at the top lead to the settings', async () => {
+  it('the initials lead to who’s coming; ⚙ to the settings (build 8½)', async () => {
     open('/trips/t1')
-    const link = await screen.findByRole('link', { name: 'Trip settings: Ana, Bea' })
-    expect(link).toHaveAttribute('href', '/trips/t1/settings')
+    const link = await screen.findByRole('link', { name: 'Who’s coming: Ana, Bea' })
+    expect(link).toHaveAttribute('href', '/trips/t1/settings#travellers')
+    expect(screen.getByRole('link', { name: 'Trip settings' })).toHaveAttribute('href', '/trips/t1/settings')
   })
 
   it('change the name, dates and target, and save', async () => {
@@ -164,7 +165,7 @@ describe('invitations (build 6)', () => {
     expect(screen.getByText('Gabriel')).toBeInTheDocument()
     click('Join as Gabriel')
     await waitFor(() => expect(data.acceptInvitation).toHaveBeenCalledWith('k7q2'))
-    expect(await screen.findByRole('link', { name: 'Trip settings: Ana, Bea' })).toBeInTheDocument()
+    expect(await screen.findByRole('link', { name: 'Who’s coming: Ana, Bea' })).toBeInTheDocument()
   })
 
   it('a link that doesn’t work any more says to ask for a new one', async () => {

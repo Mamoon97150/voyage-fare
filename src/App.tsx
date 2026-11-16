@@ -3,6 +3,9 @@ import { useEffect } from 'react'
 import { clearLinkErrorAtStart, linkError, linkErrorAtStart, linkKind } from './lib/linkAtStart'
 import { AuthProvider, RequireAuth, SignedOutOnly } from './lib/auth'
 import { OfflineStrip } from './components/PhoneApp'
+import { WideHome, WideTrip } from './components/WideFrames'
+import { Me } from './pages/Me'
+import { Someday } from './pages/Someday'
 import { Account } from './pages/Account'
 import { Admin } from './pages/Admin'
 import { Compare } from './pages/Compare'
@@ -86,7 +89,9 @@ export function AppRoutes() {
           path="/trips/new"
           element={
             <RequireAuth>
-              <NewTrip />
+              <WideHome>
+                <NewTrip />
+              </WideHome>
             </RequireAuth>
           }
         />
@@ -94,7 +99,9 @@ export function AppRoutes() {
           path="/trips/import"
           element={
             <RequireAuth>
-              <ImportNewTrip />
+              <WideHome>
+                <ImportNewTrip />
+              </WideHome>
             </RequireAuth>
           }
         />
@@ -102,7 +109,9 @@ export function AppRoutes() {
           path="/trips/:tripId/import"
           element={
             <RequireAuth>
-              <ImportIntoTrip />
+              <WideTrip>
+                <ImportIntoTrip />
+              </WideTrip>
             </RequireAuth>
           }
         />
@@ -110,7 +119,9 @@ export function AppRoutes() {
           path="/trips/:tripId/booking-email"
           element={
             <RequireAuth>
-              <BookingEmail />
+              <WideTrip>
+                <BookingEmail />
+              </WideTrip>
             </RequireAuth>
           }
         />
@@ -150,7 +161,9 @@ export function AppRoutes() {
           path="/trips/:tripId/route"
           element={
             <RequireAuth>
-              <RoutePage />
+              <WideTrip>
+                <RoutePage />
+              </WideTrip>
             </RequireAuth>
           }
         />
@@ -158,7 +171,9 @@ export function AppRoutes() {
           path="/trips/:tripId/settings"
           element={
             <RequireAuth>
-              <TripSettings />
+              <WideTrip>
+                <TripSettings />
+              </WideTrip>
             </RequireAuth>
           }
         />
@@ -174,7 +189,25 @@ export function AppRoutes() {
           path="/admin"
           element={
             <RequireAuth>
-              <Admin />
+              <WideHome size="wide">
+                <Admin />
+              </WideHome>
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/me"
+          element={
+            <RequireAuth>
+              <Me />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/someday"
+          element={
+            <RequireAuth>
+              <Someday />
             </RequireAuth>
           }
         />
@@ -182,7 +215,9 @@ export function AppRoutes() {
           path="/account"
           element={
             <RequireAuth>
-              <Account />
+              <WideHome>
+                <Account />
+              </WideHome>
             </RequireAuth>
           }
         />

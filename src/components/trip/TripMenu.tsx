@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { AI_QUESTIONS, aiTextSize, tripForAi } from '../../lib/aiText'
 import { copyText } from '../../lib/clipboard'
@@ -20,33 +20,33 @@ import { plural } from '../../lib/tripText'
 import { SketchBox } from '../Sketch'
 
 /*
- * The trip's menu ⋯ (build 8 step 1, mockup copy-for-ai-v5, 15 Nov): "Copy the trip for my AI" now;
- * Import from my AI, Duplicate and Share a link join it as build 8 goes on. Trip settings too.
+ * ↗ Share (build 8½, mockup menus-home-v6, 16 Nov): replaces the ☰ menu. One sheet, three groups:
+ * plan it together (invite), let someone look (read-only link), for your AI (copy the trip, import
+ * its answer). The rest of the old menu went where it's used: ⚙ by the trip's name, "Bring things
+ * in" at the end of the trip, "Start a new trip from this one" in Trip settings.
  */
 
-export function TripMenu({ detail }: { detail: TripDetail }) {
+export function TripShare({ detail }: { detail: TripDetail }) {
   const demo = useDemo()
-  const [open, setOpen] = useState(false)
+  const [hub, setHub] = useState(false)
   const [sheet, setSheet] = useState(false)
-  const [again, setAgain] = useState(false)
   const [sharing, setSharing] = useState(false)
   const [copied, setCopied] = useState(false)
-  const box = useRef<HTMLDivElement>(null)
-  // Through a read-only share link, there's nothing to do with the trip: no menu.
+  // Through a read-only share link, there's nothing to do with the trip.
   const hidden = Boolean(demo?.share)
+  const tripId = detail.trip.id
 
   useEffect(() => {
-    if (!open && !sheet && !again && !sharing) return
+    if (!hub && !sheet && !sharing) return
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return
-      setOpen(false)
+      setHub(false)
       setSheet(false)
-      setAgain(false)
       setSharing(false)
     }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
-  }, [open, sheet, again, sharing])
+  }, [hub, sheet, sharing])
 
   useEffect(() => {
     if (!copied) return
@@ -56,93 +56,81 @@ export function TripMenu({ detail }: { detail: TripDetail }) {
 
   if (hidden) return null
   return (
-    <div className="trip-menu" ref={box}>
+    <>
       <button
         type="button"
-        className={`trip-menu__button${open ? ' trip-menu__button--open' : ''}`}
-        aria-haspopup="menu"
-        aria-expanded={open}
-        aria-label="Trip menu"
-        onClick={() => setOpen((o) => !o)}
+        className="round-button trip-tools__share"
+        aria-haspopup="dialog"
+        aria-label="Share the trip"
+        onClick={() => setHub(true)}
       >
-        ☰
+        ↗
       </button>
-      {open && <div className="trip-menu__scrim" aria-hidden="true" onClick={() => setOpen(false)} />}
-      {open && (
-        <div className="trip-menu__list" role="menu">
-          <SketchBox className="trip-menu__sheet" seed={41}>
-            <button
-              type="button"
-              role="menuitem"
-              className="trip-menu__item trip-menu__item--new"
-              onClick={() => {
-                setOpen(false)
-                setSheet(true)
-              }}
-            >
-              <i aria-hidden="true">✦</i>Copy the trip for my AI
-            </button>
-            {!demo && (
-              <>
-                <button
-                  type="button"
-                  role="menuitem"
-                  className="trip-menu__item"
-                  onClick={() => {
-                    setOpen(false)
-                    setSharing(true)
-                  }}
-                >
-                  <i aria-hidden="true">↗</i>Share a read-only link
-                </button>
-                <Link
-                  to={`/trips/${detail.trip.id}/settings#trip-address`}
-                  role="menuitem"
-                  className="trip-menu__item"
-                  onClick={() => setOpen(false)}
-                >
-                  <i aria-hidden="true">✉</i>Forward a booking
-                </Link>
-                <Link
-                  to={`/trips/${detail.trip.id}/booking-email`}
-                  role="menuitem"
-                  className="trip-menu__item"
-                  onClick={() => setOpen(false)}
-                >
-                  <i aria-hidden="true">📋</i>Paste a booking email
-                </Link>
-                <Link
-                  to={`/trips/${detail.trip.id}/import`}
-                  role="menuitem"
-                  className="trip-menu__item"
-                  onClick={() => setOpen(false)}
-                >
-                  <i aria-hidden="true">⇣</i>Import from my AI
-                </Link>
-                <button
-                  type="button"
-                  role="menuitem"
-                  className="trip-menu__item"
-                  onClick={() => {
-                    setOpen(false)
-                    setAgain(true)
-                  }}
-                >
-                  <i aria-hidden="true">⧉</i>Start a new trip from this one
-                </button>
-                <hr className="trip-menu__rule" />
-                <Link
-                  to={`/trips/${detail.trip.id}/settings`}
-                  role="menuitem"
-                  className="trip-menu__item"
-                  onClick={() => setOpen(false)}
-                >
-                  <i aria-hidden="true">⚙</i>Trip settings
-                </Link>
-              </>
-            )}
-          </SketchBox>
-        </div>
+      {hub && (
+        <>
+          <div className="trip-menu__scrim" aria-hidden="true" onClick={() => setHub(false)} />
+          <div className="copy-ai" role="dialog" aria-modal="true" aria-labelledby="share-hub-title">
+            <SketchBox tape="mustard" className="copy-ai__sheet share-hub" seed={43}>
+              <button type="button" className="copy-ai__close" aria-label="Close" onClick={() => setHub(false)}>
+                ✕
+              </button>
+              <h2 id="share-hub-title" className="copy-ai__title">
+                Share the trip
+              </h2>
+              <p className="copy-ai__lead">with people, or with your own AI</p>
+              {!demo && (
+                <section className="share-hub__group" aria-labelledby="share-hub-together">
+                  <h3 id="share-hub-together">Plan it together</h3>
+                  <p>Invite someone: they get their own link, and their share is right from the start.</p>
+                  <Link
+                    to={`/trips/${tripId}/settings#travellers`}
+                    className="button button--small"
+                    onClick={() => setHub(false)}
+                  >
+                    + Invite someone
+                  </Link>
+                </section>
+              )}
+              {!demo && (
+                <section className="share-hub__group" aria-labelledby="share-hub-look">
+                  <h3 id="share-hub-look">Let someone look</h3>
+                  <p>A read-only link: they see the trip, they can’t change anything. Turn it off any time.</p>
+                  <button
+                    type="button"
+                    className="button button--small"
+                    onClick={() => {
+                      setHub(false)
+                      setSharing(true)
+                    }}
+                  >
+                    Share a read-only link
+                  </button>
+                </section>
+              )}
+              <section className="share-hub__group" aria-labelledby="share-hub-ai">
+                <h3 id="share-hub-ai">For your AI</h3>
+                <p>Give your assistant the whole trip, or bring its answer back in.</p>
+                <div className="share-hub__acts">
+                  <button
+                    type="button"
+                    className="button button--small"
+                    onClick={() => {
+                      setHub(false)
+                      setSheet(true)
+                    }}
+                  >
+                    ✦ Copy the trip for my AI
+                  </button>
+                  {!demo && (
+                    <Link to={`/trips/${tripId}/import`} className="button button--small" onClick={() => setHub(false)}>
+                      Import its answer
+                    </Link>
+                  )}
+                </div>
+              </section>
+            </SketchBox>
+          </div>
+        </>
       )}
       {sheet && (
         <CopyForAi
@@ -154,7 +142,6 @@ export function TripMenu({ detail }: { detail: TripDetail }) {
           }}
         />
       )}
-      {again && <NewTripFromThis detail={detail} onClose={() => setAgain(false)} />}
       {sharing && <ShareSheet detail={detail} onClose={() => setSharing(false)} />}
       {copied && (
         <div className="copied-note" role="status">
@@ -163,7 +150,7 @@ export function TripMenu({ detail }: { detail: TripDetail }) {
           <p className="hand">it doesn’t change anything here: your AI just reads it</p>
         </div>
       )}
-    </div>
+    </>
   )
 }
 
@@ -407,7 +394,7 @@ function ShareSheet({ detail, onClose }: { detail: TripDetail; onClose: () => vo
 }
 
 /** "A new trip from this one" (mockup duplicate-v5): a name, who comes, the options or only what was chosen. */
-function NewTripFromThis({ detail, onClose }: { detail: TripDetail; onClose: () => void }) {
+export function NewTripFromThis({ detail, onClose }: { detail: TripDetail; onClose: () => void }) {
   const { session } = useAuth()
   const navigate = useNavigate()
   const { busy, run } = useSaving()

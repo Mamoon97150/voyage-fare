@@ -13,6 +13,8 @@ import { SketchBox } from './Sketch'
 import { TripTopBar } from './trip/TripTopBar'
 import { TripBudget } from './TripBudget'
 import { TripNav } from './TripNav'
+import { TripWideFrame } from './trip/TripWideFrame'
+import { useWide } from '../lib/useWide'
 
 export type MoneyPage = {
   detail: TripDetail
@@ -28,6 +30,7 @@ export type MoneyPage = {
  * page's cards. Loads the trip and its money side together.
  */
 export function MoneyScreen({ children }: { children: (page: MoneyPage) => ReactNode }) {
+  const wide = useWide()
   const tripId = useTripId()
   const demo = useDemo()
   const { session } = useAuth()
@@ -85,6 +88,24 @@ export function MoneyScreen({ children }: { children: (page: MoneyPage) => React
 
   const solo = isSolo(detail)
   const shownMode: Mode = solo ? 'total' : mode
+  if (wide)
+    return (
+      <TripWideFrame detail={detail} userId={session?.user.id} solo={solo}>
+        <DemoStrip detail={detail} />
+        <TripBudget
+          view={budgetView(detail, viewer, shownMode)}
+          currency={detail.trip.currency}
+          mode={shownMode}
+          onMode={setMode}
+          mineLabel={detail.trip.is_demo ? demoShare(detail, viewer) : undefined}
+          solo={solo}
+        />
+        <div className="cards cards--wide">
+          {children({ detail, money, viewer, mode: shownMode, solo, reload })}
+          <YourTurn detail={detail} />
+        </div>
+      </TripWideFrame>
+    )
   return (
     <div className="screen screen--trip">
       <TripTopBar

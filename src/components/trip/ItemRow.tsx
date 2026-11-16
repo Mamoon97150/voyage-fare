@@ -16,6 +16,7 @@ import { SourceBadge, VerdictChips } from './ToTry'
 import { dayHasCome, inFoodBudget, MEALS, VERDICTS } from '../../lib/toTry'
 import { todayIso } from '../../lib/shelf'
 import { usePhoto } from '../../lib/usePhoto'
+import { useWide } from '../../lib/useWide'
 import { GluedPhoto } from '../GluedPhoto'
 
 /**
@@ -47,6 +48,7 @@ export function ItemRow({
   onOpen?: () => void
 }) {
   const [editing, setEditing] = useState(false)
+  const wide = useWide()
   // The demo can't be changed: a tap shows the line's details instead (mockup demo-v5).
   const readOnly = isReadOnly(detail)
   const [peek, setPeek] = useState(false)
@@ -81,59 +83,58 @@ export function ItemRow({
   const inCompare = priceInCompare(detail, item)
   const dropped = item.status === 'dropped'
 
-  if (editing) {
-    const price = priceOf(detail, item)
-    const place = detail.places.find((p) => p.id === item.place_id)
-    return (
-      <li className="item-row item-row--editing">
-        <LineSheet
+  const price = priceOf(detail, item)
+  const place = detail.places.find((p) => p.id === item.place_id)
+  const sheet = editing ? (
+    <LineSheet
+      detail={detail}
+      item={item}
+      viewer={viewer}
+      title={title}
+      amount={foodBudget ? 'in your food budget' : amountText(line, item, detail.trip.currency)}
+      meta={meta}
+      catKey={item.kind}
+      onChanged={onChanged}
+      onClose={() => setEditing(false)}
+      edit={(done) => (
+        <ItemForm
           detail={detail}
-          item={item}
-          viewer={viewer}
-          title={title}
-          amount={foodBudget ? 'in your food budget' : amountText(line, item, detail.trip.currency)}
-          meta={meta}
-          catKey={item.kind}
-          onChanged={onChanged}
-          onClose={() => setEditing(false)}
-          edit={(done) => (
-            <ItemForm
-              detail={detail}
-              formId={`edit-${item.id}`}
-              kinds={editKinds(kinds, item.kind as ItemKind)}
-              days={days}
-              placeDays={place ? placeDays(detail, place) : undefined}
-              people={sharers(detail, item.id)}
-              near={nearOf(place)}
-              foldKind
-              initial={{
-                kind: item.kind as ItemKind,
-                covers: detail.items.filter((i) => i.package_id === item.id).map((i) => i.id),
-                name: item.name,
-                day: item.day_number ? String(item.day_number) : '',
-                endDay: item.end_day_number ? String(item.end_day_number) : '',
-                price: amountForInput(price),
-                details: detailsOf(item),
-              }}
-              submitLabel="Save"
-              options={inCompare}
-              nameLabel={decision ? 'What you’re deciding' : 'Name'}
-              onSubmit={async ({ covers, details, toTry: _toTry, ...v }) => {
-                await updateItem({ id: item.id, ...v, keepPrice: inCompare !== undefined })
-                await setItemDetails(item.id, details)
-                if (v.kind === 'package') await setPackageCover(item.id, covers ?? [])
-                done()
-              }}
-              onCancel={done}
-            />
-          )}
+          formId={`edit-${item.id}`}
+          kinds={editKinds(kinds, item.kind as ItemKind)}
+          days={days}
+          placeDays={place ? placeDays(detail, place) : undefined}
+          people={sharers(detail, item.id)}
+          near={nearOf(place)}
+          foldKind
+          initial={{
+            kind: item.kind as ItemKind,
+            covers: detail.items.filter((i) => i.package_id === item.id).map((i) => i.id),
+            name: item.name,
+            day: item.day_number ? String(item.day_number) : '',
+            endDay: item.end_day_number ? String(item.end_day_number) : '',
+            price: amountForInput(price),
+            details: detailsOf(item),
+          }}
+          submitLabel="Save"
+          options={inCompare}
+          nameLabel={decision ? 'What you’re deciding' : 'Name'}
+          onSubmit={async ({ covers, details, toTry: _toTry, ...v }) => {
+            await updateItem({ id: item.id, ...v, keepPrice: inCompare !== undefined })
+            await setItemDetails(item.id, details)
+            if (v.kind === 'package') await setPackageCover(item.id, covers ?? [])
+            done()
+          }}
+          onCancel={done}
         />
-      </li>
-    )
-  }
+      )}
+    />
+  ) : null
+  // On a phone the open line becomes its sheet; on a computer the line stays (washed) and its
+  // sheet opens in the panel on the right (desktop-v6).
+  if (editing && !wide) return <li className="item-row item-row--editing">{sheet}</li>
 
   return (
-    <li className={dropped ? 'item-row item-row--dropped' : 'item-row'}>
+    <li className={`item-row${dropped ? ' item-row--dropped' : ''}${editing ? ' item-row--editing' : ''}`}>
       <button
         type="button"
         className="item-row__tap"
@@ -198,6 +199,7 @@ export function ItemRow({
         dayHasCome(detail.trip.start_date, item.day_number, todayIso()) && (
           <VerdictChips item={item} onChanged={onChanged} />
         )}
+      {sheet}
     </li>
   )
 }

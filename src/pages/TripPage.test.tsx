@@ -1,4 +1,4 @@
-import { fireEvent, screen, waitFor } from '@testing-library/react'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { cartagena, click, data, detail, open, travellers, type } from '../test/app'
 
@@ -655,9 +655,9 @@ describe('the trip menu ⋯: copy the trip for my AI (build 8)', () => {
     })
     open('/trips/t1')
     await screen.findByRole('heading', { name: 'Colombia' })
-    fireEvent.click(screen.getByRole('button', { name: 'Trip menu' }))
-    expect(screen.getByRole('menuitem', { name: /Trip settings/ })).toHaveAttribute('href', '/trips/t1/settings')
-    fireEvent.click(screen.getByRole('menuitem', { name: /Copy the trip for my AI/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Share the trip' }))
+    expect(screen.getByRole('dialog', { name: 'Share the trip' })).toHaveTextContent('Plan it together')
+    fireEvent.click(screen.getByRole('button', { name: /Copy the trip for my AI/ }))
     const dialog = screen.getByRole('dialog', { name: 'Copy the trip for my AI' })
     expect(dialog).toHaveTextContent('Nothing is sent from here')
     fireEvent.click(screen.getByRole('switch', { name: /Real names/ }))
@@ -680,16 +680,16 @@ describe('start a new trip from this one (build 8 step 3)', () => {
   it('a name, who comes, the options; then the new trip opens with a note', async () => {
     data.getTrip.mockResolvedValue(detail())
     data.duplicateTrip.mockResolvedValue('t2')
-    open('/trips/t1')
-    fireEvent.click(await screen.findByRole('button', { name: 'Trip menu' }))
-    fireEvent.click(screen.getByRole('menuitem', { name: /Start a new trip from this one/ }))
+    // In Trip settings now (build 8½).
+    open('/trips/t1/settings')
+    fireEvent.click(await screen.findByRole('button', { name: /Start a new trip from this one/ }))
     const dialog = screen.getByRole('dialog', { name: 'A new trip from this one' })
     expect(dialog).toHaveTextContent('Nothing changes in Colombia.')
-    expect(screen.getByLabelText('Name')).toHaveValue('Colombia again')
-    type('Name', 'Colombia 2027')
-    fireEvent.click(screen.getByRole('button', { name: 'Bea' })) // Bea stays home
-    fireEvent.click(screen.getByRole('switch', { name: /The options you compared/ }))
-    click('Start the new trip')
+    expect(within(dialog).getByLabelText('Name')).toHaveValue('Colombia again')
+    fireEvent.change(within(dialog).getByLabelText('Name'), { target: { value: 'Colombia 2027' } })
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Bea' })) // Bea stays home
+    fireEvent.click(within(dialog).getByRole('switch', { name: /The options you compared/ }))
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Start the new trip' }))
     await waitFor(() =>
       expect(data.duplicateTrip).toHaveBeenCalledWith({
         tripId: 't1',

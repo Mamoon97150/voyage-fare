@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { FormMessage, TextField } from '../components/AuthForm'
 import { SketchBox } from '../components/Sketch'
@@ -33,6 +33,13 @@ export function Account() {
   const [newEmail, setNewEmail] = useState('')
   const [changingEmail, setChangingEmail] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
+
+  // From Me's "Delete my account" (build 8½): straight to it.
+  useEffect(() => {
+    if (window.location.hash !== '#delete') return
+    const t = setTimeout(() => document.getElementById('delete')?.scrollIntoView?.({ block: 'start' }), 200)
+    return () => clearTimeout(t)
+  }, [])
 
   async function saveName(event: FormEvent) {
     event.preventDefault()
@@ -205,7 +212,9 @@ export function Account() {
         </button>
 
         <SketchBox weight="light" className="form__sheet account__delete" seed={53}>
-          <h2 className="account__title">Delete my account</h2>
+          <h2 className="account__title" id="delete">
+            Delete my account
+          </h2>
           {confirmDelete ? (
             <div className="confirm-delete" role="group" aria-label="Delete my account">
               <p>

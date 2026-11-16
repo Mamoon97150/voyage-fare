@@ -90,8 +90,10 @@ describe('import from my AI (build 8 step 2)', () => {
     )
     data.importLines.mockResolvedValue({ places: 0, lines: 1 })
     open('/trips/t1')
-    fireEvent.click(await screen.findByRole('button', { name: 'Trip menu' }))
-    expect(screen.getByRole('menuitem', { name: /Import from my AI/ })).toHaveAttribute('href', '/trips/t1/import')
+    // At the end of the trip, "Bring things in"; and in ↗ Share, "Import its answer" (build 8½).
+    expect(await screen.findByRole('link', { name: /Import from my AI/ })).toHaveAttribute('href', '/trips/t1/import')
+    fireEvent.click(screen.getByRole('button', { name: 'Share the trip' }))
+    expect(screen.getByRole('link', { name: 'Import its answer' })).toHaveAttribute('href', '/trips/t1/import')
     open('/trips/t1/import')
     expect(await screen.findByRole('heading', { name: 'Add to Colombia' })).toBeInTheDocument()
     type('Paste its answer', answer)

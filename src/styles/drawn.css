@@ -491,3 +491,32 @@ input[type='radio'] {
   min-height: 2.5rem;
   margin: 0;
 }
+
+/* Rule check (build 8½, 16 Nov): what still had a straight edge or a shadow.
+   The places' suggestions: a slip of the notebook, its edge in pencil. */
+.suggest {
+  position: relative;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: visible;
+}
+
+.suggest::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--ink-soft);
+  -webkit-mask: url('/sketch/panel.svg') 0 0 / 100% 100% no-repeat;
+  mask: url('/sketch/panel.svg') 0 0 / 100% 100% no-repeat;
+  pointer-events: none;
+}
+
+/* Boxes that only hold something to copy or read (the trip's address, a shared link, an
+   invitation link, Admin's numbers): dashed, like the other notes in the notebook. */
+.booking-match,
+.invite__link,
+.admin__stat {
+  border: 1.5px dashed var(--line);
+  border-radius: 8px;
+}

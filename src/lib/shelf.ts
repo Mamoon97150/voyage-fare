@@ -120,3 +120,55 @@ export const monthYear = (iso: string) =>
   new Intl.DateTimeFormat('en-GB', { month: 'short', year: 'numeric', timeZone: 'UTC' }).format(
     new Date(`${iso}T00:00:00Z`),
   )
+
+export type Need = { key: string; text: string; sub: string; to: string; kind: 'pay' | 'owe' | 'decide' }
+
+/** How soon a payment is due, in words: "due in 5 days", "due today", "was due on 1 Apr". */
+function dueWords(today: string, dueOn: string): string {
+  const n = days(today, dueOn)
+  if (n < 0) return `was due on ${shortDay(dueOn)}`
+  if (n === 0) return 'due today'
+  if (n === 1) return 'due tomorrow'
+  return `due in ${n} days`
+}
+
+/**
+ * "Needs you" (build 8½, menus-home-v6): across all your trips, what's waiting on you: a payment
+ * due within 30 days (or late), money you owe someone, lines still to decide. Money first, the
+ * soonest first; past trips only for money still owed.
+ */
+export function needsYou(cards: TripCard[], today: string): Need[] {
+  const pay: (Need & { when: number })[] = []
+  const owe: Need[] = []
+  const decide: Need[] = []
+  for (const t of cards) {
+    const over = Boolean(t.start_date && (lastDay(t) as string) < today)
+    if (t.nextDue && !over && days(today, t.nextDue.dueOn) <= 30)
+      pay.push({
+        key: `pay-${t.id}`,
+        text: `${t.nextDue.name}: ${formatWhole(t.nextDue.left, t.currency)} to pay`,
+        sub: `${t.name} · ${dueWords(today, t.nextDue.dueOn)}`,
+        to: `/trips/${t.id}/budget`,
+        kind: 'pay',
+        when: days(today, t.nextDue.dueOn),
+      })
+    for (const s of t.settle)
+      if (s.youPay)
+        owe.push({
+          key: `owe-${t.id}-${s.name}`,
+          text: `You owe ${s.name} ${formatWhole(s.amount, t.currency)}`,
+          sub: t.name,
+          to: `/trips/${t.id}/who-paid`,
+          kind: 'owe',
+        })
+    if (t.undecidedCount > 0 && !over)
+      decide.push({
+        key: `decide-${t.id}`,
+        text: t.undecidedCount === 1 ? '1 line to decide' : `${t.undecidedCount} lines to decide`,
+        sub: `${t.name}${t.undecided ? ` · ${t.undecided.name}${t.undecidedCount > 1 ? ' and more' : ''}` : ''}`,
+        to: `/trips/${t.id}/compare`,
+        kind: 'decide',
+      })
+  }
+  return [...pay.sort((a, b) => a.when - b.when).map(({ when: _when, ...n }) => n), ...owe, ...decide]
+}

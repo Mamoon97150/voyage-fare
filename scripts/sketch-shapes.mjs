@@ -36,4 +36,12 @@ writeFileSync(
   'public/sketch/round-fill.svg',
   svg(40, 40, [gen.ellipse(20, 20, 34, 34, { ...pen, seed: 6, roughness: 1.3, fill: '#000', fillStyle: 'solid' })]),
 )
+// A sheet laid over the page on a computer (build 8½): tall, so its pencil isn't a button's stretched.
+writeFileSync(
+  'public/sketch/panel.svg',
+  svg(420, 760, [gen.rectangle(4, 4, 412, 752, { ...pen, seed: 8, roughness: 1.8, bowing: 0.9 })]).replace(
+    /stroke-width="0.85"/g,
+    'stroke-width="1.3"',
+  ),
+)
 console.log('sketch shapes written')

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router'
+import { Link, useParams, useSearchParams } from 'react-router'
 import { FormMessage } from '../components/AuthForm'
 import { Loading } from '../lib/auth'
 import { useAuth } from '../lib/authContext'
@@ -10,6 +10,8 @@ import { MainCurrency } from '../components/settings/MainCurrency'
 import { TripForm } from '../components/settings/TripForm'
 import { Travellers } from '../components/settings/Travellers'
 import { TripAddress } from '../components/trip/TripAddress'
+import { NewTripFromThis } from '../components/trip/TripMenu'
+import { SketchBox } from '../components/Sketch'
 
 /**
  * Trip settings (mockup 8): the trip, its budget, its travellers, and deleting it.
@@ -32,6 +34,14 @@ export function TripSettings() {
       setLoadError(explainAuthError(e as { message?: string }).message)
     }
   }, [tripId, session])
+
+  // From the trip's initials (#travellers): straight to who's coming, once the page has settled.
+  const loaded = Boolean(detail)
+  useEffect(() => {
+    if (!loaded || window.location.hash !== '#travellers') return
+    const t = setTimeout(() => document.getElementById('travellers')?.scrollIntoView?.({ block: 'start' }), 300)
+    return () => clearTimeout(t)
+  }, [loaded])
 
   useEffect(() => {
     let active = true
@@ -74,14 +84,32 @@ export function TripSettings() {
       <MainCurrency detail={detail} onChanged={reload} />
       <Travellers detail={detail} userId={session?.user.id} owner={owner} onChanged={reload} />
       {!detail.trip.is_demo && <TripAddress detail={detail} />}
+      {!detail.trip.is_demo && <StartAgain detail={detail} />}
       {owner ? <DeleteTrip detail={detail} owner={owner} /> : <LeaveTrip detail={detail} />}
     </Screen>
   )
 }
 
+/** "Start a new trip from this one" (moved from the trip's ☰ menu, build 8½). */
+function StartAgain({ detail }: { detail: TripDetail }) {
+  // From "Your trips" → "From a trip you had" (?again=1): the sheet opens straight away.
+  const [params] = useSearchParams()
+  const [open, setOpen] = useState(params.get('again') === '1')
+  return (
+    <SketchBox weight="light" className="form__sheet start-again" seed={77}>
+      <h2 className="sheet-title">Start a new trip from this one</h2>
+      <p className="field__hint">Same places, lines and ideas, with fresh dates and payments. Nothing changes here.</p>
+      <button type="button" className="button button--quiet" onClick={() => setOpen(true)}>
+        ⧉ Start a new trip from this one
+      </button>
+      {open && <NewTripFromThis detail={detail} onClose={() => setOpen(false)} />}
+    </SketchBox>
+  )
+}
+
 function Screen({ tripId, name, children }: { tripId: string; name?: string; children: React.ReactNode }) {
   return (
-    <div className="screen">
+    <div className="screen settings-page">
       <header className="screen__top">
         <Link to={`/trips/${tripId}`} className="round-button" aria-label="Back to the trip">
           ‹

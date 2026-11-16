@@ -176,3 +176,76 @@ export function ToReview({ detail, onChanged }: { detail: TripDetail; onChanged:
     </div>
   )
 }
+
+/**
+ * "Bring things in" (build 8½, menus-home-v6): at the end of the trip, where you add things, what
+ * was in the ☰ menu: the trip's address to forward bookings to, paste a booking email, import
+ * from my AI. Dashed: it's an invitation, not a part of the trip.
+ */
+export function BringIn({ detail }: { detail: TripDetail }) {
+  const [address, setAddress] = useState<string>()
+  const [copied, setCopied] = useState(false)
+  const tripId = detail.trip.id
+
+  useEffect(() => {
+    let active = true
+    tripMailAddress(tripId)
+      .then((a) => active && setAddress(a))
+      .catch(() => {})
+    return () => {
+      active = false
+    }
+  }, [tripId])
+
+  return (
+    <SketchBox weight="light" dashed className="bring-in" seed={88}>
+      <h2 className="bring-in__title">Bring things in</h2>
+      <ul className="bring-in__rows">
+        <li>
+          <span aria-hidden="true">✉</span>
+          <span>
+            Forward your bookings
+            <small>{address ? `${address} · they wait in “To review”` : 'to the trip’s own address'}</small>
+          </span>
+          {address ? (
+            <button
+              type="button"
+              className="link-button"
+              onClick={() => void copyText(address).then((ok) => setCopied(ok))}
+            >
+              {copied ? '✓ Copied' : 'Copy'}
+            </button>
+          ) : (
+            <Link
+              to={`/trips/${tripId}/settings#trip-address`}
+              className="bring-in__go"
+              aria-label="The trip’s address"
+            >
+              ›
+            </Link>
+          )}
+        </li>
+        <li>
+          <span aria-hidden="true">📋</span>
+          <Link to={`/trips/${tripId}/booking-email`} className="bring-in__link">
+            Paste a booking email
+            <small>when forwarding isn’t handy</small>
+          </Link>
+          <span className="bring-in__go" aria-hidden="true">
+            ›
+          </span>
+        </li>
+        <li>
+          <span aria-hidden="true">✦</span>
+          <Link to={`/trips/${tripId}/import`} className="bring-in__link">
+            Import from my AI
+            <small>its answer becomes lines</small>
+          </Link>
+          <span className="bring-in__go" aria-hidden="true">
+            ›
+          </span>
+        </li>
+      </ul>
+    </SketchBox>
+  )
+}

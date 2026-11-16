@@ -50,8 +50,7 @@ describe('paste a booking email (build 8 step 5a)', () => {
     data.readBooking.mockResolvedValue(email)
     data.applyBooking.mockResolvedValue('h1')
     open('/trips/t1')
-    fireEvent.click(await screen.findByRole('button', { name: 'Trip menu' }))
-    expect(screen.getByRole('menuitem', { name: /Paste a booking email/ })).toHaveAttribute(
+    expect(await screen.findByRole('link', { name: /Paste a booking email/ })).toHaveAttribute(
       'href',
       '/trips/t1/booking-email',
     )

@@ -1,6 +1,7 @@
 import { type ReactNode, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router'
-import { AccountMenu } from '../components/AccountMenu'
+import { HomeNav } from '../components/HomeNav'
+import { useWide } from '../lib/useWide'
 import { FormMessage } from '../components/AuthForm'
 import { HandBar } from '../components/HandBar'
 import { InstallCard, NoConnection } from '../components/PhoneApp'
@@ -16,15 +17,17 @@ import {
   daysTo,
   greeting,
   monthYear,
+  needsYou,
   nights,
   placeOn,
+  type Need,
   settleLines,
   shelve,
   sortOutNote,
   todayIso,
   toSortOut,
 } from '../lib/shelf'
-import { listTrips, type TripCard } from '../lib/trips'
+import { listSomeday, listTrips, type SomedayIdea, type TripCard } from '../lib/trips'
 import { formatDates, plural } from '../lib/tripText'
 
 /**
@@ -35,6 +38,8 @@ import { formatDates, plural } from '../lib/tripText'
 export function Trips() {
   const { session } = useAuth()
   const [trips, setTrips] = useState<TripCard[]>()
+  // On a computer: every way to start and a peek at Someday, in a column on the right (desktop-v6).
+  const wide = useWide()
   const [error, setError] = useState<string>()
   const [offline, setOffline] = useState(false)
   const [attempt, setAttempt] = useState(0)
@@ -64,85 +69,212 @@ export function Trips() {
   const firstName = (session?.user.user_metadata?.first_name as string | undefined) ?? null
 
   return (
-    <div className="page">
+    <div className="page page--nav">
       <header className="app-header">
         <img src="/illustrations/compass.svg" width={28} height={28} alt="" />
         <span className="app-header__name">Voyage Fare</span>
-        <span className="app-header__account">
-          <AccountMenu />
-        </span>
       </header>
-      <main className="trips">
-        <div className="trips__head">
-          <h1 className="trips__title">Your trips</h1>
-          {shelf && trips && trips.length > 0 && (
-            <p className="hand trips__hello">{greeting(shelf, firstName, today)}</p>
-          )}
-        </div>
-        <WelcomeSlip />
-        {trips && trips.length > 0 && <InstallCard />}
-        {error && <FormMessage tone="error">{error}</FormMessage>}
-        {offline && trips === undefined && <NoConnection onRetry={() => setAttempt((n) => n + 1)} />}
-        {!error && !offline && trips === undefined && <Loading />}
-        {trips?.length === 0 && (
-          <SketchBox tape="green" className="empty">
-            <Sketch name="no-trips" width={240} />
-            <h2 className="empty__title">Your first trip</h2>
-            <p className="empty__lead">
-              Where to? Add the places, then what you’re thinking of: the app adds it up, for each of you.
-            </p>
-            <Link to="/trips/new" className="button button--primary button--wide">
-              + Start a trip
-            </Link>
-            <Link to="/demo" className="empty__demo">
-              or look at a real trip first ›
-            </Link>
-          </SketchBox>
-        )}
-        {shelf && trips && trips.length > 0 && (
-          <div className="shelf">
-            {shelf.featured && (
-              <Group label={shelf.travelling ? 'Travelling now' : 'Coming up'}>
-                <BigTrip trip={shelf.featured} travelling={shelf.travelling} today={today} />
-              </Group>
-            )}
-            {shelf.coming.length > 0 && (
-              <Group label={shelf.featured && !shelf.travelling ? 'After that' : 'Coming up'}>
-                {shelf.coming.map((t, i) => (
-                  <SmallTrip key={t.id} trip={t} seed={70 + i}>
-                    <span className="small-trip__meta">
-                      {formatDates(t.start_date, t.end_date)} · {countdown(daysTo(t, today) ?? 0, true).toLowerCase()}
-                    </span>
-                  </SmallTrip>
-                ))}
-              </Group>
-            )}
-            {shelf.dreams.length > 0 && (
-              <Group label="Still a dream" aside="no dates yet">
-                {shelf.dreams.map((t, i) => (
-                  <SmallTrip key={t.id} trip={t} seed={80 + i}>
-                    <span className="small-trip__meta">{routeLine(t) ?? plural(t.travellers.length, 'traveller')}</span>
-                  </SmallTrip>
-                ))}
-              </Group>
-            )}
-            <Link to="/trips/new" className="new-page-link">
-              <SketchBox weight="light" dashed className="new-page" seed={63}>
-                <b>+ A new trip</b>
-                <span className="hand">a blank page, wherever you dream of going</span>
-              </SketchBox>
-            </Link>
-            {shelf.past.length > 0 && (
-              <Group label="Past trips" aside={String(shelf.past.length)}>
-                {shelf.past.map((t, i) => (
-                  <PastTrip key={t.id} trip={t} seed={90 + i} />
-                ))}
-              </Group>
+      <main className={wide ? 'trips trips--wide' : 'trips'}>
+        <div className="trips__main">
+          <div className="trips__head">
+            <h1 className="trips__title">Your trips</h1>
+            {shelf && trips && trips.length > 0 && (
+              <p className="hand trips__hello">{greeting(shelf, firstName, today)}</p>
             )}
           </div>
+          <WelcomeSlip />
+          {trips && trips.length > 0 && <InstallCard />}
+          {trips && trips.length > 0 && <NeedsYou needs={needsYou(trips, today)} />}
+          {error && <FormMessage tone="error">{error}</FormMessage>}
+          {offline && trips === undefined && <NoConnection onRetry={() => setAttempt((n) => n + 1)} />}
+          {!error && !offline && trips === undefined && <Loading />}
+          {trips?.length === 0 && (
+            <SketchBox tape="green" className="empty">
+              <Sketch name="no-trips" width={240} />
+              <h2 className="empty__title">Your first trip</h2>
+              <p className="empty__lead">
+                Where to? Add the places, then what you’re thinking of: the app adds it up, for each of you.
+              </p>
+              <Link to="/trips/new" className="button button--primary button--wide">
+                + Start a trip
+              </Link>
+              <Link to="/demo" className="empty__demo">
+                or look at a real trip first ›
+              </Link>
+            </SketchBox>
+          )}
+          {shelf && trips && trips.length > 0 && (
+            <div className="shelf">
+              {shelf.featured && (
+                <Group label={shelf.travelling ? 'Travelling now' : 'Coming up'}>
+                  <BigTrip trip={shelf.featured} travelling={shelf.travelling} today={today} />
+                </Group>
+              )}
+              {shelf.coming.length > 0 && (
+                <Group label={shelf.featured && !shelf.travelling ? 'After that' : 'Coming up'}>
+                  {shelf.coming.map((t, i) => (
+                    <SmallTrip key={t.id} trip={t} seed={70 + i}>
+                      <span className="small-trip__meta">
+                        {formatDates(t.start_date, t.end_date)} · {countdown(daysTo(t, today) ?? 0, true).toLowerCase()}
+                      </span>
+                    </SmallTrip>
+                  ))}
+                </Group>
+              )}
+              {shelf.dreams.length > 0 && (
+                <Group label="Still a dream" aside="no dates yet">
+                  {shelf.dreams.map((t, i) => (
+                    <SmallTrip key={t.id} trip={t} seed={80 + i}>
+                      <span className="small-trip__meta">
+                        {routeLine(t) ?? plural(t.travellers.length, 'traveller')}
+                      </span>
+                    </SmallTrip>
+                  ))}
+                </Group>
+              )}
+              {!wide && <StartATrip trips={trips} />}
+              {shelf.past.length > 0 && (
+                <Group label="Past trips" aside={String(shelf.past.length)}>
+                  {shelf.past.map((t, i) => (
+                    <PastTrip key={t.id} trip={t} seed={90 + i} />
+                  ))}
+                </Group>
+              )}
+            </div>
+          )}
+        </div>
+        {wide && trips && trips.length > 0 && (
+          <aside className="trips__aside">
+            <StartATrip trips={trips} />
+            <SomedayPeek />
+          </aside>
         )}
       </main>
+      <HomeNav />
     </div>
+  )
+}
+
+/** A peek at Someday, beside the shelf on a computer: the latest ideas and the way in. */
+function SomedayPeek() {
+  const [ideas, setIdeas] = useState<SomedayIdea[]>()
+  useEffect(() => {
+    let active = true
+    listSomeday()
+      .then((list) => active && setIdeas(list))
+      .catch(() => active && setIdeas([]))
+    return () => {
+      active = false
+    }
+  }, [])
+  if (!ideas) return null
+  return (
+    <SketchBox weight="light" className="someday-peek" seed={67}>
+      <h2 className="someday-peek__title">
+        Someday <small>{ideas.length ? plural(ideas.length, 'idea') : 'ideas without a trip yet'}</small>
+      </h2>
+      <ul className="someday-peek__list">
+        {ideas
+          .slice(-4)
+          .reverse()
+          .map((i) => (
+            <li key={i.id}>
+              <i className={`cat-dot cat-dot--${i.kind}`} aria-hidden="true" />
+              <span>
+                {i.name}
+                <small>{i.place_name ?? 'anywhere'}</small>
+              </span>
+            </li>
+          ))}
+      </ul>
+      <Link to="/someday" className="someday-peek__all">
+        {ideas.length ? 'See them all ›' : '+ Save an idea ›'}
+      </Link>
+    </SketchBox>
+  )
+}
+
+/** What's waiting on you, across all your trips (build 8½): money first, then what to decide. */
+function NeedsYou({ needs }: { needs: Need[] }) {
+  return (
+    <SketchBox weight="light" className="needs-you" seed={58}>
+      <h2 className="needs-you__title">Needs you</h2>
+      {needs.length === 0 ? (
+        <p className="hand needs-you__none">nothing right now: all sorted</p>
+      ) : (
+        <ul className="needs-you__list">
+          {needs.map((n) => (
+            <li key={n.key}>
+              <Link to={n.to} className="needs-you__row">
+                <i className={`needs-you__dot needs-you__dot--${n.kind}`} aria-hidden="true" />
+                <span>
+                  {n.text}
+                  <small>{n.sub}</small>
+                </span>
+                <span className="needs-you__go" aria-hidden="true">
+                  ›
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </SketchBox>
+  )
+}
+
+/** Every way to start a trip, in one place (build 8½): blank, from my AI, from a trip you had, the demo. */
+function StartATrip({ trips }: { trips: TripCard[] }) {
+  const [picking, setPicking] = useState(false)
+  return (
+    <section className="shelf__group" aria-label="Start a trip">
+      <p className="shelf__label">Start a trip</p>
+      <div className="starts">
+        <Link to="/trips/new" className="new-page-link">
+          <SketchBox weight="light" dashed className="new-page start" seed={63}>
+            <b>+ A new trip</b>
+            <span className="hand">a blank page</span>
+          </SketchBox>
+        </Link>
+        <Link to="/trips/import" className="new-page-link">
+          <SketchBox weight="light" dashed className="new-page start" seed={64}>
+            <b>✦ From my AI</b>
+            <span className="hand">paste its plan</span>
+          </SketchBox>
+        </Link>
+        {trips.length > 0 && (
+          <button type="button" className="new-page-link start__button" onClick={() => setPicking((p) => !p)}>
+            <SketchBox weight="light" dashed className="new-page start" seed={65}>
+              <b>⧉ From a trip you had</b>
+              <span className="hand">same route, fresh dates</span>
+            </SketchBox>
+          </button>
+        )}
+        <Link to="/demo" className="new-page-link">
+          <SketchBox weight="light" dashed className="new-page start" seed={66}>
+            <b>◎ See the demo</b>
+            <span className="hand">a real trip, names hidden</span>
+          </SketchBox>
+        </Link>
+      </div>
+      {picking && (
+        <ul className="starts__pick" aria-label="Start from which trip?">
+          {trips.map((t) => (
+            <li key={t.id}>
+              <Link to={`/trips/${t.id}/settings?again=1`} className="me__row">
+                <span>
+                  {t.name}
+                  <small>{routeLine(t) ?? plural(t.travellers.length, 'traveller')}</small>
+                </span>
+                <span className="me__go" aria-hidden="true">
+                  ›
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   )
 }
 

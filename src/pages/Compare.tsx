@@ -10,6 +10,9 @@ import { StaysMap, type PricePin } from '../components/compare/StaysMap'
 import { nearOf } from '../lib/itemDetails'
 import { Sketch, SketchBox } from '../components/Sketch'
 import { TripTopBar } from '../components/trip/TripTopBar'
+import { TripWideFrame } from '../components/trip/TripWideFrame'
+import { useWide } from '../lib/useWide'
+import { OptionColumns } from '../components/compare/OptionColumns'
 import { TripBudget } from '../components/TripBudget'
 import { TripNav } from '../components/TripNav'
 import { Loading } from '../lib/auth'
@@ -46,6 +49,7 @@ const EMPTY: Record<Tab, { kind: ItemKind; add: string; none: (where: string) =>
  * categories, "turn the page" between journeys or places, the options side by side.
  */
 export function Compare() {
+  const wide = useWide()
   const tripId = useTripId()
   const { session } = useAuth()
   const [params, setParams] = useSearchParams()
@@ -93,15 +97,8 @@ export function Compare() {
     setParams(p, { replace: true })
   }
 
-  return (
-    <div className="screen screen--trip">
-      <TripTopBar
-        title={detail.trip.name}
-        subtitle={tripSubtitle(detail.trip, detail.travellers.length)}
-        tripId={detail.trip.id}
-        travellers={detail.travellers}
-        userId={session?.user.id}
-      />
+  const inner = (
+    <>
       <DemoStrip detail={detail} />
       <TripBudget
         view={budgetView(detail, viewer, shownMode)}
@@ -189,6 +186,25 @@ export function Compare() {
       <div className="screen__body">
         <YourTurn detail={detail} />
       </div>
+    </>
+  )
+  if (wide)
+    return (
+      <TripWideFrame detail={detail} userId={session?.user.id} solo={solo}>
+        {inner}
+      </TripWideFrame>
+    )
+  return (
+    <div className="screen screen--trip">
+      <TripTopBar
+        title={detail.trip.name}
+        subtitle={tripSubtitle(detail.trip, detail.travellers.length)}
+        tripId={detail.trip.id}
+        travellers={detail.travellers}
+        userId={session?.user.id}
+        detail={detail}
+      />
+      {inner}
       <TripNav tripId={detail.trip.id} solo={solo} />
     </div>
   )
@@ -212,6 +228,7 @@ function ItemOptions({
   mode: Mode
   onChanged: () => void
 }) {
+  const wide = useWide()
   const [sort, setSort] = useState<Sort>('cheapest')
   // The demo: look at the options and which one is circled, but no circling another (build 7).
   const readOnly = detail.trip.is_demo
@@ -261,7 +278,7 @@ function ItemOptions({
   }
 
   const form = (option?: (typeof lines)[number]['option']) => (
-    <SketchBox weight="light" className="form__sheet" seed={91}>
+    <SketchBox weight="light" className="form__sheet panel-form" seed={91}>
       <h3 className="sheet-title">{option ? `Change ${option.name}` : 'Add an option'}</h3>
       <OptionForm
         kind={item.kind as ItemKind}
@@ -322,47 +339,80 @@ function ItemOptions({
         <p className="field__hint compare-item__note">Kept for the record. Choose one to bring it back.</p>
       )}
       {error && <FormMessage tone="error">{error}</FormMessage>}
-      {pins.length > 0 && (
-        <>
-          <StaysMap
-            pins={pins}
+      {wide ? (
+        <div className={pins.length > 0 ? 'compare-wide compare-wide--map' : 'compare-wide'}>
+          <OptionColumns
+            lines={lines}
+            item={item}
+            place={subject.place}
+            currency={detail.trip.currency}
+            roundTrip={roundTrip}
             focused={focused}
-            label={`Map of the places to stay${subject.place ? ` in ${subject.place.name}` : ''}`}
-            onPick={(optionId) => {
-              setFocused(optionId)
-              document.getElementById(`opt-${optionId}`)?.scrollIntoView?.({ behavior: 'smooth', block: 'center' })
-            }}
+            readOnly={readOnly}
+            busy={busy}
+            onChoose={(id) => void act(() => chooseOption(id))}
+            onFavourite={(id, on) => void act(() => setFavourite(id, on))}
+            onEdit={(id) => setEditing(id)}
+            onFocus={setFocused}
           />
-          <p className="hand stays-map__note">tap a price: its card comes up</p>
+          {pins.length > 0 && (
+            <div className="compare-wide__map">
+              <StaysMap
+                pins={pins}
+                focused={focused}
+                label={`Map of the places to stay${subject.place ? ` in ${subject.place.name}` : ''}`}
+                onPick={setFocused}
+              />
+              <p className="hand stays-map__note">hover a column: its price lights up</p>
+            </div>
+          )}
+        </div>
+      ) : (
+        <>
+          {pins.length > 0 && (
+            <>
+              <StaysMap
+                pins={pins}
+                focused={focused}
+                label={`Map of the places to stay${subject.place ? ` in ${subject.place.name}` : ''}`}
+                onPick={(optionId) => {
+                  setFocused(optionId)
+                  document.getElementById(`opt-${optionId}`)?.scrollIntoView?.({ behavior: 'smooth', block: 'center' })
+                }}
+              />
+              <p className="hand stays-map__note">tap a price: its card comes up</p>
+            </>
+          )}
+          <ul className="opts">
+            {lines.map((line) =>
+              editing === line.option.id ? (
+                <li key={line.option.id}>{form(line.option)}</li>
+              ) : (
+                <OptionCard
+                  key={line.option.id}
+                  line={line}
+                  item={item}
+                  place={subject.place}
+                  currency={detail.trip.currency}
+                  travellers={detail.shares.filter((s) => s.item_id === item.id).length || detail.travellers.length}
+                  roundTrip={roundTrip}
+                  busy={busy}
+                  readOnly={readOnly}
+                  focused={focused === line.option.id}
+                  onEdit={() => !readOnly && setEditing(line.option.id)}
+                  rooms={roomsOf(detail, line.option.id).map(
+                    (r) =>
+                      `${r.name} ${formatMoney(r.amount, line.option.currency)}${r.occupants.length ? ` · ${r.occupants.map((t) => detail.travellers.find((x) => x.id === t)?.name).join(', ')}` : ''}`,
+                  )}
+                  onChoose={() => void act(() => chooseOption(line.option.id))}
+                  onFavourite={() => void act(() => setFavourite(line.option.id, !line.option.is_favourite))}
+                />
+              ),
+            )}
+          </ul>
         </>
       )}
-      <ul className="opts">
-        {lines.map((line) =>
-          editing === line.option.id ? (
-            <li key={line.option.id}>{form(line.option)}</li>
-          ) : (
-            <OptionCard
-              key={line.option.id}
-              line={line}
-              item={item}
-              place={subject.place}
-              currency={detail.trip.currency}
-              travellers={detail.shares.filter((s) => s.item_id === item.id).length || detail.travellers.length}
-              roundTrip={roundTrip}
-              busy={busy}
-              readOnly={readOnly}
-              focused={focused === line.option.id}
-              onEdit={() => !readOnly && setEditing(line.option.id)}
-              rooms={roomsOf(detail, line.option.id).map(
-                (r) =>
-                  `${r.name} ${formatMoney(r.amount, line.option.currency)}${r.occupants.length ? ` · ${r.occupants.map((t) => detail.travellers.find((x) => x.id === t)?.name).join(', ')}` : ''}`,
-              )}
-              onChoose={() => void act(() => chooseOption(line.option.id))}
-              onFavourite={() => void act(() => setFavourite(line.option.id, !line.option.is_favourite))}
-            />
-          ),
-        )}
-      </ul>
+      {wide && editing && editing !== 'new' && form(lines.find((l) => l.option.id === editing)?.option)}
       {editing === 'new' ? (
         form()
       ) : readOnly ? null : (
