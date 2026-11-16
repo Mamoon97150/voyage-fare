@@ -47,8 +47,9 @@ describe('details by kind', () => {
        where id = $1`,
       [act],
     )
-    expect(await one(db, 'select start_time, duration, needs_booking, price_per_person from items where id = $1', [act]))
-      .toMatchObject({ start_time: '07:00:00', duration: '2 h', needs_booking: true, price_per_person: true })
+    expect(
+      await one(db, 'select start_time, duration, needs_booking, price_per_person from items where id = $1', [act]),
+    ).toMatchObject({ start_time: '07:00:00', duration: '2 h', needs_booking: true, price_per_person: true })
   })
 
   it('the deposit is held, not spent: the budget only counts the rental', async () => {
@@ -113,9 +114,11 @@ describe('a duplicated trip', () => {
     )
     const copy = (await one<{ id: string }>(db, `select duplicate_trip($1, 'Again') as id`, [ids.trip])).id
     expect(
-      await one(db, `select food_kind, needs_booking, price_per_person from items where trip_id = $1 and name = 'Kikunoi'`, [
-        copy,
-      ]),
+      await one(
+        db,
+        `select food_kind, needs_booking, price_per_person from items where trip_id = $1 and name = 'Kikunoi'`,
+        [copy],
+      ),
     ).toMatchObject({ food_kind: 'kaiseki', needs_booking: true, price_per_person: true })
   })
 })

@@ -506,8 +506,16 @@ a {
   background: var(--cat-food);
 }
 
-.cat-dot--housing { background: var(--cat-stay); }
+.cat-dot--housing {
+  background: var(--cat-stay);
+}
 .cat-dot--transport,
-.cat-dot--car_rental { background: var(--cat-travel); }
-.cat-dot--activity { background: var(--cat-activity); }
-.cat-dot--restaurant { background: var(--cat-food); }
+.cat-dot--car_rental {
+  background: var(--cat-travel);
+}
+.cat-dot--activity {
+  background: var(--cat-activity);
+}
+.cat-dot--restaurant {
+  background: var(--cat-food);
+}
