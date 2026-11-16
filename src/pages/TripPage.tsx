@@ -7,6 +7,7 @@ import { TripNav } from '../components/TripNav'
 import { AddPlace } from '../components/trip/AddPlace'
 import { EstimateForm, EstimateRows } from '../components/trip/DailyEstimates'
 import { AddItem } from '../components/trip/ItemForm'
+import { CashForm } from '../components/trip/CashForm'
 import { ItemRow } from '../components/trip/ItemRow'
 import { PlacesWeLoved, ToTryForm, ToTryList } from '../components/trip/ToTry'
 import { DayPrompts, WhereWeSleep } from '../components/trip/PlacePrompts'
@@ -197,7 +198,7 @@ export function TripPage() {
           {places.map((place, i) => {
             const placeItems = items.filter((it) => it.place_id === place.id)
             const ownDays = placeDays(detail, place)
-            const addHere = (kind: 'housing' | 'activity' | 'restaurant', day?: number) =>
+            const addHere = (kind: 'housing' | 'activity' | 'restaurant' | 'cash', day?: number) =>
               setAdding(`${kind}:${place.id}:${day ?? ''}`)
             const addingHere = (kind: string, day?: number) => adding === `${kind}:${place.id}:${day ?? ''}`
             const inlineAdd = (kind: 'housing' | 'activity' | 'restaurant', day?: number) => (
@@ -335,6 +336,15 @@ export function TripPage() {
                                 inlineAdd('activity', group.day)
                               ) : addingHere('restaurant', group.day) ? (
                                 inlineAdd('restaurant', group.day)
+                              ) : addingHere('cash', group.day) ? (
+                                <CashForm
+                                  detail={detail}
+                                  placeId={place.id}
+                                  day={group.day}
+                                  viewer={viewer}
+                                  onDone={added}
+                                  onCancel={() => setAdding(null)}
+                                />
                               ) : (
                                 <DayPrompts
                                   items={placeItems}
@@ -354,7 +364,15 @@ export function TripPage() {
                       mode={shownMode}
                       onChanged={reload}
                     />
-                    {adding === place.id ? (
+                    {adding === `cash:${place.id}:` ? (
+                      <CashForm
+                        detail={detail}
+                        placeId={place.id}
+                        viewer={viewer}
+                        onDone={added}
+                        onCancel={() => setAdding(null)}
+                      />
+                    ) : adding === place.id ? (
                       <AddItem
                         detail={detail}
                         placeId={place.id}
@@ -420,6 +438,16 @@ export function TripPage() {
                           </span>
                           Daily estimate
                         </button>
+                        <button
+                          type="button"
+                          className="add-row place__add"
+                          onClick={() => setAdding(`cash:${place.id}:`)}
+                        >
+                          <span className="add-row__plus" aria-hidden="true">
+                            +
+                          </span>
+                          Cash
+                        </button>
                       </div>
                     )}
                   </SketchBox>
@@ -473,6 +501,14 @@ export function TripPage() {
                 />
               ) : adding === 'estimate:trip' ? (
                 <EstimateForm detail={detail} placeId={null} onDone={added} onCancel={() => setAdding(null)} />
+              ) : adding === 'cash:trip' ? (
+                <CashForm
+                  detail={detail}
+                  placeId={null}
+                  viewer={viewer}
+                  onDone={added}
+                  onCancel={() => setAdding(null)}
+                />
               ) : readOnly ? null : (
                 <div className="place__adds">
                   <button type="button" className="add-row place__add" onClick={() => setAdding('trip')}>
@@ -486,6 +522,12 @@ export function TripPage() {
                       +
                     </span>
                     Daily estimate
+                  </button>
+                  <button type="button" className="add-row place__add" onClick={() => setAdding('cash:trip')}>
+                    <span className="add-row__plus" aria-hidden="true">
+                      +
+                    </span>
+                    Cash
                   </button>
                 </div>
               )}

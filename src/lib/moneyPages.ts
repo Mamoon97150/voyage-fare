@@ -168,39 +168,94 @@ export function notCounted(detail: TripDetail): string[] {
 
 const nameOf = (detail: TripDetail, id: string | null) => detail.travellers.find((t) => t.id === id)?.name ?? 'Someone'
 
-/** The one thing to know first: owed, owe, or square. */
+// Who pays together (build 10): a group settles up as one. A "party" is a group, or someone on their own.
+
+export type Party = { key: string; groupId: string | null; members: string[]; name: string }
+
+/** "Djamina & Danielle", "Ana, Bea & Cleo". */
+export function joinNames(names: string[]): string {
+  if (names.length <= 1) return names[0] ?? ''
+  return `${names.slice(0, -1).join(', ')} & ${names[names.length - 1]}`
+}
+
+/** The groups and the people on their own, in trip order. */
+export function parties(detail: TripDetail): Party[] {
+  const seen = new Set<string>()
+  const list: Party[] = []
+  for (const t of detail.travellers) {
+    const g = t.pay_group_id ?? null
+    if (g) {
+      if (seen.has(g)) continue
+      seen.add(g)
+      const members = detail.travellers.filter((x) => x.pay_group_id === g)
+      list.push({ key: g, groupId: g, members: members.map((m) => m.id), name: joinNames(members.map((m) => m.name)) })
+    } else list.push({ key: t.id, groupId: null, members: [t.id], name: t.name })
+  }
+  return list
+}
+
+export const hasGroups = (detail: TripDetail) => detail.travellers.some((t) => t.pay_group_id)
+
+function partyOf(detail: TripDetail, travellerId: string | null): Party | undefined {
+  return parties(detail).find((p) => travellerId !== null && p.members.includes(travellerId))
+}
+
+/** How a party is called to the viewer: "you", "you two", "your group", or its name. */
+function partyWords(party: Party | undefined, viewer: string | null): string {
+  if (!party) return 'Someone'
+  if (viewer && party.members.includes(viewer)) {
+    return party.members.length === 1 ? 'you' : party.members.length === 2 ? 'you two' : 'your group'
+  }
+  return party.name
+}
+
+const capital = (w: string) => w.slice(0, 1).toUpperCase() + w.slice(1)
+
+/** The one thing to know first: owed, owe, or square. With a group, it speaks for the group. */
 export function headline(detail: TripDetail, money: TripMoney, viewer: string | null) {
+  const mine = partyOf(detail, viewer)
+  const grouped = Boolean(mine?.groupId)
+  const row = grouped ? money.parties?.find((p) => p.group_id === mine?.groupId) : undefined
   const b = money.balances.find((x) => x.traveller_id === viewer)
-  const balance = num(b?.balance) ?? 0
-  const paid = num(b?.paid) ?? 0
-  const share = num(b?.share_of_paid) ?? 0
+  const balance = num(grouped ? row?.balance : b?.balance) ?? 0
+  const paid = num(grouped ? row?.paid : b?.paid) ?? 0
+  const share = num(grouped ? row?.share_of_paid : b?.share_of_paid) ?? 0
   const currency = detail.trip.currency
-  const words = Math.abs(balance) < 0.5 ? 'You’re all square' : balance > 0 ? 'You are owed' : 'You owe'
+  const who = grouped ? (mine!.members.length === 2 ? 'You two' : 'Your group') : 'You'
+  const words =
+    Math.abs(balance) < 0.5
+      ? `${who === 'You' ? 'You’re' : `${who} are`} all square`
+      : balance > 0
+        ? `${who} are owed`
+        : `${who} owe`
   return {
     words,
     amount: Math.abs(balance) < 0.5 ? null : Math.abs(balance),
     owed: balance > 0,
-    sub: `you paid ${formatMoney(Math.round(paid), currency)} · your share of it is ${formatMoney(Math.round(share), currency)}`,
+    sub: `${who.toLowerCase()} paid ${formatMoney(Math.round(paid), currency)} · your share of it is ${formatMoney(Math.round(share), currency)}`,
   }
 }
 
-/** "Danielle pays you", "You pay Bea", "Cleo pays Bea". */
-export function settleWords(detail: TripDetail, from: string, to: string, viewer: string | null): string {
-  if (from === viewer) return `You pay ${nameOf(detail, to)}`
-  if (to === viewer) return `${nameOf(detail, from)} pays you`
-  return `${nameOf(detail, from)} pays ${nameOf(detail, to)}`
+/** "Danielle pays you", "You pay Bea", "Peggy & Gabriel pay you two". */
+export function settleWords(
+  detail: TripDetail,
+  from: string,
+  to: string,
+  viewer: string | null,
+  groups?: { from?: string | null; to?: string | null },
+): string {
+  const fromParty = groups?.from ? parties(detail).find((p) => p.groupId === groups.from) : partyOf(detail, from)
+  const toParty = groups?.to ? parties(detail).find((p) => p.groupId === groups.to) : partyOf(detail, to)
+  const f = partyWords(fromParty, viewer)
+  const t = partyWords(toParty, viewer)
+  const plural = f.startsWith('you') || (fromParty?.members.length ?? 1) > 1
+  return `${capital(f)} ${plural ? 'pay' : 'pays'} ${t}`
 }
 
 export function balanceLines(detail: TripDetail, money: TripMoney) {
-  return detail.travellers.map((t) => {
-    const b = money.balances.find((x) => x.traveller_id === t.id)
-    const balance = num(b?.balance) ?? 0
-    const paid = num(b?.paid) ?? 0
-    const share = num(b?.share_of_paid) ?? 0
-    const repaid = num(b?.repaid) ?? 0
-    const received = num(b?.received) ?? 0
-    const currency = detail.trip.currency
-    const meta = [
+  const currency = detail.trip.currency
+  const words = (paid: number, share: number, repaid = 0, received = 0) =>
+    [
       `paid ${formatMoney(Math.round(paid), currency)}`,
       `share ${formatMoney(Math.round(share), currency)}`,
       repaid ? `paid back ${formatMoney(Math.round(repaid), currency)}` : null,
@@ -208,8 +263,84 @@ export function balanceLines(detail: TripDetail, money: TripMoney) {
     ]
       .filter(Boolean)
       .join(' · ')
-    const tag = Math.abs(balance) < 0.5 ? 'settled' : balance > 0 ? 'is owed' : 'owes'
-    return { id: t.id, name: t.name, meta, balance, tag }
+  const tagOf = (balance: number) => (Math.abs(balance) < 0.5 ? 'settled' : balance > 0 ? 'is owed' : 'owes')
+  // Groups settle as one: one row per group (build 10).
+  if (hasGroups(detail) && money.parties) {
+    return parties(detail).map((p) => {
+      const row = p.groupId
+        ? money.parties!.find((x) => x.group_id === p.groupId)
+        : money.parties!.find((x) => x.traveller_id === p.members[0])
+      const balance = num(row?.balance) ?? 0
+      const tag = tagOf(balance)
+      return {
+        id: p.key,
+        name: p.name,
+        members: p.members,
+        meta: words(num(row?.paid) ?? 0, num(row?.share_of_paid) ?? 0),
+        balance,
+        tag: p.members.length > 1 && tag !== 'settled' ? (tag === 'is owed' ? 'are owed' : 'owe') : tag,
+      }
+    })
+  }
+  return detail.travellers.map((t) => {
+    const b = money.balances.find((x) => x.traveller_id === t.id)
+    const balance = num(b?.balance) ?? 0
+    return {
+      id: t.id,
+      name: t.name,
+      members: [t.id],
+      meta: words(num(b?.paid) ?? 0, num(b?.share_of_paid) ?? 0, num(b?.repaid) ?? 0, num(b?.received) ?? 0),
+      balance,
+      tag: tagOf(balance),
+    }
+  })
+}
+
+export type BetweenLine = { from: string; to: string; amount: number; words: string; why: string }
+
+/**
+ * "Between you two" (option B): inside the viewer's group, who owes whom, netted per pair, with
+ * the line(s) it comes from. Only the group's members see it; nothing when it's all square.
+ */
+export function betweenLines(detail: TripDetail, money: TripMoney, viewer: string | null): BetweenLine[] {
+  const mine = partyOf(detail, viewer)
+  if (!mine?.groupId) return []
+  const rows = (money.between ?? []).filter((r) => r.group_id === mine.groupId)
+  const net = new Map<string, number>()
+  const why = new Map<string, string[]>()
+  for (const r of rows) {
+    if (!r.owed_by || !r.owed_to) continue
+    const [a, b] = [r.owed_by, r.owed_to].sort()
+    const key = `${a}|${b}`
+    const signed = (r.owed_by === a ? 1 : -1) * Number(r.amount ?? 0)
+    net.set(key, (net.get(key) ?? 0) + signed)
+    if (r.item_id) {
+      const item = detail.items.find((i) => i.id === r.item_id)
+      if (item) why.set(key, [...(why.get(key) ?? []), item.name])
+    }
+  }
+  const name = (id: string) => detail.travellers.find((t) => t.id === id)?.name ?? 'Someone'
+  return [...net.entries()].flatMap(([key, value]) => {
+    if (Math.abs(value) < 0.5) return []
+    const [a, b] = key.split('|')
+    const [from, to] = value > 0 ? [a, b] : [b, a]
+    const words =
+      from === viewer
+        ? `You owe ${name(to)}`
+        : to === viewer
+          ? `${name(from)} owes you`
+          : `${name(from)} owes ${name(to)}`
+    const items = why.get(key) ?? []
+    const paidBy = to === viewer ? 'you' : name(to)
+    return [
+      {
+        from,
+        to,
+        amount: Math.round(Math.abs(value) * 100) / 100,
+        words,
+        why: items.length ? `${paidBy} paid ${items.slice(0, 2).join(', ')}${items.length > 2 ? '…' : ''}` : '',
+      },
+    ]
   })
 }
 
@@ -231,7 +362,11 @@ export function paidLines(detail: TripDetail, viewer: string | null) {
         i.actual_currency && i.actual_currency !== detail.trip.currency
           ? formatMoney(num(i.actual_amount), i.actual_currency)
           : null
-      const meta = [`${who}${when}`, sharedBy && sharedBy < n ? `split between ${sharedBy}` : null, own]
+      const meta = [
+        `${i.is_cash ? 'cash, ' : ''}${who}${when}`,
+        sharedBy && sharedBy < n ? `split between ${sharedBy}` : null,
+        own,
+      ]
         .filter(Boolean)
         .join(' · ')
       return { id: i.id, name: itemTitle(detail, i).title, meta, amount }

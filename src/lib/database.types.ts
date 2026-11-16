@@ -564,6 +564,7 @@ export type Database = {
           due_on: string | null
           end_day_number: number | null
           id: string
+          is_cash: boolean
           kind: string
           latitude: number | null
           link: string | null
@@ -604,6 +605,7 @@ export type Database = {
           due_on?: string | null
           end_day_number?: number | null
           id?: string
+          is_cash?: boolean
           kind: string
           latitude?: number | null
           link?: string | null
@@ -644,6 +646,7 @@ export type Database = {
           due_on?: string | null
           end_day_number?: number | null
           id?: string
+          is_cash?: boolean
           kind?: string
           latitude?: number | null
           link?: string | null
@@ -829,10 +832,26 @@ export type Database = {
           },
         ]
       }
+      pay_groups: {
+        Row: {
+          id: string
+          trip_id: string
+        }
+        Insert: {
+          id?: string
+          trip_id: string
+        }
+        Update: {
+          id?: string
+          trip_id?: string
+        }
+        Relationships: []
+      }
       payments: {
         Row: {
           amount: number
           created_at: string
+          for_payer: boolean
           currency: string
           id: string
           item_id: string
@@ -847,6 +866,7 @@ export type Database = {
         Insert: {
           amount: number
           created_at?: string
+          for_payer?: boolean
           currency: string
           id?: string
           item_id: string
@@ -861,6 +881,7 @@ export type Database = {
         Update: {
           amount?: number
           created_at?: string
+          for_payer?: boolean
           currency?: string
           id?: string
           item_id?: string
@@ -1158,6 +1179,7 @@ export type Database = {
         Row: {
           id: string
           name: string
+          pay_group_id: string | null
           position: number
           trip_id: string
           user_id: string | null
@@ -1165,6 +1187,7 @@ export type Database = {
         Insert: {
           id?: string
           name: string
+          pay_group_id?: string | null
           position?: number
           trip_id: string
           user_id?: string | null
@@ -1172,6 +1195,7 @@ export type Database = {
         Update: {
           id?: string
           name?: string
+          pay_group_id?: string | null
           position?: number
           trip_id?: string
           user_id?: string | null
@@ -1282,6 +1306,43 @@ export type Database = {
       }
     }
     Views: {
+      v_group_between: {
+        Row: {
+          amount: number | null
+          group_id: string | null
+          item_id: string | null
+          owed_by: string | null
+          owed_to: string | null
+          paid_on: string | null
+          trip_id: string | null
+        }
+        Relationships: []
+      }
+      v_item_bills: {
+        Row: {
+          common_part: number | null
+          item_id: string | null
+          left_to_pay: number | null
+          paid_own: number | null
+          share: number | null
+          traveller_id: string | null
+          trip_id: string | null
+        }
+        Relationships: []
+      }
+      v_party_balances: {
+        Row: {
+          balance: number | null
+          group_id: string | null
+          lead_traveller: string | null
+          paid: number | null
+          position: number | null
+          share_of_paid: number | null
+          traveller_id: string | null
+          trip_id: string | null
+        }
+        Relationships: []
+      }
       v_budget_by_category: {
         Row: {
           category: string | null
@@ -1566,6 +1627,31 @@ export type Database = {
       }
     }
     Functions: {
+      add_cash: {
+        Args: {
+          p_amount: number
+          p_category: string
+          p_currency?: string
+          p_day_number?: number
+          p_for?: string[]
+          p_name: string
+          p_paid_by: string
+          p_paid_on?: string
+          p_place_id?: string
+          p_rate?: number
+          p_trip_id: string
+        }
+        Returns: string
+      }
+      party_name: {
+        Args: { p_group_id: string; p_traveller_id: string }
+        Returns: string
+      }
+      remove_pay_group: { Args: { p_group_id: string }; Returns: undefined }
+      set_pay_group: {
+        Args: { p_group_id?: string; p_traveller_ids: string[]; p_trip_id: string }
+        Returns: string
+      }
       delete_my_account: { Args: never; Returns: undefined }
       add_to_try: {
         Args: {
@@ -1673,6 +1759,7 @@ export type Database = {
         Args: {
           p_amount: number
           p_currency?: string
+          p_for_payer?: boolean
           p_item_id: string
           p_kind: string
           p_note?: string
@@ -1832,7 +1919,9 @@ export type Database = {
         Args: { p_trip_id: string }
         Returns: {
           amount: number
+          from_group: string
           from_traveller: string
+          to_group: string
           to_traveller: string
         }[]
       }

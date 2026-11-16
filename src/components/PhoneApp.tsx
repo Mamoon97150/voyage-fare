@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useInstallCard, useOnline } from '../lib/pwa'
 import { Sketch, SketchBox } from './Sketch'
 
@@ -58,10 +59,15 @@ export function InstallCard() {
 /** Lost the connection: what's on screen stays, a note says changes have to wait. */
 export function OfflineStrip() {
   const online = useOnline()
+  // Read-only while offline (build 10): the add / save buttons are greyed out (phone-app.css).
+  useEffect(() => {
+    document.body.classList.toggle('is-offline', !online)
+    return () => document.body.classList.remove('is-offline')
+  }, [online])
   if (online) return null
   return (
     <p className="offline-strip" role="status">
-      <b>● Offline.</b> You’re seeing what was loaded last. Changes need a connection.
+      <b>● Offline · read only.</b> You’re seeing your trips as last opened. Changes need a connection.
     </p>
   )
 }

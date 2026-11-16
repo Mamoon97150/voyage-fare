@@ -257,7 +257,7 @@ describe('the app on the phone (pwa-v5)', () => {
     data.listTrips.mockRejectedValueOnce(new TypeError('Failed to fetch')).mockResolvedValueOnce([tripSoon()])
     open('/trips')
     expect(await screen.findByText('No connection')).toBeInTheDocument()
-    expect(screen.getByText(/● Offline\./)).toBeInTheDocument()
+    expect(screen.getByText(/● Offline · read only\./)).toBeInTheDocument()
     online.mockReturnValue(true)
     click('Try again')
     expect(await screen.findAllByText('Lisbon & Porto')).not.toHaveLength(0)

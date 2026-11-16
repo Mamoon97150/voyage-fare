@@ -47,6 +47,8 @@ export type TripDetail = {
   /** Payments in parts (build 6) and, per booked line, paid so far / left to pay. */
   payments: Payment[]
   itemLeft: ItemLeft[]
+  /** Each person's bill on a booked line, after a deposit for everyone (build 10). */
+  bills?: Tables<'v_item_bills'>[]
   /** Tickets and vouchers on booked lines (build 8 step 4). */
   files?: ItemFile[]
   /** Forwarded booking emails waiting in "To review" (build 8 step 5b). */
@@ -79,6 +81,7 @@ export async function getTrip(id: string): Promise<TripDetail | null> {
     itemLeft,
     files,
     mails,
+    bills,
   ] = await Promise.all([
     supabase.from('trips').select('*').eq('id', id).maybeSingle(),
     supabase.from('travellers').select('*').eq('trip_id', id).order('position'),
@@ -106,6 +109,7 @@ export async function getTrip(id: string): Promise<TripDetail | null> {
       .eq('trip_id', id)
       .eq('status', 'new')
       .order('received_at', { ascending: false }),
+    supabase.from('v_item_bills').select('*').eq('trip_id', id),
   ])
   for (const r of [
     trip,
@@ -129,6 +133,7 @@ export async function getTrip(id: string): Promise<TripDetail | null> {
     itemLeft,
     files,
     mails,
+    bills,
   ]) {
     if (r.error) throw r.error
   }
@@ -155,5 +160,6 @@ export async function getTrip(id: string): Promise<TripDetail | null> {
     itemLeft: itemLeft.data ?? [],
     files: files.data ?? [],
     mails: mails.data ?? [],
+    bills: bills.data ?? [],
   }
 }

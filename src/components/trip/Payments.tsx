@@ -69,7 +69,13 @@ export function PaymentsPanel({
             {payments.map((p) => (
               <li key={p.id} className="payments__row">
                 <span>
-                  <span className="payments__kind">{KIND_WORD[p.kind] ?? 'Paid'}</span>
+                  <span className="payments__kind">
+                    {p.for_payer
+                      ? 'Own bill'
+                      : p.kind === 'deposit' && !isSolo(detail)
+                        ? 'Deposit for everyone'
+                        : (KIND_WORD[p.kind] ?? 'Paid')}
+                  </span>
                   <small>
                     {p.paid_each ? 'each their own share' : name(p.paid_by)} · {shortDay(p.paid_on)}
                     {p.currency !== currency ? ` · ${formatMoney(Number(p.amount), p.currency)}` : ''}
@@ -106,6 +112,7 @@ export function PaymentsPanel({
         </div>
       )}
       {error && <FormMessage tone="error">{error}</FormMessage>}
+      <OwnBills detail={detail} item={item} viewer={viewer} onChanged={onChanged} />
       {line.left > 0 &&
         (adding ? (
           <PaymentForm
@@ -129,6 +136,90 @@ export function PaymentsPanel({
         ))}
       <p className="hand payments__note">the budget already counts the full price: paying only changes what’s left</p>
     </section>
+  )
+}
+
+/**
+ * "Then each pays their own" (build 10, mockup money-v6 screen 5): once something was paid for
+ * everyone (a deposit), each person's bill = their share − their part of it − what they paid
+ * themselves. "Paid" records their own bill (it only counts against their share).
+ */
+function OwnBills({
+  detail,
+  item,
+  viewer,
+  onChanged,
+}: {
+  detail: TripDetail
+  item: Item
+  viewer: string | null
+  onChanged: () => void
+}) {
+  const { busy, run } = useSaving()
+  const [error, setError] = useState<string>()
+  if (isSolo(detail)) return null
+  const payments = (detail.payments ?? []).filter((p) => p.item_id === item.id)
+  const common = payments.some((p) => !p.for_payer)
+  const own = payments.some((p) => p.for_payer)
+  if (!common && !own) return null
+  const bills = (detail.bills ?? []).filter((b) => b.item_id === item.id)
+  if (bills.length < 2) return null
+  const currency = detail.trip.currency
+  const name = (id: string | null) => detail.travellers.find((t) => t.id === id)?.name ?? ''
+  const order = (id: string | null) => detail.travellers.findIndex((t) => t.id === id)
+  const rows = [...bills].sort((a, b) => order(a.traveller_id) - order(b.traveller_id))
+
+  return (
+    <div className="own-bills">
+      <p className="payments__label">Then each pays their own</p>
+      <ul className="payments__list">
+        {rows.map((b) => {
+          const left = Number(b.left_to_pay ?? 0)
+          const you = b.traveller_id === viewer
+          return (
+            <li key={b.traveller_id} className="payments__row">
+              <span>
+                <span className="payments__kind">{you ? 'You' : name(b.traveller_id)}</span>
+                <small className="num">
+                  share {formatMoney(Number(b.share ?? 0), currency)}
+                  {Number(b.common_part ?? 0) > 0 ? ` − deposit ${formatMoney(Number(b.common_part), currency)}` : ''}
+                  {Number(b.paid_own ?? 0) > 0 ? ` · paid ${formatMoney(Number(b.paid_own), currency)}` : ''}
+                </small>
+              </span>
+              <b className="num">{left > 0 ? formatMoney(left, currency) : '✓'}</b>
+              {left > 0 && !detail.trip.is_demo ? (
+                <button
+                  type="button"
+                  className="small-button"
+                  disabled={busy}
+                  aria-label={`${you ? 'I paid my' : `${name(b.traveller_id)} paid their`} bill: ${formatMoney(left, currency)}`}
+                  onClick={() =>
+                    void run(async () => {
+                      await addPayment({
+                        itemId: item.id,
+                        kind: 'balance',
+                        amount: left,
+                        paidBy: b.traveller_id,
+                        each: false,
+                        paidOn: localToday(),
+                        forPayer: true,
+                      })
+                      onChanged()
+                    }, setError)
+                  }
+                >
+                  Paid
+                </button>
+              ) : (
+                <span />
+              )}
+            </li>
+          )
+        })}
+      </ul>
+      <p className="hand payments__note">different rooms, different bills: each one is worked out for you</p>
+      {error && <FormMessage tone="error">{error}</FormMessage>}
+    </div>
   )
 }
 

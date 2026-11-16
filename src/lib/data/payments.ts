@@ -15,6 +15,8 @@ export async function addPayment(p: {
   paidBy: string | null
   each: boolean
   paidOn: string
+  /** Their own bill (after a deposit for everyone): counts only against the payer's share. */
+  forPayer?: boolean
 }): Promise<string> {
   const { data, error } = await supabase.rpc('add_payment', {
     p_item_id: p.itemId,
@@ -25,6 +27,7 @@ export async function addPayment(p: {
     p_paid_by: p.paidBy ?? undefined,
     p_paid_each: p.each,
     p_paid_on: p.paidOn,
+    p_for_payer: p.forPayer ?? false,
   })
   if (error) throw error
   return data

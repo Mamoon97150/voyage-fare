@@ -1,12 +1,18 @@
 /*
  * Voyage Fare's service worker (build 7 step 5, mockup pwa-v5, 15 Nov 2026).
  * Keeps the app itself on the phone (pages, scripts, fonts, drawings) so it opens without the
- * internet. Trips are NOT kept: Supabase and the map tiles always go to the network.
+ * internet. Build 10 (16 Nov): the trips you open are kept too (read-only offline): what Supabase
+ * answered last is saved, the network always comes first. Cleared on sign-out, or when "Keep my
+ * trips on this phone" is turned off in Me. Map tiles still always go to the network.
  * The build fills in the list of files and the version (see vite.config.ts).
  */
 const VERSION = '__VERSION__'
 const FILES = __FILES__
 const CACHE = `vf-app-${VERSION}`
+const DATA = 'vf-data'
+const OFF = '/__vf-keep-trips-off'
+// Functions that only read (safe to answer from the phone): the trip's money, Your trips.
+const READ_RPC = new Set(['trip_settlement', 'trip_cards', 'am_i_admin', 'shared_trip'])
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -28,10 +34,63 @@ self.addEventListener('activate', (event) => {
   )
 })
 
+// ── Trips, read-only offline (build 10) ──────────────────────────────────────
+// Supabase's data (rest/v1: tables, views and the read-only functions) — never auth or storage.
+const isData = (url) => url.hostname.endsWith('.supabase.co') && url.pathname.startsWith('/rest/v1/')
+
+async function keyFor(request) {
+  if (request.method === 'GET') return request.url
+  // A function call (POST): the same call = the same address + the same body.
+  const body = await request.clone().text()
+  const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(body))
+  const hex = [...new Uint8Array(hash)].map((b) => b.toString(16).padStart(2, '0')).join('')
+  return `${request.url}#${hex}`
+}
+
+async function keepingOn(cache) {
+  return !(await cache.match(OFF))
+}
+
+async function networkFirst(request) {
+  const key = await keyFor(request)
+  const cache = await caches.open(DATA)
+  try {
+    const response = await fetch(request)
+    if (response.ok && (await keepingOn(cache))) cache.put(key, response.clone())
+    return response
+  } catch (error) {
+    const kept = await cache.match(key)
+    if (kept) return kept
+    throw error
+  }
+}
+
+self.addEventListener('message', (event) => {
+  const type = event.data?.type
+  if (type === 'forget-trips') event.waitUntil(caches.delete(DATA))
+  if (type === 'keep-trips') {
+    event.waitUntil(
+      caches.open(DATA).then(async (cache) => {
+        if (event.data.on) return cache.delete(OFF)
+        // Off: forget everything kept, and remember not to keep more.
+        for (const k of await cache.keys()) await cache.delete(k)
+        return cache.put(OFF, new Response('off'))
+      }),
+    )
+  }
+})
+
 self.addEventListener('fetch', (event) => {
   const request = event.request
-  if (request.method !== 'GET') return
   const url = new URL(request.url)
+  if (isData(url)) {
+    const rpc = url.pathname.startsWith('/rest/v1/rpc/') ? url.pathname.slice('/rest/v1/rpc/'.length) : null
+    if (request.method === 'GET' || (request.method === 'POST' && rpc && READ_RPC.has(rpc))) {
+      event.respondWith(networkFirst(request))
+    }
+    return
+  }
+  if (request.method !== 'GET') return
   if (url.origin !== self.location.origin) return
 
   // ignoreVary: the server answers "Vary: Origin", and scripts are asked for with an Origin.

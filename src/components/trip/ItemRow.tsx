@@ -158,7 +158,10 @@ export function ItemRow({
         )}
         {photo && <GluedPhoto src={photo} className="item-row__photo" />}
         <span className="item-row__main">
-          <span className="item-row__name">{title}</span>
+          <span className="item-row__name">
+            {title}
+            {item.is_cash && <span className="cash-tag">cash</span>}
+          </span>
           {meta && <span className="item-row__meta">{meta}</span>}
           {(item.link || item.verdict) && (
             <span className="item-row__meta item-row__source">

@@ -1,3 +1,4 @@
+import { tellWorker } from './pwa'
 import { useEffect, useState, type ReactNode } from 'react'
 import { Navigate, useLocation } from 'react-router'
 import { AuthContext, useAuth, type AuthState } from './authContext'
@@ -12,7 +13,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     supabase.auth.getSession().then(({ data }) => {
       if (active) setState({ session: data.session })
     })
-    const { data } = supabase.auth.onAuthStateChange((_event, session) => setState({ session }))
+    const { data } = supabase.auth.onAuthStateChange((event, session) => {
+      // Signed out: the trips kept on this phone for offline reading go too (build 10).
+      if (event === 'SIGNED_OUT') tellWorker({ type: 'forget-trips' })
+      setState({ session })
+    })
     return () => {
       active = false
       data.subscription.unsubscribe()

@@ -300,3 +300,69 @@
   border-top: 1.5px solid var(--ink);
   font-weight: 600;
 }
+
+/* Who pays together (build 10): a group in Balances shows its people overlapping */
+.line--who .avatars {
+  min-height: 0;
+}
+
+/* Trip settings: who pays together (build 10) */
+.pay-groups {
+  margin-top: var(--space-5);
+}
+.pay-groups__title {
+  font-size: var(--text-2xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--ink-soft);
+  padding-bottom: var(--space-1);
+  border-bottom: 1px solid var(--line);
+}
+.pay-groups__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.pay-groups__tie {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--space-2);
+  align-items: center;
+  padding: var(--space-2) var(--space-3);
+  margin-top: var(--space-2);
+  border: 1.5px dashed var(--line);
+  border-radius: 10px;
+}
+.pay-groups__tie .avatars {
+  min-height: 0;
+}
+.pay-groups__tie small {
+  display: block;
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+}
+.pay-groups__picker {
+  margin-top: var(--space-2);
+}
+.pay-groups__check {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  gap: var(--space-2);
+  align-items: center;
+  min-height: 44px;
+  border-bottom: 1px solid var(--line);
+}
+.pay-groups__check small {
+  color: var(--ink-soft);
+  font-size: var(--text-xs);
+}
+
+.who-for__groups {
+  margin-bottom: var(--space-2);
+}
+
+.pay-together__done {
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+}

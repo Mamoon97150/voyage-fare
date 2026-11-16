@@ -4,7 +4,10 @@ import { FeedbackSheet } from '../components/FeedbackSheet'
 import { HomeNav } from '../components/HomeNav'
 import { SketchBox } from '../components/Sketch'
 import { useAuth } from '../lib/authContext'
-import { useInstallCard } from '../lib/pwa'
+import { keepTrips, setKeepTrips, useInstallCard } from '../lib/pwa'
+import { pushState, turnOff, turnOn, type PushState } from '../lib/push'
+import { FormMessage } from '../components/AuthForm'
+import { useSaving } from '../lib/useSaving'
 import { DEMO_LINK } from '../lib/site'
 import { supabase } from '../lib/supabase'
 import { useAdmin } from '../lib/useAdmin'
@@ -77,6 +80,8 @@ export function Me() {
           <h2 className="me__title">The app</h2>
           <ul className="me__rows">
             {canInstall && <Row onClick={putOnPhone} label="Put it on my phone" />}
+            <RemindersSwitch />
+            <KeepTripsSwitch />
             <Row onClick={() => setFeedback(true)} label="Send feedback" sub="something broken, unclear, an idea" />
             <Row to={DEMO_LINK} label="See the demo" />
             <Row to="/privacy" label="Privacy" />
@@ -135,6 +140,75 @@ function Row({ to, onClick, label, sub }: { to?: string; onClick?: () => void; l
           {inner}
         </button>
       )}
+    </li>
+  )
+}
+
+/** Reminders (build 10): a notification 3 days before a balance is due, and on the day. */
+function RemindersSwitch() {
+  const [state, setState] = useState<PushState>()
+  const [error, setError] = useState<string>()
+  const { busy, run } = useSaving()
+  useEffect(() => {
+    pushState()
+      .then(setState)
+      .catch(() => setState('unsupported'))
+  }, [])
+  if (!state || state === 'unsupported') return null
+  const hint: Record<PushState, string> = {
+    on: '3 days before a balance is due, and on the day',
+    off: '3 days before a balance is due, and on the day',
+    unsupported: '',
+    'needs-home-screen': 'on iPhone, put Voyage Fare on your home screen first, then open it from there',
+    blocked: 'notifications are blocked for Voyage Fare in this phone’s settings',
+  }
+  return (
+    <li>
+      <button
+        type="button"
+        className="me__row copy-ai__switch"
+        aria-pressed={state === 'on'}
+        disabled={busy || state === 'needs-home-screen' || state === 'blocked'}
+        onClick={() =>
+          void run(async () => {
+            if (state === 'on') await turnOff()
+            else await turnOn()
+            setState(await pushState())
+          }, setError)
+        }
+      >
+        <span>
+          Reminders
+          <small>{busy ? 'one moment…' : hint[state]}</small>
+        </span>
+        <span className={`toggle-pill${state === 'on' ? ' toggle-pill--on' : ''}`} aria-hidden="true" />
+      </button>
+      {error && <FormMessage tone="error">{error}</FormMessage>}
+    </li>
+  )
+}
+
+/** Keep my trips on this phone (build 10): the trips you open stay readable with no signal. */
+function KeepTripsSwitch() {
+  const [on, setOn] = useState(keepTrips)
+  if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return null
+  return (
+    <li>
+      <button
+        type="button"
+        className="me__row copy-ai__switch"
+        aria-pressed={on}
+        onClick={() => {
+          setKeepTrips(!on)
+          setOn(!on)
+        }}
+      >
+        <span>
+          Keep my trips on this phone
+          <small>to read them with no signal (airport, metro)</small>
+        </span>
+        <span className={`toggle-pill${on ? ' toggle-pill--on' : ''}`} aria-hidden="true" />
+      </button>
     </li>
   )
 }

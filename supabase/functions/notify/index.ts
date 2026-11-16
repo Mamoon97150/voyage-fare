@@ -4,7 +4,9 @@
 //    x-hook-token, a secret only the server knows);
 //  · by Resend when hello@ receives an email (it only triggers a check: we ask Resend for unread
 //    conversations we haven't announced yet, so a fake call can't invent a notification);
-//  · by an admin's app: "key" (the public key to subscribe a phone) and "test".
+//  · by anyone's app (build 10: reminders are for everyone): "key" (the public key to subscribe a
+//    phone) and "test";
+//  · by the daily job (x-hook-token, type "reminders"): balances due in 3 days, or today.
 // The notification keys are made here the first time and kept in private.push_settings.
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import postgres from 'npm:postgres@3.4.5'
@@ -54,6 +56,40 @@ async function send(message: { title: string; body: string; url: string; tag: st
       const status = (e as { statusCode?: number }).statusCode
       if (status === 404 || status === 410) await sql`delete from public.push_subscriptions where endpoint = ${p.endpoint}`
     }
+  }
+  return sent
+}
+
+const money = (amount: number, currency: string) =>
+  new Intl.NumberFormat('fr-FR', { style: 'currency', currency, maximumFractionDigits: 0 }).format(amount)
+
+/**
+ * Reminders (build 10): every booked line with a balance due in 3 days or today, to each person on
+ * the trip with an account and the app's notifications on. "Your part" when each pays their own
+ * bill; nothing for someone whose own bill is already paid.
+ */
+async function reminders() {
+  const rows = await sql`
+    select tr.user_id, i.id as item_id, i.name, t.name as trip, t.id as trip_id, t.currency,
+           l.left_to_pay, (l.due_on - current_date) as days,
+           b.left_to_pay as my_left, coalesce(b.paid_own, 0) as my_paid,
+           exists (select 1 from public.payments p where p.item_id = i.id and not p.for_payer) as has_common
+    from public.v_item_left l
+    join public.items i on i.id = l.item_id
+    join public.trips t on t.id = l.trip_id
+    join public.travellers tr on tr.trip_id = t.id and tr.user_id is not null
+    left join public.v_item_bills b on b.item_id = i.id and b.traveller_id = tr.id
+    where l.left_to_pay > 0 and l.due_on is not null and (l.due_on - current_date) in (0, 3)`
+  let sent = 0
+  for (const r of rows) {
+    const own = r.has_common && r.my_left !== null
+    if (own && Number(r.my_left) <= 0) continue
+    const when = Number(r.days) === 0 ? 'balance due today' : 'balance due in 3 days'
+    const amount = own ? `your part: ${money(Number(r.my_left), r.currency)}` : `${money(Number(r.left_to_pay), r.currency)} left to pay`
+    sent += await send(
+      { title: `${r.name} · ${when}`, body: `${amount} · ${r.trip}`, url: `/trips/${r.trip_id}/budget`, tag: `due-${r.item_id}-${r.days}` },
+      r.user_id,
+    )
   }
   return sent
 }
@@ -115,6 +151,7 @@ Deno.serve(async (req) => {
       const s = await settings()
       if (token !== s.hook_token) return reply({ error: 'Not allowed' }, 403)
       if (input.type === 'feedback' && typeof input.id === 'string') return reply({ sent: await newFeedback(input.id) })
+      if (input.type === 'reminders') return reply({ sent: await reminders() })
       // ai-read: 80 % of this month's AI reading cap is used (sent once a month).
       if (input.type === 'ai_budget')
         return reply({
@@ -131,18 +168,17 @@ Deno.serve(async (req) => {
     // 2. Resend: hello@ received an email (only a nudge to check).
     if (input.type === 'inbox.email.received' || input.type === 'email.received') return reply({ sent: await newMail() })
 
-    // 3. An admin's app.
+    // 3. Someone's app (signed in): turning notifications on for this phone.
     const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_ANON_KEY')!, {
       global: { headers: { Authorization: req.headers.get('Authorization') ?? '' } },
     })
-    const { data: isAdmin } = await supabase.rpc('am_i_admin')
-    if (isAdmin !== true) return reply({ error: 'Admins only' }, 403)
+    const { data: me } = await supabase.auth.getUser()
+    if (!me.user) return reply({ error: 'Sign in first' }, 401)
     if (input.action === 'key') return reply({ key: (await settings()).vapid_public })
     if (input.action === 'test') {
-      const { data: me } = await supabase.auth.getUser()
       const sent = await send(
-        { title: 'Voyage Fare', body: 'Notifications are on for this phone ✓', url: '/admin', tag: 'test' },
-        me.user?.id,
+        { title: 'Voyage Fare', body: 'Notifications are on for this phone ✓', url: '/me', tag: 'test' },
+        me.user.id,
       )
       return reply({ sent })
     }

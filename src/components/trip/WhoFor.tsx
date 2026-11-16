@@ -4,6 +4,7 @@ import { compareLink, roomsOf } from '../../lib/options'
 import { setItemSplit, type Item, type TripDetail } from '../../lib/trips'
 import { FormMessage } from '../AuthForm'
 import { useSaving } from '../../lib/useSaving'
+import { joinNames } from '../../lib/moneyPages'
 
 /**
  * "Split between…" (SR-3, build 4): who a line is for. Everyone by default; tap a name to take
@@ -58,12 +59,61 @@ export function WhoFor({ detail, item, onChanged }: { detail: TripDetail; item: 
     )
   }
 
+  async function pick(next: string[]) {
+    const before = on
+    setOn(next)
+    setError(undefined)
+    await run(
+      async () => {
+        await setItemSplit(item.id, next.length === everyone.length ? [] : next)
+        onChanged()
+      },
+      (message) => {
+        setOn(before)
+        setError(message)
+      },
+    )
+  }
+
+  // Who pays together (build 10): each group is one tap, next to Everyone.
+  const groups = [...new Set(detail.travellers.map((t) => t.pay_group_id).filter(Boolean))] as string[]
+  const groupMembers = (g: string) => detail.travellers.filter((t) => t.pay_group_id === g).map((t) => t.id)
+  const same = (a: string[], b: string[]) => a.length === b.length && a.every((x) => b.includes(x))
+
   const out = detail.travellers.filter((t) => !on.includes(t.id)).map((t) => t.name)
   return (
     <div className="who-for" role="group" aria-labelledby={`who-for-${item.id}`}>
       <p id={`who-for-${item.id}`} className="field__label">
         Who it’s for
       </p>
+      {groups.length > 0 && (
+        <div className="who-for__names who-for__groups">
+          <button
+            type="button"
+            className="chip"
+            aria-pressed={on.length === everyone.length}
+            disabled={busy}
+            onClick={() => void pick(everyone)}
+          >
+            Everyone
+          </button>
+          {groups.map((g) => {
+            const ids = groupMembers(g)
+            return (
+              <button
+                key={g}
+                type="button"
+                className="chip"
+                aria-pressed={same(on, ids)}
+                disabled={busy}
+                onClick={() => void pick(ids)}
+              >
+                {joinNames(detail.travellers.filter((t) => ids.includes(t.id)).map((t) => t.name))}
+              </button>
+            )
+          })}
+        </div>
+      )}
       <div className="who-for__names">
         {detail.travellers.map((t) => {
           const picked = on.includes(t.id)

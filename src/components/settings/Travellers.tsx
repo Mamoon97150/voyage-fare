@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { FormMessage } from '../AuthForm'
 import { SketchBox } from '../Sketch'
+import { PayGroups } from './PayGroups'
 import {
   addTraveller,
   cancelInvitation,
@@ -102,6 +103,7 @@ export function Travellers({
           </button>
         </form>
         {error && <FormMessage tone="error">{error}</FormMessage>}
+        <PayGroups detail={detail} onChanged={onChanged} />
       </SketchBox>
       {canInvite && travellers.length > 1 && (
         <p className="settings__margin-note">No need to invite everyone: a name is enough to count their share.</p>

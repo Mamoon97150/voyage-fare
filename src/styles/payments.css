@@ -149,3 +149,35 @@
   font-size: var(--text-note);
   color: var(--estimated-text);
 }
+
+/* Then each pays their own (build 10) */
+.own-bills {
+  margin-top: var(--space-3);
+}
+.own-bills .payments__row {
+  grid-template-columns: minmax(0, 1fr) auto minmax(3.2rem, auto);
+}
+
+/* I paid cash (build 10) */
+.cash-form__amount .field__input {
+  font-size: var(--text-xl);
+  font-weight: 600;
+}
+.cash-form__about {
+  padding-left: var(--space-3);
+  font-size: var(--text-xl);
+  color: var(--ink-soft);
+}
+.cash-tag {
+  display: inline-block;
+  margin-left: 0.35rem;
+  padding: 0 0.35rem;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  vertical-align: 1px;
+}

@@ -192,3 +192,14 @@ body {
   transform: translateX(-50%);
   z-index: 60;
 }
+
+/* Offline = read only (build 10): what changes the trip is greyed out until the connection is back. */
+body.is-offline .add-row,
+body.is-offline .day-prompt,
+body.is-offline .ghost-line,
+body.is-offline .small-button,
+body.is-offline form .button--primary,
+body.is-offline .add-item {
+  opacity: 0.45;
+  pointer-events: none;
+}

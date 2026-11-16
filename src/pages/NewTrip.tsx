@@ -5,7 +5,8 @@ import { CityField } from '../components/CityField'
 import { emptyCity, type CityValue } from '../lib/places'
 import { SketchBox } from '../components/Sketch'
 import { useAuth } from '../lib/authContext'
-import { createTrip } from '../lib/trips'
+import { createTrip, groupByPosition } from '../lib/trips'
+import { joinNames } from '../lib/moneyPages'
 import { parseAmount } from '../lib/money'
 import { CURRENCIES, currencyLabel } from '../lib/tripText'
 import { useSaving } from '../lib/useSaving'
@@ -29,6 +30,9 @@ export function NewTrip() {
   const [currency, setCurrency] = useState('EUR')
   const [target, setTarget] = useState('')
   const [scope, setScope] = useState<'per_person' | 'total'>('per_person')
+  // Who pays together (build 10): groups by position in the list (0 = you), 3+ travellers only.
+  const [groups, setGroups] = useState<number[][]>([])
+  const [building, setBuilding] = useState<number[]>([])
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [formError, setFormError] = useState<string>()
   const { busy, run } = useSaving()
@@ -63,6 +67,9 @@ export function NewTrip() {
         targetAmount: amount,
         targetScope: scope,
       })
+      const all = [...groups, building].filter((g) => g.length >= 2)
+      // The trip exists either way: a group that fails can be set again in Trip settings.
+      if (all.length) await groupByPosition(id, all).catch(() => undefined)
       navigate(`/trips/${id}`, { replace: true })
     }, setFormError)
   }
@@ -237,6 +244,13 @@ export function NewTrip() {
                 Add a traveller
               </button>
             </SketchBox>
+            <PayTogether
+              names={[me, ...others.map((o) => o.trim()).filter(Boolean)]}
+              groups={groups}
+              building={building}
+              setGroups={setGroups}
+              setBuilding={setBuilding}
+            />
             <p className="screen__note">You can invite them to edit the trip later, from its settings.</p>
             <button
               type="button"
@@ -335,5 +349,70 @@ export function NewTrip() {
         )}
       </form>
     </div>
+  )
+}
+
+/** "Anyone paying together?" (mockup money-v6 screen 2): only with 3+ travellers; skipping is fine. */
+function PayTogether({
+  names,
+  groups,
+  building,
+  setGroups,
+  setBuilding,
+}: {
+  names: string[]
+  groups: number[][]
+  building: number[]
+  setGroups: (g: number[][]) => void
+  setBuilding: (b: number[]) => void
+}) {
+  if (names.length < 3) return null
+  const taken = (i: number) => groups.some((g) => g.includes(i))
+  const label = (g: number[]) => joinNames(g.map((i) => (i === 0 ? `${names[0]} (you)` : names[i])))
+  const toggle = (i: number) => setBuilding(building.includes(i) ? building.filter((x) => x !== i) : [...building, i])
+  return (
+    <SketchBox className="form__sheet pay-together" seed={13}>
+      <h2 className="sheet-title">Anyone paying together?</h2>
+      <p className="hand-note">a couple, a family… they’ll settle up as one</p>
+      {groups.map((g, k) => (
+        <p key={k} className="pay-together__done">
+          {label(g)} pay together{' '}
+          <button type="button" className="link-button" onClick={() => setGroups(groups.filter((_, j) => j !== k))}>
+            Undo
+          </button>
+        </p>
+      ))}
+      <div className="pay-groups__picker">
+        {names.map((n, i) =>
+          taken(i) ? null : (
+            <label key={i} className="pay-groups__check">
+              <input type="checkbox" checked={building.includes(i)} onChange={() => toggle(i)} />
+              <span className={`avatar${i === 0 ? ' avatar--me' : ''}`} aria-hidden="true">
+                {n.slice(0, 1).toUpperCase()}
+              </span>
+              <span>{i === 0 ? `${n} (you)` : n}</span>
+            </label>
+          ),
+        )}
+      </div>
+      {building.length >= 2 && (
+        <>
+          <p className="field__hint">{label(building)} will pay together</p>
+          <button
+            type="button"
+            className="add-row"
+            onClick={() => {
+              setGroups([...groups, building])
+              setBuilding([])
+            }}
+          >
+            <span className="add-row__plus" aria-hidden="true">
+              +
+            </span>
+            Add another group
+          </button>
+        </>
+      )}
+    </SketchBox>
   )
 }

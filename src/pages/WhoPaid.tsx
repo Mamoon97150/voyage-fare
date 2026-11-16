@@ -4,7 +4,15 @@ import { Card, MoneyScreen, type MoneyPage } from '../components/MoneyScreen'
 import { Sketch, SketchBox } from '../components/Sketch'
 import { explainAuthError } from '../lib/authForm'
 import { formatMoney, formatWhole, parseAmount } from '../lib/money'
-import { balanceLines, bookedLines, headline, paidLines, repaymentLines, settleWords } from '../lib/moneyPages'
+import {
+  balanceLines,
+  betweenLines,
+  bookedLines,
+  headline,
+  paidLines,
+  repaymentLines,
+  settleWords,
+} from '../lib/moneyPages'
 import { addRepayment, deleteRepayment } from '../lib/trips'
 import { localToday } from '../lib/tripText'
 import { useSaving } from '../lib/useSaving'
@@ -37,6 +45,14 @@ function Pages({ detail, money, viewer, reload }: MoneyPage) {
   const booked = bookedLines(detail)
   const repaid = repaymentLines(detail, money, viewer)
   const paidTotal = paid.reduce((s, l) => s + (l.amount ?? 0), 0)
+  const between = betweenLines(detail, money, viewer)
+  const myGroup = detail.travellers.find((t) => t.id === viewer)?.pay_group_id
+  const groupSize = myGroup ? detail.travellers.filter((t) => t.pay_group_id === myGroup).length : 0
+  const initial = (id: string) =>
+    detail.travellers
+      .find((t) => t.id === id)
+      ?.name.slice(0, 1)
+      .toUpperCase() ?? '?'
 
   return (
     <>
@@ -67,6 +83,7 @@ function Pages({ detail, money, viewer, reload }: MoneyPage) {
                 page={{ detail, money, viewer, reload }}
                 from={s.from_traveller}
                 to={s.to_traveller}
+                groups={{ from: s.from_group, to: s.to_group }}
                 amount={s.amount}
               />
             ))}
@@ -78,8 +95,12 @@ function Pages({ detail, money, viewer, reload }: MoneyPage) {
         <ul className="lines">
           {balanceLines(detail, money).map((b) => (
             <li key={b.id} className="line line--who">
-              <span className={`avatar${b.id === viewer ? ' avatar--me' : ''}`} aria-hidden="true">
-                {b.name.slice(0, 1).toUpperCase()}
+              <span className="avatars" aria-hidden="true">
+                {b.members.map((m) => (
+                  <span key={m} className={`avatar${m === viewer ? ' avatar--me' : ''}`}>
+                    {initial(m)}
+                  </span>
+                ))}
               </span>
               <span>
                 <span className="line__name">{b.name}</span>
@@ -97,6 +118,20 @@ function Pages({ detail, money, viewer, reload }: MoneyPage) {
           ))}
         </ul>
       </Card>
+
+      {between.length > 0 && (
+        <Card
+          title={groupSize === 2 ? 'Between you two' : 'Inside your group'}
+          small="only your group sees this"
+          seed={86}
+        >
+          <ul className="lines">
+            {between.map((l) => (
+              <BetweenRow key={`${l.from}-${l.to}`} page={{ detail, money, viewer, reload }} line={l} />
+            ))}
+          </ul>
+        </Card>
+      )}
 
       <Card title="Paid so far" total={paid.length ? formatWhole(paidTotal, currency) : undefined} seed={83}>
         {paid.length === 0 ? (
@@ -168,11 +203,23 @@ function Pages({ detail, money, viewer, reload }: MoneyPage) {
 type Ctx = Pick<MoneyPage, 'detail' | 'money' | 'viewer' | 'reload'>
 
 /** One of the payments that settle everything; "Paid back" records it, after one check. */
-function SettleRow({ page, from, to, amount }: { page: Ctx; from: string; to: string; amount: number }) {
+function SettleRow({
+  page,
+  from,
+  to,
+  groups,
+  amount,
+}: {
+  page: Ctx
+  from: string
+  to: string
+  groups?: { from?: string | null; to?: string | null }
+  amount: number
+}) {
   const { detail, viewer, reload } = page
   const [asking, setAsking] = useState(false)
   const [error, setError] = useState<string>()
-  const words = settleWords(detail, from, to, viewer)
+  const words = settleWords(detail, from, to, viewer, groups)
   const fromName = detail.travellers.find((t) => t.id === from)?.name ?? ''
   const currency = detail.trip.currency
 
@@ -216,6 +263,46 @@ function SettleRow({ page, from, to, amount }: { page: Ctx; from: string; to: st
         {error && <FormMessage tone="error">{error}</FormMessage>}
       </span>
       <b className="line__amount num">{formatMoney(amount, currency)}</b>
+    </li>
+  )
+}
+
+/** "You owe Danielle 40 €: she paid your massage" — inside a group; "Paid back" records it. */
+function BetweenRow({ page, line }: { page: Ctx; line: ReturnType<typeof betweenLines>[number] }) {
+  const { detail, reload } = page
+  const [error, setError] = useState<string>()
+  const { busy, run } = useSaving()
+  const currency = detail.trip.currency
+  return (
+    <li className="line">
+      <span>
+        <span className="line__name">{line.words}</span>
+        {line.why && <span className="line__meta">{line.why}</span>}
+        {!detail.trip.is_demo && (
+          <button
+            type="button"
+            className="small-button"
+            disabled={busy}
+            onClick={() =>
+              void run(async () => {
+                await addRepayment({
+                  tripId: detail.trip.id,
+                  from: line.from,
+                  to: line.to,
+                  amount: line.amount,
+                  paidOn: localToday(),
+                })
+                reload()
+              }, setError)
+            }
+            aria-label={`Paid back: ${line.words}`}
+          >
+            Paid back
+          </button>
+        )}
+        {error && <FormMessage tone="error">{error}</FormMessage>}
+      </span>
+      <b className="line__amount num">{formatMoney(line.amount, currency)}</b>
     </li>
   )
 }

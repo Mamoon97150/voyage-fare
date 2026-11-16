@@ -162,6 +162,30 @@ export function useInstallCard() {
 
 // ── Offline ───────────────────────────────────────────────────────────────────
 
+/** A word to the service worker (forget the kept trips, keep them or not). Nothing without one. */
+export function tellWorker(message: { type: 'forget-trips' } | { type: 'keep-trips'; on: boolean }) {
+  if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return
+  void navigator.serviceWorker.ready.then((r) => r.active?.postMessage(message)).catch(() => undefined)
+}
+
+const KEEP = 'vf-keep-trips'
+/** "Keep my trips on this phone" (Me, build 10): on unless turned off on this phone. */
+export function keepTrips(): boolean {
+  try {
+    return localStorage.getItem(KEEP) !== 'off'
+  } catch {
+    return true
+  }
+}
+export function setKeepTrips(on: boolean) {
+  try {
+    localStorage.setItem(KEEP, on ? 'on' : 'off')
+  } catch {
+    // Private browsing: the worker still hears it for now.
+  }
+  tellWorker({ type: 'keep-trips', on })
+}
+
 /** Is there a connection? Follows the phone's own online / offline events. */
 export function useOnline(): boolean {
   const [online, setOnline] = useState(() => navigator.onLine)

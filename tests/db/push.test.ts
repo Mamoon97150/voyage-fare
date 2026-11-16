@@ -28,8 +28,8 @@ async function refused(database: PGlite, sql: string) {
 const sub = (endpoint: string) =>
   `insert into push_subscriptions (endpoint, p256dh, auth) values ('${endpoint}', 'k', 'a')`
 
-describe('phone notifications for admins', () => {
-  it('an admin subscribes their phone; nobody else can, and nobody reads the keys', async () => {
+describe('phone notifications (admins, and reminders for everyone since build 10)', () => {
+  it('anyone subscribes their own phone; nobody sees another’s, and nobody reads the keys', async () => {
     await actAs(db, { user: dj })
     await db.exec(sub('https://push.test/dj-phone'))
     expect(await rows(db, 'select endpoint from push_subscriptions')).toEqual([
@@ -38,8 +38,8 @@ describe('phone notifications for admins', () => {
     expect(await refused(db, 'select * from private.push_settings')).toBe(true)
 
     await actAs(db, { user: ana })
-    expect(await refused(db, sub('https://push.test/ana'))).toBe(true) // not an admin
-    expect(await rows(db, 'select * from push_subscriptions')).toEqual([]) // can't see others'
+    await db.exec(sub('https://push.test/ana')) // reminders: not only admins (build 10)
+    expect(await rows(db, 'select endpoint from push_subscriptions')).toEqual([{ endpoint: 'https://push.test/ana' }])
     expect(await refused(db, 'select * from private.push_settings')).toBe(true)
 
     await actAs(db, 'owner')
