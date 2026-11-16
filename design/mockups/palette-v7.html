@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pen kit palettes (v7, 16 Nov)</title>
+    <script type="module">
+      import '/src/index.css'
+      import './forms.css'
+      import './v4.css'
+      import './v5.js'
+    </script>
+    <script type="module">
+      // Drawn buttons (direction A, chosen 16 Nov), in each palette's pens.
+      import rough from 'roughjs'
+      await document.fonts.ready
+      await new Promise((r) => (document.readyState === 'complete' ? r() : addEventListener('load', r)))
+      let seed = 21
+      for (const el of document.querySelectorAll('[data-rough]')) {
+        const { width: w, height: h } = el.getBoundingClientRect()
+        const scope = el.closest('[class*="pal-"]') ?? document.documentElement
+        const color = getComputedStyle(scope).getPropertyValue(el.dataset.color || '--pen').trim()
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+        svg.setAttribute('class', 'rough-layer')
+        svg.setAttribute('viewBox', `0 0 ${w} ${h}`)
+        const rc = rough.svg(svg)
+        const o = { seed: seed++, roughness: 1.6, bowing: 0.8, strokeWidth: 1.3, stroke: color }
+        const k = el.dataset.rough
+        if (k === 'box') {
+          svg.setAttribute('filter', 'url(#vf-pencil)')
+          svg.appendChild(rc.rectangle(3, 3, w - 6, h - 6, o))
+        }
+        if (k === 'fill') svg.appendChild(rc.rectangle(3, 3, w - 6, h - 6, { ...o, fill: color, fillStyle: 'solid' }))
+        if (k === 'circle') {
+          svg.setAttribute('filter', 'url(#vf-pencil)')
+          svg.appendChild(rc.ellipse(w / 2, h / 2, w + 8, h + 6, { ...o, roughness: 1.9 }))
+        }
+        if (k === 'bar') {
+          const paid = Number(el.dataset.paid), est = Number(el.dataset.est)
+          const g = getComputedStyle(scope)
+          svg.setAttribute('filter', 'url(#vf-crayon)')
+          if (paid) svg.appendChild(rc.rectangle(2, 3, (w - 4) * paid, h - 6, { seed: seed++, fill: g.getPropertyValue('--paid').trim(), fillStyle: 'zigzag', hachureGap: 2.4, stroke: 'none', roughness: 1.4 }))
+          if (est) svg.appendChild(rc.rectangle(2 + (w - 4) * paid, 3, (w - 4) * est, h - 6, { seed: seed++, fill: g.getPropertyValue('--est').trim(), fillStyle: 'zigzag', hachureGap: 2.4, stroke: 'none', roughness: 1.4 }))
+        }
+        el.prepend(svg)
+      }
+    </script>
+    <style>
+      /* A · Pen kit (stationery: bright, clear) */
+      .pal-kit {
+        --paper: #fbf8f1; --page: #fffdf9; --rule: #e6dfcf;
+        --ink: #1e2533; --pencil: #646b78;
+        --pen: #2a5bb5; --pen-wash: #e6edf9;
+        --paid: #2b7a4b; --est: #f0b429; --est-text: #946200;
+        --red: #c8372d; --red-wash: #fbe9e6;
+        --c-travel: #8dbbe3; --c-stay: #b7a6e0; --c-act: #f2a487; --c-food: #a7cf95;
+        --tape: #f4dfa0;
+      }
+      /* B · Travel journal (earthy, warm) */
+      .pal-journal {
+        --paper: #f6f0e3; --page: #fdf9f1; --rule: #e3d8c3;
+        --ink: #2c2620; --pencil: #776a5d;
+        --pen: #33508c; --pen-wash: #e7ebf3;
+        --paid: #4e7a3c; --est: #d6a043; --est-text: #8a5e14;
+        --red: #b04a35; --red-wash: #f6e4dd;
+        --c-travel: #79a9a6; --c-stay: #c9a0b6; --c-act: #dc9a7c; --c-food: #b6bf86;
+        --tape: #e5c8a8;
+      }
+      [class*='pal-'] { background: var(--paper); color: var(--ink); }
+      .rough-layer { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; z-index: -1; }
+      [data-rough] { position: relative; isolation: isolate; }
+      .hand { font-family: var(--font-hand); color: var(--pencil); line-height: 1.2; }
+      .pad { padding: var(--space-4); }
+      .kicker { font-size: var(--text-2xs); letter-spacing: .08em; text-transform: uppercase; font-weight: 700; color: var(--pencil); }
+      .t { font-family: var(--font-title); font-size: var(--text-lg); font-weight: 600; }
+      .lead { font-size: var(--text-sm); color: var(--pencil); line-height: 1.45; margin-top: var(--space-1); }
+      .pens { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-2) var(--space-3); margin-top: var(--space-3); }
+      .pen { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-xs); color: var(--pencil); line-height: 1.25; }
+      .pen i { flex: none; width: 1.9rem; height: .55rem; border-radius: 99px 3px 3px 99px; }
+      .pen b { display: block; color: var(--ink); font-size: var(--text-sm); }
+      .cats { display: flex; gap: var(--space-2); flex-wrap: wrap; margin-top: var(--space-2); }
+      .cat { display: inline-flex; align-items: center; gap: .35rem; font-size: var(--text-xs); color: var(--ink); padding: .2rem .55rem; border-radius: 99px; }
+      .cat::before { content: ''; width: .55rem; height: .55rem; border-radius: 50%; background: var(--c); }
+
+      .card { position: relative; margin-top: var(--space-4); padding: var(--space-5, 1.25rem) var(--space-4) var(--space-4); background: var(--page); border: 1px solid var(--rule); border-radius: 10px; }
+      .tp { position: absolute; top: -.55rem; left: 50%; width: 4.5rem; height: 1.15rem; transform: translateX(-50%) rotate(-3deg); background: var(--tape); opacity: .85; border-radius: 2px; }
+      .card h4 { font-family: var(--font-title); font-size: var(--text-xl); }
+      .meta { font-size: var(--text-xs); color: var(--pencil); }
+      .amt { display: flex; justify-content: space-between; align-items: baseline; margin-top: var(--space-3); }
+      .amt b { font-family: var(--font-title); font-size: var(--text-2xl); }
+      .bar { height: 1.1rem; margin-top: var(--space-2); }
+      .legend { display: flex; justify-content: space-between; font-size: var(--text-xs); margin-top: var(--space-1); }
+      .ln { display: grid; grid-template-columns: .7rem 1fr auto; gap: var(--space-2); align-items: center; padding: var(--space-2) 0; border-top: 1px solid var(--rule); font-size: var(--text-sm); }
+      .dot { width: .55rem; height: .55rem; border-radius: 50%; }
+      .ln small { display: block; font-size: var(--text-xs); color: var(--pencil); }
+      .st { font-size: .6rem; letter-spacing: .08em; text-transform: uppercase; font-weight: 700; text-align: right; }
+      .row { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; margin-top: var(--space-3); }
+      .end { justify-content: flex-end; }
+      .end .left { margin-right: auto; }
+      .x { display: inline-flex; align-items: center; justify-content: center; gap: .35rem; min-height: 2.6rem; padding: 0 1.05rem; font-size: var(--text-md); font-weight: 600; color: var(--pen); white-space: nowrap; }
+      .x--s { min-height: 2.2rem; padding: 0 .75rem; font-size: var(--text-sm); }
+      .x--main { color: var(--page); }
+      .del { color: var(--red); font-size: var(--text-sm); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+      .pick { background: var(--pen-wash); }
+      .add { display: inline-flex; align-items: center; gap: .35rem; font-size: var(--text-sm); color: var(--pen); font-weight: 500; }
+      .add i { font-style: normal; width: 1.3rem; height: 1.3rem; border-radius: 50%; border: 1.5px dashed var(--pen); display: grid; place-items: center; font-size: .75rem; }
+      .tabs { display: flex; gap: var(--space-1); margin-top: var(--space-3); }
+      .tab { padding: .35rem .6rem; font-size: var(--text-xs); border: 1px solid var(--rule); border-bottom: 0; border-radius: 8px 8px 0 0; background: var(--paper); color: var(--pencil); position: relative; }
+      .tab::after { content: ''; position: absolute; left: .4rem; right: .4rem; top: 0; height: 3px; border-radius: 2px; background: var(--c); }
+      .tab.on { background: var(--page); color: var(--ink); font-weight: 600; }
+      .warn { margin-top: var(--space-3); padding: var(--space-2) var(--space-3); border-radius: 8px; background: var(--red-wash); color: var(--red); font-size: var(--text-sm); }
+
+      .rules li { margin-bottom: var(--space-2); }
+      .k { font-size: .62rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; padding: .05rem .35rem; border-radius: 4px; margin-right: .3rem; }
+      .k--keep { background: #e3efe6; color: #2b6b47; }
+      .k--change { background: #fbefd2; color: #8a5e14; }
+      .k--drop { background: #f8e2de; color: #a3392c; }
+      .k--new { background: #e3eaf7; color: #2a4f9a; }
+    </style>
+  </head>
+  <body>
+    <div class="phones">
+
+      <!-- 1. The rules -->
+      <figure>
+        <div class="phone">
+          <div class="pad">
+            <p class="kicker">Honest review · the colour rules</p>
+            <h3 class="t">A notebook with a pen kit</h3>
+            <ul class="rules" style="margin:var(--space-3) 0 0 1rem;font-size:var(--text-sm);line-height:1.45">
+              <li><span class="k k--drop">drop</span>“Red only for over budget.” Too strict. In a notebook, <b>red pen = careful</b>: delete, a problem to fix, over budget. Rare, but not only money.</li>
+              <li><span class="k k--keep">keep</span><b>Green = booked or paid</b>, <b>mustard = estimated</b>. Clear, learned fast. They just stop being used for anything else.</li>
+              <li><span class="k k--change">widen</span><b>Blue = the option you chose</b> becomes <b>blue = your pen</b>: everything you do or pick (buttons, links, “+ Add”, what’s selected).</li>
+              <li><span class="k k--change">change</span><b>The overall tone</b>: forest ink on cream felt serious and a bit dull for a travel app. Brighter pens, still on paper.</li>
+              <li><span class="k k--new">new</span><b>Coloured pencils for categories</b> (Travel, Stay, Activities, Food): soft tints for dots, tabs and bars, never for words, so they can’t be read as a status.</li>
+              <li><span class="k k--new">new</span><b>Tapes</b> get their own colour (masking tape), not the status colours.</li>
+              <li><span class="k k--keep">keep</span>One tape per screen, sheets drawn in pencil, Lora titles, handwritten notes, no side bars.</li>
+            </ul>
+            <p class="hand" style="margin-top:var(--space-3)">the rule of thumb: pens say something, pencils decorate</p>
+          </div>
+        </div>
+        <figcaption><b>1 · The rules, kept, changed and dropped.</b> Then two pen kits (2 and 3), each shown on the same trip card and line, with the drawn buttons you chose (A).</figcaption>
+      </figure>
+
+      <!-- 2. Pen kit -->
+      <figure>
+        <div class="phone pal-kit">
+          <div class="pad">
+            <p class="kicker">Palette 1 · stationery pen kit</p>
+            <h3 class="t">Bright pens, clear meanings</h3>
+            <div class="pens">
+              <span class="pen"><i style="background:var(--ink)"></i><span><b>Black</b>the trip</span></span>
+              <span class="pen"><i style="background:var(--pen)"></i><span><b>Blue</b>what you do or pick</span></span>
+              <span class="pen"><i style="background:var(--paid)"></i><span><b>Green</b>booked, paid</span></span>
+              <span class="pen"><i style="background:var(--est)"></i><span><b>Highlighter</b>estimated</span></span>
+              <span class="pen"><i style="background:var(--red)"></i><span><b>Red</b>careful</span></span>
+              <span class="pen"><i style="background:var(--pencil)"></i><span><b>Pencil</b>hints</span></span>
+            </div>
+            <div class="cats"><span class="cat" style="--c:var(--c-travel)">Travel</span><span class="cat" style="--c:var(--c-stay)">Stay</span><span class="cat" style="--c:var(--c-act)">Activities</span><span class="cat" style="--c:var(--c-food)">Food</span></div>
+
+            <div class="card"><span class="tp"></span>
+              <p class="meta">IN 138 DAYS</p>
+              <h4>Japan in spring</h4>
+              <div class="amt"><b>1 240 €</b><span class="meta" style="color:var(--red);font-weight:600">40 € over your target</span></div>
+              <div class="bar" data-rough="bar" data-paid=".45" data-est=".55"></div>
+              <div class="legend"><span style="color:var(--paid);font-weight:600">560 € paid</span><span style="color:var(--est-text);font-weight:600">680 € estimated</span></div>
+              <div class="tabs"><span class="tab on" style="--c:var(--c-stay)">Stay</span><span class="tab" style="--c:var(--c-travel)">Travel</span><span class="tab" style="--c:var(--c-act)">Activities</span><span class="tab" style="--c:var(--c-food)">Food</span></div>
+              <div class="ln"><span class="dot" style="background:var(--paid)"></span><span>Hotel Gracery<small>Tokyo · 4 nights</small></span><span><b>640 €</b><div class="st" style="color:var(--paid)">Paid</div></span></div>
+              <div class="ln"><span class="dot" style="background:var(--est)"></span><span><span data-rough="circle" style="color:var(--pen);font-weight:600">Hotel Kanra</span><small>Kyoto · the one you chose</small></span><span><b>450 €</b><div class="st" style="color:var(--est-text)">Estimated</div></span></div>
+              <div class="row"><span class="x x--s pick" data-rough="box">✓ Stay</span><span class="x x--s" data-rough="box" data-color="--rule" style="color:var(--pencil)">Food</span><span class="add"><i>+</i>Add to Kyoto</span></div>
+              <div class="warn">! The dates are outside the trip.</div>
+              <div class="row end"><span class="del left">Delete</span><span class="x" data-rough="box">Cancel</span><span class="x x--main" data-rough="fill">Save</span></div>
+            </div>
+          </div>
+        </div>
+        <figcaption><b>2 · Stationery pen kit.</b> Royal blue, bright green, a yellow highlighter for estimates, a true red. Category pencils in sky, lilac, coral and leaf.
+          <ul><li>Feels like a fresh notebook from a stationery shop: clear and cheerful.</li></ul>
+        </figcaption>
+      </figure>
+
+      <!-- 3. Travel journal -->
+      <figure>
+        <div class="phone pal-journal">
+          <div class="pad">
+            <p class="kicker">Palette 2 · travel journal</p>
+            <h3 class="t">Warm, earthy inks</h3>
+            <div class="pens">
+              <span class="pen"><i style="background:var(--ink)"></i><span><b>Sepia black</b>the trip</span></span>
+              <span class="pen"><i style="background:var(--pen)"></i><span><b>Indigo</b>what you do or pick</span></span>
+              <span class="pen"><i style="background:var(--paid)"></i><span><b>Olive</b>booked, paid</span></span>
+              <span class="pen"><i style="background:var(--est)"></i><span><b>Ochre</b>estimated</span></span>
+              <span class="pen"><i style="background:var(--red)"></i><span><b>Terracotta</b>careful</span></span>
+              <span class="pen"><i style="background:var(--pencil)"></i><span><b>Pencil</b>hints</span></span>
+            </div>
+            <div class="cats"><span class="cat" style="--c:var(--c-travel)">Travel</span><span class="cat" style="--c:var(--c-stay)">Stay</span><span class="cat" style="--c:var(--c-act)">Activities</span><span class="cat" style="--c:var(--c-food)">Food</span></div>
+
+            <div class="card"><span class="tp"></span>
+              <p class="meta">IN 138 DAYS</p>
+              <h4>Japan in spring</h4>
+              <div class="amt"><b>1 240 €</b><span class="meta" style="color:var(--red);font-weight:600">40 € over your target</span></div>
+              <div class="bar" data-rough="bar" data-paid=".45" data-est=".55"></div>
+              <div class="legend"><span style="color:var(--paid);font-weight:600">560 € paid</span><span style="color:var(--est-text);font-weight:600">680 € estimated</span></div>
+              <div class="tabs"><span class="tab on" style="--c:var(--c-stay)">Stay</span><span class="tab" style="--c:var(--c-travel)">Travel</span><span class="tab" style="--c:var(--c-act)">Activities</span><span class="tab" style="--c:var(--c-food)">Food</span></div>
+              <div class="ln"><span class="dot" style="background:var(--paid)"></span><span>Hotel Gracery<small>Tokyo · 4 nights</small></span><span><b>640 €</b><div class="st" style="color:var(--paid)">Paid</div></span></div>
+              <div class="ln"><span class="dot" style="background:var(--est)"></span><span><span data-rough="circle" style="color:var(--pen);font-weight:600">Hotel Kanra</span><small>Kyoto · the one you chose</small></span><span><b>450 €</b><div class="st" style="color:var(--est-text)">Estimated</div></span></div>
+              <div class="row"><span class="x x--s pick" data-rough="box">✓ Stay</span><span class="x x--s" data-rough="box" data-color="--rule" style="color:var(--pencil)">Food</span><span class="add"><i>+</i>Add to Kyoto</span></div>
+              <div class="warn">! The dates are outside the trip.</div>
+              <div class="row end"><span class="del left">Delete</span><span class="x" data-rough="box">Cancel</span><span class="x x--main" data-rough="fill">Save</span></div>
+            </div>
+          </div>
+        </div>
+        <figcaption><b>3 · Travel journal.</b> Sepia ink on warmer paper, indigo pen, olive for paid, ochre for estimated, terracotta for careful. Category pencils in teal, dusty rose, apricot and sage.
+          <ul><li>Closer to today’s mood, warmer and more “carnet de voyage”.</li></ul>
+        </figcaption>
+      </figure>
+
+    </div>
+  </body>
+</html>

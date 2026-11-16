@@ -64,7 +64,7 @@
 }
 
 a {
-  color: var(--confirmed);
+  color: var(--pen);
   text-underline-offset: 0.15em;
 }
 
@@ -102,7 +102,7 @@ a {
 }
 
 .button--primary {
-  background: var(--ink);
+  background: var(--pen);
   color: var(--paper);
 }
 
@@ -196,7 +196,7 @@ a {
   border: 0;
   background: none;
   font: inherit;
-  color: var(--confirmed);
+  color: var(--pen);
   text-decoration: underline;
   text-underline-offset: 0.15em;
   cursor: pointer;
@@ -307,13 +307,13 @@ a {
 
 .form-message--error::before {
   content: '!';
-  background: var(--ink);
+  background: var(--over);
   color: var(--paper);
 }
 
 .form-message--info::before {
   content: '✓';
-  background: var(--confirmed);
+  background: var(--pen);
   color: var(--paper);
 }
 
@@ -366,11 +366,11 @@ a {
 }
 
 .tape--mustard {
-  background: color-mix(in srgb, var(--estimated) 45%, transparent);
+  background: color-mix(in srgb, var(--tape) 85%, transparent); /* washi tape, not the ochre of 'estimated' */
 }
 
 .tape--green {
-  background: color-mix(in srgb, var(--confirmed) 28%, transparent);
+  background: color-mix(in srgb, var(--tape-2) 85%, transparent);
 }
 
 .underlined {
@@ -422,7 +422,7 @@ a {
 
 .resend--sent {
   font-weight: 600;
-  color: var(--confirmed);
+  color: var(--pen);
 }
 
 .form__privacy {
@@ -473,4 +473,35 @@ a {
   padding: 0;
   font-size: var(--text-sm);
   line-height: 1.45;
+}
+
+/* Coloured pencils for categories (palette v7, 16 Nov): a small mark, never the words. */
+.cat-dot {
+  display: inline-block;
+  width: 0.55rem;
+  height: 0.55rem;
+  margin-right: 0.4rem;
+  border-radius: var(--radius-pen);
+  background: var(--cat-other);
+  vertical-align: 0.05em;
+}
+
+.cat-dot--travel,
+.cat-dot--main_transport,
+.cat-dot--around,
+.cat-dot--local_transport {
+  background: var(--cat-travel);
+}
+
+.cat-dot--stay,
+.cat-dot--accommodation {
+  background: var(--cat-stay);
+}
+
+.cat-dot--activities {
+  background: var(--cat-activity);
+}
+
+.cat-dot--food {
+  background: var(--cat-food);
 }

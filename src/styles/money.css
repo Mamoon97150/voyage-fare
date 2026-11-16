@@ -170,7 +170,7 @@
 }
 
 .plus {
-  color: var(--confirmed);
+  color: var(--pen);
 }
 
 .minus {
@@ -192,14 +192,14 @@
 }
 
 .small-button--yes {
-  border-color: var(--confirmed);
-  color: var(--confirmed);
+  border-color: var(--pen);
+  color: var(--pen);
 }
 
 .quiet-link {
   font-size: var(--text-sm);
   font-weight: 600;
-  color: var(--confirmed);
+  color: var(--pen);
 }
 
 .repay-form {

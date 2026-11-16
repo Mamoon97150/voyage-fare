@@ -61,7 +61,7 @@
 }
 
 .pill--dark {
-  background: var(--ink);
+  background: var(--pen);
   color: var(--paper);
 }
 

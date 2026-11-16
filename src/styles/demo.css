@@ -38,7 +38,7 @@
 .demo-strip__make {
   font-size: var(--text-sm);
   font-weight: 600;
-  color: var(--confirmed);
+  color: var(--pen);
   white-space: nowrap;
 }
 

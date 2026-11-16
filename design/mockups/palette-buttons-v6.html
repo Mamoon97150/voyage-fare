@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Colours by role + notebook buttons (v6, 16 Nov)</title>
+    <script type="module">
+      import '/src/index.css'
+      import './forms.css'
+      import './v4.css'
+      import './v5.js'
+    </script>
+    <script type="module">
+      // Hand-drawn buttons for this mockup: rough.js, like the sheets.
+      import rough from 'roughjs'
+      await document.fonts.ready
+      await new Promise((r) => (document.readyState === 'complete' ? r() : addEventListener('load', r)))
+      const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim()
+      let seed = 11
+      for (const el of document.querySelectorAll('[data-rough]')) {
+        const { width: w, height: h } = el.getBoundingClientRect()
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+        svg.setAttribute('class', 'rough-layer')
+        svg.setAttribute('viewBox', `0 0 ${w} ${h}`)
+        if (el.dataset.rough !== 'fill') svg.setAttribute('filter', 'url(#vf-pencil)')
+        const rc = rough.svg(svg)
+        const stroke = css(el.dataset.color || '--pen')
+        const kind = el.dataset.rough
+        const o = { seed: seed++, roughness: 1.6, bowing: 0.8, strokeWidth: 1.3, stroke }
+        if (kind === 'box') svg.appendChild(rc.rectangle(3, 3, w - 6, h - 6, o))
+        if (kind === 'fill')
+          svg.appendChild(rc.rectangle(3, 3, w - 6, h - 6, { ...o, fill: stroke, fillStyle: 'solid' }))
+        if (kind === 'hatch')
+          svg.appendChild(
+            rc.rectangle(3, 3, w - 6, h - 6, { ...o, fill: stroke, fillStyle: 'hachure', hachureGap: 3.2, fillWeight: 1.4 }),
+          )
+        if (kind === 'stamp') {
+          svg.appendChild(rc.rectangle(2, 2, w - 4, h - 4, { ...o, strokeWidth: 1.8, roughness: 2.2 }))
+          svg.appendChild(rc.rectangle(6, 6, w - 12, h - 12, { ...o, strokeWidth: 1, roughness: 1.4 }))
+        }
+        if (kind === 'circle') svg.appendChild(rc.ellipse(w / 2, h / 2, w + 6, h + 4, { ...o, roughness: 1.9 }))
+        if (kind === 'under') svg.appendChild(rc.line(2, h - 4, w - 2, h - 6, { ...o, roughness: 1.4 }))
+        if (kind === 'label') svg.appendChild(rc.rectangle(2, 2, w - 4, h - 4, { ...o, stroke: css('--pencil'), strokeWidth: 1 }))
+        el.prepend(svg)
+      }
+    </script>
+    <style>
+      :root {
+        /* The proposal: colours by role (v6). */
+        --paper: #fbf7ef;
+        --page: #fffdf8;
+        --rule: #e4dccb;
+        --ink: #1f2a24; /* printed: the trip itself */
+        --pencil: #55615a; /* hints, small print */
+        --faint: #8b958f; /* placeholders, switched off */
+        --pen: #2c4a7a; /* your blue pen: what you do and what you pick */
+        --pen-wash: color-mix(in srgb, var(--pen) 9%, transparent);
+        --est: #e2a93b; --est-ink: #b07d1a; --est-text: #8f6412; /* estimated */
+        --paid: #2f6b4f; /* booked or paid */
+        --over: #c2513f; /* over budget, or something to fix */
+        --tape: #e6d9b8; --tape-sage: #cfdccb; --tape-rose: #edd3cb; /* decoration only */
+      }
+      .rough-layer { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; z-index: -1; }
+      [data-rough] { position: relative; isolation: isolate; }
+      [data-rough] > *:not(.rough-layer) { position: relative; }
+      .hand { font-family: var(--font-hand); color: var(--pencil); line-height: 1.2; }
+      .pad { padding: var(--space-4); }
+      .kicker { font-size: var(--text-2xs); letter-spacing: .08em; text-transform: uppercase; font-weight: 700; color: var(--pencil); margin-top: var(--space-4); }
+      .t { font-family: var(--font-title); font-size: var(--text-lg); font-weight: 600; color: var(--ink); }
+      .lead { font-size: var(--text-sm); color: var(--pencil); line-height: 1.45; margin-top: var(--space-1); }
+      .sw { display: grid; grid-template-columns: 2.4rem 1fr; gap: var(--space-3); align-items: center; padding: var(--space-2) 0; border-bottom: 1px solid var(--rule); font-size: var(--text-xs); color: var(--pencil); }
+      .sw i { width: 2.4rem; height: 2.4rem; border-radius: 8px; border: 1px solid rgba(0,0,0,.08); }
+      .sw b { display: block; font-size: var(--text-sm); color: var(--ink); }
+      .grp { font-size: var(--text-2xs); letter-spacing: .08em; text-transform: uppercase; font-weight: 700; color: var(--ink); margin-top: var(--space-4); }
+      .tapes { display: flex; gap: var(--space-3); margin-top: var(--space-2); }
+      .tapes span { width: 4.5rem; height: 1.2rem; transform: rotate(-3deg); border-radius: 2px; }
+
+      /* sample sheet, shared by the 3 directions */
+      .sheet { margin-top: var(--space-3); padding: var(--space-4); background: var(--page); border: 1px solid var(--rule); border-radius: 10px; }
+      .sheet h4 { font-family: var(--font-title); font-size: var(--text-lg); color: var(--ink); }
+      .lbl { font-size: var(--text-2xs); letter-spacing: .08em; text-transform: uppercase; font-weight: 700; color: var(--pencil); margin: var(--space-3) 0 var(--space-2); }
+      .row { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
+      .end { justify-content: flex-end; margin-top: var(--space-4); }
+      .end .left { margin-right: auto; }
+      .x { display: inline-flex; align-items: center; justify-content: center; gap: .35rem; min-height: 2.75rem; padding: 0 1.1rem; font-size: var(--text-md); font-weight: 600; color: var(--pen); background: none; border: 0; font-family: inherit; white-space: nowrap; }
+      .x--s { min-height: 2.25rem; padding: 0 .8rem; font-size: var(--text-sm); }
+      .x--main { color: var(--page); }
+      .x--txt { min-height: 2.75rem; padding: 0 .2rem; font-weight: 500; color: var(--pencil); font-size: var(--text-sm); }
+      .add { display: inline-flex; align-items: center; gap: .4rem; font-size: var(--text-sm); font-weight: 500; color: var(--pen); min-height: 2.75rem; }
+      .add i { font-style: normal; width: 1.35rem; height: 1.35rem; border-radius: 50%; border: 1.5px dashed var(--pen); display: grid; place-items: center; font-size: .8rem; }
+      .seg { display: flex; gap: var(--space-1); }
+      .pick { background: var(--pen-wash); }
+      .stamp { text-transform: uppercase; letter-spacing: .12em; font-size: var(--text-xs); font-weight: 800; transform: rotate(-1.5deg); }
+      .labelbtn { background: var(--page); box-shadow: 0 1px 0 rgba(0,0,0,.06), 0 2px 6px rgba(31,42,36,.08); border-radius: 3px; color: var(--ink); }
+      .topbar { display: flex; align-items: center; gap: var(--space-2); padding-bottom: var(--space-3); border-bottom: 1px solid var(--rule); }
+      .topbar h5 { flex: 1; font-family: var(--font-title); font-size: var(--text-lg); color: var(--ink); }
+      .ic { min-width: 2.5rem; min-height: 2.5rem; padding: 0; font-size: 1.15rem; }
+      .money { display: flex; gap: var(--space-3); margin-top: var(--space-3); font-size: var(--text-sm); }
+      .money span b { display: block; font-family: var(--font-title); font-size: var(--text-lg); }
+    </style>
+  </head>
+  <body>
+    <div class="phones">
+
+      <!-- 1. Colours by role -->
+      <figure>
+        <div class="phone">
+          <div class="pad">
+            <p class="kicker" style="margin-top:0">Proposal · colours by role</p>
+            <h3 class="t">A notebook and a blue pen</h3>
+            <p class="lead">Each colour has one job. If it means something, it’s never decoration.</p>
+            <p class="grp">The notebook</p>
+            <div class="sw"><i style="background:var(--paper)"></i><span><b>Paper</b>the background</span></div>
+            <div class="sw"><i style="background:var(--page)"></i><span><b>Page</b>sheets, cards, notes (one shade, not three)</span></div>
+            <div class="sw"><i style="background:var(--rule)"></i><span><b>Rule</b>lines between rows, borders</span></div>
+            <p class="grp">Writing</p>
+            <div class="sw"><i style="background:var(--ink)"></i><span><b>Ink</b>the trip: names, amounts, titles</span></div>
+            <div class="sw"><i style="background:var(--pencil)"></i><span><b>Pencil</b>hints, small print, the sheets’ outlines</span></div>
+            <div class="sw"><i style="background:var(--pen)"></i><span><b>Your blue pen</b>everything you <i>do</i> or <i>pick</i>: buttons, links, “+ Add”, what’s selected, the option you circled</span></div>
+            <p class="grp">Money (only money)</p>
+            <div class="sw"><i style="background:var(--est)"></i><span><b>Mustard</b>estimated</span></div>
+            <div class="sw"><i style="background:var(--paid)"></i><span><b>Green</b>booked or paid</span></div>
+            <div class="sw"><i style="background:var(--over)"></i><span><b>Red</b>over budget, or something to fix</span></div>
+            <p class="grp">Decoration (means nothing)</p>
+            <div class="tapes"><span style="background:var(--tape)"></span><span style="background:var(--tape-sage)"></span><span style="background:var(--tape-rose)"></span></div>
+            <p class="lead">Washi tapes in soft sand, sage and rose: no longer mustard and green, so a tape is never read as “estimated” or “paid”.</p>
+          </div>
+        </div>
+        <figcaption><b>1 · Colours by role.</b> What changes:
+          <ul>
+            <li><b>Blue pen</b> becomes the colour of action and choice (today: green for links and “+ Add”, black for selections, blue only on Compare).</li>
+            <li><b>Green</b> goes back to meaning booked/paid only (48 places used it for other things).</li>
+            <li><b>Red</b> also says “something to fix” (form errors), the only other alarm.</li>
+            <li><b>Tapes</b>: their own soft colours. <b>Page</b>: one shade instead of three near-identical whites.</li>
+          </ul>
+        </figcaption>
+      </figure>
+
+      <!-- 2. A · Drawn -->
+      <figure>
+        <div class="phone">
+          <div class="pad">
+            <p class="kicker" style="margin-top:0">Buttons · A · drawn</p>
+            <h3 class="t">Boxes drawn in pen</h3>
+            <div class="sheet">
+              <div class="topbar"><span class="x ic" data-rough="box">‹</span><h5>Kyoto</h5><span class="x ic" data-rough="box">☰</span></div>
+              <p class="lbl">What is it?</p>
+              <div class="row"><span class="x x--s pick" data-rough="box">✓ Stay</span><span class="x x--s" data-rough="box" data-color="--rule" style="color:var(--pencil)">Activities</span><span class="x x--s" data-rough="box" data-color="--rule" style="color:var(--pencil)">Food</span></div>
+              <p class="lbl">Where it stands</p>
+              <div class="row"><span class="x x--s x--main" data-rough="fill">Chosen</span><span class="x x--s" style="color:var(--pencil)">Booked</span><span class="x x--s" style="color:var(--pencil)">Paid</span></div>
+              <div class="row" style="margin-top:var(--space-3)"><span class="x x--s" data-rough="box">📋 Paste</span><span class="x x--s" data-rough="box">Day ▾</span></div>
+              <div class="row"><span class="add"><i>+</i>Add to Kyoto</span><span class="add"><i>+</i>To try</span></div>
+              <div class="row end"><span class="x x--txt left" style="text-decoration:underline">Delete</span><span class="x" data-rough="box">Cancel</span><span class="x x--main" data-rough="fill">Save</span></div>
+            </div>
+          </div>
+        </div>
+        <figcaption><b>A · Drawn.</b> Every button is a box drawn in blue pen, like the sheets are drawn in pencil. The main one is coloured in. Same sizes as today (easy to tap), nothing perfectly round any more.
+          <ul><li>Closest to today’s sheets: the most coherent, the least surprising.</li></ul>
+        </figcaption>
+      </figure>
+
+      <!-- 3. B · Stamps and labels -->
+      <figure>
+        <div class="phone">
+          <div class="pad">
+            <p class="kicker" style="margin-top:0">Buttons · B · stamps &amp; labels</p>
+            <h3 class="t">A stamp to save, labels for the rest</h3>
+            <div class="sheet">
+              <div class="topbar"><span class="x ic labelbtn">‹</span><h5>Kyoto</h5><span class="x ic labelbtn">☰</span></div>
+              <p class="lbl">What is it?</p>
+              <div class="row"><span class="x x--s labelbtn pick" style="color:var(--pen)">✓ Stay</span><span class="x x--s labelbtn" style="color:var(--pencil)">Activities</span><span class="x x--s labelbtn" style="color:var(--pencil)">Food</span></div>
+              <p class="lbl">Where it stands</p>
+              <div class="row"><span class="x x--s stamp" data-rough="stamp">Chosen</span><span class="x x--s" style="color:var(--pencil)">Booked</span><span class="x x--s" style="color:var(--pencil)">Paid</span></div>
+              <div class="row" style="margin-top:var(--space-3)"><span class="x x--s labelbtn">📋 Paste</span><span class="x x--s labelbtn">Day ▾</span></div>
+              <div class="row"><span class="add"><i>+</i>Add to Kyoto</span><span class="add"><i>+</i>To try</span></div>
+              <div class="row end"><span class="x x--txt left" style="text-decoration:underline">Delete</span><span class="x labelbtn">Cancel</span><span class="x stamp" data-rough="stamp">Save</span></div>
+            </div>
+          </div>
+        </div>
+        <figcaption><b>B · Stamps &amp; labels.</b> The main action is a rubber stamp in blue ink (slightly tilted); the others are paper labels stuck on the page, with a soft shadow.
+          <ul><li>The most playful and “travel journal”. Stamps in capitals are a bit harder to read on a small phone.</li></ul>
+        </figcaption>
+      </figure>
+
+      <!-- 4. C · Written -->
+      <figure>
+        <div class="phone">
+          <div class="pad">
+            <p class="kicker" style="margin-top:0">Buttons · C · written</p>
+            <h3 class="t">Words in pen, circled when it matters</h3>
+            <div class="sheet">
+              <div class="topbar"><span class="x ic">‹</span><h5>Kyoto</h5><span class="x ic">☰</span></div>
+              <p class="lbl">What is it?</p>
+              <div class="row"><span class="x x--s" data-rough="circle">Stay</span><span class="x x--s" style="color:var(--pencil)">Activities</span><span class="x x--s" style="color:var(--pencil)">Food</span></div>
+              <p class="lbl">Where it stands</p>
+              <div class="row"><span class="x x--s" data-rough="circle">Chosen</span><span class="x x--s" style="color:var(--pencil)">Booked</span><span class="x x--s" style="color:var(--pencil)">Paid</span></div>
+              <div class="row" style="margin-top:var(--space-3)"><span class="x x--s" data-rough="under">📋 Paste</span><span class="x x--s" data-rough="under">Day ▾</span></div>
+              <div class="row"><span class="add"><i>+</i>Add to Kyoto</span><span class="add"><i>+</i>To try</span></div>
+              <div class="row end"><span class="x x--txt left" style="text-decoration:underline">Delete</span><span class="x" data-rough="under">Cancel</span><span class="x" data-rough="circle" style="font-weight:700">Save</span></div>
+            </div>
+          </div>
+        </div>
+        <figcaption><b>C · Written.</b> No boxes: actions are words written in blue pen, underlined; the main one and your picks are <b>circled</b>, like circling a word in a notebook (the same gesture as “the option you chose” on Compare).
+          <ul><li>The most notebook and the lightest. Risk: on a busy screen, a word is less obviously “tap me” than a box.</li></ul>
+        </figcaption>
+      </figure>
+
+    </div>
+  </body>
+</html>

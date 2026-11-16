@@ -10,13 +10,32 @@ export function FolderTabs({ tab, todo, onTab }: { tab: Tab; todo: (t: Tab) => b
   return (
     <div className="folder-tabs" role="tablist" aria-label="Categories">
       {TABS.map((t) => (
-        <FolderTab key={t.key} on={t.key === tab} todo={todo(t.key)} label={t.label} onClick={() => onTab(t.key)} />
+        <FolderTab
+          key={t.key}
+          cat={t.key}
+          on={t.key === tab}
+          todo={todo(t.key)}
+          label={t.label}
+          onClick={() => onTab(t.key)}
+        />
       ))}
     </div>
   )
 }
 
-function FolderTab({ on, todo, label, onClick }: { on: boolean; todo: boolean; label: string; onClick: () => void }) {
+function FolderTab({
+  cat,
+  on,
+  todo,
+  label,
+  onClick,
+}: {
+  cat: string
+  on: boolean
+  todo: boolean
+  label: string
+  onClick: () => void
+}) {
   // Open at the bottom: the open tab runs into its sheet.
   const { box: button, line } = useHandDrawn<HTMLButtonElement>(
     (pen, width, height) => {
@@ -53,6 +72,7 @@ function FolderTab({ on, todo, label, onClick }: { on: boolean; todo: boolean; l
       onClick={onClick}
     >
       <svg ref={line} className="folder-tab__line" aria-hidden="true" />
+      <i className={`cat-dot cat-dot--${cat}`} aria-hidden="true" />
       {label}
       {todo && <span className="visually-hidden"> (something to decide)</span>}
     </button>

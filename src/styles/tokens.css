@@ -1,23 +1,43 @@
-/* Palette "Carnet" — cahier des charges §12. One light theme in V1. */
+/* Palette "Travel journal" (v7, chosen 16 Nov): a notebook and a pen kit. Pens say something,
+   pencils decorate. Each colour has one job; one that means something is never decoration. */
 :root {
-  /* Colour */
-  --paper: #fbf7ef;
-  --paper-raised: #fffdf8;
-  --ink: #1f2a24;
-  --ink-soft: #55615a;
-  --line: #e4dccb;
-  --confirmed: #2f6b4f; /* forest green: booked or paid, with an actual amount */
-  --estimated: #e2a93b; /* mustard: everything still estimated */
-  --estimated-ink: #b07d1a; /* mustard for small marks (dots): 3.4:1 on paper, readable outdoors */
-  --estimated-text: #8f6412; /* mustard for words: 4.9:1 on paper (WCAG AA, review 14 Nov) */
-  --over: #c2513f; /* red: over budget only */
-  --chosen: #2c4a7a; /* blue ink: the option you chose on Compare, like circling it with a pen (13 Nov) */
-  --paper-note: #fffdf6; /* a note slipped into the notebook (the welcome note) */
-  --map-bg: #f3eee2; /* behind the map while it loads */
+  /* The notebook */
+  --paper: #f6f0e3; /* the background */
+  --paper-raised: #fdf9f1; /* the page: sheets, cards, notes */
+  --paper-note: var(--paper-raised); /* one shade for pages (was three near-identical whites) */
+  --line: #e3d8c3; /* rules between rows, borders */
+  --map-bg: #efe7d6; /* behind the map while it loads */
+
+  /* Writing */
+  --ink: #2c2620; /* sepia black: the trip itself */
+  --ink-soft: #776a5d; /* pencil: hints, small print (4.6:1 on paper) */
+  --pen: #33508c; /* indigo pen: everything you DO or PICK (buttons, links, + Add, selected, the option you circled) */
+  --chosen: var(--pen); /* the option you chose on Compare: circled with your pen */
+  --pen-wash: color-mix(in srgb, var(--pen) 9%, transparent);
+
+  /* Money (only money) */
+  --confirmed: #477136; /* olive: booked or paid, with an actual amount (5:1 on paper) */
+  --estimated: #d6a043; /* ochre: everything still estimated (bars, fills) */
+  --estimated-ink: #b07d1a; /* ochre for small marks (dots) */
+  --estimated-text: #8a5e14; /* ochre for words (5:1 on paper) */
+
+  /* Careful: over budget, delete, something to fix (no longer "over budget only", 16 Nov) */
+  --over: #b04a35; /* terracotta red */
+
+  /* Coloured pencils: categories. Dots, tabs, bars; never words. */
+  --cat-travel: #79a9a6; /* teal */
+  --cat-stay: #c9a0b6; /* dusty rose */
+  --cat-activity: #dc9a7c; /* apricot */
+  --cat-food: #b6bf86; /* sage */
+  --cat-other: #c5b8a5; /* sand */
+
+  /* Decoration: washi tape, means nothing */
+  --tape: #e5c8a8;
+  --tape-2: #cfd9c4;
 
   /* Made from the colours above: change a colour, these follow. */
   --wash-confirmed: color-mix(in srgb, var(--confirmed) 7%, transparent);
-  --wash-over: color-mix(in srgb, var(--over) 7%, transparent);
+  --wash-over: color-mix(in srgb, var(--over) 8%, transparent);
   --paper-veil: color-mix(in srgb, var(--paper) 85%, transparent);
   --shadow-1: 0 2px 6px color-mix(in srgb, var(--ink) 8%, transparent);
   --shadow-2: 0 6px 16px color-mix(in srgb, var(--ink) 8%, transparent);

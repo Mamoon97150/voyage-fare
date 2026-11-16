@@ -72,7 +72,7 @@
 }
 
 .countdown--now {
-  color: var(--confirmed);
+  color: var(--pen);
 }
 
 .big-trip__name {
@@ -112,7 +112,7 @@
 }
 
 .route-words__today {
-  color: var(--confirmed);
+  color: var(--pen);
 }
 
 .todo-lines {
@@ -157,7 +157,7 @@
 .big-trip__open {
   font-size: var(--text-md);
   font-weight: 600;
-  color: var(--confirmed);
+  color: var(--pen);
 }
 
 /* Your share on a card */

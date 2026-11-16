@@ -287,7 +287,7 @@
 }
 
 .opt__fast {
-  color: var(--confirmed);
+  color: var(--pen);
 }
 
 .opt__side {
@@ -337,7 +337,7 @@
 }
 
 .flag--yes {
-  color: var(--confirmed);
+  color: var(--pen);
 }
 
 .flag--no {
@@ -412,7 +412,7 @@
 
 .yesno button[aria-checked='true'] {
   border-color: var(--ink);
-  background: var(--ink);
+  background: var(--pen);
   color: var(--paper);
   font-weight: 600;
 }
@@ -472,7 +472,7 @@
 }
 
 .status-steps button[aria-checked='true'] {
-  background: var(--ink);
+  background: var(--pen);
   color: var(--paper);
   font-weight: 600;
 }

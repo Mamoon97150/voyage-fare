@@ -21,7 +21,7 @@
 }
 
 .people__name .people__state--in {
-  color: var(--confirmed);
+  color: var(--pen);
 }
 
 .people__name .people__state--wait {
@@ -96,7 +96,7 @@
 .invite__arrow {
   font-family: var(--font-hand);
   font-size: var(--text-note);
-  color: var(--confirmed);
+  color: var(--pen);
   transform: rotate(-2deg);
   transform-origin: left;
 }
@@ -214,6 +214,6 @@
   background: none;
   font-family: var(--font-hand);
   font-size: var(--text-note-l);
-  color: var(--confirmed);
+  color: var(--pen);
   cursor: pointer;
 }

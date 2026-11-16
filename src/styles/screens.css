@@ -127,7 +127,7 @@
 }
 
 .stepbar i.on {
-  background: var(--ink);
+  background: var(--pen);
 }
 
 .screen__body {
@@ -227,7 +227,7 @@ select.field__input,
 
 .suggest__item--on,
 .suggest__item:hover {
-  background: color-mix(in srgb, var(--confirmed) 8%, var(--paper-raised));
+  background: var(--pen-wash);
 }
 
 .suggest__item small {
@@ -257,7 +257,7 @@ select.field__input,
 }
 
 .field__pin {
-  color: var(--confirmed);
+  color: var(--pen);
 }
 
 .field--short {
@@ -288,7 +288,7 @@ select.field__input,
 }
 
 .switch button[aria-checked='true'] {
-  background: var(--ink);
+  background: var(--pen);
   color: var(--paper);
 }
 
@@ -370,7 +370,7 @@ select.field__input,
   background: none;
   font: inherit;
   font-weight: 500;
-  color: var(--confirmed);
+  color: var(--pen);
   cursor: pointer;
 }
 
@@ -380,7 +380,7 @@ select.field__input,
   display: grid;
   place-items: center;
   border-radius: var(--radius-round);
-  border: 1.5px dashed var(--confirmed);
+  border: 1.5px dashed var(--pen);
 }
 
 /* Inside a trip */
@@ -500,7 +500,7 @@ select.field__input,
 }
 
 .trip-budget__target-text--over {
-  color: var(--over); /* red: over budget only */
+  color: var(--over);
   font-weight: 600;
 }
 

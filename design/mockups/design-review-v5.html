@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Design review + look pass (v5, 16 Nov)</title>
+    <script type="module">
+      import '/src/index.css'
+      import './forms.css'
+      import './v4.css'
+      import './v5.js'
+    </script>
+    <style>
+      .hand { font-family: var(--font-hand); color: var(--ink-soft); line-height: 1.2; }
+      .pad { padding: var(--space-4); }
+      .kicker { font-size: var(--text-2xs); letter-spacing: .08em; text-transform: uppercase; font-weight: 700; color: var(--ink-soft); margin-top: var(--space-4); }
+      .t { font-family: var(--font-title); font-size: var(--text-lg); font-weight: 600; margin-top: var(--space-1); }
+      .lead { font-size: var(--text-sm); color: var(--ink-soft); line-height: 1.45; margin-top: var(--space-1); }
+      .row { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; margin-top: var(--space-2); }
+      .spec { display: grid; grid-template-columns: 6.5rem 1fr; gap: var(--space-2) var(--space-3); align-items: center; padding: var(--space-3) 0; border-bottom: 1px solid var(--line); font-size: var(--text-xs); color: var(--ink-soft); }
+      .spec b { display: block; color: var(--ink); font-size: var(--text-sm); }
+
+      /* proposed system */
+      .b { display: inline-flex; align-items: center; justify-content: center; gap: .35rem; min-height: 2.75rem; padding: 0 1.25rem; border-radius: 999px; font-size: var(--text-md); font-weight: 600; font-family: inherit; border: 1.5px solid var(--ink); background: var(--paper-raised); color: var(--ink); white-space: nowrap; }
+      .b--main { background: var(--ink); color: var(--paper); }
+      .b--small { min-height: 2.25rem; padding: 0 .85rem; font-size: var(--text-xs); }
+      .b--wide { width: 100%; }
+      .txt { font-size: var(--text-sm); color: var(--ink-soft); text-decoration: underline; text-underline-offset: 3px; font-weight: 500; background: none; border: 0; padding: 0; }
+      .add { display: inline-flex; align-items: center; gap: .5rem; font-size: var(--text-md); font-weight: 500; color: var(--ink); }
+      .add i { font-style: normal; width: 1.6rem; height: 1.6rem; border-radius: 50%; border: 1.5px dashed var(--ink-soft); display: grid; place-items: center; font-size: .9rem; }
+      .round { width: 2.5rem; height: 2.5rem; border-radius: 50%; border: 1.5px solid var(--ink); background: var(--paper-raised); display: inline-grid; place-items: center; font-size: 1.1rem; color: var(--ink); }
+      .seg { display: inline-flex; border: 1.5px solid var(--ink); border-radius: 999px; overflow: hidden; }
+      .seg span { padding: .5rem .9rem; font-size: var(--text-sm); font-weight: 600; }
+      .seg span.on { background: var(--ink); color: var(--paper); }
+      .ch { display: inline-flex; align-items: center; gap: .3rem; min-height: 2.25rem; padding: 0 .85rem; border-radius: 999px; border: 1.5px solid var(--line); background: var(--paper-raised); font-size: var(--text-sm); color: var(--ink-soft); }
+      .ch.on { border-color: var(--ink); background: var(--ink); color: var(--paper); font-weight: 600; }
+      .ch.multi.on { background: var(--paper-raised); color: var(--ink); }
+      .tg { width: 2.6rem; height: 1.5rem; border-radius: 999px; background: var(--line); position: relative; display: inline-block; }
+      .tg::after { content: ''; position: absolute; top: 3px; left: 3px; width: 1.1rem; height: 1.1rem; border-radius: 50%; background: var(--paper-raised); box-shadow: var(--shadow-1); }
+      .tg.on { background: var(--ink); }
+      .tg.on::after { left: auto; right: 3px; }
+      .circled { color: var(--chosen); font-weight: 600; text-decoration: underline; text-decoration-color: var(--chosen); }
+
+      /* today */
+      .today .q { display: inline-flex; align-items: center; min-height: 2.25rem; padding: 0 1rem; border-radius: 999px; border: 1px solid var(--line); background: var(--paper-raised); font-size: var(--text-md); }
+      .today .p { display: inline-flex; align-items: center; min-height: 2.75rem; padding: 0 1.5rem; border-radius: 999px; background: var(--ink); color: var(--paper); font-weight: 600; font-size: var(--text-md); }
+      .today .o { display: inline-flex; align-items: center; min-height: 2.5rem; padding: 0 .9rem; border-radius: 999px; border: 1.5px solid var(--ink); background: var(--paper-raised); font-size: var(--text-sm); font-weight: 600; }
+      .today .g { color: var(--confirmed); text-decoration: underline; font-size: var(--text-md); }
+      .today .gr { color: var(--ink-soft); text-decoration: underline; font-size: var(--text-sm); }
+      .today .r { color: var(--over); text-decoration: underline; font-size: var(--text-md); }
+      .today .s { display: inline-flex; align-items: center; min-height: 2rem; padding: 0 .7rem; border-radius: 999px; border: 1.5px solid var(--line); font-size: var(--text-xs); font-weight: 600; background: #eee; }
+      .today .bl { display: inline-flex; align-items: center; gap: .3rem; min-height: 2.25rem; padding: 0 .85rem; border-radius: 999px; border: 1.5px solid var(--chosen); color: var(--chosen); font-size: var(--text-sm); font-weight: 600; }
+      .today .gadd { display: inline-flex; align-items: center; gap: .5rem; color: var(--confirmed); font-size: var(--text-md); }
+      .today .gadd i { font-style: normal; width: 1.6rem; height: 1.6rem; border-radius: 50%; border: 1.5px dashed var(--confirmed); display: grid; place-items: center; }
+      .tag { font-size: .62rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; padding: 0 .35rem; border-radius: 4px; background: var(--wash-over); color: var(--over); margin-left: .3rem; }
+
+      /* look pass */
+      .daycard { margin-top: var(--space-3); padding: var(--space-3); border: 1px solid var(--line); border-radius: 10px; background: var(--paper-raised); }
+      .daycard h4 { font-family: var(--font-title); font-size: var(--text-lg); display: flex; justify-content: space-between; align-items: baseline; }
+      .daycard h4 small { font-family: inherit; font-size: var(--text-xs); color: var(--ink-soft); font-weight: 400; }
+      .acts1 { display: flex; gap: .3rem .7rem; flex-wrap: wrap; margin-top: var(--space-3); padding-top: var(--space-3); border-top: 1px solid var(--line); }
+      .acts1 .add { font-size: var(--text-sm); gap: .3rem; white-space: nowrap; }
+      .acts1 .add i { width: 1.25rem; height: 1.25rem; font-size: .75rem; }
+      .top { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) 0; border-bottom: 1px solid var(--line); }
+      .top h5 { flex: 1; font-family: var(--font-title); font-size: var(--text-lg); }
+      .av { display: flex; } .av span { width: 1.7rem; height: 1.7rem; border-radius: 50%; display: grid; place-items: center; font-size: .7rem; font-weight: 700; background: var(--line); margin-left: -.35rem; border: 2px solid var(--paper); }
+      .tab-out { display: inline-flex; align-items: center; gap: .3rem; padding: .35rem .7rem .35rem .6rem; border: 1.5px solid var(--ink); border-right: 0; border-radius: 10px 0 0 10px; background: var(--estimated); font-size: var(--text-xs); font-weight: 700; }
+      .pencil { font-size: 1.15rem; }
+      ol.fixes { margin: var(--space-2) 0 0 1.1rem; font-size: var(--text-sm); line-height: 1.5; }
+      ol.fixes li { margin-bottom: var(--space-2); }
+    </style>
+  </head>
+  <body>
+    <div class="phones">
+
+      <!-- 1. What's off today -->
+      <figure>
+        <div class="phone today">
+          <div class="pad">
+            <p class="kicker" style="margin-top:0">Today · buttons</p>
+            <h3 class="t">8 looks for “a button”</h3>
+            <div class="spec"><span>Main</span><span><span class="p">Save</span> ink, 44 px</span></div>
+            <div class="spec"><span>“Quiet”</span><span><span class="q">Cancel</span> thin beige border, 36 px, lighter text</span></div>
+            <div class="spec"><span>Outlined</span><span><span class="o">📋 Paste</span> <span class="o">Day ▾</span> ink border, 40 px</span></div>
+            <div class="spec"><span>Small</span><span><span class="s">Invite</span> grey, 32 px</span></div>
+            <div class="spec"><span>Text links</span><span><span class="g">Drop it</span> · <span class="gr">Edit</span> · <span class="gr">Rename</span> green or grey</span></div>
+            <div class="spec"><span>Delete</span><span><span class="r">Delete</span> red <span class="tag">red = over budget only</span></span></div>
+            <div class="spec"><span>Add rows</span><span><span class="gadd"><i>+</i>Add to Kyoto</span> green</span></div>
+            <div class="spec"><span>Picked</span><span><span class="bl">✓ Stay</span> blue · black fill (Chosen/Booked/Paid) · green toggles</span></div>
+            <p class="kicker">Back / close</p>
+            <div class="row"><span style="font-size:1.6rem">‹</span><span class="hand">plain (trip)</span><span class="round" style="border:1px solid var(--line)">‹</span><span class="hand">round (settings)</span><span class="round" style="border:1px solid var(--line)">✕</span><span class="hand">new trip</span></div>
+          </div>
+        </div>
+        <figcaption><b>1 · What’s not coherent (buttons).</b> You felt it right: the buttons grew one feature at a time.
+          <ul>
+            <li><b>Cancel and Save don’t match</b>: different height, border and weight, side by side.</li>
+            <li><b>Three “secondary” looks</b> (beige border, ink border, grey) for the same job.</li>
+            <li><b>Colours that mean something are used for buttons</b>: green is “booked / paid”, blue is “the option you chose”, red is “over budget”. Here they also mean “add”, “selected in a form” and “delete”.</li>
+            <li>Three back buttons.</li>
+          </ul>
+        </figcaption>
+      </figure>
+
+      <!-- 2. Other things off -->
+      <figure>
+        <div class="phone">
+          <div class="pad">
+            <p class="kicker" style="margin-top:0">Today · the rest</p>
+            <h3 class="t">What else I’d fix</h3>
+            <ol class="fixes">
+              <li><b>Two main buttons on one screen.</b> New trip: “Bring it from my AI” and “Next” are both black. One main action per screen.</li>
+              <li><b>Two Save buttons in one sheet.</b> A line: “Save” for the line, then “Save where it stands” further down. (Goes with the line-form pass.)</li>
+              <li><b>Save far from what it saves.</b> Trip settings: “Save the trip” sits under the Budget card, outside both cards.</li>
+              <li><b>Actions not in the same place.</b> Sometimes Cancel/Save on the right, sometimes full width at the bottom, sometimes Delete on the left.</li>
+              <li><b>Three ways to show “picked”</b>: blue outline with ✓ (What is it?, Who it’s for), black fill (Chosen / Booked / Paid), green switch (toggles).</li>
+              <li><b>Text sizes in buttons</b>: 12, 13, 14 and 16 px.</li>
+              <li><b>Sign out</b> is greyed like it’s switched off.</li>
+            </ol>
+            <p class="hand" style="margin-top:var(--space-3)">what works and stays: the notebook sheets, one tape, the handwritten notes, the ink + paper palette, the bottom bar</p>
+          </div>
+        </div>
+        <figcaption><b>2 · The rest of the review.</b> Nothing broken: it’s small gaps that add up to “something feels off”. Most of it is fixed by one rule set (3) applied everywhere.</figcaption>
+      </figure>
+
+      <!-- 3. Proposed system -->
+      <figure>
+        <div class="phone">
+          <div class="pad">
+            <p class="kicker" style="margin-top:0">Proposed · 5 kinds, all in ink</p>
+            <h3 class="t">One button family</h3>
+            <div class="spec"><span><b>Main</b>one per screen</span><span><span class="b b--main">Save</span></span></div>
+            <div class="spec"><span><b>Second</b>same size, ink outline</span><span><span class="b">Cancel</span></span></div>
+            <div class="spec"><span><b>Small</b>in a row</span><span class="row" style="margin:0"><span class="b b--small">Copy</span><span class="b b--small">Invite</span><span class="b b--small">📋 Paste</span><span class="b b--small">Day ▾</span></span></div>
+            <div class="spec"><span><b>Text</b>small things</span><span class="row" style="margin:0"><button class="txt">Edit</button><button class="txt">Rename</button><button class="txt">Delete</button><button class="txt">Drop it</button></span></div>
+            <div class="spec"><span><b>Add</b>“+ something”</span><span><span class="add"><i>+</i>Add to Kyoto</span></span></div>
+            <div class="spec"><span><b>Round</b>back, close, menu</span><span class="row" style="margin:0"><span class="round">‹</span><span class="round">✕</span><span class="round">☰</span></span></div>
+            <p class="kicker">Picked: always ink</p>
+            <div class="row"><span class="seg"><span class="on">Chosen</span><span>Booked</span><span>Paid</span></span></div>
+            <div class="row"><span class="ch on">Stay</span><span class="ch">Activities</span><span class="ch">Food</span></div>
+            <div class="row"><span class="ch multi on" style="border-color:var(--ink)">✓ Demo</span><span class="ch multi on" style="border-color:var(--ink)">✓ Bea</span><span class="hand">several: ✓ + ink outline</span></div>
+            <div class="row"><span class="tg on"></span><span class="hand">switch on = ink</span></div>
+            <p class="kicker">Colours keep their meaning</p>
+            <p class="lead">Green = booked/paid. Mustard = estimated. Red = over budget. <span class="circled">Blue</span> = the option you circled on Compare. Never for buttons.</p>
+          </div>
+        </div>
+        <figcaption><b>3 · The proposal.</b>
+          <ul>
+            <li><b>Main</b> and <b>Second</b>: same height (44 px), same text; only the fill changes. One Main per screen or sheet.</li>
+            <li><b>Small</b> (36 px) for actions inside a row: Copy, Invite, Paste, Day ▾, Add.</li>
+            <li><b>Text</b> (grey, underlined) for small or rare things, Delete included: the “Yes, delete …” confirm stays a Main button, in ink.</li>
+            <li><b>Add rows</b> in ink with the dashed circle (the circle is the sign, not the green).</li>
+            <li>In a sheet, always: <i>text action left · Second · Main right</i>.</li>
+          </ul>
+        </figcaption>
+      </figure>
+
+      <!-- 4. Look pass: menu button + one-line actions -->
+      <figure>
+        <div class="phone">
+          <div class="pad">
+            <p class="kicker" style="margin-top:0">Look pass · the ⋯ button (3 ideas)</p>
+            <div class="top"><span class="round">‹</span><h5>Japan in spring</h5><span class="av"><span>D</span><span>B</span></span><span class="round">☰</span></div>
+            <p class="hand">A · a notebook’s ☰ (same round button as back)</p>
+            <div class="top"><span class="round">‹</span><h5>Japan in spring</h5><span class="av"><span>D</span><span>B</span></span><span class="round pencil">✎</span></div>
+            <p class="hand">B · a pencil: “do something with this trip”</p>
+            <div class="top" style="overflow:hidden"><span class="round">‹</span><h5>Japan in spring</h5><span class="av"><span>D</span><span>B</span></span><span class="tab-out">☰ Trip</span></div>
+            <p class="hand">C · a mustard tab sticking out of the page, like a notebook divider</p>
+
+            <p class="kicker">Look pass · actions on one line</p>
+            <div class="daycard">
+              <h4>Kyoto <small>3 nights</small></h4>
+              <div class="acts1"><span class="add"><i>+</i>Add to Kyoto</span><span class="add"><i>+</i>To try</span><span class="add"><i>+</i>Daily estimate</span></div>
+            </div>
+            <div class="daycard">
+              <h4>Okinawa <small>4 nights</small></h4>
+              <div class="acts1"><span class="add"><i>+</i>Add to Okinawa</span><span class="add"><i>+</i>To try</span><span class="add"><i>+</i>Daily estimate</span></div>
+            </div>
+            <div class="daycard">
+              <h4>Rio de Janeiro <small>5 nights</small></h4>
+              <div class="acts1"><span class="add"><i>+</i>Add to Rio de Janeiro</span><span class="add"><i>+</i>To try</span><span class="add"><i>+</i>Daily estimate</span></div>
+            </div>
+            <p class="hand" style="margin-top:var(--space-2)">fits on one line on a phone; a long place name drops one to the next line (2 + 1)</p>
+          </div>
+        </div>
+        <figcaption><b>4 · The look pass you asked for.</b>
+          <ul>
+            <li><b>The ⋯ button</b>: my pick is <b>A (☰)</b>, the same round button as back, so the top bar is one family. B is friendlier; C is the most “notebook” but takes room.</li>
+            <li><b>Add to … · To try · Daily estimate</b> on one line: slightly smaller (13 px), a line above them; 2 + 1 only when a long name doesn’t fit.</li>
+          </ul>
+        </figcaption>
+      </figure>
+
+    </div>
+  </body>
+</html>

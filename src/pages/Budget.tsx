@@ -41,7 +41,10 @@ export function Budget() {
                   {cats.map((c) => (
                     <li key={c.key} className="line">
                       <span>
-                        <span className="line__name">{c.name}</span>
+                        <span className="line__name">
+                          <i className={`cat-dot cat-dot--${c.key}`} aria-hidden="true" />
+                          {c.name}
+                        </span>
                         {c.meta && <span className="line__meta">{c.meta}</span>}
                         {!c.word && (c.amount ?? 0) > 0 && (
                           <span className="line__bar">

@@ -112,7 +112,7 @@ export function NewTrip() {
                 Claude, ChatGPT, Gemini… Your AI writes the trip in our format, you paste it here: places, nights,
                 hotels and ideas, with their prices.
               </p>
-              <Link to="/trips/import" className="button button--primary button--wide">
+              <Link to="/trips/import" className="button button--quiet button--wide">
                 Bring it from my AI
               </Link>
             </SketchBox>

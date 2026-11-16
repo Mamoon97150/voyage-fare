@@ -65,7 +65,7 @@ export function TripMenu({ detail }: { detail: TripDetail }) {
         aria-label="Trip menu"
         onClick={() => setOpen((o) => !o)}
       >
-        ⋯
+        ☰
       </button>
       {open && <div className="trip-menu__scrim" aria-hidden="true" onClick={() => setOpen(false)} />}
       {open && (

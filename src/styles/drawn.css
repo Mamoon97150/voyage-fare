@@ -1,0 +1,314 @@
+/*
+ * Drawn buttons (look pass, direction A, chosen 16 Nov; mockup palette-buttons-v6 / palette-v7).
+ * Every button is a box drawn in pen, like the sheets are drawn in pencil: the main one coloured in.
+ * The shapes are drawn once with rough.js (scripts/sketch-shapes.mjs → public/sketch/*.svg) and used
+ * here as masks: the colour comes from --btn-ink, the shape from --btn-shape. Last in the cascade.
+ *
+ *   Main    .button--primary   coloured in, pen        one per screen or sheet
+ *   Second  .button--quiet     drawn outline, pen      same height as Main
+ *   Small   .button--small, .small-button, .paste-button, .day-button, .chip
+ *   Round   .round-button, .trip-menu__button          back, close, menu
+ *   Careful .button--danger    coloured in, red        "Yes, delete…"
+ */
+
+.button,
+.small-button,
+.paste-button,
+.day-button,
+.chip,
+.round-button,
+.trip-menu__button {
+  --btn-ink: var(--pen);
+  --btn-shape: url('/sketch/box-m.svg');
+  position: relative;
+  isolation: isolate;
+  border-color: transparent;
+  border-radius: var(--radius-sm);
+  background-color: transparent;
+}
+
+.button::after,
+.small-button::after,
+.paste-button::after,
+.day-button::after,
+.chip::after,
+.round-button::after,
+.trip-menu__button::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--btn-ink);
+  -webkit-mask: var(--btn-shape) 0 0 / 100% 100% no-repeat;
+  mask: var(--btn-shape) 0 0 / 100% 100% no-repeat;
+}
+
+/* Main: coloured in with the pen. */
+.button--primary {
+  --btn-shape: url('/sketch/fill-m.svg');
+  background-color: transparent;
+  color: var(--paper-raised);
+}
+
+/* Second: the same size as Main, drawn in pen. */
+.button--quiet {
+  min-height: 2.75rem;
+  color: var(--pen);
+  font-weight: 600;
+}
+
+.button--quiet:hover,
+.small-button:hover,
+.paste-button:hover,
+.day-button:hover,
+.round-button:hover,
+.trip-menu__button:hover {
+  background-color: var(--pen-wash);
+}
+
+/* Wide buttons get the long shape, so a long box isn't a short one stretched. */
+.button--wide {
+  --btn-shape: url('/sketch/box-l.svg');
+}
+
+.button--wide.button--primary {
+  --btn-shape: url('/sketch/fill-l.svg');
+}
+
+/* Careful: the last step of a delete. */
+.button--danger {
+  --btn-ink: var(--over);
+  --btn-shape: url('/sketch/fill-m.svg');
+  background-color: transparent;
+  color: var(--paper-raised);
+}
+
+/* Small: actions inside a row. */
+.button--small,
+.small-button,
+.paste-button,
+.day-button {
+  --btn-shape: url('/sketch/box-s.svg');
+  color: var(--pen);
+}
+
+.small-button--yes {
+  --btn-shape: url('/sketch/fill-s.svg');
+  color: var(--paper-raised);
+}
+
+/* Chips: a pencil outline; picked = pen, with a wash. */
+.chip {
+  --btn-ink: var(--line);
+  --btn-shape: url('/sketch/box-s.svg');
+  border-color: transparent;
+}
+
+.chip[aria-pressed='true'],
+.chip[role='radio'][aria-checked='true'],
+.chip[aria-checked='true'] {
+  --btn-ink: var(--pen);
+  background-color: var(--pen-wash);
+  color: var(--pen);
+}
+
+/* Round: back, close, the trip's menu. */
+.round-button,
+.trip-menu__button {
+  --btn-shape: url('/sketch/round.svg');
+  border-radius: var(--radius-round);
+  color: var(--pen);
+}
+
+.trip-menu__button--open {
+  --btn-shape: url('/sketch/round-fill.svg');
+  color: var(--paper-raised);
+}
+
+.button:disabled,
+.chip:disabled,
+.small-button:disabled {
+  --btn-ink: var(--ink-soft);
+  opacity: 0.55;
+}
+
+.button--primary:disabled {
+  color: var(--paper-raised);
+}
+
+/* Two or three choices side by side (Chosen · Booked · Paid, Per person · Whole trip, yes · no):
+   a drawn frame, the picked one coloured in with the pen. */
+.status-steps,
+.switch {
+  position: relative;
+  isolation: isolate;
+  border-color: transparent;
+  border-radius: var(--radius-sm);
+  background-color: transparent;
+}
+
+.status-steps::after,
+.switch::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background: var(--pen);
+  -webkit-mask: url('/sketch/box-l.svg') 0 0 / 100% 100% no-repeat;
+  mask: url('/sketch/box-l.svg') 0 0 / 100% 100% no-repeat;
+}
+
+.status-steps button + button {
+  border-left-color: var(--line);
+}
+
+.status-steps button,
+.switch button,
+.yesno button {
+  position: relative;
+  isolation: isolate;
+  color: var(--pen);
+}
+
+.status-steps button[aria-checked='true'],
+.switch button[aria-checked='true'],
+.yesno button[aria-checked='true'] {
+  background: transparent;
+  border-color: transparent;
+  color: var(--paper-raised);
+}
+
+.status-steps button[aria-checked='true']::before,
+.switch button[aria-checked='true']::before,
+.yesno button[aria-checked='true']::before {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--pen);
+  -webkit-mask: url('/sketch/fill-s.svg') 0 0 / 100% 100% no-repeat;
+  mask: url('/sketch/fill-s.svg') 0 0 / 100% 100% no-repeat;
+}
+
+.yesno button {
+  border-color: transparent;
+  background: transparent;
+}
+
+.yesno button:not([aria-checked='true'])::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--line);
+  -webkit-mask: url('/sketch/box-s.svg') 0 0 / 100% 100% no-repeat;
+  mask: url('/sketch/box-s.svg') 0 0 / 100% 100% no-repeat;
+}
+
+.yesno button:not([aria-checked='true']) {
+  color: var(--ink-soft);
+}
+
+/* A place's actions on one line (look pass, 16 Nov): Add to … · To try · Daily estimate.
+   A bit smaller; a long place name drops one to the next line (2 + 1). Still 44 px to tap. */
+.place__adds {
+  column-gap: 0.65rem;
+  margin-top: var(--space-3);
+  padding-top: var(--space-1);
+  border-top: 1px solid var(--line);
+}
+
+.place__adds .place__add {
+  margin-top: 0;
+  gap: 0.3rem;
+  font-size: var(--text-sm);
+  white-space: nowrap;
+}
+
+.place__adds .add-row__plus {
+  width: 1.35rem;
+  height: 1.35rem;
+  font-size: 0.8rem;
+}
+
+/* One back button everywhere (look pass): round, drawn, like settings' and the menu ☰. */
+.screen__back {
+  --btn-ink: var(--pen);
+  position: relative;
+  isolation: isolate;
+  width: 2.5rem;
+  height: 2.5rem;
+  min-height: 2.5rem;
+  margin-left: 0;
+  border: 0;
+  background: none;
+  font-size: var(--text-lg);
+  color: var(--pen);
+  cursor: pointer;
+}
+
+.screen__back::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--btn-ink);
+  -webkit-mask: url('/sketch/round.svg') 0 0 / 100% 100% no-repeat;
+  mask: url('/sketch/round.svg') 0 0 / 100% 100% no-repeat;
+}
+
+.screen__back:hover {
+  background-color: var(--pen-wash);
+  border-radius: var(--radius-round);
+}
+
+.round-button,
+.trip-menu__button {
+  font-size: var(--text-lg);
+}
+
+/* Native checkboxes and radios: the pen too. */
+input[type='checkbox'],
+input[type='radio'] {
+  accent-color: var(--pen);
+}
+
+/* The welcome page's bar: "Your trips ›" / "Sign in", drawn like the rest; ☰ in pen. */
+.pill {
+  position: relative;
+  isolation: isolate;
+  border-color: transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--pen);
+}
+
+.pill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--pen);
+  -webkit-mask: url('/sketch/box-s.svg') 0 0 / 100% 100% no-repeat;
+  mask: url('/sketch/box-s.svg') 0 0 / 100% 100% no-repeat;
+}
+
+.pill--dark {
+  background: transparent;
+  color: var(--paper-raised);
+}
+
+.pill--dark::after {
+  -webkit-mask-image: url('/sketch/fill-s.svg');
+  mask-image: url('/sketch/fill-s.svg');
+}
+
+.site-bar__burger {
+  color: var(--pen);
+}

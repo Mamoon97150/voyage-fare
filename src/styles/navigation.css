@@ -493,7 +493,7 @@
 }
 
 .toggle-pill--on {
-  background: var(--confirmed);
+  background: var(--pen);
 }
 
 .toggle-pill--on::after {
@@ -575,7 +575,7 @@
   width: 1.25rem;
   height: 1.25rem;
   border-radius: 50%;
-  background: var(--confirmed);
+  background: var(--pen);
   color: var(--paper);
   font-size: var(--text-xs);
 }
@@ -822,7 +822,7 @@
 
 .import__tag--new {
   background: var(--wash-confirmed);
-  color: var(--confirmed);
+  color: var(--pen);
 }
 
 .import__notes {
@@ -1107,7 +1107,7 @@ button.screen__back {
 }
 
 .admin__tab--on {
-  background: var(--ink);
+  background: var(--pen);
   color: var(--paper);
 }
 
@@ -1154,7 +1154,7 @@ button.screen__back {
   margin-top: 2px;
   font-style: normal;
   font-size: var(--text-xs);
-  color: var(--confirmed);
+  color: var(--pen);
 }
 
 .admin__kicker {
@@ -1193,7 +1193,7 @@ button.screen__back {
   display: block;
   height: 100%;
   border-radius: 999px;
-  background: var(--confirmed);
+  background: var(--pen);
 }
 
 .admin__bar i.admin__bar--high {
@@ -1245,7 +1245,7 @@ button.screen__back {
   padding: 0 0.3rem;
   border-radius: 4px;
   background: var(--wash-confirmed);
-  color: var(--confirmed);
+  color: var(--pen);
   font-size: 0.62rem;
   vertical-align: 1px;
 }
@@ -1669,7 +1669,7 @@ button.screen__back {
 .import__pin {
   margin-left: 0.35rem;
   font-size: var(--text-xs);
-  color: var(--confirmed);
+  color: var(--pen);
   font-family: inherit;
 }
 
