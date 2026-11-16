@@ -1,5 +1,13 @@
 import { useEffect, useId, useRef, useState } from 'react'
-import { rememberedPlaces, searchPlaces, spotFromLink, type CityValue, type PlaceSuggestion } from '../lib/places'
+import {
+  isShortMapsLink,
+  rememberedPlaces,
+  searchPlaces,
+  spotFromLink,
+  type CityValue,
+  type PlaceSuggestion,
+} from '../lib/places'
+import { previewLink } from '../lib/trips'
 
 /**
  * Type a city, pick it from the suggestions: that gives its coordinates for the map.
@@ -126,6 +134,25 @@ export function CityField({
               typed.current = false
               setOpen(false)
               return onChange(fromLink)
+            }
+            // A short link from Google Maps' Share button: the server follows it to the spot.
+            if (readLinks && isShortMapsLink(e.target.value)) {
+              typed.current = false
+              setOpen(false)
+              setLooking(true)
+              const link = e.target.value.trim()
+              onChange({ name: link, country: null, latitude: null, longitude: null })
+              previewLink(link)
+                .then((p) =>
+                  onChange(
+                    p.latitude !== null && p.longitude !== null
+                      ? { name: p.name ?? 'Pinned spot', country: null, latitude: p.latitude, longitude: p.longitude }
+                      : { name: '', country: null, latitude: null, longitude: null },
+                  ),
+                )
+                .catch(() => onChange({ name: '', country: null, latitude: null, longitude: null }))
+                .finally(() => setLooking(false))
+              return
             }
             // Typing again forgets the picked place's position.
             onChange({ name: e.target.value, country: null, latitude: null, longitude: null })

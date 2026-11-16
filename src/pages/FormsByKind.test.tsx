@@ -248,3 +248,25 @@ describe('where it is (maps-v6)', () => {
     expect(screen.getByLabelText('no place yet')).toBeInTheDocument()
   })
 })
+
+describe('a short Google Maps link (the Share button)', () => {
+  it('the server follows it to the spot, then it’s pinned', async () => {
+    data.previewLink.mockResolvedValue({
+      name: 'Nock Reserved Residences',
+      image: null,
+      site: 'google.com',
+      price: null,
+      currency: null,
+      place: 'Medellín',
+      latitude: 6.2089,
+      longitude: -75.5701,
+      url: 'https://www.google.com/maps/place/x',
+    })
+    await openAdd()
+    pick(/Activities/)
+    type('Name', 'Our flat')
+    fireEvent.change(screen.getByLabelText('Where (optional)'), { target: { value: 'https://maps.app.goo.gl/AbC123' } })
+    await waitFor(() => expect(screen.getByLabelText('Where (optional)')).toHaveValue('Nock Reserved Residences'))
+    expect(data.previewLink).toHaveBeenCalledWith('https://maps.app.goo.gl/AbC123')
+  })
+})

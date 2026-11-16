@@ -80,6 +80,9 @@ Deno.serve(async (req) => {
   try {
     let res: Response | null = null
     for (let hop = 0; hop <= 4; hop++) {
+      // Google's cookie page (servers in Europe) carries the real address: go straight to it.
+      const behind = url.hostname === 'consent.google.com' ? url.searchParams.get('continue') : null
+      if (behind) url = new URL(behind)
       await safeHost(url)
       // A Google Maps address already says where: no need to open it.
       if (mapsSpot(url.toString())) return new Response(JSON.stringify(readPage('', url.toString())), { headers })

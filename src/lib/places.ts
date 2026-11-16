@@ -138,7 +138,8 @@ export async function searchSpots(
   const response = await fetch(url, { signal })
   if (!response.ok) throw new Error(`Place search failed (${response.status})`)
   const data = (await response.json()) as { features?: SpotFeature[] }
-  const found = toSpots(data.features ?? [])
+  // A hotel of the same name on the other side of the world is noise (16 Nov): near the place only.
+  const found = toSpots(data.features ?? [], near)
   remembered.set(key, found)
   return found
 }
@@ -148,7 +149,10 @@ export const rememberedSpots = (query: string, near: { latitude: number; longitu
     `spot|${query.trim().toLowerCase()}|${near ? `${near.latitude.toFixed(2)},${near.longitude.toFixed(2)}` : ''}`,
   )
 
-export function toSpots(features: SpotFeature[]): PlaceSuggestion[] {
+export function toSpots(
+  features: SpotFeature[],
+  near: { latitude: number; longitude: number } | null = null,
+): PlaceSuggestion[] {
   const seen = new Set<string>()
   const out: PlaceSuggestion[] = []
   for (const f of features) {
@@ -163,10 +167,17 @@ export function toSpots(features: SpotFeature[]): PlaceSuggestion[] {
     if (seen.has(key)) continue
     seen.add(key)
     const [longitude, latitude] = f.geometry.coordinates
+    if (near && kmBetween(near, { latitude, longitude }) > NEAR_KM) continue
     out.push({ name, detail, country: country ?? null, latitude, longitude })
   }
   return out.slice(0, 5)
 }
+
+/** How far from the place a spot can be: a day trip, not another country. */
+const NEAR_KM = 150
+
+/** maps.app.goo.gl/… (Google Maps' Share button): its spot is behind a redirect, read on the server. */
+export const isShortMapsLink = (text: string) => /^https?:\/\/(maps\.app\.goo\.gl|goo\.gl\/maps)\//i.test(text.trim())
 
 /**
  * A Google Maps link carries the spot: "/place/Kikunoi/@35.0,135.7,17z", "!3d35.0!4d135.7", or

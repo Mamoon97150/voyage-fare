@@ -132,13 +132,20 @@ export function groupPlaceItems(
   options: { item_id: string }[] = [],
 ): ItemGroup[] {
   const stays = items.filter((i) => i.kind === 'housing')
-  const rest = items.filter((i) => i.kind !== 'housing')
+  // A car for several days belongs to the place, not to the day it's picked up (16 Nov);
+  // a car for one day stays on its day.
+  const rentals = items.filter(
+    (i) =>
+      i.kind === 'car_rental' && i.day_number !== null && i.end_day_number !== null && i.end_day_number > i.day_number,
+  )
+  const rest = items.filter((i) => i.kind !== 'housing' && !rentals.includes(i))
   // Every day of the place shows (kinds-v6), even an empty one: it has "+ What we do".
   const days = [...new Set([...allDays, ...rest.filter((i) => i.day_number).map((i) => i.day_number as number)])].sort(
     (a, b) => a - b,
   )
   const groups: ItemGroup[] = []
   if (stays.length) groups.push({ key: 'stay', label: 'Stay', items: stays })
+  if (rentals.length) groups.push({ key: 'around', label: 'Getting around', items: rentals })
   for (const d of days)
     groups.push({ key: `day-${d}`, label: dayLabel(d, start), items: rest.filter((i) => i.day_number === d), day: d })
   // Restaurants and activities with no day are the pool "To try" (build 7, kinds-v6); other things

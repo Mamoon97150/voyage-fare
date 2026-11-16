@@ -130,6 +130,19 @@ describe('a place’s items, as in the mockup', () => {
       ['Ideas, no day yet', ['b']],
     ])
   })
+
+  it('a car for several days sits with the place, under Stay; a car for one day stays on its day', () => {
+    const groups = groupPlaceItems([
+      item({ id: 'car', kind: 'car_rental', day_number: 2, end_day_number: 4 }),
+      item({ id: 'day-car', kind: 'car_rental', day_number: 3, end_day_number: 3 }),
+      item({ id: 'c', kind: 'housing', day_number: 1, end_day_number: 4 }),
+    ])
+    expect(groups.map((g) => [g.label, g.items.map((i) => i.id)])).toEqual([
+      ['Stay', ['c']],
+      ['Getting around', ['car']],
+      ['Day 3', ['day-car']],
+    ])
+  })
 })
 
 describe('the budget bar', () => {

@@ -75,3 +75,29 @@ describe('reading a page', () => {
     for (const ok of ['8.8.8.8', '2606:4700::1111', 'fdj.fr', 'booking.com']) expect(isPrivateAddress(ok)).toBe(false)
   })
 })
+
+describe('a Google Maps page (a short link, followed)', () => {
+  it('the name and address from its title, the spot from its preview map', () => {
+    const html = `<meta content="Nock Reserved Residences · Cl. 10 #43-12, Medellín, Antioquia" property="og:title">
+      <meta content="https://maps.google.com/maps/api/staticmap?center=6.2089%2C-75.5701&amp;zoom=15" property="og:image">`
+    expect(readPage(html, 'https://www.google.com/maps/place/Nock/data=!4m2')).toMatchObject({
+      name: 'Nock Reserved Residences',
+      place: 'Cl. 10 #43-12, Medellín, Antioquia',
+      latitude: 6.2089,
+      longitude: -75.5701,
+      image: null,
+    })
+  })
+})
+
+describe('a Google Maps page that isn’t one place', () => {
+  it('“Google Maps”, zoomed out on a country: nothing pinned, no name', () => {
+    const html = `<meta content="Google Maps" property="og:title">
+      <meta content="https://maps.google.com/maps/api/staticmap?center=46.75984%2C1.738281&amp;zoom=6" property="og:image">`
+    expect(readPage(html, 'https://www.google.com/maps/place/Grand+Hyatt')).toMatchObject({
+      name: null,
+      latitude: null,
+      longitude: null,
+    })
+  })
+})

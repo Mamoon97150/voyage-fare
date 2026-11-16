@@ -293,7 +293,7 @@ export function TripPage() {
                                       days={days}
                                       onChanged={reload}
                                       onOpen={opened}
-                                      showDays={group.key === 'stay' || group.key === 'ideas'}
+                                      showDays={group.key === 'stay' || group.key === 'around' || group.key === 'ideas'}
                                       pin={pinOf(it)}
                                     />
                                   ))}

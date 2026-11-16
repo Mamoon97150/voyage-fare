@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { toSuggestions, toSpots, spotFromLink, kmBetween } from './places'
+import { toSuggestions, toSpots, spotFromLink, kmBetween, isShortMapsLink } from './places'
 
 const feature = (name: string, state: string | undefined, country: string, lon = 1, lat = 2) => ({
   geometry: { coordinates: [lon, lat] as [number, number] },
@@ -56,6 +56,20 @@ describe('spots for a line’s Where (maps-v6)', () => {
     expect(spotFromLink('https://maps.google.com/?q=34.9671,135.7727')).toMatchObject({ latitude: 34.9671 })
     expect(spotFromLink('https://maps.app.goo.gl/abc')).toBeNull()
     expect(spotFromLink('Kikunoi')).toBeNull()
+  })
+
+  it('near a place, spots far away are left out (a hotel of the same name in London)', () => {
+    const kyoto = { latitude: 35.01, longitude: 135.77 }
+    const found = toSpots(
+      [
+        f('The Park hotel', { osm_value: 'hotel', city: 'Kyoto' }),
+        f('The Park hotel', { city: 'London' }, [-0.12, 51.5]),
+      ],
+      kyoto,
+    )
+    expect(found.map((s) => s.detail)).toEqual(['hotel · Kyoto'])
+    expect(isShortMapsLink('https://maps.app.goo.gl/AbC123')).toBe(true)
+    expect(isShortMapsLink('https://www.google.com/maps/place/x')).toBe(false)
   })
 
   it('measures as the crow flies', () => {

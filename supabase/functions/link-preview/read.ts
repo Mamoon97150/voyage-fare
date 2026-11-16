@@ -112,7 +112,7 @@ export function readPage(html: string, url: string): Preview {
     meta.get('og:title') ?? str(thing.name) ?? meta.get('twitter:title') ?? (html.match(/<title[^>]*>([^<]*)<\/title>/i)?.[1] ? decode(html.match(/<title[^>]*>([^<]*)<\/title>/i)![1]) : null)
   const name = rawTitle ? withoutSite(rawTitle, site, host).slice(0, 120) : null
 
-  const image = absolute(meta.get('og:image') ?? meta.get('og:image:url') ?? meta.get('twitter:image') ?? firstImage(thing.image), url)
+  const image = /(^|\.)google\.[a-z.]+$/i.test(host) ? null : absolute(meta.get('og:image') ?? meta.get('og:image:url') ?? meta.get('twitter:image') ?? firstImage(thing.image), url)
 
   const offers = (Array.isArray(thing.offers) ? thing.offers[0] : thing.offers) as Json | undefined
   let price = num(meta.get('product:price:amount') ?? meta.get('og:price:amount') ?? offers?.price ?? offers?.lowPrice)
@@ -133,13 +133,27 @@ export function readPage(html: string, url: string): Preview {
   const place = str(address.addressLocality) ?? meta.get('og:locality') ?? null
 
   const spot = mapsSpot(url)
+  // A Google Maps page: "Name · address" as its title, and its preview map's centre is the spot.
+  // A page that isn't one place ("Google Maps", zoomed out on the visitor's country) says nothing.
+  const google = /(^|\.)google\.[a-z.]+$/i.test(host) && url.includes('/maps') && rawTitle !== 'Google Maps'
+  if (google && !spot && latitude === null) {
+    const preview = meta.get('og:image') ?? ''
+    const c = preview.match(/center=(-?\d+(?:\.\d+)?)(?:%2C|,)(-?\d+(?:\.\d+)?)/i)
+    const zoom = Number(preview.match(/zoom=(\d+)/)?.[1] ?? 0)
+    if (c && zoom >= 13) {
+      latitude = Number(c[1])
+      longitude = Number(c[2])
+    }
+  }
+  const googleName = google && rawTitle ? rawTitle.split(' · ')[0].trim() : null
+  const googlePlace = google && rawTitle && rawTitle.includes(' · ') ? rawTitle.split(' · ').slice(1).join(', ') : null
   return {
-    name: spot?.name ?? name,
+    name: spot?.name ?? googleName ?? (rawTitle === 'Google Maps' ? null : name),
     image,
     site: site ?? host.replace(/^www\./, ''),
     price,
     currency,
-    place,
+    place: place ?? googlePlace,
     latitude: spot?.latitude ?? latitude,
     longitude: spot?.longitude ?? longitude,
     url,
