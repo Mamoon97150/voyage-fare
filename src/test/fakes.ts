@@ -35,6 +35,7 @@ export const data = {
   setAiEnabled: vi.fn(),
   tripMailAddress: vi.fn(),
   markTripMail: vi.fn(),
+  pinPlaces: vi.fn(async () => {}),
   listTrips: vi.fn(),
   getDemoTripId: vi.fn(),
   getTrip: vi.fn(),
@@ -127,6 +128,7 @@ export const tripsModule = {
   setAiEnabled: data.setAiEnabled,
   tripMailAddress: data.tripMailAddress,
   markTripMail: data.markTripMail,
+  pinPlaces: data.pinPlaces,
   foundIn: (m: { found: unknown }) => m.found ?? null,
   AiError,
   fileProblem: (f: { size: number; type: string }) =>

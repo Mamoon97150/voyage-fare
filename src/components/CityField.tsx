@@ -1,9 +1,11 @@
 import { useEffect, useId, useRef, useState } from 'react'
-import { searchPlaces, type CityValue, type PlaceSuggestion } from '../lib/places'
+import { rememberedPlaces, searchPlaces, type CityValue, type PlaceSuggestion } from '../lib/places'
 
 /**
  * Type a city, pick it from the suggestions: that gives its coordinates for the map.
  * A city that isn't in the list can still be typed and kept; it just won't be on the map.
+ * suggestNow: show suggestions for the name already there (a place that isn't on the map yet).
+ * While it looks, it says so; a search done before is instant (16 Nov: "the picker took long").
  */
 export function CityField({
   id,
@@ -14,6 +16,7 @@ export function CityField({
   hint,
   error,
   autoFocus,
+  suggestNow = false,
 }: {
   id: string
   label: string
@@ -23,27 +26,41 @@ export function CityField({
   hint?: string
   error?: string
   autoFocus?: boolean
+  suggestNow?: boolean
 }) {
   const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([])
   const [open, setOpen] = useState(false)
   const [active, setActive] = useState(-1)
-  const typed = useRef(false)
+  const [looking, setLooking] = useState(false)
+  const typed = useRef(suggestNow)
   const listId = useId()
 
   useEffect(() => {
     if (!typed.current) return
     const query = value.name
     if (query.trim().length < 2) return
+    const show = (found: PlaceSuggestion[]) => {
+      setSuggestions(found)
+      setActive(-1)
+      setOpen(found.length > 0)
+      setLooking(false)
+    }
+    const known = rememberedPlaces(query)
     const controller = new AbortController()
-    const timer = setTimeout(() => {
-      searchPlaces(query, controller.signal)
-        .then((found) => {
-          setSuggestions(found)
-          setActive(-1)
-          setOpen(found.length > 0)
-        })
-        .catch(() => setSuggestions([])) // no suggestions: the typed name still works
-    }, 250)
+    const timer = setTimeout(
+      () => {
+        if (known) return show(known)
+        setLooking(true)
+        searchPlaces(query, controller.signal)
+          .then(show)
+          .catch((e: Error) => {
+            if (e.name === 'AbortError') return
+            setSuggestions([]) // no suggestions: the typed name still works
+            setLooking(false)
+          })
+      },
+      known ? 0 : 150,
+    )
     return () => {
       clearTimeout(timer)
       controller.abort()
@@ -84,12 +101,18 @@ export function CityField({
             if (e.target.value.trim().length < 2) {
               setSuggestions([])
               setOpen(false)
+              setLooking(false)
             }
             // Typing again forgets the picked place's position.
             onChange({ name: e.target.value, country: null, latitude: null, longitude: null })
           }}
           // A tap on a phone blurs the field before the click lands: give it time.
-          onBlur={() => setTimeout(() => setOpen(false), 300)}
+          onBlur={() =>
+            setTimeout(() => {
+              setOpen(false)
+              setLooking(false)
+            }, 300)
+          }
           onFocus={() => suggestions.length && typed.current && setOpen(true)}
           onKeyDown={(e) => {
             if (!open) return
@@ -113,6 +136,11 @@ export function CityField({
           </span>
         )}
       </div>
+      {looking && !open && (
+        <p className="suggest suggest__looking" role="status">
+          looking for it on the map…
+        </p>
+      )}
       {open && (
         <ul id={listId} role="listbox" className="suggest">
           {suggestions.map((s, i) => (
@@ -120,6 +148,7 @@ export function CityField({
               key={`${s.name}-${s.detail}`}
               id={`${listId}-${i}`}
               role="option"
+              aria-label={s.detail ? `${s.name}, ${s.detail}` : s.name}
               aria-selected={i === active}
               className={i === active ? 'suggest__item suggest__item--on' : 'suggest__item'}
               onPointerDown={(e) => e.preventDefault()}

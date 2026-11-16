@@ -234,6 +234,17 @@ select.field__input,
   color: var(--ink-soft);
 }
 
+.suggest__looking {
+  padding: 0.6rem var(--space-3);
+  font-family: var(--font-hand);
+  font-size: var(--text-note);
+  color: var(--ink-soft);
+}
+
+.field__hint--map {
+  color: var(--ink-soft);
+}
+
 .field__pin,
 .field__unit {
   position: absolute;

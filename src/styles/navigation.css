@@ -1665,3 +1665,10 @@ button.screen__back {
 .to-review {
   margin-bottom: var(--space-3);
 }
+
+.import__pin {
+  margin-left: 0.35rem;
+  font-size: var(--text-xs);
+  color: var(--confirmed);
+  font-family: inherit;
+}

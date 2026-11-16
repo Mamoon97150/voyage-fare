@@ -193,7 +193,16 @@ export async function deleteItem(id: string): Promise<void> {
   if (error) throw error
 }
 
-export async function updatePlace(id: string, change: { name: string; nights: number }): Promise<void> {
+export async function updatePlace(
+  id: string,
+  change: {
+    name: string
+    nights: number
+    country?: string | null
+    latitude?: number | null
+    longitude?: number | null
+  },
+): Promise<void> {
   const { error } = await supabase.from('places').update(change).eq('id', id)
   if (error) throw error
 }
@@ -269,4 +278,29 @@ export async function importLines(tripId: string, payload: Json): Promise<{ plac
   const { data, error } = await supabase.rpc('import_lines', { p_trip_id: tripId, p_payload: payload })
   if (error) throw error
   return data as { places: number; lines: number }
+}
+
+/** Imported places (16 Nov): put the ones still off the map on it, by name. */
+export async function pinPlaces(
+  tripId: string,
+  pins: { name: string; country: string | null; latitude: number; longitude: number }[],
+): Promise<void> {
+  if (!pins.length) return
+  const { data, error } = await supabase.from('places').select('id, name').eq('trip_id', tripId).is('latitude', null)
+  if (error) throw error
+  const norm = (s: string) =>
+    s
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .trim()
+  for (const place of data ?? []) {
+    const pin = pins.find((p) => norm(p.name) === norm(place.name))
+    if (!pin) continue
+    const { error: e } = await supabase
+      .from('places')
+      .update({ country: pin.country, latitude: pin.latitude, longitude: pin.longitude })
+      .eq('id', place.id)
+    if (e) throw e
+  }
 }

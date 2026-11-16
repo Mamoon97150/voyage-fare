@@ -397,7 +397,9 @@ describe('changing what was added', () => {
     // Only the edit form has a Nights field now: the add-place form is closed until asked for.
     fireEvent.change(document.getElementById('place-edit-p1-nights')!, { target: { value: '5' } })
     click('Save')
-    await waitFor(() => expect(data.updatePlace).toHaveBeenCalledWith('p1', { name: 'Cartagena', nights: 5 }))
+    await waitFor(() =>
+      expect(data.updatePlace).toHaveBeenCalledWith('p1', expect.objectContaining({ name: 'Cartagena', nights: 5 })),
+    )
 
     fireEvent.click(await screen.findByRole('button', { name: 'Change Cartagena' }))
     click('Delete')
@@ -406,6 +408,31 @@ describe('changing what was added', () => {
     ).toBeInTheDocument()
     click('Yes, delete Cartagena')
     await waitFor(() => expect(data.deletePlace).toHaveBeenCalledWith('p1'))
+  })
+})
+
+describe('a place off the map (16 Nov)', () => {
+  it('editing it shows the picker’s suggestions at once; picking one puts it on the map', async () => {
+    data.getTrip.mockResolvedValue(detail({ places: [{ ...cartagena, latitude: null, longitude: null }] }))
+    data.searchPlaces.mockResolvedValue([
+      { name: 'Cartagena', detail: 'Bolívar, Colombia', country: 'Colombia', latitude: 10.39, longitude: -75.51 },
+    ])
+    data.updatePlace.mockResolvedValue(undefined)
+    open('/trips/t1')
+    fireEvent.click(await screen.findByRole('button', { name: 'Change Cartagena' }))
+    expect(screen.getByText('Not on the map yet: pick it from the list.')).toBeInTheDocument()
+    await waitFor(() => expect(data.searchPlaces).toHaveBeenCalled())
+    fireEvent.click(await screen.findByRole('option', { name: 'Cartagena, Bolívar, Colombia' }))
+    click('Save')
+    await waitFor(() =>
+      expect(data.updatePlace).toHaveBeenCalledWith('p1', {
+        name: 'Cartagena',
+        nights: 4,
+        country: 'Colombia',
+        latitude: 10.39,
+        longitude: -75.51,
+      }),
+    )
   })
 })
 

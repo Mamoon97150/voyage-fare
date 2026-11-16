@@ -29,9 +29,15 @@ const ENDPOINT = 'https://photon.komoot.io/api/'
 // Cities, towns, areas, regions, countries: not shops and street names.
 const LAYERS = ['city', 'locality', 'district', 'state', 'country']
 
+// Searches already done, so typing back or opening the same place again is instant (16 Nov).
+const remembered = new Map<string, PlaceSuggestion[]>()
+export const rememberedPlaces = (query: string) => remembered.get(query.trim().toLowerCase())
+
 export async function searchPlaces(query: string, signal?: AbortSignal): Promise<PlaceSuggestion[]> {
   const q = query.trim()
   if (q.length < 2) return []
+  const known = remembered.get(q.toLowerCase())
+  if (known) return known
   const url = new URL(ENDPOINT)
   url.searchParams.set('q', q)
   url.searchParams.set('limit', '6')
@@ -41,7 +47,19 @@ export async function searchPlaces(query: string, signal?: AbortSignal): Promise
   const response = await fetch(url, { signal })
   if (!response.ok) throw new Error(`Place search failed (${response.status})`)
   const data = (await response.json()) as { features?: PhotonFeature[] }
-  return toSuggestions(data.features ?? [])
+  const found = toSuggestions(data.features ?? [])
+  remembered.set(q.toLowerCase(), found)
+  return found
+}
+
+/** The most likely place for a name ("Tokyo"), or null: for places that came without a pick. */
+export async function firstPlace(name: string): Promise<CityValue | null> {
+  try {
+    const [s] = await searchPlaces(name)
+    return s ? { name, country: s.country, latitude: s.latitude, longitude: s.longitude } : null
+  } catch {
+    return null
+  }
 }
 
 export function toSuggestions(features: PhotonFeature[]): PlaceSuggestion[] {

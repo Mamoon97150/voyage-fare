@@ -5,6 +5,12 @@ import { click, data, detail, open, type } from '../test/app'
 
 vi.mock('../lib/supabase', async () => (await import('../test/fakes')).supabaseModule)
 vi.mock('../lib/trips', async () => (await import('../test/fakes')).tripsModule)
+vi.mock('../lib/places', async (original) => ({
+  ...(await original<typeof import('../lib/places')>()),
+  firstPlace: vi.fn(async (name: string) =>
+    name === 'Tokyo' ? { name, country: 'Japan', latitude: 35.68, longitude: 139.76 } : null,
+  ),
+}))
 vi.mock('../lib/rates', async (original) => ({
   ...(await original<typeof import('../lib/rates')>()),
   fetchRate: vi.fn(async (from: string) => (from === 'JPY' ? 0.0062 : 1)),
@@ -34,6 +40,7 @@ describe('import from my AI (build 8 step 2)', () => {
     click('See what it gives')
     expect(await screen.findByRole('heading', { name: 'Japan in spring' })).toBeInTheDocument()
     const tokyo = screen.getByRole('region', { name: 'Tokyo' })
+    expect(await within(tokyo).findByTitle('On the map')).toBeInTheDocument()
     expect(within(tokyo).getByText('Where we sleep: Hotel Gracery')).toBeInTheDocument()
     expect(within(tokyo).getByText('4 nights × 160 €')).toBeInTheDocument()
     expect(await screen.findByText(/Prices in JPY are saved with today’s rate/)).toBeInTheDocument()
@@ -56,6 +63,10 @@ describe('import from my AI (build 8 step 2)', () => {
     }
     expect(payload.places[0].lines[1].options[0]).toMatchObject({ amount: 10400, currency: 'JPY', rate: 0.0062 })
     expect(await screen.findByText(/Added from your AI: 1 place, 2 lines/)).toBeInTheDocument()
+    // On the map: Tokyo was found by name, and saved with its map point.
+    expect(data.pinPlaces).toHaveBeenCalledWith('new-trip', [
+      { name: 'Tokyo', country: 'Japan', latitude: 35.68, longitude: 139.76 },
+    ])
   })
 
   it('an answer with no trip in it: offer AI reading, and the request again', async () => {

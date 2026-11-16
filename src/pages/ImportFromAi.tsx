@@ -17,9 +17,10 @@ import { useAuth } from '../lib/authContext'
 import { copyText } from '../lib/clipboard'
 import { formatMoney } from '../lib/money'
 import { canPaste } from '../lib/pwa'
+import { firstPlace, type CityValue } from '../lib/places'
 import { fetchRate } from '../lib/rates'
 import { AiError } from '../lib/aiError'
-import { createTrip, deleteTrip, importLines, readTrip, type TripDetail } from '../lib/trips'
+import { createTrip, deleteTrip, importLines, pinPlaces, readTrip, type TripDetail } from '../lib/trips'
 import { formatDates, plural } from '../lib/tripText'
 import { useTrip } from '../lib/useTrip'
 import { useSaving } from '../lib/useSaving'
@@ -270,12 +271,33 @@ function PreviewStep({
     [parsed, target, currency, people, rates],
   )
 
+  // On the map (16 Nov): new places and the starting city are looked up by name, shown with ◉,
+  // and saved with their map point. Not found: the place still comes in, off the map.
+  const lookFor = useMemo(() => {
+    const names = parsed.places.map((p) => p.name).filter((n) => !target?.places.some((x) => sameName(x.name, n)))
+    if (!target && parsed.trip.from) names.push(parsed.trip.from)
+    return [...new Set(names)]
+  }, [parsed, target])
+  const [pins, setPins] = useState<Record<string, CityValue | null>>({})
+  useEffect(() => {
+    let active = true
+    for (const name of lookFor) void firstPlace(name).then((pin) => active && setPins((p) => ({ ...p, [name]: pin })))
+    return () => {
+      active = false
+    }
+  }, [lookFor])
+  const found = () =>
+    Object.values(pins).filter((p): p is CityValue & { latitude: number; longitude: number } =>
+      Boolean(p && p.latitude !== null && p.longitude !== null),
+    )
+
   async function save() {
     if (!preview) return
     setError(undefined)
     await run(async () => {
       if (target) {
         await importLines(target.trip.id, asJson(preview.payload))
+        await pinPlaces(target.trip.id, found()).catch(() => {}) // off the map is fine
         navigate(`/trips/${target.trip.id}`, {
           state: {
             note: `Added from your AI: ${preview.newPlaces ? `${plural(preview.newPlaces, 'place')}, ` : ''}${plural(preview.newLines, 'line')}. ${ESTIMATED}`,
@@ -290,14 +312,15 @@ function PreviewStep({
         startDate: parsed.trip.start,
         endDate: parsed.trip.end && parsed.trip.start && parsed.trip.end >= parsed.trip.start ? parsed.trip.end : null,
         homeCity: parsed.trip.from,
-        homeLatitude: null,
-        homeLongitude: null,
+        homeLatitude: parsed.trip.from ? (pins[parsed.trip.from]?.latitude ?? null) : null,
+        homeLongitude: parsed.trip.from ? (pins[parsed.trip.from]?.longitude ?? null) : null,
         currency,
         targetAmount: null,
         targetScope: 'per_person',
       })
       try {
         await importLines(id, asJson(preview.payload))
+        await pinPlaces(id, found()).catch(() => {}) // off the map is fine
       } catch (e) {
         // All or nothing: no half trip left behind.
         await deleteTrip(id).catch(() => {})
@@ -375,6 +398,11 @@ function PreviewStep({
             <section key={p.name} className="import__place" aria-label={p.name}>
               <h3>
                 {p.name}
+                {pins[p.name]?.latitude != null && (
+                  <span className="import__pin" title="On the map">
+                    ◉<span className="visually-hidden"> on the map</span>
+                  </span>
+                )}
                 {target && p.isNew && <span className="import__tag import__tag--new">new place</span>}
                 <small>{target && !p.isNew ? 'already in the trip' : plural(p.nights, 'night')}</small>
               </h3>
