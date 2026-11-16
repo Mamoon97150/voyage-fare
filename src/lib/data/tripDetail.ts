@@ -15,6 +15,7 @@ export type EstimateCheck = Tables<'v_daily_estimate_checks'>
 export type Payment = Tables<'payments'>
 export type ItemLeft = Tables<'v_item_left'>
 export type ItemFile = Tables<'item_files'>
+export type TripMail = Tables<'trip_mails'>
 export type ItemShare = Tables<'v_item_shares'>
 export type TripBudget = Tables<'v_trip_budget'>
 export type TravellerShare = Tables<'v_traveller_shares'>
@@ -46,6 +47,8 @@ export type TripDetail = {
   itemLeft: ItemLeft[]
   /** Tickets and vouchers on booked lines (build 8 step 4). */
   files?: ItemFile[]
+  /** Forwarded booking emails waiting in "To review" (build 8 step 5b). */
+  mails?: TripMail[]
 }
 
 /** null when the trip doesn't exist or isn't shared with this person (privacy hides both the same way). */
@@ -71,6 +74,7 @@ export async function getTrip(id: string): Promise<TripDetail | null> {
     payments,
     itemLeft,
     files,
+    mails,
   ] = await Promise.all([
     supabase.from('trips').select('*').eq('id', id).maybeSingle(),
     supabase.from('travellers').select('*').eq('trip_id', id).order('position'),
@@ -92,6 +96,12 @@ export async function getTrip(id: string): Promise<TripDetail | null> {
     supabase.from('payments').select('*').eq('trip_id', id).order('paid_on').order('created_at'),
     supabase.from('v_item_left').select('*').eq('trip_id', id),
     supabase.from('item_files').select('*').eq('trip_id', id).order('created_at'),
+    supabase
+      .from('trip_mails')
+      .select('*')
+      .eq('trip_id', id)
+      .eq('status', 'new')
+      .order('received_at', { ascending: false }),
   ])
   for (const r of [
     trip,
@@ -114,6 +124,7 @@ export async function getTrip(id: string): Promise<TripDetail | null> {
     payments,
     itemLeft,
     files,
+    mails,
   ]) {
     if (r.error) throw r.error
   }
@@ -139,5 +150,6 @@ export async function getTrip(id: string): Promise<TripDetail | null> {
     payments: payments.data ?? [],
     itemLeft: itemLeft.data ?? [],
     files: files.data ?? [],
+    mails: mails.data ?? [],
   }
 }

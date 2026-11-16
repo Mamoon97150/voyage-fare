@@ -70,12 +70,20 @@ export function TripMenu({ detail }: { detail: TripDetail }) {
             {!demo && (
               <>
                 <Link
+                  to={`/trips/${detail.trip.id}/settings#trip-address`}
+                  role="menuitem"
+                  className="trip-menu__item"
+                  onClick={() => setOpen(false)}
+                >
+                  <i aria-hidden="true">✉</i>Forward a booking
+                </Link>
+                <Link
                   to={`/trips/${detail.trip.id}/booking-email`}
                   role="menuitem"
                   className="trip-menu__item"
                   onClick={() => setOpen(false)}
                 >
-                  <i aria-hidden="true">✉</i>Paste a booking email
+                  <i aria-hidden="true">📋</i>Paste a booking email
                 </Link>
                 <Link
                   to={`/trips/${detail.trip.id}/import`}
@@ -244,7 +252,7 @@ function Switch({
         {label}
         <small>{hint}</small>
       </span>
-      <span className={`switch${on ? ' switch--on' : ''}`} aria-hidden="true" />
+      <span className={`toggle-pill${on ? ' toggle-pill--on' : ''}`} aria-hidden="true" />
     </button>
   )
 }

@@ -190,14 +190,26 @@ Deno.serve(async (req) => {
   if (req.method !== 'POST') return refuse(fail(405, 'method', 'POST only'))
 
   try {
-    // Signed in, with their own login.
-    const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_ANON_KEY')!, {
-      global: { headers: { Authorization: req.headers.get('Authorization') ?? '' } },
-    })
-    const { data: me } = await supabase.auth.getUser()
-    if (!me.user) return refuse(fail(401, 'signin', 'Sign in first.'))
-
     const input = await req.json().catch(() => ({}))
+
+    // Who: signed in, with their own login — or the trip-mail function reading a forwarded email
+    // for a traveller (header x-hook-token, a secret only the server knows).
+    let userId: string | null = null
+    const token = req.headers.get('x-hook-token')
+    if (token) {
+      const [s] = await sql`select hook_token from private.push_settings where id = 1`
+      const uuid = /^[0-9a-f-]{36}$/
+      if (token !== s.hook_token || typeof input.user_id !== 'string' || !uuid.test(input.user_id))
+        return refuse(fail(403, 'signin', 'Not allowed.'))
+      userId = input.user_id
+    } else {
+      const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_ANON_KEY')!, {
+        global: { headers: { Authorization: req.headers.get('Authorization') ?? '' } },
+      })
+      const { data: me } = await supabase.auth.getUser()
+      userId = me.user?.id ?? null
+    }
+    if (!userId) return refuse(fail(401, 'signin', 'Sign in first.'))
     const kind: Kind | null = input.kind === 'trip' || input.kind === 'booking' ? input.kind : null
     const text = typeof input.text === 'string' ? input.text.trim() : ''
     if (!kind || !text) return refuse(fail(400, 'empty', 'Paste the text first.'))
@@ -208,7 +220,7 @@ Deno.serve(async (req) => {
 
     const key = Deno.env.get('ANTHROPIC_API_KEY')
     if (!key) return refuse(fail(503, 'no_key', 'AI reading isn’t set up yet.'))
-    const blocked = await check(me.user.id)
+    const blocked = await check(userId)
     if (blocked) return refuse(blocked)
 
     const client = new Anthropic({ apiKey: key, maxRetries: 1, timeout: 60_000 })
@@ -222,7 +234,7 @@ Deno.serve(async (req) => {
         format: { type: 'json_schema', schema: kind === 'trip' ? TRIP_SCHEMA : BOOKING_SCHEMA },
       },
     })
-    await record(me.user.id, kind, response.usage)
+    await record(userId, kind, response.usage)
 
     if (response.stop_reason === 'refusal' || response.stop_reason === 'max_tokens')
       return refuse(fail(422, 'unreadable', 'We couldn’t read this text.'))

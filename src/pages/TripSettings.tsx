@@ -9,6 +9,7 @@ import { DeleteTrip, LeaveTrip } from '../components/settings/DangerZone'
 import { MainCurrency } from '../components/settings/MainCurrency'
 import { TripForm } from '../components/settings/TripForm'
 import { Travellers } from '../components/settings/Travellers'
+import { TripAddress } from '../components/trip/TripAddress'
 
 /**
  * Trip settings (mockup 8): the trip, its budget, its travellers, and deleting it.
@@ -72,6 +73,7 @@ export function TripSettings() {
       <TripForm key={detail.trip.currency} detail={detail} onSaved={reload} />
       <MainCurrency detail={detail} onChanged={reload} />
       <Travellers detail={detail} userId={session?.user.id} owner={owner} onChanged={reload} />
+      {!detail.trip.is_demo && <TripAddress detail={detail} />}
       {owner ? <DeleteTrip detail={detail} owner={owner} /> : <LeaveTrip detail={detail} />}
     </Screen>
   )

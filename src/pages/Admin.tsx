@@ -667,7 +667,7 @@ function NotifyMe() {
           Notify me
           <small>{busy ? 'one moment…' : hint[state]}</small>
         </span>
-        <span className={`switch${state === 'on' ? ' switch--on' : ''}`} aria-hidden="true" />
+        <span className={`toggle-pill${state === 'on' ? ' toggle-pill--on' : ''}`} aria-hidden="true" />
       </button>
       {error && <FormMessage tone="error">{error}</FormMessage>}
     </>

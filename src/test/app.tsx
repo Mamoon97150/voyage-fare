@@ -65,6 +65,7 @@ beforeEach(() => {
   data.listOpenInvitations.mockResolvedValue([])
   data.amIAdmin.mockResolvedValue(false)
   data.inboxThreads.mockResolvedValue([])
+  data.tripMailAddress.mockResolvedValue('colombia-k7q2@voyagefare.app')
   data.adminAi.mockResolvedValue({
     enabled: true,
     cap_usd: 5.8,

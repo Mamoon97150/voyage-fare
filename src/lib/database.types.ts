@@ -299,6 +299,45 @@ export type Database = {
           },
         ]
       }
+      trip_mails: {
+        Row: {
+          forwarded_by: string | null
+          forwarder: string | null
+          found: Json | null
+          id: string
+          problem: string | null
+          received_at: string
+          resend_id: string
+          status: string
+          subject: string | null
+          trip_id: string
+        }
+        Insert: {
+          forwarded_by?: string | null
+          forwarder?: string | null
+          found?: Json | null
+          id?: string
+          problem?: string | null
+          received_at?: string
+          resend_id: string
+          status?: string
+          subject?: string | null
+          trip_id: string
+        }
+        Update: {
+          forwarded_by?: string | null
+          forwarder?: string | null
+          found?: Json | null
+          id?: string
+          problem?: string | null
+          received_at?: string
+          resend_id?: string
+          status?: string
+          subject?: string | null
+          trip_id?: string
+        }
+        Relationships: []
+      }
       item_files: {
         Row: {
           added_by: string | null
@@ -1123,6 +1162,7 @@ export type Database = {
           home_longitude: number | null
           id: string
           is_demo: boolean
+          mail_code: string | null
           name: string
           start_date: string | null
           target_amount: number | null
@@ -1138,6 +1178,7 @@ export type Database = {
           home_longitude?: number | null
           id?: string
           is_demo?: boolean
+          mail_code?: string | null
           name: string
           start_date?: string | null
           target_amount?: number | null
@@ -1153,6 +1194,7 @@ export type Database = {
           home_longitude?: number | null
           id?: string
           is_demo?: boolean
+          mail_code?: string | null
           name?: string
           start_date?: string | null
           target_amount?: number | null
@@ -1492,6 +1534,7 @@ export type Database = {
       }
       admin_add: { Args: { p_email: string }; Returns: string }
       admin_ai: { Args: never; Returns: Json }
+      trip_mail_address: { Args: { p_trip_id: string; p_new?: boolean }; Returns: string }
       admin_set_ai: { Args: { p_enabled: boolean }; Returns: undefined }
       apply_booking: {
         Args: {

@@ -33,6 +33,8 @@ export const data = {
   applyBooking: vi.fn(),
   adminAi: vi.fn(),
   setAiEnabled: vi.fn(),
+  tripMailAddress: vi.fn(),
+  markTripMail: vi.fn(),
   listTrips: vi.fn(),
   getDemoTripId: vi.fn(),
   getTrip: vi.fn(),
@@ -123,6 +125,9 @@ export const tripsModule = {
   applyBooking: data.applyBooking,
   adminAi: data.adminAi,
   setAiEnabled: data.setAiEnabled,
+  tripMailAddress: data.tripMailAddress,
+  markTripMail: data.markTripMail,
+  foundIn: (m: { found: unknown }) => m.found ?? null,
   AiError,
   fileProblem: (f: { size: number; type: string }) =>
     ['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'image/heic'].includes(f.type)

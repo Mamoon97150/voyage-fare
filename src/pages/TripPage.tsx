@@ -14,6 +14,7 @@ import { RouteGap } from '../components/trip/RouteGap'
 import { RouteCard } from '../components/trip/RouteCard'
 import { TripTopBar } from '../components/trip/TripTopBar'
 import { WelcomeNote } from '../components/trip/WelcomeNote'
+import { ToReview } from '../components/trip/TripAddress'
 import { Loading } from '../lib/auth'
 import { isToTry } from '../lib/toTry'
 import { useTrip } from '../lib/useTrip'
@@ -114,6 +115,7 @@ export function TripPage() {
       />
       <DemoStrip detail={detail} />
       <ImportedNote />
+      {!readOnly && <ToReview detail={detail} onChanged={reload} />}
       {!readOnly && (
         <WelcomeNote tripId={trip.id} userId={session?.user.id} createdBy={trip.created_by} travellers={travellers} />
       )}

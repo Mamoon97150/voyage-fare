@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
 import { AiProblem, Reading, WhereItGoes } from '../components/AiReading'
 import { FormMessage } from '../components/AuthForm'
 import { SketchBox } from '../components/Sketch'
@@ -8,7 +8,15 @@ import { Loading } from '../lib/auth'
 import { formatMoney } from '../lib/money'
 import { canPaste } from '../lib/pwa'
 import { fetchRate } from '../lib/rates'
-import { applyBooking, readBooking, type FoundBooking, type Item, type TripDetail } from '../lib/trips'
+import {
+  applyBooking,
+  foundIn,
+  markTripMail,
+  readBooking,
+  type FoundBooking,
+  type Item,
+  type TripDetail,
+} from '../lib/trips'
 import { formatDates } from '../lib/tripText'
 import { useSaving } from '../lib/useSaving'
 import { useTrip } from '../lib/useTrip'
@@ -17,6 +25,7 @@ import { useTrip } from '../lib/useTrip'
  * "Paste a booking email" (build 8 step 5a, mockup ai-reading-v5 screens 3–4), /trips/:id/booking-email.
  * Paste the confirmation → Claude reads it → which line it goes on (Not this one / a new line) and
  * what changes → one tap marks it booked. Nothing is saved before that tap.
+ * ?mail=<id> (step 5b): a forwarded email from "To review", already read on the server.
  */
 
 const NEW = 'new'
@@ -63,11 +72,23 @@ function Shell({
 
 function BookingEmailFor({ detail }: { detail: TripDetail }) {
   const back = `/trips/${detail.trip.id}`
+  const navigate = useNavigate()
+  const [params] = useSearchParams()
+  const mail = detail.mails?.find((m) => m.id === params.get('mail'))
+  const forwarded = mail ? foundIn(mail) : null
   const [text, setText] = useState('')
   const [reading, setReading] = useState(false)
   const [error, setError] = useState<unknown>(null)
   const [found, setFound] = useState<FoundBooking | null>(null)
 
+  if (forwarded && mail)
+    return <Found detail={detail} found={forwarded} mailId={mail.id} onBack={() => navigate(back)} />
+  if (params.get('mail'))
+    return (
+      <Shell back={back} title="From the email">
+        <FormMessage tone="info">This email was already checked.</FormMessage>
+      </Shell>
+    )
   if (found) return <Found detail={detail} found={found} onBack={() => setFound(null)} />
 
   async function read() {
@@ -155,7 +176,18 @@ function optionNote(detail: TripDetail, item: Item, name: string | null): string
   return options.length ? `adds ${name ?? 'it'} as an option` : item.status
 }
 
-function Found({ detail, found, onBack }: { detail: TripDetail; found: FoundBooking; onBack: () => void }) {
+function Found({
+  detail,
+  found,
+  mailId,
+  onBack,
+}: {
+  detail: TripDetail
+  found: FoundBooking
+  /** From "To review": marked done once saved, or dropped. */
+  mailId?: string
+  onBack: () => void
+}) {
   const navigate = useNavigate()
   const plan = useMemo(() => planBooking(detail, found), [detail, found])
   const [target, setTarget] = useState<string>(plan.match?.id ?? NEW)
@@ -226,6 +258,7 @@ function Found({ detail, found, onBack }: { detail: TripDetail; found: FoundBook
         ref: found.confirmation,
         link,
       })
+      if (mailId) await markTripMail(mailId, 'done')
       navigate(`/trips/${detail.trip.id}`, {
         state: { note: `From the email: ${item?.name ?? plan.name} is ${paid ? 'paid' : 'booked'}.` },
       })
@@ -345,9 +378,25 @@ function Found({ detail, found, onBack }: { detail: TripDetail; found: FoundBook
             </p>
           ))}
           <div className="add-item__actions">
-            <button type="button" className="button button--quiet" onClick={onBack}>
-              Cancel
-            </button>
+            {mailId ? (
+              <button
+                type="button"
+                className="button button--quiet"
+                disabled={busy}
+                onClick={() =>
+                  void run(async () => {
+                    await markTripMail(mailId, 'dropped')
+                    navigate(`/trips/${detail.trip.id}`)
+                  }, setSaveError)
+                }
+              >
+                Not for this trip
+              </button>
+            ) : (
+              <button type="button" className="button button--quiet" onClick={onBack}>
+                Cancel
+              </button>
+            )}
             <button
               type="button"
               className="button button--primary"

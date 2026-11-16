@@ -95,7 +95,7 @@ export function FeedbackSheet({ onClose, onSent }: { onClose: () => void; onSent
               You can write back to me
               <small>{email ? `at ${email}` : 'by email'}</small>
             </span>
-            <span className={`switch${canReply ? ' switch--on' : ''}`} aria-hidden="true" />
+            <span className={`toggle-pill${canReply ? ' toggle-pill--on' : ''}`} aria-hidden="true" />
           </button>
           {error && <FormMessage tone="error">{error}</FormMessage>}
           <button
