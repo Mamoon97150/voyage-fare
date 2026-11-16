@@ -255,7 +255,7 @@ export function EstimateForm({
               type="button"
               role="radio"
               aria-checked={category === c.key}
-              className="chip chip--pick"
+              className={`chip chip--pick cat--${c.key}`}
               onClick={() => pickCategory(c.key)}
             >
               <span className="chip__icon" aria-hidden="true">

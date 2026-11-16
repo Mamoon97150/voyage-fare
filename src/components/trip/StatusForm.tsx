@@ -109,6 +109,7 @@ export function StatusForm({
             type="button"
             role="radio"
             aria-checked={status === s.key}
+            className={`status-step--${s.key}`}
             onClick={() => setStatus(s.key)}
           >
             {s.label}

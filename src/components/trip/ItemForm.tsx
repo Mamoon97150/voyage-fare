@@ -96,7 +96,7 @@ function KindPicker({ kinds, kind, onKind }: { kinds: ItemKind[]; kind: ItemKind
             type="button"
             role="radio"
             aria-checked={kind === k}
-            className="chip chip--pick"
+            className={`chip chip--pick cat--${k}`}
             onClick={() => onKind(k)}
           >
             <span className="chip__icon" aria-hidden="true">

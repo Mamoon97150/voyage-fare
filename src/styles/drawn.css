@@ -312,3 +312,152 @@ input[type='radio'] {
 .site-bar__burger {
   color: var(--pen);
 }
+
+/* ── Less blue (16 Nov, Djamina: "too much blue") ───────────────────────────────
+   The pen is for the one thing that matters: the main button, text links, the option you
+   circled on Compare. Everything else is written in sepia ink. */
+.button--quiet,
+.button--small,
+.small-button,
+.paste-button,
+.day-button,
+.round-button,
+.trip-menu__button,
+.screen__back,
+.pill {
+  --btn-ink: var(--ink);
+  color: var(--ink);
+}
+
+.screen__back::after {
+  background: var(--ink);
+}
+
+.pill::after {
+  background: var(--ink);
+}
+
+.pill--dark {
+  color: var(--paper-raised);
+}
+
+.pill--dark::after {
+  background: var(--pen);
+}
+
+.trip-menu__button--open {
+  --btn-ink: var(--ink);
+  color: var(--paper-raised);
+}
+
+.button--quiet:hover,
+.small-button:hover,
+.paste-button:hover,
+.day-button:hover,
+.round-button:hover,
+.trip-menu__button:hover,
+.screen__back:hover {
+  background-color: color-mix(in srgb, var(--ink) 6%, transparent);
+}
+
+.site-bar__burger {
+  color: var(--ink);
+}
+
+/* Picked chips: ink, unless they are a category (then that category's pencil). */
+.chip[aria-pressed='true'],
+.chip[role='radio'][aria-checked='true'],
+.chip[aria-checked='true'] {
+  --btn-ink: var(--ink);
+  background-color: color-mix(in srgb, var(--ink) 6%, transparent);
+  color: var(--ink);
+}
+
+.chip.cat--housing[aria-checked='true'] {
+  --btn-ink: var(--cat-stay);
+  background-color: color-mix(in srgb, var(--cat-stay) 22%, transparent);
+}
+
+.chip.cat--transport[aria-checked='true'],
+.chip.cat--car_rental[aria-checked='true'],
+.chip.cat--local_transport[aria-checked='true'] {
+  --btn-ink: var(--cat-travel);
+  background-color: color-mix(in srgb, var(--cat-travel) 22%, transparent);
+}
+
+.chip.cat--activity[aria-checked='true'],
+.chip.cat--activities[aria-checked='true'] {
+  --btn-ink: var(--cat-activity);
+  background-color: color-mix(in srgb, var(--cat-activity) 22%, transparent);
+}
+
+.chip.cat--restaurant[aria-checked='true'],
+.chip.cat--food[aria-checked='true'] {
+  --btn-ink: var(--cat-food);
+  background-color: color-mix(in srgb, var(--cat-food) 26%, transparent);
+}
+
+.chip.cat--other[aria-checked='true'],
+.chip.cat--buffer[aria-checked='true'],
+.chip.cat--insurance[aria-checked='true'],
+.chip.cat--package[aria-checked='true'] {
+  --btn-ink: var(--cat-other);
+  background-color: color-mix(in srgb, var(--cat-other) 28%, transparent);
+}
+
+/* "+ Add …" rows: ink, the dashed circle in pencil. */
+.add-row {
+  color: var(--ink);
+}
+
+.add-row__plus {
+  border-color: var(--ink-soft);
+}
+
+/* Two-way switches (Per person · Whole trip, yes · no): ink. */
+.status-steps::after,
+.switch::after {
+  background: var(--ink);
+}
+
+.status-steps button,
+.switch button,
+.yesno button {
+  color: var(--ink-soft);
+}
+
+.switch button[aria-checked='true']::before,
+.yesno button[aria-checked='true']::before {
+  background: var(--ink);
+}
+
+.switch button[aria-checked='true'],
+.yesno button[aria-checked='true'] {
+  color: var(--paper-raised);
+}
+
+/* Where it stands: the money colours. Chosen = still estimated (ochre), booked or paid = olive. */
+.status-steps button[aria-checked='true'] {
+  color: var(--ink);
+}
+
+.status-steps button.status-step--chosen[aria-checked='true']::before {
+  background: var(--estimated);
+}
+
+.status-steps button.status-step--booked[aria-checked='true'],
+.status-steps button.status-step--paid[aria-checked='true'] {
+  color: var(--paper-raised);
+}
+
+.status-steps button.status-step--booked[aria-checked='true']::before,
+.status-steps button.status-step--paid[aria-checked='true']::before {
+  background: var(--confirmed);
+}
+
+/* The route: places and pins in ink (the map isn't an action). */
+.place__pin,
+.route-pin,
+.stops__n {
+  background: var(--ink);
+}
