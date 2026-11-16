@@ -25,14 +25,20 @@ export function StatusForm({
   detail,
   item,
   viewer,
+  target,
+  onCancel,
   onSaved,
 }: {
   detail: TripDetail
   item: Item
   viewer: string | null
+  /** "Mark it booked" / "Mark it paid" (line-sheet-v6): that step only, no Chosen/Booked/Paid choice. */
+  target?: 'booked' | 'paid'
+  onCancel?: () => void
   onSaved: () => void
 }) {
-  const initial = (item.status === 'booked' || item.status === 'paid' ? item.status : 'chosen') as ItemStatus
+  const initial = (target ??
+    (item.status === 'booked' || item.status === 'paid' ? item.status : 'chosen')) as ItemStatus
   // What was really paid starts as the chosen option's price, in its own currency and saved rate.
   const chosen = detail.options.find((o) => o.item_id === item.id && o.is_chosen)
   const trip = detail.trip.currency
@@ -52,6 +58,9 @@ export function StatusForm({
   // Booking details (build 8 step 4): optional, when it's booked or paid.
   const [ref, setRef] = useState(item.booking_ref ?? '')
   const [link, setLink] = useState(item.booking_link ?? '')
+  // Optional extras, folded until asked for (unless already filled).
+  const [showRef, setShowRef] = useState(!target || Boolean(item.booking_ref))
+  const [showLink, setShowLink] = useState(!target || Boolean(item.booking_link))
   const { busy, run } = useSaving()
   const [error, setError] = useState<string>()
   const solo = isSolo(detail)
@@ -101,21 +110,25 @@ export function StatusForm({
 
   return (
     <form className="status-form" onSubmit={submit} aria-label={`Where ${item.name} stands`}>
-      <h3 className="sheet-title">Where it stands</h3>
-      <div className="status-steps" role="radiogroup" aria-label="Status">
-        {STEPS.map((s) => (
-          <button
-            key={s.key}
-            type="button"
-            role="radio"
-            aria-checked={status === s.key}
-            className={`status-step--${s.key}`}
-            onClick={() => setStatus(s.key)}
-          >
-            {s.label}
-          </button>
-        ))}
-      </div>
+      <h3 className="sheet-title">
+        {target === 'booked' ? 'Mark it booked' : target === 'paid' ? 'Mark it paid' : 'Where it stands'}
+      </h3>
+      {!target && (
+        <div className="status-steps" role="radiogroup" aria-label="Status">
+          {STEPS.map((s) => (
+            <button
+              key={s.key}
+              type="button"
+              role="radio"
+              aria-checked={status === s.key}
+              className={`status-step--${s.key}`}
+              onClick={() => setStatus(s.key)}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {status !== 'chosen' && (
         <div className="row2">
@@ -171,26 +184,50 @@ export function StatusForm({
       )}
       {status !== 'chosen' && (
         <>
-          <div className="field">
-            <label className="field__label" htmlFor={`${id}-ref`}>
-              Confirmation number <span className="field__optional">(optional)</span>
-            </label>
-            <input id={`${id}-ref`} className="field__input" value={ref} onChange={(e) => setRef(e.target.value)} />
-          </div>
-          <div className="field">
-            <label className="field__label" htmlFor={`${id}-link`}>
-              Booking link <span className="field__optional">(optional)</span>
-            </label>
-            <input
-              id={`${id}-link`}
-              className="field__input"
-              inputMode="url"
-              placeholder="https://…"
-              value={link}
-              onChange={(e) => setLink(e.target.value)}
-            />
-          </div>
-          <p className="hand status-form__later">tickets and vouchers: add them on the line, now or later</p>
+          {target && (!showRef || !showLink) && (
+            <div className="status-form__extras">
+              {!showRef && (
+                <button type="button" className="add-row" onClick={() => setShowRef(true)}>
+                  <span className="add-row__plus" aria-hidden="true">
+                    +
+                  </span>
+                  Confirmation number
+                </button>
+              )}
+              {!showLink && (
+                <button type="button" className="add-row" onClick={() => setShowLink(true)}>
+                  <span className="add-row__plus" aria-hidden="true">
+                    +
+                  </span>
+                  Booking link
+                </button>
+              )}
+            </div>
+          )}
+          {showRef && (
+            <div className="field">
+              <label className="field__label" htmlFor={`${id}-ref`}>
+                Confirmation number <span className="field__optional">(optional)</span>
+              </label>
+              <input id={`${id}-ref`} className="field__input" value={ref} onChange={(e) => setRef(e.target.value)} />
+            </div>
+          )}
+          {showLink && (
+            <div className="field">
+              <label className="field__label" htmlFor={`${id}-link`}>
+                Booking link <span className="field__optional">(optional)</span>
+              </label>
+              <input
+                id={`${id}-link`}
+                className="field__input"
+                inputMode="url"
+                placeholder="https://…"
+                value={link}
+                onChange={(e) => setLink(e.target.value)}
+              />
+            </div>
+          )}
+          <p className="hand status-form__later">tickets and vouchers: in Booking, once it’s saved</p>
         </>
       )}
       <p className="field__hint">
@@ -205,9 +242,16 @@ export function StatusForm({
                 : 'Confirmed. Who owes whom is on “Who paid”.'}
       </p>
       {error && <FormMessage tone="error">{error}</FormMessage>}
-      <button type="submit" className="button button--quiet" disabled={busy}>
-        {busy ? 'Saving…' : 'Save where it stands'}
-      </button>
+      <div className="add-item__actions">
+        {onCancel && (
+          <button type="button" className="button button--quiet" onClick={onCancel} disabled={busy}>
+            Cancel
+          </button>
+        )}
+        <button type="submit" className="button button--primary" disabled={busy}>
+          {busy ? 'Saving…' : target === 'booked' ? 'Booked' : target === 'paid' ? 'Paid' : 'Save'}
+        </button>
+      </div>
     </form>
   )
 }

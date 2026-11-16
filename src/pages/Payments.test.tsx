@@ -98,6 +98,8 @@ describe('what’s left to pay (build 6)', () => {
     data.addPayment.mockResolvedValue('pay2')
     open('/trips/t1')
     fireEvent.click(await screen.findByRole('button', { name: 'Change Graffiti tour' }))
+    // Booked with payments: the next step is "Payments".
+    click('Payments')
     expect(screen.getByRole('region', { name: 'Payments' })).toHaveTextContent('Deposit')
     expect(screen.queryByRole('form', { name: /Where Graffiti tour stands/ })).not.toBeInTheDocument()
     click('Add a payment')

@@ -102,6 +102,7 @@ describe('agency packages (build 6)', () => {
     data.setItemPackage.mockResolvedValue(undefined)
     open('/trips/t1')
     fireEvent.click(await screen.findByRole('button', { name: 'Change La Cevichería' }))
+    fireEvent.click(screen.getByRole('button', { name: 'More ▾' }))
     fireEvent.change(screen.getByLabelText('Part of a package'), { target: { value: 'pk' } })
     await waitFor(() => expect(data.setItemPackage).toHaveBeenCalledWith('d1', 'pk'))
   })

@@ -156,6 +156,7 @@ describe('To try', () => {
     data.getTrip.mockResolvedValue(pool())
     open('/trips/t1')
     fireEvent.click(await screen.findByRole('button', { name: /Change Carmen/ }))
+    click('More ▾')
     click('Back to To try')
     await waitFor(() => expect(data.setRestaurantDay).toHaveBeenCalledWith('c2', null))
   })

@@ -43,16 +43,38 @@ describe('where it stands', () => {
       amounts: [{ item_id: 'i1', current: 1200, is_confirmed: false }],
     })
 
+  it('a line, opened: the next step moves on (booked → Mark it paid); the kind stays folded', async () => {
+    data.getTrip.mockResolvedValue(stay({ status: 'booked', actual_amount: 1150 }))
+    data.setItemStatus.mockResolvedValue(undefined)
+    open('/trips/t1')
+    fireEvent.click(await screen.findByRole('button', { name: 'Change Casa Lola' }))
+    expect(screen.getByRole('button', { name: /Where it stands: Booked/ })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Mark it booked' })).toBeNull()
+    expect(screen.getByRole('button', { name: /^Booking/ })).toBeInTheDocument()
+    click(/Name, day, price/)
+    expect(screen.queryByRole('radio', { name: /Activities/ })).toBeNull()
+    click('Change what it is')
+    expect(screen.getByRole('radio', { name: /Activities/ })).toBeInTheDocument()
+    click('Cancel')
+    click('Mark it paid')
+    expect(screen.getByLabelText('Really paid')).toHaveValue('1 150')
+    click('Paid')
+    await waitFor(() =>
+      expect(data.setItemStatus).toHaveBeenCalledWith(expect.objectContaining({ status: 'paid', actualAmount: 1150 })),
+    )
+  })
+
   it('booked, for what it really costs', async () => {
     data.getTrip.mockResolvedValue(stay())
     data.setItemStatus.mockResolvedValue(undefined)
     open('/trips/t1')
     fireEvent.click(await screen.findByRole('button', { name: 'Change Casa Lola' }))
-    expect(screen.getByRole('radio', { name: 'Chosen' })).toHaveAttribute('aria-checked', 'true')
-    fireEvent.click(screen.getByRole('radio', { name: 'Booked' }))
+    // The summary: where it stands, and the next step as the one main button.
+    expect(screen.getByRole('button', { name: /Where it stands: Chosen/ })).toBeInTheDocument()
+    click('Mark it booked')
     expect(screen.getByLabelText('Booked for')).toHaveValue('1 200')
     type('Booked for', '1 150')
-    click('Save where it stands')
+    click('Booked')
     await waitFor(() =>
       expect(data.setItemStatus).toHaveBeenCalledWith({
         id: 'i1',
@@ -70,11 +92,13 @@ describe('where it stands', () => {
     data.setItemStatus.mockResolvedValue(undefined)
     open('/trips/t1')
     fireEvent.click(await screen.findByRole('button', { name: 'Change Casa Lola' }))
+    // Tapping the track opens all three steps (to correct one too).
+    click(/Where it stands/)
     fireEvent.click(screen.getByRole('radio', { name: 'Paid' }))
     expect(screen.getByLabelText('Really paid')).toHaveValue('1 150')
     expect(screen.getByLabelText('Paid by')).toHaveValue('a')
     fireEvent.change(screen.getByLabelText('Paid by'), { target: { value: 'b' } })
-    click('Save where it stands')
+    click('Save')
     await waitFor(() =>
       expect(data.setItemStatus).toHaveBeenCalledWith(
         expect.objectContaining({ status: 'paid', actualAmount: 1150, paidBy: 'b' }),
@@ -86,9 +110,10 @@ describe('where it stands', () => {
     data.getTrip.mockResolvedValue(stay())
     open('/trips/t1')
     fireEvent.click(await screen.findByRole('button', { name: 'Change Casa Lola' }))
+    click(/Where it stands/)
     fireEvent.click(screen.getByRole('radio', { name: 'Paid' }))
     type('Really paid', '')
-    click('Save where it stands')
+    click('Save')
     expect(await screen.findByText('How much was really paid?')).toBeInTheDocument()
     expect(data.setItemStatus).not.toHaveBeenCalled()
   })

@@ -232,6 +232,12 @@ describe('Compare', () => {
     open('/trips/t1')
     expect(await screen.findByText(/2 options compared/)).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Change Casa Lola' }))
+    // The summary links to Compare; the form keeps the price there.
+    expect(screen.getByRole('link', { name: /Compare the options/ })).toHaveAttribute(
+      'href',
+      '/trips/t1/compare?tab=stay&page=p1',
+    )
+    click(/Name, day, price/)
     expect(screen.getByText(/2 options compared · chosen: Casa Lola/)).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Open in Compare' })).toHaveAttribute(
       'href',
@@ -378,6 +384,7 @@ describe('rooms (a stay by room)', () => {
     view.unmount()
     open('/trips/t1')
     fireEvent.click(await screen.findByRole('button', { name: 'Change Casona' }))
+    click(/Who it’s for/)
     expect(screen.getByText(/Split by room: Ana · Bea & Cleo/)).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Bea' })).not.toBeInTheDocument()
   })

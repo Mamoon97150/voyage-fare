@@ -1,26 +1,22 @@
-import { BookingMarks, BookingPart } from './Booking'
+import { BookingMarks } from './Booking'
+import { LineSheet } from './LineSheet'
 import { useState } from 'react'
 import { amountForInput } from '../../lib/money'
-import { deleteItem, setPackageCover, updateItem, type Item, type ItemKind, type TripDetail } from '../../lib/trips'
+import { setPackageCover, updateItem, type Item, type ItemKind, type TripDetail } from '../../lib/trips'
 import { coversText, daysText, itemLine, itemTitle, kindLabel, leftLine, type Mode } from '../../lib/tripView'
 import { LeftWords } from './LeftWords'
-import { PartOfPackage } from './Packages'
-import { PaymentsPanel } from './Payments'
 import { optionCount } from '../../lib/options'
 import { amountText, priceInCompare, priceOf, statusWord } from './itemShared'
-import { DropControl } from './DropControl'
 import { ItemForm } from './ItemForm'
-import { StatusForm } from './StatusForm'
-import { WhoFor } from './WhoFor'
 import { ItemPeek } from './ItemPeek'
 import { isReadOnly } from '../../lib/demo'
-import { BackToTry, SourceBadge, VerdictChips } from './ToTry'
+import { SourceBadge, VerdictChips } from './ToTry'
 import { dayHasCome, inFoodBudget, MEALS, VERDICTS } from '../../lib/toTry'
 import { todayIso } from '../../lib/shelf'
 
 /**
  * One line of the notebook: a dot (green confirmed, mustard estimated, hollow no price), the name,
- * the amount. Tapping it opens the same form as when adding, to change or delete it.
+ * the amount. Tapping it opens the line's sheet (line-sheet-v6): a summary and the next step.
  */
 export function ItemRow({
   detail,
@@ -70,7 +66,6 @@ export function ItemRow({
     .filter(Boolean)
     .join(' · ')
 
-  const chosen = detail.options.find((o) => o.item_id === item.id && o.is_chosen)
   const inCompare = priceInCompare(detail, item)
   const dropped = item.status === 'dropped'
 
@@ -78,65 +73,43 @@ export function ItemRow({
     const price = priceOf(detail, item)
     return (
       <li className="item-row item-row--editing">
-        <ItemForm
+        <LineSheet
           detail={detail}
-          formId={`edit-${item.id}`}
-          kinds={editKinds(kinds, item.kind as ItemKind)}
-          days={days}
-          initial={{
-            kind: item.kind as ItemKind,
-            covers: detail.items.filter((i) => i.package_id === item.id).map((i) => i.id),
-            name: item.name,
-            day: item.day_number ? String(item.day_number) : '',
-            endDay: item.end_day_number ? String(item.end_day_number) : '',
-            price: amountForInput(price),
-          }}
-          submitLabel="Save"
-          options={inCompare}
-          nameLabel={decision ? 'What you’re deciding' : 'Name'}
-          onSubmit={async ({ covers, ...v }) => {
-            await updateItem({ id: item.id, ...v, keepPrice: inCompare !== undefined })
-            if (v.kind === 'package') await setPackageCover(item.id, covers ?? [])
-            setEditing(false)
-            onChanged()
-          }}
-          onDelete={async () => {
-            await deleteItem(item.id)
-            onChanged()
-          }}
-          deleteName={item.name}
-          onCancel={() => setEditing(false)}
-        />
-        <WhoFor detail={detail} item={item} onChanged={onChanged} />
-        <PartOfPackage detail={detail} item={item} onChanged={onChanged} />
-        <BackToTry
           item={item}
-          onChanged={() => {
-            setEditing(false)
-            onChanged()
-          }}
+          viewer={viewer}
+          title={title}
+          amount={foodBudget ? 'in your food budget' : amountText(line, item, detail.trip.currency)}
+          meta={meta}
+          catKey={item.kind}
+          onChanged={onChanged}
+          onClose={() => setEditing(false)}
+          edit={(done) => (
+            <ItemForm
+              detail={detail}
+              formId={`edit-${item.id}`}
+              kinds={editKinds(kinds, item.kind as ItemKind)}
+              days={days}
+              foldKind
+              initial={{
+                kind: item.kind as ItemKind,
+                covers: detail.items.filter((i) => i.package_id === item.id).map((i) => i.id),
+                name: item.name,
+                day: item.day_number ? String(item.day_number) : '',
+                endDay: item.end_day_number ? String(item.end_day_number) : '',
+                price: amountForInput(price),
+              }}
+              submitLabel="Save"
+              options={inCompare}
+              nameLabel={decision ? 'What you’re deciding' : 'Name'}
+              onSubmit={async ({ covers, ...v }) => {
+                await updateItem({ id: item.id, ...v, keepPrice: inCompare !== undefined })
+                if (v.kind === 'package') await setPackageCover(item.id, covers ?? [])
+                done()
+              }}
+              onCancel={done}
+            />
+          )}
         />
-        <DropControl
-          item={item}
-          onChanged={() => {
-            setEditing(false)
-            onChanged()
-          }}
-        />
-        {/* Paid in parts (build 6): payments take over from "Where it stands" once there are some. */}
-        {chosen && !(detail.payments ?? []).some((p) => p.item_id === item.id) && (
-          <StatusForm
-            detail={detail}
-            item={item}
-            viewer={viewer}
-            onSaved={() => {
-              setEditing(false)
-              onChanged()
-            }}
-          />
-        )}
-        <PaymentsPanel detail={detail} item={item} viewer={viewer} onChanged={onChanged} />
-        <BookingPart detail={detail} item={item} onChanged={onChanged} />
       </li>
     )
   }

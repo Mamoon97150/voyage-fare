@@ -132,6 +132,7 @@ export function ItemForm({
   onSubmit,
   onCancel,
   onDelete,
+  foldKind = false,
   deleteName,
   options,
   nameLabel = 'Name',
@@ -148,6 +149,8 @@ export function ItemForm({
   onSubmit: (values: ItemValues) => Promise<void>
   onCancel: () => void
   onDelete?: () => Promise<void>
+  /** Changing a line (line-sheet-v6): its kind shown, the choices only on "Change what it is". */
+  foldKind?: boolean
   deleteName?: string
   /** Several options: the price is the chosen one's, changed on Compare (shown instead of the field). */
   options?: { text: string; link: string | null }
@@ -158,6 +161,7 @@ export function ItemForm({
 }) {
   const [ownKind, setOwnKind] = useState<ItemKind>(initial?.kind ?? kinds[0])
   const kind = controlledKind ?? ownKind
+  const [showKinds, setShowKinds] = useState(false)
   const setKind = onKind ?? setOwnKind
   const [name, setName] = useState(initial?.name ?? '')
   const [day, setDay] = useState(initial?.day ?? '')
@@ -202,7 +206,17 @@ export function ItemForm({
     <form onSubmit={submit} noValidate className="add-item">
       {title}
       {formError && <FormMessage tone="error">{formError}</FormMessage>}
-      <KindPicker kinds={kinds} kind={kind} onKind={setKind} />
+      {foldKind && !showKinds ? (
+        <div className="kind-now">
+          <i className={`cat-dot cat-dot--${kind}`} aria-hidden="true" />
+          <b>{kindLabel(kind, kinds.includes('housing')).label}</b>
+          <button type="button" className="link-button" onClick={() => setShowKinds(true)}>
+            Change what it is
+          </button>
+        </div>
+      ) : (
+        <KindPicker kinds={kinds} kind={kind} onKind={setKind} />
+      )}
 
       <div className={`field${errors.name ? ' field--error' : ''}`}>
         <label htmlFor={`${id}-name`} className="field__label">

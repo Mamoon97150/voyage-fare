@@ -308,11 +308,12 @@ describe('changing what was added', () => {
     ],
   }
 
-  it('tap an item: the same form, filled in; save the new price', async () => {
+  it('tap an item: its summary; “Name, day, price” opens the form, filled in; save the new price', async () => {
     data.getTrip.mockResolvedValue(detail(roundTrip))
     data.updateItem.mockResolvedValue(undefined)
     open('/trips/t1')
     fireEvent.click(await screen.findByRole('button', { name: 'Change Casa Lola' }))
+    click(/Name, day, price/)
     expect(screen.getByLabelText('Name')).toHaveValue('Casa Lola')
     expect(screen.getByLabelText('From')).toHaveValue('1')
     expect(screen.getByLabelText('Until')).toHaveValue('5')
@@ -337,11 +338,12 @@ describe('changing what was added', () => {
     data.deleteItem.mockResolvedValue(undefined)
     open('/trips/t1')
     fireEvent.click(await screen.findByRole('button', { name: 'Change Casa Lola' }))
-    click('Delete')
-    expect(screen.getByText('This can’t be undone.')).toBeInTheDocument()
+    click('More ▾')
+    click('Delete this line')
+    expect(screen.getByText(/This can’t be undone./)).toBeInTheDocument()
     expect(data.deleteItem).not.toHaveBeenCalled()
     click('Keep it')
-    click('Delete')
+    click('Delete this line')
     click('Yes, delete Casa Lola')
     await waitFor(() => expect(data.deleteItem).toHaveBeenCalledWith('i1'))
   })
@@ -548,6 +550,7 @@ describe('review fixes (13 Nov)', () => {
     data.updateItem.mockResolvedValue(undefined)
     open('/trips/t1')
     fireEvent.click(await screen.findByRole('button', { name: 'Change Momo Beauty Bar' }))
+    click(/Name, day, price/)
     expect(screen.getByText(/615 000 COP ≈ 169 €/)).toBeInTheDocument()
     expect(screen.queryByLabelText('Price')).not.toBeInTheDocument()
     expect(screen.getByLabelText('What you’re deciding')).toHaveValue('Nails')
@@ -607,6 +610,7 @@ describe('review fixes (13 Nov)', () => {
     data.setItemDropped.mockResolvedValue(undefined)
     open('/trips/t1')
     fireEvent.click(await screen.findByRole('button', { name: 'Change Momo Beauty Bar' }))
+    click('More ▾')
     click('Drop it')
     await waitFor(() => expect(data.setItemDropped).toHaveBeenCalledWith('i1', true))
   })

@@ -171,9 +171,10 @@ describe('Budget and Who paid (build 4)', () => {
     data.setItemStatus.mockResolvedValue(undefined)
     open('/trips/t1')
     fireEvent.click(await screen.findByRole('button', { name: 'Change Flat' }))
+    click(/Where it stands/)
     fireEvent.change(screen.getByLabelText('Paid by'), { target: { value: 'each' } })
     expect(screen.getByText(/nobody owes anything for it/)).toBeInTheDocument()
-    click('Save where it stands')
+    click('Save')
     await waitFor(() =>
       expect(data.setItemStatus).toHaveBeenCalledWith(
         expect.objectContaining({ status: 'paid', paidBy: null, paidEach: true }),
@@ -221,6 +222,7 @@ describe('who it’s for (split between…)', () => {
     data.setItemSplit.mockResolvedValue(undefined)
     open('/trips/t1')
     fireEvent.click(await screen.findByRole('button', { name: 'Change Fly Dress' }))
+    click(/Who it’s for/)
     expect(screen.getByText('Everyone: split equally.')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Bea' }))
     expect(screen.getByText('Split between 2: not Bea.')).toBeInTheDocument()
@@ -232,6 +234,7 @@ describe('who it’s for (split between…)', () => {
     data.setItemSplit.mockResolvedValue(undefined)
     open('/trips/t1')
     fireEvent.click(await screen.findByRole('button', { name: 'Change Fly Dress' }))
+    click(/Who it’s for/)
     expect(screen.getByText('Just Ana.')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Ana' })).toBeDisabled()
     fireEvent.click(screen.getByRole('button', { name: 'Bea' }))
