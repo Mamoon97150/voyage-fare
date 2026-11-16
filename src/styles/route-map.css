@@ -33,7 +33,7 @@
   position: relative;
   border-radius: var(--radius-sm);
   overflow: hidden;
-  border: 1px solid var(--line);
+  /* No straight frame inside a pencil-drawn sheet: the paper-toned map is its own edge. */
   background: var(--map-bg);
   z-index: 0; /* Leaflet's panes stay under the app's bars */
 }

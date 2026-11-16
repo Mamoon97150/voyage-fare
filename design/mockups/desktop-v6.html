@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>On a computer (v6, 16 Nov)</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script type="module">
+      import '/src/index.css'
+      import './forms.css'
+      import './v4.css'
+      import './v5.js'
+    </script>
+    <style>
+      body { background: #e9e2d3; }
+      .d-frames { display: grid; gap: 3.5rem; padding: 2.5rem 0 5rem; justify-items: center; }
+      .d-frame { width: 1280px; }
+      .d-screen { position: relative; height: 800px; overflow: hidden; background: var(--paper); border-radius: 12px; box-shadow: 0 10px 40px rgb(44 38 32 / .18); border: 1px solid #d8ccb4; }
+      .d-frame figcaption { max-width: 60rem; margin: 1rem auto 0; font-size: .9rem; color: var(--ink-soft); line-height: 1.5; }
+      .d-frame figcaption b { color: var(--ink); }
+      .d-frame figcaption ul { margin: .4rem 0 0; padding-left: 1.2rem; }
+      .d-hand { font-family: var(--font-hand); color: var(--ink-soft); line-height: 1.2; }
+      .d-num { font-variant-numeric: tabular-nums; }
+      .d-caps { font-size: var(--text-2xs); letter-spacing: .08em; text-transform: uppercase; font-weight: 700; color: var(--ink-soft); }
+
+      /* three columns */
+      .d-desk { display: grid; grid-template-columns: 220px minmax(0, 1fr) 380px; gap: 28px; height: 100%; padding: 0 28px 0 0; }
+      .d-desk--two { grid-template-columns: 220px minmax(0, 1fr); }
+      .d-side { padding: 26px 0 26px 26px; border-right: 1px solid var(--line); display: flex; flex-direction: column; gap: 18px; background: color-mix(in srgb, var(--paper-raised) 60%, var(--paper)); }
+      .d-brand { display: flex; align-items: center; gap: .5rem; font-family: var(--font-title); font-weight: 600; font-size: 1.1rem; }
+      .d-brand i { font-style: normal; width: 1.6rem; height: 1.6rem; border-radius: 50%; border: 1.5px solid var(--ink); display: grid; place-items: center; font-size: .8rem; }
+      .d-back { font-size: var(--text-sm); color: var(--ink-soft); }
+      .d-trip-name { font-family: var(--font-title); font-size: 1.45rem; font-weight: 600; line-height: 1.15; padding-right: 18px; }
+      .d-trip-name small { display: block; font-family: var(--font-hand); font-weight: 400; font-size: 1.05rem; color: var(--ink-soft); margin-top: 2px; }
+      .d-nav { display: grid; gap: 2px; padding-right: 14px; }
+      .d-nav a { display: flex; align-items: center; gap: .6rem; padding: .55rem .7rem; border-radius: 8px; font-size: var(--text-md); color: var(--ink-soft); }
+      .d-nav a.d-on { color: var(--ink); font-weight: 700; background: var(--paper-raised); box-shadow: inset 3px 0 0 var(--ink); }
+      .d-nav a span { width: 1.2rem; text-align: center; }
+      .d-people { display: flex; gap: 4px; }
+      .d-av { width: 1.9rem; height: 1.9rem; border-radius: 50%; display: grid; place-items: center; font-size: .75rem; font-weight: 700; background: var(--paper-raised); border: 1.5px solid var(--line); }
+      .d-av--me { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+      .d-menu { display: grid; gap: .1rem; font-size: var(--text-sm); color: var(--ink-soft); padding-right: 14px; }
+      .d-menu span { padding: .35rem .7rem; }
+      .d-side .d-push { margin-top: auto; font-size: var(--text-sm); color: var(--ink-soft); display: flex; align-items: center; gap: .5rem; }
+
+      .d-mid { overflow: hidden; padding: 26px 0; }
+      .d-mid-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+      .d-mid-head h1 { font-family: var(--font-title); font-size: 1.6rem; }
+      .d-chips { display: flex; gap: 6px; }
+
+      .d-ticket { display: grid; grid-template-columns: 1.6rem minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 10px 16px; margin: 10px 0; border: 1.5px dashed var(--line); border-radius: 10px; font-size: var(--text-md); }
+      .d-ticket small { display: block; color: var(--ink-soft); font-size: var(--text-xs); }
+      .d-place { background: var(--paper-raised); border: 1px solid var(--line); border-radius: 10px; padding: 16px 20px; margin-bottom: 12px; }
+      .d-place-head { display: flex; align-items: center; gap: 10px; }
+      .d-place-head h2 { font-family: var(--font-title); font-size: 1.35rem; font-weight: 600; }
+      .d-place-head .d-n { width: 1.7rem; height: 1.7rem; border-radius: 50%; background: var(--ink); color: var(--paper); display: grid; place-items: center; font-size: .8rem; font-weight: 700; }
+      .d-place-head small { font-size: var(--text-xs); color: var(--ink-soft); }
+      .d-place-head b { margin-left: auto; font-family: var(--font-title); font-size: 1.2rem; }
+      .d-grp { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; padding-bottom: 4px; border-bottom: 1px solid var(--line); }
+      .d-grp--on { border-bottom: 2px solid var(--ink); }
+      .d-grp--on .d-caps { color: var(--ink); }
+      .d-ln { display: grid; grid-template-columns: 1.3rem minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: var(--text-md); }
+      .d-ln--photo { grid-template-columns: 3.6rem minmax(0, 1fr) auto; }
+      .d-ln--open { background: color-mix(in srgb, var(--ink) 6%, transparent); margin: 0 -10px; padding: 8px 10px; border-radius: 8px; box-shadow: inset 3px 0 0 var(--ink); }
+      .d-ln small { display: block; font-size: var(--text-xs); color: var(--ink-soft); }
+      .d-ln b { font-weight: 600; }
+      .d-dot { width: .6rem; height: .6rem; border-radius: 50%; justify-self: center; }
+      .d-dot--ok { background: var(--confirmed); }
+      .d-dot--est { background: var(--estimated); }
+      .d-dot--none { border: 1.5px solid var(--ink-soft); }
+      .d-mk { width: 1.3rem; height: 1.3rem; border-radius: 50%; display: grid; place-items: center; font-size: .68rem; font-weight: 700; color: var(--paper); }
+      .d-mk--act { background: var(--cat-activity); }
+      .d-mk--food { background: var(--cat-food); }
+      .d-prompts { display: flex; justify-content: space-evenly; padding: 4px 0; font-size: var(--text-sm); color: var(--ink-soft); }
+      .d-maptag { font-size: var(--text-xs); font-weight: 600; padding: .1rem .55rem; border: 1.5px solid var(--line); border-radius: 999px; background: var(--paper); }
+      .d-maptag--on { border-color: var(--ink); }
+      .d-photo { position: relative; display: block; border-radius: 2px; background-size: cover; box-shadow: 0 1px 2px rgb(0 0 0 / .18); }
+      .d-photo::before, .d-photo::after, .d-photo i::before, .d-photo i::after { content: ''; position: absolute; width: 12px; height: 12px; background: color-mix(in srgb, var(--ink) 78%, transparent); }
+      .d-photo::before { top: -3px; left: -3px; clip-path: polygon(0 0, 100% 0, 0 100%); }
+      .d-photo::after { bottom: -3px; right: -3px; clip-path: polygon(100% 0, 100% 100%, 0 100%); }
+      .d-photo i::before { top: -3px; right: -3px; clip-path: polygon(0 0, 100% 0, 100% 100%); }
+      .d-photo i::after { bottom: -3px; left: -3px; clip-path: polygon(0 0, 0 100%, 100% 100%); }
+      .d-ph-a { background-image: linear-gradient(180deg, #c9b38a 0 30%, #8a6d48 30% 33%, #e6d7b5 33% 62%, #6e7f4c 62% 66%, #d7c79f 66%); }
+      .d-ph-b { background-image: linear-gradient(160deg, #e9d9bf 0 38%, #c8a982 38% 41%, #f2e6d3 41% 70%, #9d7a55 70% 74%, #e3cfae 74%); }
+      .d-ph-c { background-image: linear-gradient(200deg, #dfe3e4 0 45%, #a9b6b9 45% 48%, #eef0ee 48% 72%, #7b8a8f 72% 76%, #d8dcd8 76%); }
+      .d-ph-d { background-image: linear-gradient(180deg, #e6c9a8 0 35%, #b5653f 35% 55%, #2c2620 55% 58%, #d9b991 58%); }
+      .d-ln--photo .d-photo { height: 2.7rem; transform: rotate(-2deg); }
+
+      /* right column */
+      .d-right { padding: 26px 0; display: flex; flex-direction: column; gap: 14px; }
+      .d-budget { padding: 14px 16px; background: var(--paper-raised); border: 1px solid var(--line); border-radius: 10px; }
+      .d-budget .d-fig { display: flex; justify-content: space-between; align-items: baseline; }
+      .d-budget .d-fig b { font-family: var(--font-title); font-size: 2rem; }
+      .d-bar { position: relative; height: 12px; margin: 10px 0 6px; border-radius: 6px; background: color-mix(in srgb, var(--line) 60%, transparent); overflow: hidden; }
+      .d-bar i { position: absolute; top: 0; bottom: 0; }
+      .d-bar .d-c { left: 0; width: 46%; background: var(--confirmed); }
+      .d-bar .d-e { left: 46%; width: 28%; background: var(--estimated); }
+      .d-budget p { font-size: var(--text-xs); color: var(--ink-soft); display: flex; justify-content: space-between; }
+      .d-mapcard { background: var(--paper-raised); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+      .d-mapcard h3 { display: flex; flex-direction: column; gap: 2px; font-family: var(--font-title); font-size: 1.1rem; margin-bottom: 8px; }
+      .d-mapcard h3 span { font-family: var(--font-text); font-size: var(--text-xs); color: var(--ink-soft); font-weight: 400; }
+      .d-map { height: 290px; border-radius: 6px; overflow: hidden; border: 1px solid var(--line); background: #f3eee2; z-index: 0; position: relative; }
+      .d-map .leaflet-tile-pane { filter: grayscale(1) sepia(0.35) contrast(0.85) brightness(1.06); }
+      .d-map .leaflet-control-attribution { font-size: 9px; background: rgb(251 247 239 / 0.8); }
+      .d-pin { width: 22px; height: 22px; border-radius: 50%; color: #fbf7ef; font: 700 11px/22px var(--font-text); text-align: center; box-shadow: 0 0 0 2px #fbf7ef; }
+      .d-pin--act { background: #dc9a7c; } .d-pin--food { background: #b6bf86; } .d-pin--stay { background: var(--ink); font-size: 13px; }
+      .d-price-pin { display: inline-block; transform: translate(-50%, -50%); padding: 2px 7px; border-radius: 999px; background: #fbf7ef; border: 1.5px solid var(--ink); font: 700 11px/16px var(--font-text); color: var(--ink); white-space: nowrap; }
+      .d-price-pin--on { background: var(--ink); color: #fbf7ef; }
+      .d-price-pin--chosen { border-color: var(--pen); box-shadow: 0 0 0 2px rgb(51 80 140 / .25); }
+      .d-left-list { background: var(--paper-raised); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; font-size: var(--text-sm); }
+      .d-left-list div { display: flex; justify-content: space-between; padding: 5px 0; border-top: 1px solid var(--line); }
+      .d-left-list div:first-of-type { border-top: 0; }
+
+      /* side panel (a line opened) */
+      .d-panel { position: absolute; top: 0; right: 0; bottom: 0; width: 420px; background: var(--paper-raised); border-left: 1px solid var(--line); box-shadow: -12px 0 30px rgb(44 38 32 / .12); padding: 22px 24px; display: flex; flex-direction: column; }
+      .d-panel-head { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 4px 12px; align-items: baseline; }
+      .d-panel-head h3 { font-family: var(--font-title); font-size: 1.5rem; font-weight: 600; }
+      .d-panel-head b { font-family: var(--font-title); font-size: 1.5rem; }
+      .d-panel-head .d-x { width: 2rem; height: 2rem; border-radius: 50%; border: 1.5px solid var(--ink); display: grid; place-items: center; }
+      .d-panel-head p { grid-column: 1 / -1; font-size: var(--text-sm); color: var(--ink-soft); }
+      .d-track { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 18px; position: relative; }
+      .d-track::before { content: ''; position: absolute; left: 16%; right: 16%; top: .55rem; border-top: 2px dashed var(--line); }
+      .d-stp { display: grid; justify-items: center; gap: .3rem; font-size: var(--text-xs); color: var(--ink-soft); position: relative; }
+      .d-stp i { width: 1.1rem; height: 1.1rem; border-radius: 50%; border: 2px solid var(--line); background: var(--paper-raised); }
+      .d-stp.d-on i { border-color: var(--estimated); background: var(--estimated); }
+      .d-stp.d-on { color: var(--ink); font-weight: 600; }
+      .d-panel .button--primary { width: 100%; margin-top: 18px; }
+      .d-rows { margin-top: 18px; border-top: 1px solid var(--line); }
+      .d-r { display: grid; grid-template-columns: 1.4rem minmax(0, 1fr) auto; gap: 8px; align-items: center; min-height: 3rem; border-bottom: 1px solid var(--line); font-size: var(--text-sm); }
+      .d-r small { display: block; font-size: var(--text-xs); color: var(--ink-soft); }
+      .d-panel .d-minimap { height: 170px; margin-top: 18px; }
+      .dim { position: absolute; inset: 0; background: rgb(44 38 32 / .06); }
+
+      /* Compare in columns */
+      .d-cmp-top { display: flex; align-items: center; gap: 18px; margin-bottom: 14px; }
+      .d-cmp-top .d-fig { font-family: var(--font-title); font-size: 1.5rem; font-weight: 600; white-space: nowrap; }
+      .d-cmp-top .d-bar { flex: 1; margin: 0; }
+      .d-tabs { display: flex; gap: 4px; align-items: flex-end; border-bottom: 1px solid var(--line); }
+      .d-tab { padding: .5rem 1.1rem; border: 1px solid var(--line); border-bottom: 0; border-radius: 10px 10px 0 0; background: color-mix(in srgb, var(--paper-raised) 50%, var(--paper)); font-size: var(--text-sm); display: flex; align-items: center; gap: .4rem; }
+      .d-tab.d-on { background: var(--paper-raised); font-weight: 700; padding: .65rem 1.3rem; margin-bottom: -1px; }
+      .d-tab i { width: .55rem; height: .55rem; border-radius: 50%; }
+      .d-cmp-sheet { background: var(--paper-raised); border: 1px solid var(--line); border-top: 0; border-radius: 0 0 10px 10px; padding: 16px 20px; display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 22px; }
+      .d-step { display: flex; align-items: center; justify-content: center; gap: 22px; grid-column: 1 / -1; }
+      .d-step h2 { font-family: var(--font-title); font-size: 1.5rem; text-align: center; }
+      .d-step p { font-family: var(--font-hand); font-size: 1.05rem; color: var(--ink-soft); text-align: center; }
+      .d-step i { font-style: normal; font-size: 1.4rem; color: var(--ink-soft); }
+      .d-cols { display: grid; grid-template-columns: 7.5rem repeat(3, minmax(0, 1fr)); font-size: var(--text-sm); }
+      .d-cols > div { padding: 8px 10px; border-bottom: 1px solid var(--line); }
+      .d-cols .d-lab { color: var(--ink-soft); font-size: var(--text-xs); font-weight: 600; padding-left: 0; }
+      .d-cols .d-hd { border-bottom: 0; }
+      .d-cols .d-hd .d-photo { height: 6rem; margin-bottom: 8px; }
+      .d-cols .d-hd b { font-size: var(--text-md); display: flex; align-items: center; gap: .4rem; }
+      .d-circle { width: 1.25rem; height: 1.25rem; border-radius: 50%; border: 1.5px solid var(--ink); display: inline-grid; place-items: center; font-size: .7rem; flex: none; }
+      .d-circle--on { background: var(--pen); border-color: var(--pen); color: #fff; }
+      .d-col-on { background: color-mix(in srgb, var(--pen) 6%, transparent); }
+      .d-price { font-family: var(--font-title); font-size: 1.25rem; font-weight: 600; }
+      .d-best { color: var(--confirmed); font-size: var(--text-2xs); font-weight: 800; letter-spacing: .06em; display: block; }
+      .d-more { color: var(--ink-soft); font-size: var(--text-2xs); font-weight: 700; display: block; }
+      .d-yes { color: var(--confirmed); } .d-no { color: var(--ink-soft); }
+      .d-stars { color: var(--estimated); letter-spacing: 1px; } .d-stars i { color: var(--line); font-style: normal; }
+
+      /* money screens */
+      .d-cards2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+      .d-card { background: var(--paper-raised); border: 1px solid var(--line); border-radius: 10px; padding: 16px 20px; }
+      .d-card h3 { font-family: var(--font-title); font-size: 1.2rem; margin-bottom: 8px; }
+      .d-row { display: grid; grid-template-columns: .8rem minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 7px 0; border-top: 1px solid var(--line); font-size: var(--text-sm); }
+      .d-row .d-mini { grid-column: 2 / -1; height: 5px; border-radius: 3px; background: color-mix(in srgb, var(--line) 60%, transparent); position: relative; overflow: hidden; margin-top: -3px; }
+      .d-row .d-mini i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--ink-soft); }
+      .d-cat { width: .6rem; height: .6rem; border-radius: 50%; }
+      .d-answer { text-align: center; padding: 22px; }
+      .d-answer b { display: block; font-family: var(--font-title); font-size: 2.2rem; margin: 4px 0; }
+      .d-settle { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 12px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); font-size: var(--text-sm); }
+
+      /* your trips */
+      .d-shelf { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; }
+      .d-book { background: var(--paper-raised); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; position: relative; }
+      .d-book .d-photo { height: 7.5rem; margin-bottom: 12px; }
+      .d-book h3 { font-family: var(--font-title); font-size: 1.25rem; }
+      .d-book p { font-size: var(--text-sm); color: var(--ink-soft); margin-top: 2px; }
+      .d-book .d-bar { margin: 12px 0 4px; height: 8px; }
+      .d-book--new { display: grid; place-items: center; border: 1.5px dashed var(--line); background: none; min-height: 15rem; color: var(--ink-soft); font-size: var(--text-md); }
+      .d-tape { position: absolute; top: -9px; left: 50%; width: 70px; height: 18px; transform: translateX(-50%) rotate(-3deg); background: color-mix(in srgb, var(--estimated) 45%, transparent); }
+
+      .d-notes { padding: 40px 60px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 40px; }
+      .d-notes h4 { font-family: var(--font-title); font-size: 1.2rem; margin-bottom: 8px; }
+      .d-notes p, .d-notes li { font-size: var(--text-sm); line-height: 1.5; color: var(--ink); }
+      .d-notes ul { padding-left: 1.1rem; margin: 0; }
+      .d-wire { margin-top: 12px; display: grid; gap: 4px; height: 120px; border: 1px solid var(--line); border-radius: 6px; padding: 6px; background: var(--paper-raised); }
+      .d-wire div { background: color-mix(in srgb, var(--line) 60%, transparent); border-radius: 3px; }
+
+      /* v6b (16 Nov): every card drawn in pencil, no straight edges or shadows; no side bars. */
+      .sketch-box.d-place, .sketch-box.d-budget, .sketch-box.d-mapcard, .sketch-box.d-left-list, .sketch-box.d-cmp-sheet,
+      .sketch-box.d-card, .sketch-box.d-book, .sketch-box.d-ticket, .sketch-box.d-panel, .sketch-box.d-tab {
+        border: 0 !important; box-shadow: none !important; border-radius: 0 !important; }
+      .sketch-box.d-ticket, .sketch-box.d-book--new { background: transparent; }
+      .sketch-box.d-tab { padding: .5rem 1.1rem; background: color-mix(in srgb, var(--paper-raised) 50%, var(--paper)); }
+      .sketch-box.d-tab.d-on { background: var(--paper-raised); padding: .65rem 1.3rem; }
+      .d-tabs { border-bottom: 0; gap: 6px; }
+      .sketch-box.d-cmp-sheet { margin-top: -2px; }
+      .d-hbar { height: 14px; margin: 10px 0 6px; }
+      .d-cmp-top .d-hbar { flex: 1; margin: 0; }
+      .d-book .d-hbar { margin: 12px 0 4px; height: 10px; }
+      .d-nav a.d-on { background: none; box-shadow: none; }
+      .d-nav a .u, .d-caps.u { position: relative; display: inline-block; }
+      .d-nav a .u { color: var(--ink); white-space: nowrap; }
+      .u__line { position: absolute; left: -2px; right: -2px; bottom: -6px; width: calc(100% + 4px); height: 10px; color: var(--estimated); pointer-events: none; }
+      .d-grp--on { border-bottom: 1px solid var(--line); }
+      .d-ln--open { box-shadow: none; background: color-mix(in srgb, var(--estimated) 12%, transparent); }
+      .d-tape--panel { top: -6px; left: 44%; }
+      .d-panel { border-left: 0; }
+      .sketch-box.d-panel { position: absolute !important; padding: 22px 24px !important; }
+      .d-trip-row { display: flex; align-items: flex-start; gap: 8px; padding-right: 14px; }
+      .d-trip-row .round-button { width: 2rem; height: 2rem; font-size: .9rem; margin-top: 2px; }
+      .d-people { cursor: pointer; }
+      .d-people .d-hint { font-family: var(--font-hand); color: var(--ink-soft); font-size: .95rem; margin-left: 6px; align-self: center; }
+      .d-actions { display: flex; gap: 8px; align-items: center; }
+      .d-address { font-size: var(--text-xs); color: var(--ink-soft); margin: -6px 0 10px; }
+      .d-address b { color: var(--ink); font-weight: 600; }
+      .d-share h4 { font-family: var(--font-title); font-size: 1.1rem; margin-top: 18px; }
+      .d-share p { font-size: var(--text-sm); color: var(--ink-soft); margin-top: 2px; }
+      .d-share .d-linkbox { display: flex; gap: 8px; margin-top: 8px; }
+      .d-share .d-linkbox span { flex: 1; min-height: 2.5rem; display: flex; align-items: center; padding: 0 10px; border-radius: 8px; background: color-mix(in srgb, var(--line) 45%, var(--paper-raised)); font-size: var(--text-sm); overflow: hidden; white-space: nowrap; }
+    </style>
+  </head>
+  <body>
+    <div class="d-frames">
+
+      <!-- 1. The trip -->
+      <figure class="d-frame">
+        <div class="d-screen">
+          <div class="d-desk">
+            <aside class="d-side">
+              <span class="d-brand"><i>✦</i>Voyage Fare</span>
+              <span class="d-back">‹ Your trips</span>
+              <div class="d-trip-row"><p class="d-trip-name">Japan in spring<small>2 – 12 Apr 2027 · 2 travellers</small></p><button class="round-button" aria-label="Trip settings">⚙</button></div>
+              <nav class="d-nav"><a class="d-on"><span>⌁</span><span class="u">Trip</span></a><a><span>▯▯</span>Compare</a><a><span>◔</span>Budget</a><a><span>⇄</span>Who paid</a></nav>
+              <div class="d-people"><span class="d-av d-av--me">D</span><span class="d-av">B</span><span class="d-hint">+ invite</span></div>
+              <span class="d-push"><span class="d-av d-av--me">D</span>Account</span>
+            </aside>
+            <main class="d-mid">
+              <div class="d-mid-head"><h1>The trip</h1><span class="d-actions"><span class="d-chips"><button class="chip" aria-pressed="true">your share</button><button class="chip">total</button></span><button class="button button--small">↗ Share</button></span></div>
+              <p class="d-address">✉ Forward your bookings to <b>japan-spring-k4@voyagefare.app</b> · they wait in “To review”</p>
+              <div class="d-ticket sketch-box sketch-box--light" data-dashed="1"><svg class="sketch-box__line" aria-hidden="true"></svg><span>✈</span><span>Paris → Tokyo<small>Plane · 2 Apr</small></span><b class="d-num">445 €</b></div>
+              <div class="d-place sketch-box sketch-box--light"><svg class="sketch-box__line" aria-hidden="true"></svg>
+                <div class="d-place-head"><span class="d-n">2</span><h2>Kyoto</h2><small>3 nights · 1 to try</small><b class="d-num">225 €</b></div>
+                <div class="d-grp"><span class="d-caps">Stay</span></div>
+                <div class="d-ln d-ln--photo"><span class="d-photo d-ph-a"><i></i></span><span><b>Hotel Kanra</b><small>5 – 8 Apr · everyone</small></span><b class="d-num">225 €</b></div>
+                <div class="d-grp"><span class="d-caps">Day 5 · Tue 6 Apr</span></div>
+                <div class="d-ln"><span class="d-dot d-dot--est"></span><span>Tea ceremony<small>Activities · 15:00 · book ahead</small></span><b class="d-num">50 €</b></div>
+                <div class="d-prompts"><span>+ What we do</span><span>+ Where we eat</span></div>
+                <div class="d-grp d-grp--on"><span class="d-caps u">Day 6 · Wed 7 Apr</span><span class="d-maptag d-maptag--on">⌖ on the map →</span></div>
+                <div class="d-ln"><span class="d-mk d-mk--act">1</span><span>Fushimi Inari at dawn<small>Activities · 07:00 · 2 h</small></span><b class="d-num">Free</b></div>
+                <div class="d-ln"><span class="d-mk d-mk--food">2</span><span>Nishiki market<small>Food · lunch · street food</small></span><b class="d-num">≈ 30 €</b></div>
+                <div class="d-ln"><span class="d-mk d-mk--food">3</span><span>Kikunoi<small>Food · dinner · kaiseki · book a table</small></span><b class="d-num">180 €</b></div>
+                <div class="d-prompts"><span>+ What we do</span></div>
+                <div class="d-grp"><span class="d-caps">Day 7 · Thu 8 Apr</span><span class="d-maptag">⌖ Map · 2</span></div>
+              </div>
+            </main>
+            <aside class="d-right">
+              <div class="d-budget sketch-box sketch-box--light"><svg class="sketch-box__line" aria-hidden="true"></svg>
+                <div class="d-fig"><b class="d-num">1 840 €</b><span class="d-caps">your share</span></div>
+                <div class="hand-bar d-hbar" data-confirmed="0.46" data-estimated="0.28"><svg aria-hidden="true"></svg></div>
+                <p><span>● 1 120 € confirmed</span><span>720 € estimated · 160 € under target</span></p>
+              </div>
+              <div class="d-mapcard sketch-box sketch-box--light"><svg class="sketch-box__line" aria-hidden="true"></svg>
+                <h3>Day 6 in Kyoto <span>⌂ → 1 → 2 → 3 · about 9 km · back to the route ↺</span></h3>
+                <div class="d-map" id="m1"></div>
+              </div>
+              <div class="d-left-list sketch-box sketch-box--light"><svg class="sketch-box__line" aria-hidden="true"></svg>
+                <p class="d-caps" style="margin-bottom:6px">Still to pay</p>
+                <div><span>Hotel Kanra · balance</span><b class="d-num">225 € · 1 Apr</b></div>
+                <div><span>Kikunoi</span><b class="d-num">180 € · on the day</b></div>
+              </div>
+            </aside>
+          </div>
+        </div>
+        <figcaption><b>1 · The trip, in three columns.</b>
+          <ul>
+            <li><b>Left:</b> the trip with its ⚙, its pages (Trip · Compare · Budget · Who paid), the travellers. Where you are: the page’s name underlined in crayon, no bar down the side.</li>
+            <li><b>Top of the trip:</b> “your share · total”, <b>↗ Share</b> (2b), and the line to forward bookings to.</li>
+            <li><b>Middle:</b> the notebook exactly as on the phone: tickets between places, place sheets, stay photo, days, prompts, To try.</li>
+            <li><b>Right, always in view:</b> the budget bar, <b>one big map</b> and what’s still to pay. The map shows the route; click a day’s “⌖ Map” and it shows that day (its date underlined in crayon), “↺” goes back to the route. No small maps inside the list on a computer.</li>
+            <li>Every card drawn in pencil (light for working sheets, dashed for tickets); the budget bar coloured in crayon; no tape here (no “moment” on this screen).</li>
+          </ul>
+        </figcaption>
+      </figure>
+
+      <!-- 2. A line opened: side panel -->
+      <figure class="d-frame">
+        <div class="d-screen">
+          <div class="d-desk">
+            <aside class="d-side">
+              <span class="d-brand"><i>✦</i>Voyage Fare</span>
+              <span class="d-back">‹ Your trips</span>
+              <p class="d-trip-name">Japan in spring<small>2 – 12 Apr 2027 · 2 travellers</small></p>
+              <nav class="d-nav"><a class="d-on"><span>⌁</span><span class="u">Trip</span></a><a><span>▯▯</span>Compare</a><a><span>◔</span>Budget</a><a><span>⇄</span>Who paid</a></nav>
+            </aside>
+            <main class="d-mid">
+              <div class="d-mid-head"><h1>The trip</h1></div>
+              <div class="d-place sketch-box sketch-box--light"><svg class="sketch-box__line" aria-hidden="true"></svg>
+                <div class="d-place-head"><span class="d-n">2</span><h2>Kyoto</h2><small>3 nights</small><b class="d-num">225 €</b></div>
+                <div class="d-grp"><span class="d-caps">Stay</span></div>
+                <div class="d-ln d-ln--photo"><span class="d-photo d-ph-a"><i></i></span><span><b>Hotel Kanra</b><small>5 – 8 Apr · everyone</small></span><b class="d-num">225 €</b></div>
+                <div class="d-grp d-grp--on"><span class="d-caps u">Day 6 · Wed 7 Apr</span></div>
+                <div class="d-ln"><span class="d-mk d-mk--act">1</span><span>Fushimi Inari at dawn<small>Activities · 07:00</small></span><b class="d-num">Free</b></div>
+                <div class="d-ln"><span class="d-mk d-mk--food">2</span><span>Nishiki market<small>Food · lunch</small></span><b class="d-num">≈ 30 €</b></div>
+                <div class="d-ln d-ln--open"><span class="d-mk d-mk--food">3</span><span>Kikunoi<small>Food · dinner · kaiseki</small></span><b class="d-num">180 €</b></div>
+              </div>
+            </main>
+          </div>
+          <div class="d-panel sketch-box sketch-box--strong"><span class="d-tape d-tape--panel"></span><svg class="sketch-box__line" aria-hidden="true"></svg>
+            <div class="d-panel-head"><h3>Kikunoi</h3><b class="d-num">180 €</b><span class="d-x">✕</span><p><i class="cat-dot cat-dot--restaurant"></i> Food · dinner, day 6 · kaiseki · everyone</p></div>
+            <div class="d-track"><span class="d-stp d-on"><i></i>Chosen</span><span class="d-stp"><i></i>Booked</span><span class="d-stp"><i></i>Paid</span></div>
+            <button class="button button--primary">Mark it booked</button>
+            <div class="d-rows">
+              <div class="d-r"><span>✎</span><span>Name, day, price<small>Kikunoi · day 6 · 90 € per person</small></span><span>›</span></div>
+              <div class="d-r"><span>👥</span><span>Who it’s for<small>everyone</small></span><span>›</span></div>
+              <div class="d-r"><span>⌖</span><span>Where<small>Kikunoi · Higashiyama, Kyoto</small></span><span>›</span></div>
+            </div>
+            <div class="d-map d-minimap" id="m2"></div>
+            <div style="display:flex;justify-content:center;margin-top:14px"><button class="button button--small">More ▾</button></div>
+          </div>
+        </div>
+        <figcaption><b>2 · A line, opened: a panel on the right.</b>
+          <ul>
+            <li>The same sheet as on the phone (line-sheet-v6: where it stands, one main button, short rows, More), but it <b>slides in from the right</b> over the budget and map, as a sheet laid on the page (strong pencil, the screen’s one tape); the trip stays readable, the open line has a light ochre wash.</li>
+            <li>The panel has its own little map of the spot. Forms (add, change, mark booked, To try) open in the same panel: one place for all forms on a computer.</li>
+            <li>✕ or Esc closes it; the keyboard goes up and down the lines.</li>
+          </ul>
+        </figcaption>
+      </figure>
+
+      <!-- 2b. Share: people and AIs in one place -->
+      <figure class="d-frame">
+        <div class="d-screen">
+          <div class="d-desk">
+            <aside class="d-side">
+              <span class="d-brand"><i>✦</i>Voyage Fare</span>
+              <span class="d-back">‹ Your trips</span>
+              <div class="d-trip-row"><p class="d-trip-name">Japan in spring<small>2 – 12 Apr 2027 · 2 travellers</small></p><button class="round-button" aria-label="Trip settings">⚙</button></div>
+              <nav class="d-nav"><a class="d-on"><span>⌁</span><span class="u">Trip</span></a><a><span>▯▯</span>Compare</a><a><span>◔</span>Budget</a><a><span>⇄</span>Who paid</a></nav>
+              <div class="d-people"><span class="d-av d-av--me">D</span><span class="d-av">B</span><span class="d-hint">+ invite</span></div>
+            </aside>
+            <main class="d-mid">
+              <div class="d-mid-head"><h1>The trip</h1><span class="d-actions"><button class="button button--small" aria-pressed="true">↗ Share</button></span></div>
+              <div class="d-place sketch-box sketch-box--light"><svg class="sketch-box__line" aria-hidden="true"></svg>
+                <div class="d-place-head"><span class="d-n">1</span><h2>Tokyo</h2><small>4 nights</small><b class="d-num">700 €</b></div>
+                <div class="d-grp"><span class="d-caps">Stay</span></div>
+                <div class="d-ln"><span class="d-dot d-dot--none"></span><span>Where we sleep<small>Stay · 2 options compared</small></span><b>—</b></div>
+              </div>
+            </main>
+          </div>
+          <div class="d-panel d-share sketch-box sketch-box--strong"><span class="d-tape d-tape--panel"></span><svg class="sketch-box__line" aria-hidden="true"></svg>
+            <div class="d-panel-head"><h3>Share the trip</h3><span></span><span class="d-x">✕</span><p>with people, or with your own AI</p></div>
+            <h4>Plan it together</h4>
+            <p>Bea has her link. Invite someone else: they get their own share.</p>
+            <div class="d-linkbox"><button class="button button--small">+ Invite someone</button></div>
+            <h4>Let someone look</h4>
+            <p>A read-only link: prices yes, first names hidden. Turn it off any time.</p>
+            <div class="d-linkbox"><span>voyagefare.app/s/k4f9…</span><button class="button button--small">Copy</button></div>
+            <h4>For your AI</h4>
+            <p>Give your assistant the whole trip, or bring its answer back in.</p>
+            <div class="d-linkbox"><button class="button button--small">✦ Copy the trip for my AI</button><button class="button button--small">Import its answer</button></div>
+          </div>
+        </div>
+        <figcaption><b>2b · Share: people and AIs in one place.</b>
+          <ul>
+            <li>One <b>↗ Share</b> button at the top of the trip (where you’d look for it, like in Google Docs) opens the panel: <b>plan it together</b> (invite), <b>let someone look</b> (read-only link), <b>for your AI</b> (copy the trip, import its answer).</li>
+            <li>The rest of the old menu goes where it’s used: <b>⚙</b> by the trip’s name (settings), the travellers’ initials <b>+ invite</b>, and the trip’s email address as a line above the trip (“forward your bookings to…”).</li>
+            <li>On the phone, the ☰ sheet gets the same three groups, in the same order.</li>
+          </ul>
+        </figcaption>
+      </figure>
+
+      <!-- 3. Compare in columns -->
+      <figure class="d-frame">
+        <div class="d-screen">
+          <div class="d-desk d-desk--two">
+            <aside class="d-side">
+              <span class="d-brand"><i>✦</i>Voyage Fare</span>
+              <span class="d-back">‹ Your trips</span>
+              <p class="d-trip-name">Japan in spring<small>2 – 12 Apr 2027 · 2 travellers</small></p>
+              <nav class="d-nav"><a><span>⌁</span>Trip</a><a class="d-on"><span>▯▯</span><span class="u">Compare</span></a><a><span>◔</span>Budget</a><a><span>⇄</span>Who paid</a></nav>
+            </aside>
+            <main class="d-mid">
+              <div class="d-cmp-top"><span class="d-fig d-num">1 840 € <small class="d-caps">your share</small></span><div class="hand-bar d-hbar" data-confirmed="0.46" data-estimated="0.28"><svg aria-hidden="true"></svg></div><span class="d-caps">160 € under target</span></div>
+              <div class="d-tabs"><span class="d-tab sketch-box sketch-box--light"><svg class="sketch-box__line" aria-hidden="true"></svg><i style="background:var(--cat-travel)"></i>Travel</span><span class="d-tab d-on sketch-box sketch-box--light"><svg class="sketch-box__line" aria-hidden="true"></svg><i style="background:var(--cat-stay)"></i>Stay</span><span class="d-tab sketch-box sketch-box--light"><svg class="sketch-box__line" aria-hidden="true"></svg><i style="background:var(--cat-travel)"></i>Getting around</span><span class="d-tab sketch-box sketch-box--light"><svg class="sketch-box__line" aria-hidden="true"></svg><i style="background:var(--cat-activity)"></i>Activities</span><span class="d-tab sketch-box sketch-box--light"><svg class="sketch-box__line" aria-hidden="true"></svg><i style="background:var(--cat-food)"></i>Food</span></div>
+              <div class="d-cmp-sheet sketch-box sketch-box--light"><svg class="sketch-box__line" aria-hidden="true"></svg>
+                <div class="d-step"><i>‹</i><div><h2>Tokyo</h2><p>4 nights · 2 – 6 Apr · where we sleep: to decide</p></div><i style="font-size:var(--text-sm)">Kyoto ›</i></div>
+                <div class="d-cols">
+                  <div class="d-lab d-hd"></div>
+                  <div class="d-hd"><span class="d-photo d-ph-b"><i></i></span><b><span class="d-circle"></span>Hotel Gracery Shinjuku</b></div>
+                  <div class="d-hd d-col-on"><span class="d-photo d-ph-c"><i></i></span><b><span class="d-circle d-circle--on">✓</span>Park Hotel Tokyo</b></div>
+                  <div class="d-hd"><span class="d-photo d-ph-d"><i></i></span><b><span class="d-circle"></span>Asakusa Kokono</b></div>
+                  <div class="d-lab">Your share</div><div><span class="d-price d-num">320 €</span><span class="d-best">CHEAPEST</span></div><div class="d-col-on"><span class="d-price d-num">420 €</span><span class="d-more">+100 €</span></div><div><span class="d-price d-num">360 €</span><span class="d-more">+40 €</span></div>
+                  <div class="d-lab">A night</div><div class="d-num">160 € for 2</div><div class="d-col-on d-num">210 € for 2</div><div class="d-num">180 € for 2</div>
+                  <div class="d-lab">Where</div><div>Shinjuku</div><div class="d-col-on">Shiodome</div><div>Asakusa</div>
+                  <div class="d-lab">Looks</div><div><span class="d-stars">★★★<i>★★</i></span></div><div class="d-col-on"><span class="d-stars">★★★★★</span></div><div><span class="d-stars">★★★★<i>★</i></span></div>
+                  <div class="d-lab">Breakfast</div><div class="d-yes">✓ Included</div><div class="d-col-on d-no">No</div><div class="d-yes">✓ Included</div>
+                  <div class="d-lab">Cancel</div><div class="d-yes">✓ Free</div><div class="d-col-on d-yes">✓ Free</div><div class="d-no">No</div>
+                  <div class="d-lab">Link</div><div>booking.com ↗</div><div class="d-col-on">parkhoteltokyo.com ↗</div><div>airbnb ↗</div>
+                  <div class="d-lab">♥</div><div>♡</div><div class="d-col-on">♥ coup de cœur</div><div>♡</div>
+                </div>
+                <div>
+                  <div class="d-map" id="m3" style="height:330px"></div>
+                  <p class="d-hand" style="margin-top:6px">hover a column: its price lights up · + Add an option</p>
+                </div>
+              </div>
+            </main>
+          </div>
+        </div>
+        <figcaption><b>3 · Compare, as columns.</b>
+          <ul>
+            <li>The folder tabs and “turn the page” between places stay; inside, <b>one column per option</b>, the same questions on each line, so the differences read across (price, a night, where, looks, breakfast, cancellation, link, ♥).</li>
+            <li>The photos head their column; the chosen one has the blue circle and a light blue wash (blue = the circled option, as agreed).</li>
+            <li>The <b>stays map sits beside the columns</b>; hovering a column lights its price on the map, clicking a price highlights the column. More than 3 options: the columns scroll sideways, the labels stay.</li>
+          </ul>
+        </figcaption>
+      </figure>
+
+      <!-- 4. Budget + Who paid -->
+      <figure class="d-frame">
+        <div class="d-screen">
+          <div class="d-desk d-desk--two">
+            <aside class="d-side">
+              <span class="d-brand"><i>✦</i>Voyage Fare</span>
+              <span class="d-back">‹ Your trips</span>
+              <p class="d-trip-name">Japan in spring<small>2 – 12 Apr 2027 · 2 travellers</small></p>
+              <nav class="d-nav"><a><span>⌁</span>Trip</a><a><span>▯▯</span>Compare</a><a class="d-on"><span>◔</span><span class="u">Budget</span></a><a><span>⇄</span>Who paid</a></nav>
+            </aside>
+            <main class="d-mid">
+              <div class="d-cmp-top"><span class="d-fig d-num">1 840 € <small class="d-caps">your share</small></span><div class="hand-bar d-hbar" data-confirmed="0.46" data-estimated="0.28"><svg aria-hidden="true"></svg></div><span class="d-caps">160 € under target</span></div>
+              <div class="d-cards2">
+                <div class="d-card sketch-box sketch-box--light"><svg class="sketch-box__line" aria-hidden="true"></svg>
+                  <h3>By category</h3>
+                  <div class="d-row"><i class="d-cat" style="background:var(--cat-travel)"></i><span>Travel</span><b class="d-num">890 €</b><span class="d-mini"><i style="width:48%"></i></span></div>
+                  <div class="d-row"><i class="d-cat" style="background:var(--cat-stay)"></i><span>Stay</span><b class="d-num">540 €</b><span class="d-mini"><i style="width:29%"></i></span></div>
+                  <div class="d-row"><i class="d-cat" style="background:var(--cat-activity)"></i><span>Activities</span><b class="d-num">160 €</b><span class="d-mini"><i style="width:9%"></i></span></div>
+                  <div class="d-row"><i class="d-cat" style="background:var(--cat-food)"></i><span>Food</span><b class="d-num">220 €</b><span class="d-mini"><i style="width:12%"></i></span></div>
+                  <div class="d-row"><i class="d-cat" style="background:var(--cat-travel)"></i><span>Getting around</span><b class="d-num">30 €</b><span class="d-mini"><i style="width:2%"></i></span></div>
+                  <h3 style="margin-top:18px">By place</h3>
+                  <div class="d-row"><i></i><span>Tokyo · 4 nights</span><b class="d-num">700 €</b></div>
+                  <div class="d-row"><i></i><span>Kyoto · 3 nights</span><b class="d-num">225 €</b></div>
+                  <div class="d-row"><i></i><span>Okinawa · 4 nights</span><b class="d-num">25 €</b></div>
+                </div>
+                <div>
+                  <div class="d-card d-answer sketch-box sketch-box--strong"><span class="d-tape"></span><svg class="sketch-box__line" aria-hidden="true"></svg><span class="d-caps">Who paid</span><b class="d-num">You are owed 133 €</b><span class="d-hand">one payment settles it all</span></div>
+                  <div class="d-card sketch-box sketch-box--light" style="margin-top:16px"><svg class="sketch-box__line" aria-hidden="true"></svg>
+                    <h3>To settle</h3>
+                    <div class="d-settle"><span>Bea → you</span><b class="d-num">133 €</b><button class="button button--small">Paid back</button></div>
+                    <h3 style="margin-top:16px">Not counted yet</h3>
+                    <div class="d-row"><i class="d-dot d-dot--none"></i><span>Okinawa: where we sleep</span><span class="d-hand">price it in Compare ›</span></div>
+                    <div class="d-row"><i class="d-dot d-dot--none"></i><span>Day in Nikko</span><span class="d-hand">no price yet</span></div>
+                  </div>
+                </div>
+              </div>
+            </main>
+          </div>
+        </div>
+        <figcaption><b>4 · Budget and Who paid, side by side.</b> The same cards as on the phone, in two columns: Budget’s cards on the left, the Who-paid answer and what’s left to settle on the right. The two pages stay in the menu; on a computer each shows the other’s key card, so one glance is enough.</figcaption>
+      </figure>
+
+      <!-- 5. Your trips -->
+      <figure class="d-frame">
+        <div class="d-screen">
+          <div class="d-desk d-desk--two">
+            <aside class="d-side">
+              <span class="d-brand"><i>✦</i>Voyage Fare</span>
+              <nav class="d-nav"><a class="d-on"><span>▤</span><span class="u">Your trips</span></a><a><span>✦</span>Import from my AI</a><a><span>◎</span>See the demo</a></nav>
+              <span class="d-push"><span class="d-av d-av--me">D</span>Account</span>
+            </aside>
+            <main class="d-mid">
+              <div class="d-mid-head"><h1>Your trips</h1><button class="button button--primary">+ A new trip</button></div>
+              <p class="d-caps" style="margin:6px 0 14px">Coming up</p>
+              <div class="d-shelf">
+                <div class="d-book sketch-box sketch-box--light"><svg class="sketch-box__line" aria-hidden="true"></svg><span class="d-tape"></span><span class="d-photo d-ph-a"><i></i></span><h3>Japan in spring</h3><p>2 – 12 Apr 2027 · in 4 months</p><div class="hand-bar d-hbar" data-confirmed="0.46" data-estimated="0.28"><svg aria-hidden="true"></svg></div><p>1 840 € your share · 2 lines to decide</p></div>
+                <div class="d-book sketch-box sketch-box--light"><svg class="sketch-box__line" aria-hidden="true"></svg><span class="d-photo d-ph-d"><i></i></span><h3>Lisbon weekend</h3><p>still a dream · 2 places</p><div class="hand-bar hand-bar--mini d-hbar-mini" data-confirmed="0" data-estimated="0.3"><svg aria-hidden="true"></svg></div><p>≈ 600 € your share</p></div>
+                <div class="d-book d-book--new sketch-box sketch-box--light" data-dashed="1"><svg class="sketch-box__line" aria-hidden="true"></svg>+ Start a trip<br /><span class="d-hand">or bring it from your AI</span></div>
+              </div>
+              <p class="d-caps" style="margin:22px 0 14px">Past</p>
+              <div class="d-shelf">
+                <div class="d-book sketch-box sketch-box--light"><svg class="sketch-box__line" aria-hidden="true"></svg><span class="d-photo d-ph-b"><i></i></span><h3>Colombia &amp; Panama</h3><p>4 – 18 Sept 2026 · 4 travellers</p><p>♥ 3 places we loved</p></div>
+              </div>
+            </main>
+          </div>
+        </div>
+        <figcaption><b>5 · Your trips, as a shelf.</b> Three notebooks per row instead of one under the other; the next trip has the tape. The sign-in pages and the landing page already have their computer layout (build 7).</figcaption>
+      </figure>
+
+      <!-- 6. Notes -->
+      <figure class="d-frame">
+        <div class="d-screen" style="height:auto">
+          <div class="d-notes">
+            <div>
+              <h4>Three sizes</h4>
+              <ul>
+                <li><b>Phone</b> (under 760 px): as today, nothing changes.</li>
+                <li><b>Tablet / small laptop</b> (760–1180): two columns: the left menu becomes a top bar; budget + map stay on the right.</li>
+                <li><b>Computer</b> (1180 and more): the three columns above.</li>
+              </ul>
+              <div class="d-wire" style="grid-template-columns: 1fr 1.6fr 1.2fr"><div></div><div></div><div></div></div>
+            </div>
+            <div>
+              <h4>What’s the same everywhere</h4>
+              <ul>
+                <li>Same notebook, same words, same buttons (drawn, pen blue for the main one).</li>
+                <li>Every card drawn in pencil; no straight borders, no shadows, no side bars; where you are = crayon underline.</li>
+                <li>Each screen keeps one tape only.</li>
+                <li>Nothing new to learn: a computer shows more at once, it doesn’t work differently.</li>
+              </ul>
+            </div>
+            <div>
+              <h4>Not in this build</h4>
+              <ul>
+                <li>Drag and drop between days (later, if testers ask).</li>
+                <li>Keyboard shortcuts beyond Esc and ↑ ↓.</li>
+                <li>Printing / PDF (V3).</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <figcaption><b>6 · Sizes and rules.</b></figcaption>
+      </figure>
+
+    </div>
+    <script>
+      window.addEventListener('load', () => {
+        const ink = getComputedStyle(document.documentElement).getPropertyValue('--ink').trim() || '#2c2620'
+        const base = (id) => {
+          const m = L.map(id, { zoomControl: false, dragging: false, scrollWheelZoom: false, doubleClickZoom: false, touchZoom: false })
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 17 }).addTo(m)
+          return m
+        }
+        const icon = (cls, t) => L.divIcon({ className: '', html: `<div class="d-pin ${cls}">${t}</div>`, iconSize: [22, 22], iconAnchor: [11, 11] })
+        const hotel = [34.989, 135.759]
+        const stops = [[34.9671, 135.7727, 'act', '1'], [35.005, 135.7649, 'food', '2'], [35.001, 135.781, 'food', '3']]
+        const d = base('m1')
+        const pts = [hotel, ...stops.map((s) => [s[0], s[1]])]
+        L.polyline(pts, { color: ink, weight: 2, dashArray: '2 6', opacity: 0.8 }).addTo(d)
+        L.marker(hotel, { icon: icon('d-pin--stay', '⌂') }).addTo(d)
+        for (const s of stops) L.marker([s[0], s[1]], { icon: icon(`d-pin--${s[2]}`, s[3]) }).addTo(d)
+        d.fitBounds(L.latLngBounds(pts), { padding: [26, 26] })
+
+        const k = base('m2')
+        L.marker([35.001, 135.781], { icon: icon('d-pin--food', '3') }).addTo(k)
+        k.setView([35.001, 135.781], 15)
+
+        const stays = [[35.6948, 139.702, '640 €', ''], [35.6627, 139.7600, '840 €', 'd-price-pin--chosen d-price-pin--on'], [35.7148, 139.7967, '720 €', '']]
+        const s = base('m3')
+        for (const x of stays) L.marker([x[0], x[1]], { icon: L.divIcon({ className: '', html: `<span class="d-price-pin ${x[3]}">${x[2]}</span>`, iconSize: [0, 0] }) }).addTo(s)
+        s.fitBounds(L.latLngBounds(stays.map((x) => [x[0], x[1]])), { padding: [40, 40] })
+      })
+    </script>
+  </body>
+</html>
