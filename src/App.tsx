@@ -17,6 +17,7 @@ import { ImportIntoTrip, ImportNewTrip } from './pages/ImportFromAi'
 import { Privacy } from './pages/Privacy'
 import { ResetPassword } from './pages/ResetPassword'
 import { SharePage } from './pages/SharePage'
+import { SharedTrip } from './pages/SharedTrip'
 import { SignIn } from './pages/SignIn'
 import { SignUp } from './pages/SignUp'
 import { TripPage } from './pages/TripPage'
@@ -70,6 +71,7 @@ export function AppRoutes() {
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/join/:token" element={<JoinTrip />} />
         <Route path="/demo/*" element={<Demo />} />
+        <Route path="/s/:token/*" element={<SharedTrip />} />
         <Route path="/link-expired" element={<LinkExpired />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route

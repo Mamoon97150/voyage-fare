@@ -1672,3 +1672,59 @@ button.screen__back {
   color: var(--confirmed);
   font-family: inherit;
 }
+
+/* ── Read-only share link (build 8 step 6) ─────────────────────────────────── */
+
+.share__link {
+  margin-top: var(--space-2);
+}
+
+.share__url {
+  font-size: var(--text-sm);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.share__never {
+  margin-top: var(--space-3);
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+.share__never b {
+  color: var(--ink);
+}
+
+.share__acts {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--space-4);
+}
+
+.share__off {
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+}
+
+.link-off__body {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+  padding-top: 20vh;
+  text-align: center;
+}
+
+.link-off__title {
+  font-family: var(--font-title);
+  font-size: var(--text-xl);
+  font-weight: 600;
+}
+
+.link-off__lead {
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+  max-width: 22rem;
+}

@@ -24,7 +24,8 @@ export function RoutePage() {
   const { session } = useAuth()
   const { detail, loadError: error } = useTrip(tripId)
   const viewer = useViewer(detail, session?.user.id)
-  const base = useDemo() ? '/demo' : `/trips/${tripId}`
+  const demo = useDemo()
+  const base = demo ? demo.base : `/trips/${tripId}`
 
   const route = useMemo(() => (detail ? routeOf(detail) : null), [detail])
 
@@ -119,7 +120,7 @@ function Shell({ tripId, children }: { tripId: string; children: React.ReactNode
   return (
     <div className="screen">
       <header className="screen__top">
-        <Link to={demo ? '/demo' : `/trips/${tripId}`} className="round-button" aria-label="Back to the trip">
+        <Link to={demo ? demo.base : `/trips/${tripId}`} className="round-button" aria-label="Back to the trip">
           ‹
         </Link>
         <h1 className="screen__title">The route</h1>

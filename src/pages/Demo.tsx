@@ -30,7 +30,7 @@ export function Demo() {
     }
   }, [])
 
-  const value = useMemo(() => (tripId ? { tripId, seeAs, setSeeAs } : null), [tripId, seeAs])
+  const value = useMemo(() => (tripId ? { tripId, seeAs, setSeeAs, base: '/demo' } : null), [tripId, seeAs])
 
   if (error || tripId === null)
     return (

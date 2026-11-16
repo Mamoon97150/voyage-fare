@@ -1535,6 +1535,13 @@ export type Database = {
       admin_add: { Args: { p_email: string }; Returns: string }
       admin_ai: { Args: never; Returns: Json }
       trip_mail_address: { Args: { p_trip_id: string; p_new?: boolean }; Returns: string }
+      share_link: {
+        Args: { p_trip_id: string }
+        Returns: { token: string; show_prices: boolean; show_names: boolean }[]
+      }
+      set_share: { Args: { p_trip_id: string; p_show_prices: boolean; p_show_names: boolean }; Returns: undefined }
+      stop_share: { Args: { p_trip_id: string }; Returns: undefined }
+      shared_trip: { Args: { p_token: string }; Returns: Json }
       admin_set_ai: { Args: { p_enabled: boolean }; Returns: undefined }
       apply_booking: {
         Args: {

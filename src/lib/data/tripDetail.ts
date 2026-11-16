@@ -3,6 +3,8 @@ import type { Tables } from '../database.types'
 import { supabase } from '../supabase'
 import type { Trip, Traveller, Place } from './trips'
 
+import type { TripMoney } from './money'
+
 export type Item = Tables<'items'>
 export type TripOption = Tables<'options'>
 export type Room = Tables<'rooms'>
@@ -49,6 +51,8 @@ export type TripDetail = {
   files?: ItemFile[]
   /** Forwarded booking emails waiting in "To review" (build 8 step 5b). */
   mails?: TripMail[]
+  /** Seen through a read-only share link (build 8 step 6): what the link shows. */
+  shared?: { token: string; showPrices: boolean; showNames: boolean; money?: TripMoney }
 }
 
 /** null when the trip doesn't exist or isn't shared with this person (privacy hides both the same way). */

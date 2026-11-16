@@ -5,20 +5,26 @@ import { SketchBox } from './Sketch'
 
 // Pieces of the demo trip's pages (build 7, step 3, mockup demo-v5).
 
-/** The note clipped at the top of every demo page, with "See it as …". */
+/** The note clipped at the top of every demo page (or shared trip's page), with "See it as …". */
 export function DemoStrip({ detail }: { detail: TripDetail }) {
   const demo = useDemo()
   if (!demo || !detail.trip.is_demo) return null
   const current = demo.seeAs ?? demoDefault(detail)
   const travellers = [...detail.travellers].sort((a, b) => a.position - b.position)
   return (
-    <aside className="demo-strip" aria-label="Demo">
-      <p>
-        <b className="demo-strip__kicker">Demo</b>A real trip, the names changed. Look around: nothing you do here is
-        saved.
-      </p>
-      <Link to="/sign-up" className="demo-strip__make">
-        Make my own ›
+    <aside className="demo-strip" aria-label={demo.share ? 'Shared with you' : 'Demo'}>
+      {demo.share ? (
+        <p>
+          <b className="demo-strip__kicker">Shared with you · read-only</b>A trip planned on Voyage Fare.
+        </p>
+      ) : (
+        <p>
+          <b className="demo-strip__kicker">Demo</b>A real trip, the names changed. Look around: nothing you do here is
+          saved.
+        </p>
+      )}
+      <Link to={demo.share ? '/' : '/sign-up'} className="demo-strip__make">
+        {demo.share ? 'Plan mine ›' : 'Make my own ›'}
       </Link>
       {travellers.length > 1 && (
         <div className="demo-strip__who" role="radiogroup" aria-label="See it as">

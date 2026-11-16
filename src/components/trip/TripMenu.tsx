@@ -4,7 +4,17 @@ import { AI_QUESTIONS, aiTextSize, tripForAi } from '../../lib/aiText'
 import { copyText } from '../../lib/clipboard'
 import { useAuth } from '../../lib/authContext'
 import { useDemo, useViewer } from '../../lib/demo'
-import { duplicateTrip, getMoney, type TripDetail, type TripMoney } from '../../lib/trips'
+import {
+  duplicateTrip,
+  getMoney,
+  setShare,
+  shareLink,
+  shareUrl,
+  stopShare,
+  type ShareLink,
+  type TripDetail,
+  type TripMoney,
+} from '../../lib/trips'
 import { useSaving } from '../../lib/useSaving'
 import { plural } from '../../lib/tripText'
 import { SketchBox } from '../Sketch'
@@ -19,20 +29,24 @@ export function TripMenu({ detail }: { detail: TripDetail }) {
   const [open, setOpen] = useState(false)
   const [sheet, setSheet] = useState(false)
   const [again, setAgain] = useState(false)
+  const [sharing, setSharing] = useState(false)
   const [copied, setCopied] = useState(false)
   const box = useRef<HTMLDivElement>(null)
+  // Through a read-only share link, there's nothing to do with the trip: no menu.
+  const hidden = Boolean(demo?.share)
 
   useEffect(() => {
-    if (!open && !sheet && !again) return
+    if (!open && !sheet && !again && !sharing) return
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return
       setOpen(false)
       setSheet(false)
       setAgain(false)
+      setSharing(false)
     }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
-  }, [open, sheet, again])
+  }, [open, sheet, again, sharing])
 
   useEffect(() => {
     if (!copied) return
@@ -40,6 +54,7 @@ export function TripMenu({ detail }: { detail: TripDetail }) {
     return () => clearTimeout(t)
   }, [copied])
 
+  if (hidden) return null
   return (
     <div className="trip-menu" ref={box}>
       <button
@@ -69,6 +84,17 @@ export function TripMenu({ detail }: { detail: TripDetail }) {
             </button>
             {!demo && (
               <>
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="trip-menu__item"
+                  onClick={() => {
+                    setOpen(false)
+                    setSharing(true)
+                  }}
+                >
+                  <i aria-hidden="true">↗</i>Share a read-only link
+                </button>
                 <Link
                   to={`/trips/${detail.trip.id}/settings#trip-address`}
                   role="menuitem"
@@ -129,6 +155,7 @@ export function TripMenu({ detail }: { detail: TripDetail }) {
         />
       )}
       {again && <NewTripFromThis detail={detail} onClose={() => setAgain(false)} />}
+      {sharing && <ShareSheet detail={detail} onClose={() => setSharing(false)} />}
       {copied && (
         <div className="copied-note" role="status">
           <b>Copied</b>
@@ -254,6 +281,128 @@ function Switch({
       </span>
       <span className={`toggle-pill${on ? ' toggle-pill--on' : ''}`} aria-hidden="true" />
     </button>
+  )
+}
+
+/**
+ * "Share a read-only link" (build 8 step 6, mockup share-link-v5): the link (made the first time),
+ * Copy or Send it…, what it shows (prices, names), and turning it off.
+ */
+function ShareSheet({ detail, onClose }: { detail: TripDetail; onClose: () => void }) {
+  const [link, setLink] = useState<ShareLink | null>()
+  const [copied, setCopied] = useState(false)
+  const [error, setError] = useState<string>()
+  const { busy, run } = useSaving()
+  const tripId = detail.trip.id
+
+  useEffect(() => {
+    let active = true
+    shareLink(tripId)
+      .then((l) => active && setLink(l))
+      .catch(() => active && setError('The link isn’t available right now.'))
+    return () => {
+      active = false
+    }
+  }, [tripId])
+
+  const url = link ? shareUrl(link.token) : ''
+  const canSend = typeof navigator !== 'undefined' && typeof navigator.share === 'function'
+
+  const change = (prices: boolean, names: boolean) => {
+    if (!link) return
+    const before = link
+    setLink({ ...link, show_prices: prices, show_names: names })
+    void run(
+      () => setShare(tripId, prices, names),
+      (m) => {
+        setLink(before)
+        setError(m)
+      },
+    )
+  }
+
+  return (
+    <>
+      <div className="trip-menu__scrim" aria-hidden="true" onClick={onClose} />
+      <div className="copy-ai" role="dialog" aria-modal="true" aria-labelledby="share-title">
+        <SketchBox tape="mustard" className="copy-ai__sheet" seed={92}>
+          <button type="button" className="copy-ai__close" aria-label="Close" onClick={onClose}>
+            ✕
+          </button>
+          <h2 id="share-title" className="copy-ai__title">
+            Share a read-only link
+          </h2>
+          <p className="copy-ai__lead">Anyone with the link sees the trip. They can’t change anything.</p>
+          {error && <p className="field__error">{error}</p>}
+          {link === undefined && !error && <p className="loading">Making the link…</p>}
+          {link && (
+            <>
+              <div className="booking-match share__link">
+                <b className="share__url">{url.replace(/^https?:\/\//, '')}</b>
+                <button
+                  type="button"
+                  className="button button--quiet trip-address__copy"
+                  onClick={() => void copyText(url).then((ok) => setCopied(ok))}
+                >
+                  {copied ? '✓ Copied' : 'Copy'}
+                </button>
+              </div>
+              {canSend && (
+                <button
+                  type="button"
+                  className="button button--primary button--wide"
+                  onClick={() =>
+                    void navigator
+                      .share({ title: detail.trip.name, text: `${detail.trip.name} on Voyage Fare`, url })
+                      .catch(() => {})
+                  }
+                >
+                  <span className="ai-icon" aria-hidden="true">
+                    ↗
+                  </span>
+                  Send it…
+                </button>
+              )}
+              <p className="copy-ai__label">What they see</p>
+              <Switch
+                label="Prices and the budget"
+                hint="off: just the route, places, days and ideas"
+                on={link.show_prices}
+                onChange={(on) => change(on, link.show_names)}
+              />
+              <Switch
+                label="Travellers’ names"
+                hint="off: “Traveller 1”, “Traveller 2”"
+                on={link.show_names}
+                onChange={(on) => change(link.show_prices, on)}
+              />
+              <p className="share__never">
+                Never in the link: <b>who paid what</b> and the balances, <b>booking numbers and files</b>, the trip’s
+                email address.
+              </p>
+              <div className="share__acts">
+                <button
+                  type="button"
+                  className="link-button share__off"
+                  disabled={busy}
+                  onClick={() =>
+                    void run(async () => {
+                      await stopShare(tripId)
+                      onClose()
+                    }, setError)
+                  }
+                >
+                  Turn the link off
+                </button>
+                <button type="button" className="button button--quiet" onClick={onClose}>
+                  Done
+                </button>
+              </div>
+            </>
+          )}
+        </SketchBox>
+      </div>
+    </>
   )
 }
 

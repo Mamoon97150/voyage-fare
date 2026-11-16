@@ -2,7 +2,7 @@
 // from the welcome page without signing up. The trip itself says it's the demo (trips.is_demo).
 import { createContext, useContext } from 'react'
 import { useParams } from 'react-router'
-import type { Trip, TripDetail } from './trips'
+import { getTrip, sharedTrip, type Trip, type TripDetail } from './trips'
 import { viewerOf } from './tripView'
 
 /** Where a trip's pages live: /demo for the demo, /trips/<id> otherwise. */
@@ -13,6 +13,10 @@ export const isReadOnly = (detail: Pick<TripDetail, 'trip'>) => detail.trip.is_d
 
 type Demo = {
   tripId: string
+  /** Where its pages live: /demo, or /s/<token> for a read-only share link (build 8 step 6). */
+  base: string
+  /** A share link: the trip is loaded through it (names and prices as the link says). */
+  share?: { token: string; showPrices: boolean }
   /** "See it as …": whose share the amounts are (a traveller id). */
   seeAs: string | null
   setSeeAs: (id: string) => void
@@ -40,3 +44,7 @@ export function useViewer(detail: TripDetail | null | undefined, userId: string 
 /** In the demo, you start as the first traveller (the one who planned it). */
 export const demoDefault = (detail: Pick<TripDetail, 'travellers'>) =>
   [...detail.travellers].sort((a, b) => a.position - b.position)[0]?.id ?? null
+
+/** Load the trip a page shows: through the share link when it's one, the usual way otherwise. */
+export const loadTrip = (demo: Demo | null, tripId: string) =>
+  demo?.share ? sharedTrip(demo.share.token) : getTrip(tripId)

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { explainAuthError } from './authForm'
-import { getTrip, type TripDetail } from './trips'
+import { loadTrip, useDemo } from './demo'
+import type { TripDetail } from './trips'
 
 /**
  * Load a whole trip for a page, and reload it after a change (code review, 14 Nov: it was
@@ -9,24 +10,25 @@ import { getTrip, type TripDetail } from './trips'
 export function useTrip(tripId: string) {
   const [detail, setDetail] = useState<TripDetail | null | undefined>(undefined)
   const [loadError, setLoadError] = useState<string>()
+  const demo = useDemo()
 
   const load = useCallback(
     () =>
-      getTrip(tripId)
+      loadTrip(demo, tripId)
         .then(setDetail)
         .catch((e) => setLoadError(explainAuthError(e).message)),
-    [tripId],
+    [demo, tripId],
   )
 
   useEffect(() => {
     let active = true
-    getTrip(tripId)
+    loadTrip(demo, tripId)
       .then((d) => active && setDetail(d))
       .catch((e) => active && setLoadError(explainAuthError(e).message))
     return () => {
       active = false
     }
-  }, [tripId])
+  }, [demo, tripId])
 
   return { detail, loadError, load }
 }

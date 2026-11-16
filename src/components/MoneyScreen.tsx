@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
-import { useTripId, useViewer } from '../lib/demo'
+import { loadTrip, useDemo, useTripId, useViewer } from '../lib/demo'
 import { DemoStrip, YourTurn, demoShare } from './DemoParts'
 import { useAuth } from '../lib/authContext'
 import { explainAuthError } from '../lib/authForm'
 import { Loading } from '../lib/auth'
-import { getMoney, getTrip, type TripDetail, type TripMoney } from '../lib/trips'
+import { getMoney, type TripDetail, type TripMoney } from '../lib/trips'
 import { tripSubtitle } from '../lib/tripText'
 import { budgetView, isSolo, type Mode } from '../lib/tripView'
 import { FormMessage } from './AuthForm'
@@ -29,6 +29,7 @@ export type MoneyPage = {
  */
 export function MoneyScreen({ children }: { children: (page: MoneyPage) => ReactNode }) {
   const tripId = useTripId()
+  const demo = useDemo()
   const { session } = useAuth()
   const [data, setData] = useState<{ detail: TripDetail | null; money: TripMoney | null } | undefined>(undefined)
   const [error, setError] = useState<string>()
@@ -36,9 +37,11 @@ export function MoneyScreen({ children }: { children: (page: MoneyPage) => React
   const viewer = useViewer(data?.detail, session?.user.id)
 
   const fetchAll = useCallback(async () => {
-    const detail = await getTrip(tripId)
+    const detail = await loadTrip(demo, tripId)
+    // A share link never shows who paid what: no money side.
+    if (demo?.share) return { detail, money: detail?.shared?.money ?? null }
     return { detail, money: detail ? await getMoney(tripId) : null }
-  }, [tripId])
+  }, [demo, tripId])
 
   useEffect(() => {
     let active = true
