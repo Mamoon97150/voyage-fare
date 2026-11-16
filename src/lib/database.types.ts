@@ -716,6 +716,8 @@ export type Database = {
           rate: number
           rate_is_manual: boolean
           trip_id: string
+          photo_url: string | null
+          photo_path: string | null
         }
         Insert: {
           amount?: number | null
@@ -736,6 +738,8 @@ export type Database = {
           rate?: number
           rate_is_manual?: boolean
           trip_id: string
+          photo_url?: string | null
+          photo_path?: string | null
         }
         Update: {
           amount?: number | null
@@ -756,6 +760,8 @@ export type Database = {
           rate?: number
           rate_is_manual?: boolean
           trip_id?: string
+          photo_url?: string | null
+          photo_path?: string | null
         }
         Relationships: [
           {

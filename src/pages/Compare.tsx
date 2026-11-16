@@ -6,13 +6,15 @@ import { FormMessage } from '../components/AuthForm'
 import { FolderTabs } from '../components/compare/FolderTabs'
 import { OptionCard } from '../components/compare/OptionCard'
 import { OptionForm } from '../components/compare/OptionForm'
+import { StaysMap, type PricePin } from '../components/compare/StaysMap'
+import { nearOf } from '../lib/itemDetails'
 import { Sketch, SketchBox } from '../components/Sketch'
 import { TripTopBar } from '../components/trip/TripTopBar'
 import { TripBudget } from '../components/TripBudget'
 import { TripNav } from '../components/TripNav'
 import { Loading } from '../lib/auth'
 import { useTrip } from '../lib/useTrip'
-import { formatMoney } from '../lib/money'
+import { formatMoney, formatWhole } from '../lib/money'
 import { useAuth } from '../lib/authContext'
 import { optionLines, roomsOf, subjectsFor, TABS, tabToDecide, type Sort, type Subject, type Tab } from '../lib/options'
 import { tripSubtitle } from '../lib/tripText'
@@ -220,6 +222,23 @@ function ItemOptions({
   const lines = optionLines(detail, item, viewer, mode, sort)
   const defaultMode = (detail.legs.find((l) => l.item_id === item.id)?.mode ?? 'plane') as TicketMode
   const timed = lines.filter((l) => l.minutes !== null).length > 1
+  // Stays on a map (maps-v6): each option's price where it is; a tap brings its card up.
+  const [focused, setFocused] = useState<string | null>(null)
+  const pins: PricePin[] =
+    item.kind === 'housing'
+      ? lines
+          .filter((l) => l.option.latitude != null && l.option.longitude != null)
+          .map((l) => ({
+            id: l.option.id,
+            latitude: l.option.latitude as number,
+            longitude: l.option.longitude as number,
+            text:
+              l.option.amount === null
+                ? l.option.name.slice(0, 14)
+                : formatWhole(Number(l.option.amount) * Number(l.option.rate), detail.trip.currency),
+            chosen: l.option.is_chosen,
+          }))
+      : []
   // The group's label, like the trip page's "DAY 1": its day, the decision, who it's for, what's left.
   const sharedBy = detail.shares.filter((x) => x.item_id === item.id).length
   const label: { text: string; tone?: 'what' | 'todo' | 'dropped' }[] = [
@@ -252,6 +271,8 @@ function ItemOptions({
         initial={option}
         travellers={detail.travellers}
         initialRooms={option ? roomsOf(detail, option.id) : []}
+        near={nearOf(subject.place)}
+        tripId={detail.trip.id}
         submitLabel={option ? 'Save' : 'Add the option'}
         onSubmit={async (input) => {
           if (option) await updateOption(option.id, input)
@@ -301,6 +322,20 @@ function ItemOptions({
         <p className="field__hint compare-item__note">Kept for the record. Choose one to bring it back.</p>
       )}
       {error && <FormMessage tone="error">{error}</FormMessage>}
+      {pins.length > 0 && (
+        <>
+          <StaysMap
+            pins={pins}
+            focused={focused}
+            label={`Map of the places to stay${subject.place ? ` in ${subject.place.name}` : ''}`}
+            onPick={(optionId) => {
+              setFocused(optionId)
+              document.getElementById(`opt-${optionId}`)?.scrollIntoView?.({ behavior: 'smooth', block: 'center' })
+            }}
+          />
+          <p className="hand stays-map__note">tap a price: its card comes up</p>
+        </>
+      )}
       <ul className="opts">
         {lines.map((line) =>
           editing === line.option.id ? (
@@ -316,6 +351,7 @@ function ItemOptions({
               roundTrip={roundTrip}
               busy={busy}
               readOnly={readOnly}
+              focused={focused === line.option.id}
               onEdit={() => !readOnly && setEditing(line.option.id)}
               rooms={roomsOf(detail, line.option.id).map(
                 (r) =>
@@ -367,6 +403,8 @@ function EmptyPage({
           defaultMode="plane"
           currency={detail.trip.currency}
           travellers={detail.travellers}
+          near={nearOf(subject.place)}
+          tripId={detail.trip.id}
           submitLabel="Add the option"
           onSubmit={async (input) => {
             await addItemWithOption(

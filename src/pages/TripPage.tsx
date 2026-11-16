@@ -10,6 +10,8 @@ import { AddItem } from '../components/trip/ItemForm'
 import { ItemRow } from '../components/trip/ItemRow'
 import { PlacesWeLoved, ToTryForm, ToTryList } from '../components/trip/ToTry'
 import { DayPrompts, WhereWeSleep } from '../components/trip/PlacePrompts'
+import { DayMap } from '../components/trip/DayMap'
+import { dayMap, kmText } from '../lib/dayMap'
 import { PlaceForm } from '../components/trip/PlaceForm'
 import { RouteGap } from '../components/trip/RouteGap'
 import { RouteCard } from '../components/trip/RouteCard'
@@ -51,6 +53,15 @@ export function TripPage() {
   const [mode, setMode] = useState<Mode>('mine')
   const [adding, setAdding] = useState<string | null>(null) // a place id, 'trip', or nothing
   const [editingPlace, setEditingPlace] = useState<string | null>(null)
+  // Day maps opened (maps-v6): closed by default, so the page doesn't get longer.
+  const [openMaps, setOpenMaps] = useState<Set<string>>(new Set())
+  const toggleMap = (key: string) =>
+    setOpenMaps((s) => {
+      const n = new Set(s)
+      if (n.has(key)) n.delete(key)
+      else n.add(key)
+      return n
+    })
   // Tapping a row opens it for changes: say so once, until the first time it's used (review 13 Nov).
   const [tapHint, setTapHint] = useState(() => !hintSeen('tap-to-change'))
 
@@ -230,48 +241,81 @@ export function TripPage() {
                           <WhereWeSleep onAdd={() => addHere('housing')} />
                         ))}
                       {groupPlaceItems(placeItems, trip.start_date, readOnly ? [] : ownDays, detail.options).map(
-                        (group) => (
-                          <div key={group.key} className="item-group">
-                            <p className="item-group__label">
-                              {group.label}
-                              {group.key === 'to-try' && <span className="hand item-group__note">no day yet</span>}
-                            </p>
-                            {group.key === 'to-try' ? (
-                              <ToTryList detail={detail} items={group.items} onChanged={reload} />
-                            ) : (
-                              <ul className="item-list">
-                                {group.items.map((it) => (
-                                  <ItemRow
-                                    key={it.id}
-                                    detail={detail}
-                                    item={it}
-                                    viewer={viewer}
-                                    mode={shownMode}
-                                    kinds={KINDS_FOR_PLACE}
-                                    days={days}
-                                    onChanged={reload}
-                                    onOpen={opened}
-                                    showDays={group.key === 'stay' || group.key === 'ideas'}
+                        (group) => {
+                          const view = group.day !== undefined ? dayMap(detail, place, group.day, group.items) : null
+                          const mapKey = `${place.id}:${group.day}`
+                          const mapOpen = view !== null && view.stops.length > 0 && openMaps.has(mapKey)
+                          const pinOf = (it: (typeof group.items)[number]) =>
+                            !mapOpen || it.status === 'dropped'
+                              ? undefined
+                              : (view.stops.find((s) => s.item.id === it.id)?.n ??
+                                (view.unplaced.includes(it) ? ('?' as const) : undefined))
+                          return (
+                            <div key={group.key} className="item-group">
+                              <p className="item-group__label">
+                                {group.label}
+                                {group.key === 'to-try' && <span className="hand item-group__note">no day yet</span>}
+                                {view && view.stops.length > 0 && (
+                                  <button
+                                    type="button"
+                                    className="map-toggle"
+                                    aria-expanded={mapOpen}
+                                    aria-label={`Map of ${group.label}`}
+                                    onClick={() => toggleMap(mapKey)}
+                                  >
+                                    ⌖ Map {mapOpen ? '▴' : `· ${view.stops.length}`}
+                                  </button>
+                                )}
+                              </p>
+                              {mapOpen && (
+                                <>
+                                  <DayMap view={view} label={`Map of ${group.label}`} />
+                                  {view.km !== null && (
+                                    <p className="hand day-map__note">
+                                      {view.stay ? '⌂ → ' : ''}
+                                      {view.stops.map((s) => s.n).join(' → ')} · {kmText(view.km)}
+                                    </p>
+                                  )}
+                                </>
+                              )}
+                              {group.key === 'to-try' ? (
+                                <ToTryList detail={detail} items={group.items} onChanged={reload} />
+                              ) : (
+                                <ul className="item-list">
+                                  {group.items.map((it) => (
+                                    <ItemRow
+                                      key={it.id}
+                                      detail={detail}
+                                      item={it}
+                                      viewer={viewer}
+                                      mode={shownMode}
+                                      kinds={KINDS_FOR_PLACE}
+                                      days={days}
+                                      onChanged={reload}
+                                      onOpen={opened}
+                                      showDays={group.key === 'stay' || group.key === 'ideas'}
+                                      pin={pinOf(it)}
+                                    />
+                                  ))}
+                                </ul>
+                              )}
+                              {group.day !== undefined &&
+                                !readOnly &&
+                                (addingHere('activity', group.day) ? (
+                                  inlineAdd('activity', group.day)
+                                ) : addingHere('restaurant', group.day) ? (
+                                  inlineAdd('restaurant', group.day)
+                                ) : (
+                                  <DayPrompts
+                                    items={placeItems}
+                                    placeId={place.id}
+                                    day={group.day}
+                                    onAdd={(kind) => addHere(kind, group.day)}
                                   />
                                 ))}
-                              </ul>
-                            )}
-                            {group.day !== undefined &&
-                              !readOnly &&
-                              (addingHere('activity', group.day) ? (
-                                inlineAdd('activity', group.day)
-                              ) : addingHere('restaurant', group.day) ? (
-                                inlineAdd('restaurant', group.day)
-                              ) : (
-                                <DayPrompts
-                                  items={placeItems}
-                                  placeId={place.id}
-                                  day={group.day}
-                                  onAdd={(kind) => addHere(kind, group.day)}
-                                />
-                              ))}
-                          </div>
-                        ),
+                            </div>
+                          )
+                        },
                       )}
                       <EstimateRows
                         detail={detail}

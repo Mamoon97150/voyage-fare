@@ -29,6 +29,10 @@ export type ItemDetails = {
   insurance_included: boolean | null
   deposit: number | null
   meal: Meal | null
+  /** Where it is (maps-v6): asked of activities, restaurants and getting around; left alone otherwise. */
+  location_name?: string | null
+  latitude?: number | null
+  longitude?: number | null
 }
 
 export const NO_DETAILS: ItemDetails = {
@@ -59,6 +63,7 @@ export function askedFor(kind: ItemKind, inPlace: boolean) {
     mode: around,
     insurance: kind === 'car_rental',
     deposit: kind === 'car_rental',
+    where: kind === 'activity' || kind === 'restaurant' || around,
   }
 }
 
@@ -77,6 +82,10 @@ export function detailsFor(kind: ItemKind, inPlace: boolean, d: ItemDetails): It
     insurance_included: a.insurance ? d.insurance_included : null,
     deposit: a.deposit ? d.deposit : null,
     meal: a.meal ? d.meal : null,
+    // Not asked: not touched (a stay keeps the place its booking gave it).
+    location_name: a.where ? d.location_name?.trim() || null : undefined,
+    latitude: a.where ? (d.location_name?.trim() ? (d.latitude ?? null) : null) : undefined,
+    longitude: a.where ? (d.location_name?.trim() ? (d.longitude ?? null) : null) : undefined,
   }
 }
 
@@ -94,8 +103,17 @@ export function detailsOf(item: Item): ItemDetails {
     insurance_included: item.insurance_included,
     deposit: item.deposit === null ? null : Number(item.deposit),
     meal: item.meal as Meal | null,
+    location_name: item.location_name,
+    latitude: item.latitude,
+    longitude: item.longitude,
   }
 }
+
+/** A place's position, for searching its spots first. */
+export const nearOf = (place: { latitude: number | null; longitude: number | null } | null | undefined) =>
+  place && place.latitude !== null && place.longitude !== null
+    ? { latitude: place.latitude, longitude: place.longitude }
+    : null
 
 /** How many share a line: everyone unless "Who it's for" says otherwise. A new line: everyone. */
 export function sharers(detail: Pick<TripDetail, 'travellers' | 'shares'>, itemId?: string): number {
@@ -133,6 +151,8 @@ export function detailsText(item: Item, currency: string): string[] {
     bits.push(d.start_time, d.duration)
   }
   if (item.kind === 'restaurant') bits.push(d.food_kind)
+  if (d.location_name && d.location_name !== item.name && (item.kind === 'activity' || item.kind === 'restaurant'))
+    bits.push(d.location_name)
   if (d.from_place || d.to_place) {
     if (item.kind === 'car_rental') {
       bits.push(

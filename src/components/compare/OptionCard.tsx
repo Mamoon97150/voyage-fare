@@ -3,6 +3,8 @@ import { formatMinutes, nextDay, wayMinutes, type OptionLine, type Way } from '.
 import type { Item, Place, TicketMode } from '../../lib/trips'
 import { MODES } from '../../lib/tripView'
 import { Underlined } from '../Sketch'
+import { GluedPhoto } from '../GluedPhoto'
+import { usePhoto } from '../../lib/usePhoto'
 
 /**
  * One candidate on Compare, as a line of the notebook (Compare v4, 13 Nov): the trip page's row
@@ -23,6 +25,7 @@ export function OptionCard({
   busy,
   readOnly = false,
   rooms = [],
+  focused = false,
 }: {
   line: OptionLine
   item: Item
@@ -38,8 +41,11 @@ export function OptionCard({
   readOnly?: boolean
   /** A stay by room: "Superior 640 € · Djamina, Danielle", one per room. */
   rooms?: string[]
+  /** Tapped on the stays' map: outlined. */
+  focused?: boolean
 }) {
   const { option, details, share, more, cheapest, fastest, minutes } = line
+  const photo = usePhoto(option)
   const chosen = option.is_chosen
   const whole = option.amount === null ? null : Number(option.amount) * Number(option.rate)
   // A price in another currency shows as typed, then what it comes to in the trip's (mockup 10).
@@ -69,7 +75,7 @@ export function OptionCard({
     .join(' · ')
 
   return (
-    <li className={`opt${chosen ? ' opt--chosen' : ''}`}>
+    <li id={`opt-${option.id}`} className={`opt${chosen ? ' opt--chosen' : ''}${focused ? ' opt--focused' : ''}`}>
       <button
         type="button"
         className="opt__pick"
@@ -87,6 +93,7 @@ export function OptionCard({
         onClick={onEdit}
         aria-label={readOnly ? option.name : `Change ${option.name}`}
       >
+        {photo && <GluedPhoto src={photo} className="opt__photo" />}
         <span className="opt__name">
           {chosen ? <Underlined>{option.name}</Underlined> : option.name}
           {details.prices && <span className="opt__pill">2 one-way tickets</span>}

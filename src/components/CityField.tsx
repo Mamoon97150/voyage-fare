@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react'
-import { rememberedPlaces, searchPlaces, type CityValue, type PlaceSuggestion } from '../lib/places'
+import { rememberedPlaces, searchPlaces, spotFromLink, type CityValue, type PlaceSuggestion } from '../lib/places'
 
 /**
  * Type a city, pick it from the suggestions: that gives its coordinates for the map.
@@ -17,6 +17,10 @@ export function CityField({
   error,
   autoFocus,
   suggestNow = false,
+  search = searchPlaces,
+  known: knownFor = rememberedPlaces,
+  readLinks = false,
+  looking: lookingWord = 'looking for it on the map…',
 }: {
   id: string
   label: string
@@ -27,12 +31,23 @@ export function CityField({
   error?: string
   autoFocus?: boolean
   suggestNow?: boolean
+  /** Spots instead of cities (a line's "Where", maps-v6). */
+  search?: (query: string, signal?: AbortSignal) => Promise<PlaceSuggestion[]>
+  known?: (query: string) => PlaceSuggestion[] | undefined
+  /** A pasted Google Maps link gives the spot straight away. */
+  readLinks?: boolean
+  looking?: string
 }) {
   const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([])
   const [open, setOpen] = useState(false)
   const [active, setActive] = useState(-1)
   const [looking, setLooking] = useState(false)
   const typed = useRef(suggestNow)
+  // The search can change with each render (a closure): the latest one is used, without searching again.
+  const searchRef = useRef({ search, knownFor })
+  useEffect(() => {
+    searchRef.current = { search, knownFor }
+  })
   const listId = useId()
 
   useEffect(() => {
@@ -45,13 +60,15 @@ export function CityField({
       setOpen(found.length > 0)
       setLooking(false)
     }
-    const known = rememberedPlaces(query)
+    if (readLinks && /^https?:\/\//i.test(query.trim())) return
+    const known = searchRef.current.knownFor(query)
     const controller = new AbortController()
     const timer = setTimeout(
       () => {
         if (known) return show(known)
         setLooking(true)
-        searchPlaces(query, controller.signal)
+        searchRef.current
+          .search(query, controller.signal)
           .then(show)
           .catch((e: Error) => {
             if (e.name === 'AbortError') return
@@ -65,7 +82,7 @@ export function CityField({
       clearTimeout(timer)
       controller.abort()
     }
-  }, [value.name])
+  }, [value.name, readLinks])
 
   function pick(s: PlaceSuggestion) {
     typed.current = false
@@ -103,6 +120,13 @@ export function CityField({
               setOpen(false)
               setLooking(false)
             }
+            // A Google Maps link carries its spot: taken as it is, nothing searched.
+            const fromLink = readLinks ? spotFromLink(e.target.value) : null
+            if (fromLink) {
+              typed.current = false
+              setOpen(false)
+              return onChange(fromLink)
+            }
             // Typing again forgets the picked place's position.
             onChange({ name: e.target.value, country: null, latitude: null, longitude: null })
           }}
@@ -138,7 +162,7 @@ export function CityField({
       </div>
       {looking && !open && (
         <p className="suggest suggest__looking" role="status">
-          looking for it on the map…
+          {lookingWord}
         </p>
       )}
       {open && (

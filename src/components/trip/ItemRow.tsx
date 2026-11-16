@@ -3,7 +3,7 @@ import { LineSheet } from './LineSheet'
 import { useState } from 'react'
 import { amountForInput } from '../../lib/money'
 import { setItemDetails, setPackageCover, updateItem, type Item, type ItemKind, type TripDetail } from '../../lib/trips'
-import { detailsOf, detailsText, sharers } from '../../lib/itemDetails'
+import { detailsOf, detailsText, nearOf, sharers } from '../../lib/itemDetails'
 import { placeDays } from '../../lib/toTry'
 import { coversText, daysText, itemLine, itemTitle, kindLabel, leftLine, type Mode } from '../../lib/tripView'
 import { LeftWords } from './LeftWords'
@@ -15,6 +15,8 @@ import { isReadOnly } from '../../lib/demo'
 import { SourceBadge, VerdictChips } from './ToTry'
 import { dayHasCome, inFoodBudget, MEALS, VERDICTS } from '../../lib/toTry'
 import { todayIso } from '../../lib/shelf'
+import { usePhoto } from '../../lib/usePhoto'
+import { GluedPhoto } from '../GluedPhoto'
 
 /**
  * One line of the notebook: a dot (green confirmed, mustard estimated, hollow no price), the name,
@@ -28,6 +30,7 @@ export function ItemRow({
   kinds,
   days,
   showDays = true,
+  pin,
   onChanged,
   onOpen,
 }: {
@@ -38,6 +41,8 @@ export function ItemRow({
   kinds: ItemKind[]
   days: number
   showDays?: boolean
+  /** On an open day map (maps-v6): its number there, or "?" with no place yet. */
+  pin?: number | '?'
   onChanged: () => void
   onOpen?: () => void
 }) {
@@ -46,6 +51,10 @@ export function ItemRow({
   const readOnly = isReadOnly(detail)
   const [peek, setPeek] = useState(false)
   const line = itemLine(detail, item, viewer, mode)
+  // The chosen stay shows its photo (maps-v6).
+  const photo = usePhoto(
+    item.kind === 'housing' ? detail.options.find((o) => o.item_id === item.id && o.is_chosen) : null,
+  )
   const foodBudget = inFoodBudget(detail, item)
   const dot =
     item.status === 'dropped'
@@ -95,6 +104,7 @@ export function ItemRow({
               days={days}
               placeDays={place ? placeDays(detail, place) : undefined}
               people={sharers(detail, item.id)}
+              near={nearOf(place)}
               foldKind
               initial={{
                 kind: item.kind as ItemKind,
@@ -135,7 +145,17 @@ export function ItemRow({
         aria-expanded={readOnly ? peek : undefined}
         aria-label={readOnly ? `Details of ${title}` : `Change ${title}`}
       >
-        <i className={`dot ${dot}`} aria-hidden="true" />
+        {pin === undefined ? (
+          <i className={`dot ${dot}`} aria-hidden="true" />
+        ) : (
+          <i
+            className={`day-pin day-pin--${pin === '?' ? 'none' : item.kind}`}
+            aria-label={pin === '?' ? 'no place yet' : `stop ${pin} on the map`}
+          >
+            {pin}
+          </i>
+        )}
+        {photo && <GluedPhoto src={photo} className="item-row__photo" />}
         <span className="item-row__main">
           <span className="item-row__name">{title}</span>
           {meta && <span className="item-row__meta">{meta}</span>}

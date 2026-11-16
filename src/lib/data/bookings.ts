@@ -66,7 +66,9 @@ export async function removeFile(file: Pick<ItemFile, 'id' | 'path'>): Promise<v
 /** Before a trip goes: its files go too (Storage doesn't follow the database on its own). */
 export async function removeTripFiles(tripId: string): Promise<void> {
   const { data } = await supabase.from('item_files').select('path').eq('trip_id', tripId)
-  const paths = (data ?? []).map((f) => f.path)
+  // Options' own photos too (build 9).
+  const photos = await supabase.from('options').select('photo_path').eq('trip_id', tripId).not('photo_path', 'is', null)
+  const paths = [...(data ?? []).map((f) => f.path), ...(photos.data ?? []).map((o) => o.photo_path as string)]
   if (paths.length) await supabase.storage.from(BUCKET).remove(paths)
 }
 

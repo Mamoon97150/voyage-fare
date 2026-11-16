@@ -210,3 +210,260 @@
   font-size: var(--text-note);
   color: var(--ink-soft);
 }
+
+/* ── A day's map (build 9, mockup maps-v6) ─────────────────────────────── */
+.day-map {
+  margin-top: var(--space-2);
+}
+
+.day-pin {
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-round);
+  background: var(--ink-soft);
+  color: var(--paper);
+  font: 700 var(--text-xs)/22px var(--font-text);
+  text-align: center;
+  box-shadow: 0 0 0 2px var(--paper);
+}
+
+.day-pin--stay {
+  background: var(--ink);
+  font-size: var(--text-sm);
+}
+
+.day-pin--activity {
+  background: var(--cat-activity);
+}
+
+.day-pin--restaurant {
+  background: var(--cat-food);
+}
+
+.day-pin--transport,
+.day-pin--car_rental {
+  background: var(--cat-travel);
+}
+
+.day-map__note {
+  margin-top: var(--space-1);
+}
+
+/* The day's "⌖ Map · 3", by its date. */
+.map-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 1.75rem;
+  padding: 0 0.6rem;
+  border: 1.5px solid var(--line);
+  border-radius: 999px;
+  background: var(--paper);
+  font: inherit;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ink);
+  cursor: pointer;
+  position: relative;
+}
+
+.map-toggle::after {
+  content: '';
+  position: absolute;
+  inset: -0.5rem -0.25rem;
+}
+
+.map-toggle[aria-expanded='true'] {
+  border-color: var(--ink);
+}
+
+/* On an open day map, a line's dot becomes its number. */
+.item-row .day-pin {
+  flex: none;
+  width: 1.3rem;
+  height: 1.3rem;
+  font-size: 0.68rem;
+  line-height: 1.3rem;
+  box-shadow: none;
+}
+
+.item-row .day-pin--none {
+  background: none;
+  border: 1.5px dashed var(--ink-soft);
+  color: var(--ink-soft);
+  line-height: calc(1.3rem - 3px);
+}
+
+/* ── Stays on a map, in Compare (build 9, mockup maps-v6) ─────────────────── */
+.stays-map {
+  margin-bottom: var(--space-1);
+}
+
+.price-pin {
+  display: inline-block;
+  transform: translate(-50%, -50%);
+  padding: 2px 7px;
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  background: var(--paper-raised);
+  font: 700 var(--text-xs)/16px var(--font-text);
+  color: var(--ink);
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.15);
+}
+
+.price-pin--chosen {
+  border-color: var(--pen);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--pen) 25%, transparent);
+}
+
+.price-pin--on {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.stays-map__note {
+  margin-bottom: var(--space-2);
+}
+
+/* ── A photo glued in with drawn corners ─────────────────────────────────── */
+.glued-photo {
+  position: relative;
+  display: block;
+  border-radius: 2px;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.18);
+  background: var(--line);
+}
+
+.glued-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 2px;
+}
+
+.glued-photo::before,
+.glued-photo::after,
+.glued-photo i::before,
+.glued-photo i::after {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  background: color-mix(in srgb, var(--ink) 78%, transparent);
+}
+
+.glued-photo::before {
+  top: -3px;
+  left: -3px;
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+}
+
+.glued-photo::after {
+  bottom: -3px;
+  right: -3px;
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+}
+
+.glued-photo i::before {
+  top: -3px;
+  right: -3px;
+  clip-path: polygon(0 0, 100% 0, 100% 100%);
+}
+
+.glued-photo i::after {
+  bottom: -3px;
+  left: -3px;
+  clip-path: polygon(0 0, 0 100%, 100% 100%);
+}
+
+.glued-photo__label {
+  position: absolute;
+  left: 6px;
+  bottom: 5px;
+  padding: 0 4px;
+  border-radius: 3px;
+  background: var(--paper-veil);
+  font-size: var(--text-micro);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.opt__photo {
+  height: 6.5rem;
+  margin-bottom: var(--space-2);
+}
+
+.item-row__photo {
+  flex: none;
+  width: 3.4rem;
+  height: 2.6rem;
+  transform: rotate(-2deg);
+}
+
+/* ── Paste a link, the photo, in the option form ──────────────────────────── */
+.link-reader__reading {
+  margin-top: var(--space-1);
+}
+
+.link-found {
+  margin-top: var(--space-2);
+  padding: var(--space-3);
+  border: 1.5px dashed var(--line);
+  border-radius: 10px;
+}
+
+.link-found__photo {
+  height: 7rem;
+  margin-bottom: var(--space-3);
+}
+
+.link-found__list {
+  display: grid;
+  gap: 0.2rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--text-sm);
+}
+
+.link-found__ok,
+.link-found__no {
+  display: inline-block;
+  width: 1.2rem;
+  font-weight: 700;
+}
+
+.link-found__ok {
+  color: var(--confirmed);
+}
+
+.link-found__no {
+  color: var(--estimated-text);
+}
+
+.photo-picker__photo {
+  height: 7rem;
+  margin: var(--space-1) 0 var(--space-2);
+}
+
+.photo-picker__actions {
+  display: flex;
+  gap: var(--space-4);
+}
+
+.photo-picker__actions .link-button {
+  cursor: pointer;
+}
+
+.opt--focused {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+  border-radius: 8px;
+}

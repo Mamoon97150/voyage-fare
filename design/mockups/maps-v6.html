@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Maps, links and photos (v6, 16 Nov)</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script type="module">
+      import '/src/index.css'
+      import './forms.css'
+      import './v4.css'
+      import './v5.js'
+    </script>
+    <style>
+      .hand { font-family: var(--font-hand); color: var(--ink-soft); line-height: 1.2; }
+      .pad { padding: var(--space-4); }
+      .kicker { font-size: var(--text-2xs); letter-spacing: .08em; text-transform: uppercase; font-weight: 700; color: var(--ink-soft); }
+      .sheet, .place { position: relative; margin-top: var(--space-3); padding: var(--space-4); background: var(--paper-raised); border: 1px solid var(--line); border-radius: 10px; }
+      .sheet h3 { font-family: var(--font-title); font-size: var(--text-lg); font-weight: 600; }
+      .place h4 { display: flex; align-items: center; gap: var(--space-2); font-family: var(--font-title); font-size: var(--text-xl); }
+      .place h4 .n { width: 1.7rem; height: 1.7rem; border-radius: 50%; background: var(--ink); color: var(--paper); display: grid; place-items: center; font-family: var(--font-text); font-size: var(--text-sm); }
+      .place h4 small { font-family: var(--font-text); font-size: var(--text-xs); color: var(--ink-soft); font-weight: 400; }
+      .grp { display: flex; justify-content: space-between; align-items: center; font-size: var(--text-2xs); letter-spacing: .08em; text-transform: uppercase; font-weight: 700; color: var(--ink-soft); margin-top: var(--space-4); padding-bottom: var(--space-1); border-bottom: 1px solid var(--line); }
+      .maplink { font-size: var(--text-xs); letter-spacing: 0; text-transform: none; font-weight: 600; color: var(--ink); display: inline-flex; align-items: center; gap: .3rem; padding: .15rem .55rem; border: 1.5px solid var(--line); border-radius: 999px; background: var(--paper); }
+      .maplink[aria-expanded='true'] { border-color: var(--ink); }
+      .ln { display: grid; grid-template-columns: 1.3rem minmax(0, 1fr) auto; gap: var(--space-2); align-items: center; padding: var(--space-2) 0; border-bottom: 1px solid var(--line); font-size: var(--text-md); }
+      .ln small { display: block; font-size: var(--text-xs); color: var(--ink-soft); }
+      .ln .num { font-weight: 600; }
+      .mk { width: 1.3rem; height: 1.3rem; border-radius: 50%; display: grid; place-items: center; font-size: .7rem; font-weight: 700; color: var(--paper); box-shadow: 0 0 0 2px var(--paper-raised); }
+      .mk--act { background: #c9824a; }
+      .mk--food { background: #7f8f4e; }
+      .mk--stay { background: var(--ink); }
+      .mk--none { background: none; border: 1.5px dashed var(--ink-soft); color: var(--ink-soft); box-shadow: none; }
+      .prompts { display: flex; justify-content: space-evenly; padding: var(--space-1) 0; font-size: var(--text-sm); color: var(--ink-soft); }
+      .map { position: relative; height: 170px; margin-top: var(--space-2); border-radius: 8px; overflow: hidden; border: 1px solid var(--line); background: #f3eee2; z-index: 0; }
+      .map--tall { height: 230px; }
+      .map .leaflet-tile-pane { filter: grayscale(1) sepia(0.35) contrast(0.85) brightness(1.06); }
+      .map .leaflet-control-attribution { font-size: 9px; background: rgb(251 247 239 / 0.8); }
+      .pin { width: 22px; height: 22px; border-radius: 50%; color: #fbf7ef; font: 700 11px/22px var(--font-text); text-align: center; box-shadow: 0 0 0 2px #fbf7ef; }
+      .pin--act { background: #c9824a; }
+      .pin--food { background: #7f8f4e; }
+      .pin--stay { background: var(--ink); font-size: 13px; }
+      .price-pin { display: inline-block; transform: translate(-50%, -50%); padding: 2px 7px; border-radius: 999px; background: #fbf7ef; border: 1.5px solid var(--ink); font: 700 11px/16px var(--font-text); color: var(--ink); white-space: nowrap; box-shadow: 0 1px 2px rgb(0 0 0 / .15); }
+      .price-pin--on { background: var(--ink); color: #fbf7ef; }
+      .price-pin--chosen { border-color: var(--pen); box-shadow: 0 0 0 2px rgb(51 80 140 / .25); }
+      .map-note { font-family: var(--font-hand); font-size: 1rem; color: var(--ink-soft); margin-top: var(--space-1); }
+      .field { margin-top: var(--space-3); }
+      .fi { display: flex; align-items: center; min-height: 2.75rem; padding: 0 var(--space-3); border-radius: 8px; background: color-mix(in srgb, var(--line) 45%, var(--paper-raised)); font-size: var(--text-base); color: var(--ink); gap: .4rem; }
+      .fi.ph { color: var(--ink-soft); }
+      .fi small { margin-left: auto; color: var(--ink-soft); font-size: var(--text-sm); }
+      .sugg { margin-top: 4px; border: 1px solid var(--line); border-radius: 8px; background: var(--paper-raised); overflow: hidden; }
+      .sugg div { padding: .55rem var(--space-3); font-size: var(--text-sm); border-top: 1px solid var(--line); }
+      .sugg div:first-child { border-top: 0; background: color-mix(in srgb, var(--ink) 5%, transparent); }
+      .sugg small { color: var(--ink-soft); }
+      .pinned { display: flex; align-items: center; gap: .4rem; margin-top: var(--space-1); font-size: var(--text-xs); color: var(--confirmed); font-weight: 600; }
+      .acts { display: flex; gap: var(--space-2); justify-content: flex-end; margin-top: var(--space-4); }
+      .new { display: inline-block; margin-left: .3rem; padding: 0 .35rem; border-radius: 4px; font-size: .6rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; background: color-mix(in srgb, var(--estimated) 25%, transparent); color: var(--estimated-text); vertical-align: 2px; }
+
+      /* photos, glued in with drawn corners */
+      .photo { position: relative; display: block; border-radius: 2px; background-size: cover; background-position: center; box-shadow: 0 1px 2px rgb(0 0 0 / .18); }
+      .photo::before, .photo::after, .photo i::before, .photo i::after { content: ''; position: absolute; width: 14px; height: 14px; background: color-mix(in srgb, var(--ink) 78%, transparent); }
+      .photo::before { top: -3px; left: -3px; clip-path: polygon(0 0, 100% 0, 0 100%); }
+      .photo::after { bottom: -3px; right: -3px; clip-path: polygon(100% 0, 100% 100%, 0 100%); }
+      .photo i::before { top: -3px; right: -3px; clip-path: polygon(0 0, 100% 0, 100% 100%); }
+      .photo i::after { bottom: -3px; left: -3px; clip-path: polygon(0 0, 0 100%, 100% 100%); }
+      .ph-room { background-image: linear-gradient(160deg, #e9d9bf 0 38%, #c8a982 38% 41%, #f2e6d3 41% 70%, #9d7a55 70% 74%, #e3cfae 74%); }
+      .ph-room2 { background-image: linear-gradient(200deg, #dfe3e4 0 45%, #a9b6b9 45% 48%, #eef0ee 48% 72%, #7b8a8f 72% 76%, #d8dcd8 76%); }
+      .ph-ryokan { background-image: linear-gradient(180deg, #c9b38a 0 30%, #8a6d48 30% 33%, #e6d7b5 33% 62%, #6e7f4c 62% 66%, #d7c79f 66%); }
+      .ph-street { background-image: linear-gradient(180deg, #e6c9a8 0 35%, #b5653f 35% 55%, #2c2620 55% 58%, #d9b991 58%); }
+      .ph-label { position: absolute; left: 6px; bottom: 5px; font: 600 9px var(--font-text); letter-spacing: .04em; text-transform: uppercase; color: rgb(44 38 32 / .55); }
+
+      .stay-line { display: grid; grid-template-columns: 4.2rem minmax(0, 1fr) auto; gap: var(--space-3); align-items: center; padding: var(--space-3) 0; border-bottom: 1px solid var(--line); }
+      .stay-line .photo { height: 3.2rem; transform: rotate(-2deg); }
+      .stay-line small { display: block; font-size: var(--text-xs); color: var(--ink-soft); }
+      .dot { display: inline-block; width: .55rem; height: .55rem; border-radius: 50%; margin-right: .35rem; vertical-align: .05em; }
+      .dot--ok { background: var(--confirmed); }
+      .dot--est { background: var(--estimated); }
+
+      .choice { margin-top: var(--space-3); padding: var(--space-3); background: var(--paper-raised); border: 1px solid var(--line); border-radius: 10px; }
+      .choice--on { border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
+      .choice .photo { height: 6.5rem; margin-bottom: var(--space-3); }
+      .choice-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-2); }
+      .choice-head b { font-size: var(--text-md); }
+      .choice-head .num { font-family: var(--font-title); font-size: var(--text-lg); font-weight: 600; }
+      .choice small { display: block; font-size: var(--text-xs); color: var(--ink-soft); margin-top: 2px; }
+      .src { display: inline-flex; align-items: center; gap: .3rem; font-size: var(--text-xs); color: var(--ink-soft); }
+      .src i { font-style: normal; width: 1.1rem; height: 1.1rem; border-radius: 4px; display: grid; place-items: center; font-size: .6rem; font-weight: 800; color: #fff; }
+      .src-booking i { background: #2c4d86; }
+      .src-airbnb i { background: #c8574f; }
+
+      .paste { display: flex; gap: var(--space-2); }
+      .paste .fi { flex: 1; font-size: var(--text-sm); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+      .reading { display: flex; align-items: center; gap: var(--space-2); margin-top: var(--space-2); font-family: var(--font-hand); font-size: 1.05rem; color: var(--ink-soft); }
+      .found { margin-top: var(--space-3); padding: var(--space-3); border: 1.5px dashed var(--line); border-radius: 10px; }
+      .found .photo { height: 7rem; margin-bottom: var(--space-3); }
+      .got { display: grid; grid-template-columns: 1.2rem minmax(0, 1fr); gap: .2rem var(--space-2); font-size: var(--text-sm); margin-top: var(--space-2); }
+      .got .ok { color: var(--confirmed); font-weight: 700; }
+      .got .no { color: var(--estimated-text); font-weight: 700; }
+      .notes h4 { font-size: var(--text-2xs); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); margin-top: var(--space-3); }
+      .notes p, .notes li { font-size: var(--text-sm); line-height: 1.45; }
+      .notes ul { padding-left: 1.1rem; }
+    </style>
+  </head>
+  <body>
+    <div class="phones">
+
+      <!-- 1. A day, map closed -->
+      <figure>
+        <div class="phone">
+          <div class="pad">
+            <div class="place">
+              <h4><span class="n">2</span>Kyoto <small>3 nights · 1 to try</small></h4>
+              <p class="grp">Stay</p>
+              <div class="stay-line">
+                <span class="photo ph-ryokan"><i></i></span>
+                <span><b>Hotel Kanra</b><small><span class="dot dot--ok"></span>booked · 3 nights · everyone</small></span>
+                <b class="num">450 €</b>
+              </div>
+              <p class="grp"><span>Day 6 · Wed 7 Apr</span><button class="maplink" aria-expanded="false">⌖ Map · 3</button></p>
+              <div class="ln"><span class="mk mk--act">1</span><span>Fushimi Inari at dawn<small>Activities · 07:00 · 2 h</small></span><b class="num">Free</b></div>
+              <div class="ln"><span class="mk mk--food">2</span><span>Nishiki market<small>Food · lunch · street food</small></span><b class="num">≈ 30 €</b></div>
+              <div class="ln"><span class="mk mk--food">3</span><span>Kikunoi<small>Food · dinner · kaiseki · book a table</small></span><b class="num">180 €</b></div>
+              <div class="prompts"><span>+ What we do</span></div>
+            </div>
+          </div>
+        </div>
+        <figcaption><b>1 · The stay’s photo, and a map for each day.</b>
+          <ul>
+            <li>The <b>chosen stay shows its photo</b>, glued in with drawn corners (yours, or the link’s preview picture).</li>
+            <li>Each day with places on it has a small <b>⌖ Map · 3</b> next to its date. Lines with a place get a <b>number in their category’s colour</b>, the same as on the map.</li>
+            <li>Closed by default, so the page doesn’t get longer.</li>
+          </ul>
+        </figcaption>
+      </figure>
+
+      <!-- 2. A day, map open -->
+      <figure>
+        <div class="phone">
+          <div class="pad">
+            <div class="place">
+              <p class="grp" style="margin-top:0"><span>Day 6 · Wed 7 Apr</span><button class="maplink" aria-expanded="true">⌖ Map ▴</button></p>
+              <div class="map" id="m-day"></div>
+              <p class="map-note">⌂ hotel → 1 → 2 → 3 · about 9 km in all, as the crow flies</p>
+              <div class="ln"><span class="mk mk--act">1</span><span>Fushimi Inari at dawn<small>Activities · 07:00 · 2 h</small></span><b class="num">Free</b></div>
+              <div class="ln"><span class="mk mk--food">2</span><span>Nishiki market<small>Food · lunch</small></span><b class="num">≈ 30 €</b></div>
+              <div class="ln"><span class="mk mk--food">3</span><span>Kikunoi<small>Food · dinner</small></span><b class="num">180 €</b></div>
+              <div class="ln"><span class="mk mk--none">?</span><span>Tea ceremony<small>Activities · no place yet: <span style="color:var(--ink);text-decoration:underline">add one</span></small></span><b class="num">50 €</b></div>
+            </div>
+          </div>
+        </div>
+        <figcaption><b>2 · The day’s map, open.</b>
+          <ul>
+            <li>The hotel (⌂) and the day’s places in the day’s order, joined by a dotted line, on the same paper-toned map as the route.</li>
+            <li>A rough distance (straight lines, not real walking routes: that needs a paid service).</li>
+            <li>A line with no place shows a dashed <b>?</b> and “add one”. Tap the map to zoom and drag.</li>
+          </ul>
+        </figcaption>
+      </figure>
+
+      <!-- 3. Where field -->
+      <figure>
+        <div class="phone">
+          <div class="pad">
+            <p class="kicker">Kyoto · add</p>
+            <div class="sheet">
+              <h3>Add to Kyoto</h3>
+              <div class="field"><p class="field__label">Name</p><div class="fi">Fushimi Inari at dawn</div></div>
+              <div class="field"><p class="field__label">Where <span class="field__optional">(optional)</span> <span class="new">new</span></p><div class="fi">⌕ fushimi ina</div>
+                <div class="sugg">
+                  <div><b>Fushimi Inari Taisha</b> <small>· shrine · Fushimi, Kyoto</small></div>
+                  <div>Fushimi Inari Station <small>· Kyoto</small></div>
+                  <div>Inari Ōyashiro Hiking Trail <small>· Kyoto</small></div>
+                </div>
+              </div>
+              <p class="hand" style="margin-top:var(--space-2)">searched around Kyoto first · or paste a Google Maps link</p>
+              <div class="acts"><button class="button button--quiet">Cancel</button><button class="button button--primary">Add</button></div>
+            </div>
+          </div>
+        </div>
+        <figcaption><b>3 · Where it is.</b> A new <b>Where</b> field in the activity, restaurant and getting-around forms: the same place search as for cities, but for spots, <b>near the place first</b>. A Google Maps link works too (it carries the spot). Optional: no place, no pin.</figcaption>
+      </figure>
+
+      <!-- 4. Compare: stays on a map -->
+      <figure>
+        <div class="phone">
+          <div class="pad">
+            <p class="kicker">Compare · Tokyo · Where we sleep</p>
+            <div class="map map--tall" id="m-stays"></div>
+            <p class="map-note">tap a price: its card comes up</p>
+            <div class="choice choice--on">
+              <span class="photo ph-room"><i></i><span class="ph-label">your photo</span></span>
+              <div class="choice-head"><b>Hotel Gracery Shinjuku</b><span class="num">540 €</span></div>
+              <small>4 nights · 135 € a night · Shinjuku</small>
+              <span class="src src-booking" style="margin-top:var(--space-2)"><i>B</i>booking.com</span>
+            </div>
+            <div class="choice">
+              <div class="choice-head"><b>Asakusa Kokono</b><span class="num">480 €</span></div>
+              <small>4 nights · 120 € a night · Asakusa</small>
+            </div>
+          </div>
+        </div>
+        <figcaption><b>4 · Stays on a map, in Compare.</b>
+          <ul>
+            <li>Above the options, a map with <b>each one’s price where it is</b>: you see at once which is central and which is cheap.</li>
+            <li>Tapping a price brings its card up (ink outline); the chosen one is circled in blue, as now.</li>
+            <li>Each option can have <b>a photo</b>: yours, or the link’s picture. None taken from hotel sites in the demo.</li>
+          </ul>
+        </figcaption>
+      </figure>
+
+      <!-- 5. Paste a link -->
+      <figure>
+        <div class="phone">
+          <div class="pad">
+            <p class="kicker">Compare · Tokyo · add an option</p>
+            <div class="sheet">
+              <h3>Add an option</h3>
+              <div class="field"><p class="field__label">Paste a link <span class="new">new</span></p>
+                <div class="paste"><div class="fi">https://www.airbnb.com/rooms/4829…</div><button class="paste-button">📋 Paste</button></div>
+              </div>
+              <div class="found">
+                <span class="photo ph-room2"><i></i><span class="ph-label">from the link</span></span>
+                <div class="choice-head"><b>Quiet flat near Shibuya</b><span class="src src-airbnb"><i>A</i>airbnb</span></div>
+                <div class="got">
+                  <span class="ok">✓</span><span>the name and the photo</span>
+                  <span class="ok">✓</span><span>where it is: Shibuya, pinned</span>
+                  <span class="no">?</span><span>the price: Airbnb doesn’t show it to us, type it</span>
+                </div>
+                <div class="field"><p class="field__label">Price for the stay</p><div class="fi ph">—<small>EUR</small></div></div>
+              </div>
+              <div class="acts"><button class="button button--quiet">Cancel</button><button class="button button--primary">Add the option</button></div>
+            </div>
+          </div>
+        </div>
+        <figcaption><b>5 · Paste a link → the option fills itself in.</b>
+          <ul>
+            <li>Paste a Booking, Airbnb, hotel or restaurant link: the app reads the page’s <b>name, picture and place</b>, and the price <b>when the site shows it</b>.</li>
+            <li>It says honestly what it found (✓) and what it didn’t (?), so nothing is made up. Everything stays editable before saving.</li>
+            <li>The link stays on the option (“Open on airbnb”).</li>
+          </ul>
+        </figcaption>
+      </figure>
+
+      <!-- 6. What it needs -->
+      <figure>
+        <div class="phone">
+          <div class="pad notes">
+            <p class="kicker">Behind the scenes</p>
+            <h4>The maps</h4>
+            <p>Same free map as the route today (OpenStreetMap). With day maps on every page it’s more use: OpenStreetMap asks apps not to lean on its own servers. <b>My advice</b>: before testers come, switch to a map service with a free plan (Stadia Maps or MapTiler; I’ll check their current limits before you pick). You’d create the account and its key, and put it in Vercel yourself.</p>
+            <h4>Reading links</h4>
+            <p>A small server function opens the page and reads what sites publish for previews (name, picture, sometimes the price and place). No AI, no cost. Some sites refuse robots: then it says so, and you type it.</p>
+            <h4>Photos</h4>
+            <p>Your own photos go in the trip’s files (Supabase, free plan 1 GB: about 2 000 phone photos, made smaller on the way in). Pictures from links stay links: nothing copied.</p>
+            <h4>Not in this build</h4>
+            <ul><li>Real walking / driving times (paid services).</li><li>One big map of everything (out, decided in the spec).</li></ul>
+          </div>
+        </div>
+        <figcaption><b>6 · What it needs from you.</b> One choice: the map service. The rest is free and stays inside what we already have.</figcaption>
+      </figure>
+
+    </div>
+    <script>
+      window.addEventListener('load', () => {
+        const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim()
+        const ink = css('--ink') || '#2c2620'
+        const base = (id) => {
+          const m = L.map(id, { zoomControl: false, dragging: false, scrollWheelZoom: false, doubleClickZoom: false, touchZoom: false, attributionControl: true })
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 16 }).addTo(m)
+          return m
+        }
+        const icon = (cls, txt) => L.divIcon({ className: '', html: `<div class="pin ${cls}">${txt}</div>`, iconSize: [22, 22], iconAnchor: [11, 11] })
+
+        // Day 6 in Kyoto
+        const hotel = [34.9890, 135.7590]
+        const stops = [[34.9671, 135.7727, 'act', '1'], [35.0050, 135.7649, 'food', '2'], [35.0010, 135.7810, 'food', '3']]
+        const d = base('m-day')
+        const pts = [hotel, ...stops.map((s) => [s[0], s[1]])]
+        L.polyline(pts, { color: ink, weight: 2, dashArray: '2 6', opacity: 0.8 }).addTo(d)
+        L.marker(hotel, { icon: icon('pin--stay', '⌂') }).addTo(d)
+        for (const s of stops) L.marker([s[0], s[1]], { icon: icon(`pin--${s[2]}`, s[3]) }).addTo(d)
+        d.fitBounds(L.latLngBounds(pts), { padding: [22, 22] })
+
+        // Stays in Tokyo
+        const stays = [[35.6948, 139.7020, '540 €', 'price-pin--on'], [35.7148, 139.7967, '480 €', ''], [35.6627, 139.7044, '610 €', ''], [35.6812, 139.7671, '390 €', '']]
+        const s = base('m-stays')
+        for (const x of stays) L.marker([x[0], x[1]], { icon: L.divIcon({ className: '', html: `<span class="price-pin ${x[3]}">${x[2]}</span>`, iconSize: [0, 0] }) }).addTo(s)
+        s.fitBounds(L.latLngBounds(stays.map((x) => [x[0], x[1]])), { padding: [30, 30] })
+      })
+    </script>
+  </body>
+</html>

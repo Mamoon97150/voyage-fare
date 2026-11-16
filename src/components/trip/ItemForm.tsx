@@ -6,6 +6,7 @@ import {
   detailsFor,
   eachOf,
   LOCAL_MODES,
+  nearOf,
   NO_DETAILS,
   rentalDays,
   totalOf,
@@ -26,6 +27,8 @@ import {
 } from '../../lib/trips'
 import { dayLabel, kindLabel, SPANS_DAYS } from '../../lib/tripView'
 import { FormMessage } from '../AuthForm'
+import { CityField } from '../CityField'
+import { rememberedSpots, searchSpots, type CityValue } from '../../lib/places'
 import { FormActions } from '../FormActions'
 import { CoversPicker } from './Packages'
 import { TicketForm } from './TicketForm'
@@ -103,6 +106,7 @@ export function AddItem({
       kinds={kinds}
       days={days}
       placeDays={placeDays}
+      near={nearOf(place)}
       kind={kind}
       onKind={setKind}
       title={title}
@@ -127,7 +131,7 @@ export function AddItem({
 
 const EMPTY = { kind: 'other' as ItemKind, name: '', day: '', endDay: '', price: '' }
 const hasDetails = (d: ItemDetails) =>
-  Object.entries(d).some(([k, v]) => (k === 'price_per_person' ? v === true : v !== null))
+  Object.entries(d).some(([k, v]) => (k === 'price_per_person' ? v === true : v !== null && v !== undefined))
 
 function KindPicker({ kinds, kind, onKind }: { kinds: ItemKind[]; kind: ItemKind; onKind: (k: ItemKind) => void }) {
   // The place's list has stays; the whole trip's doesn't (its transport is a ticket: "Travel").
@@ -219,6 +223,7 @@ export function ItemForm({
   title,
   people = Math.max(detail.travellers.length, 1),
   adding = false,
+  near = null,
 }: {
   detail: TripDetail
   formId: string
@@ -253,6 +258,8 @@ export function ItemForm({
   people?: number
   /** Adding in a place: no day for a restaurant or an activity means To try. */
   adding?: boolean
+  /** The place's position: its spots are searched first (maps-v6). */
+  near?: { latitude: number; longitude: number } | null
 }) {
   const startDetails = initial?.details ?? NO_DETAILS
   const [ownKind, setOwnKind] = useState<ItemKind>(initial?.kind ?? kinds[0])
@@ -273,6 +280,12 @@ export function ItemForm({
   })
   const [perPerson, setPerPerson] = useState(initial?.details ? startDetails.price_per_person : true)
   const [d, setD] = useState<ItemDetails>(startDetails)
+  const [where, setWhere] = useState<CityValue>({
+    name: startDetails.location_name ?? '',
+    country: null,
+    latitude: startDetails.latitude ?? null,
+    longitude: startDetails.longitude ?? null,
+  })
   const [deposit, setDeposit] = useState(startDetails.deposit === null ? '' : amountForInput(startDetails.deposit))
   const [covers, setCovers] = useState<string[]>(initial?.covers ?? [])
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -313,6 +326,9 @@ export function ItemForm({
       price_per_person: pricedEach,
       deposit: held,
       meal: start === null ? null : d.meal,
+      location_name: where.name,
+      latitude: where.latitude,
+      longitude: where.longitude,
     })
     const finalName =
       name.trim() ||
@@ -586,6 +602,21 @@ export function ItemForm({
             </p>
           )}
         </div>
+      )}
+
+      {asked.where && (
+        <CityField
+          id={`${id}-where`}
+          label="Where (optional)"
+          value={where}
+          onChange={setWhere}
+          placeholder="search it, or paste a Google Maps link"
+          search={(q, signal) => searchSpots(q, near, signal)}
+          known={(q) => rememberedSpots(q, near)}
+          readLinks
+          looking="looking for it nearby…"
+          hint={where.name && where.latitude === null ? 'Not on the map: pick it from the list to pin it.' : undefined}
+        />
       )}
 
       {asked.booking && (

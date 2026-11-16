@@ -10,6 +10,10 @@ import { CurrencyPicker, RateField } from '../RateField'
 import { roomsTotal, type RoomDraft } from '../../lib/rooms'
 import { RoomsEditor } from './RoomsEditor'
 import { useSaving } from '../../lib/useSaving'
+import { CityField } from '../CityField'
+import { rememberedSpots, searchSpots, type CityValue } from '../../lib/places'
+import { LinkReader, PhotoPicker } from './OptionExtras'
+import { usePhoto } from '../../lib/usePhoto'
 
 const STAY_TYPES = ['Hotel', 'Apartment', 'House', 'Guesthouse', 'Hostel', 'Room']
 
@@ -29,6 +33,8 @@ export function OptionForm({
   onDelete,
   travellers = [],
   initialRooms = [],
+  near = null,
+  tripId,
 }: {
   kind: ItemKind
   roundTrip: boolean
@@ -42,6 +48,10 @@ export function OptionForm({
   /** For a stay by room: who can sleep where, and the option's rooms so far. */
   travellers?: Traveller[]
   initialRooms?: RoomInput[]
+  /** The place's position: its spots are searched first (maps-v6). */
+  near?: { latitude: number; longitude: number } | null
+  /** For keeping your own photo in the trip's files. Without it, no photo. */
+  tripId?: string
 }) {
   const d0: OptionDetails = initial ? detailsOf(initial) : {}
   const journey = kind === 'transport'
@@ -65,6 +75,15 @@ export function OptionForm({
   const [freeCancellation, setFreeCancellation] = useState<boolean | undefined>(d0.freeCancellation)
   const [note, setNote] = useState(initial?.note ?? '')
   const [link, setLink] = useState(initial?.link ?? '')
+  const [place, setPlace] = useState<CityValue>({
+    name: initial?.location_name ?? '',
+    country: null,
+    latitude: initial?.latitude ?? null,
+    longitude: initial?.longitude ?? null,
+  })
+  const [photoUrl, setPhotoUrl] = useState<string | null>(initial?.photo_url ?? null)
+  const ownPhoto = usePhoto(initial?.photo_path ? { photo_url: null, photo_path: initial.photo_path } : null)
+  const [photo, setPhoto] = useState<{ file: File; tripId: string } | 'remove' | undefined>()
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [formError, setFormError] = useState<string>()
   const { busy, run } = useSaving()
@@ -169,6 +188,7 @@ export function OptionForm({
         details,
         link: link.trim() || null,
         note: note.trim() || null,
+        ...(journey ? {} : { place: place.name.trim() ? place : null, photoUrl, ...(photo ? { photo } : {}) }),
       })
     }, setFormError)
   }
@@ -295,6 +315,25 @@ export function OptionForm({
   return (
     <form onSubmit={submit} noValidate className="option-form">
       {formError && <FormMessage tone="error">{formError}</FormMessage>}
+      {!journey && (
+        <LinkReader
+          id={id}
+          link={link}
+          onLink={setLink}
+          onFound={(f) => {
+            if (f.name && !name.trim()) setName(f.name)
+            if (f.image) setPhotoUrl(f.image)
+            if (f.latitude !== null && f.longitude !== null)
+              setPlace({
+                name: f.place ?? f.name ?? 'Pinned',
+                country: null,
+                latitude: f.latitude,
+                longitude: f.longitude,
+              })
+            if (f.price !== null && f.currency === currency && !price.trim()) setPrice(amountForInput(f.price))
+          }}
+        />
+      )}
       {text('name', journey ? 'Airline or company' : stay ? 'Name of the place' : 'Name', name, setName, {
         autoFocus: true,
         placeholder: journey ? 'Copa' : stay ? 'Casa Lola' : 'Rosario islands',
@@ -398,7 +437,7 @@ export function OptionForm({
               </button>
             ))}
           </div>
-          {text('location', 'Location, in your words', location, setLocation, {
+          {text('location', 'The area, in your words', location, setLocation, {
             placeholder: 'Great area, lots of stairs',
           })}
           {yesNo('breakfast', 'Breakfast', breakfast, setBreakfast)}
@@ -406,10 +445,36 @@ export function OptionForm({
         </>
       )}
 
+      {!journey && (
+        <CityField
+          id={`${id}-where`}
+          label="Where (optional)"
+          value={place}
+          onChange={setPlace}
+          placeholder="search it, or paste a Google Maps link"
+          search={(q, signal) => searchSpots(q, near, signal)}
+          known={(q) => rememberedSpots(q, near)}
+          readLinks
+          looking="looking for it nearby…"
+          hint={place.name && place.latitude === null ? 'Not on the map: pick it from the list to pin it.' : undefined}
+        />
+      )}
+      {!journey && tripId && (
+        <PhotoPicker
+          id={id}
+          shown={photo === 'remove' ? null : (ownPhoto ?? photoUrl)}
+          onFile={(file) => setPhoto({ file, tripId })}
+          onRemove={() => {
+            setPhotoUrl(null)
+            setPhoto(ownPhoto || initial?.photo_path ? 'remove' : undefined)
+          }}
+        />
+      )}
+
       {text('note', 'Note', note, setNote, {
         placeholder: journey ? 'Short stop, good times' : 'Why it’s on the list',
       })}
-      {text('link', 'Link', link, setLink, { type: 'url', placeholder: 'https://…', inputMode: 'url' })}
+      {journey && text('link', 'Link', link, setLink, { type: 'url', placeholder: 'https://…', inputMode: 'url' })}
 
       <FormActions
         busy={busy}

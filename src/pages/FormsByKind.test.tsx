@@ -190,3 +190,61 @@ describe('the place card', () => {
     expect(screen.getByRole('radio', { name: 'Day 3' })).toHaveAttribute('aria-checked', 'true')
   })
 })
+
+describe('where it is (maps-v6)', () => {
+  it('a Google Maps link pins the spot, and saves with the line', async () => {
+    await openAdd()
+    pick(/Activities/)
+    type('Name', 'Kikunoi')
+    fireEvent.change(screen.getByLabelText('Where (optional)'), {
+      target: { value: 'https://www.google.com/maps/place/Kikunoi/@35.0010,135.7810,17z' },
+    })
+    expect(screen.getByLabelText('Where (optional)')).toHaveValue('Kikunoi')
+    fireEvent.change(screen.getByLabelText('Day'), { target: { value: '2' } })
+    click('Add')
+    await waitFor(() =>
+      expect(data.setItemDetails).toHaveBeenCalledWith(
+        'new',
+        expect.objectContaining({ location_name: 'Kikunoi', latitude: 35.001, longitude: 135.781 }),
+      ),
+    )
+  })
+
+  it('a day with places opens its map; its lines get their numbers', async () => {
+    data.getTrip.mockResolvedValue(
+      detail({
+        places: [cartagena],
+        items: [
+          {
+            id: 'a1',
+            place_id: 'p1',
+            kind: 'activity',
+            name: 'Walled city',
+            status: 'idea',
+            day_number: 2,
+            end_day_number: null,
+            latitude: 10.42,
+            longitude: -75.55,
+          },
+          {
+            id: 'a2',
+            place_id: 'p1',
+            kind: 'activity',
+            name: 'Mud volcano',
+            status: 'idea',
+            day_number: 2,
+            end_day_number: null,
+          },
+        ],
+      }),
+    )
+    open('/trips/t1')
+    const toggle = await screen.findByRole('button', { name: /Map of Day 2/ })
+    expect(toggle).toHaveTextContent('⌖ Map · 1')
+    fireEvent.click(toggle)
+    expect(toggle).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByRole('img', { name: /Map of Day 2/ })).toBeInTheDocument()
+    expect(screen.getByLabelText('stop 1 on the map')).toBeInTheDocument()
+    expect(screen.getByLabelText('no place yet')).toBeInTheDocument()
+  })
+})

@@ -196,8 +196,12 @@ export async function updateTicket(itemId: string, ticket: TicketChange, keepPri
 
 /** An item (or a ticket, with its legs) and its price go together. */
 export async function deleteItem(id: string): Promise<void> {
+  const { data } = await supabase.from('options').select('photo_path').eq('item_id', id).not('photo_path', 'is', null)
   const { error } = await supabase.from('items').delete().eq('id', id)
   if (error) throw error
+  // Its options' own photos go with it (build 9).
+  const paths = (data ?? []).map((o) => o.photo_path as string)
+  if (paths.length) await supabase.storage.from('trip-files').remove(paths)
 }
 
 export async function updatePlace(
