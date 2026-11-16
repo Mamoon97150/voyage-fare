@@ -1,8 +1,11 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { formatMinutes, journeyMinutes, nextDay, optionLines, subjectsFor, tabToDecide, wayMinutes } from './options'
 import type { Item, TripDetail, TripOption } from './trips'
 import { parseRate } from './rates'
 import { itemTitle } from './tripView'
+
+// options.ts reaches demo.tsx, which loads the Supabase client: no settings on GitHub, so a stand-in.
+vi.mock('./supabase', async () => (await import('../test/fakes')).supabaseModule)
 
 const option = (over: Partial<TripOption>): TripOption =>
   ({
