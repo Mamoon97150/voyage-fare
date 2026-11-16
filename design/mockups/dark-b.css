@@ -1,0 +1,40 @@
+/* Dark mode, direction B · "Blue hour" (mockup dark-v6, 16 Nov): a notebook read by the light of the
+   sky after sunset. Cool slate paper, white chalk ink, softer pens. Only tokens change. */
+:root {
+  --paper: #15191f;
+  --paper-raised: #1d222a;
+  --line: #313845;
+  --map-bg: #212731;
+
+  --ink: #e7e9ee;
+  --ink-soft: #9aa3b1;
+  --pen: #9fb6f2;
+
+  --confirmed: #93c47f;
+  --estimated: #ddb05b;
+  --estimated-ink: #e3b862;
+  --estimated-text: #e9c374;
+  --over: #ea8670;
+
+  --cat-travel: #70adaa;
+  --cat-stay: #c39ab3;
+  --cat-activity: #d89b80;
+  --cat-food: #adb880;
+  --cat-other: #a49e93;
+
+  --tape: #4d5368;
+  --tape-2: #3e5247;
+
+  --shadow-1: 0 2px 6px rgb(0 0 0 / 0.4);
+  --shadow-2: 0 6px 16px rgb(0 0 0 / 0.45);
+  --shadow-3: 0 8px 24px rgb(0 0 0 / 0.55);
+  color-scheme: dark;
+}
+.leaflet-tile-pane {
+  filter: grayscale(1) invert(1) brightness(0.75) contrast(1.05) hue-rotate(180deg) saturate(0.4) !important;
+}
+/* The sketches as light line drawings on the dark page (inverted, so the ink becomes chalk). */
+img[src*='/illustrations/sketch-'] {
+  filter: invert(0.92) hue-rotate(180deg) saturate(0.6);
+  mix-blend-mode: screen;
+}
