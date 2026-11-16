@@ -8,6 +8,7 @@ import { AddPlace } from '../components/trip/AddPlace'
 import { EstimateForm, EstimateRows } from '../components/trip/DailyEstimates'
 import { AddItem } from '../components/trip/ItemForm'
 import { CashForm } from '../components/trip/CashForm'
+import { localToday } from '../lib/tripText'
 import { ItemRow } from '../components/trip/ItemRow'
 import { PlacesWeLoved, ToTryForm, ToTryList } from '../components/trip/ToTry'
 import { DayPrompts, WhereWeSleep } from '../components/trip/PlacePrompts'
@@ -124,6 +125,8 @@ export function TripPage() {
   const solo = isSolo(detail)
   const shownMode: Mode = solo ? 'total' : mode
   const viewerName = travellers.find((t) => t.id === viewer)?.name ?? null
+  // The trip has started (or is over): "+ Cash" shows on each day (build 10).
+  const started = Boolean(detail?.trip.start_date && detail.trip.start_date <= localToday())
   const days = tripDays(detail)
   const meta = tripSubtitle(trip, travellers.length)
   // Tickets with a route are drawn between the places, not listed again here.
@@ -351,6 +354,7 @@ export function TripPage() {
                                   placeId={place.id}
                                   day={group.day}
                                   onAdd={(kind) => addHere(kind, group.day)}
+                                  cash={started}
                                 />
                               ))}
                           </div>

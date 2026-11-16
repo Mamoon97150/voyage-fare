@@ -1,4 +1,3 @@
-// Generated from the Supabase project (voyage-fare). Do not edit by hand: regenerate after each migration.
 export type Json =
   | string
   | number
@@ -15,45 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
-      someday_ideas: {
+      admins: {
         Row: {
-          id: string
-          user_id: string
-          place_name: string | null
-          place_country: string | null
-          place_latitude: number | null
-          place_longitude: number | null
-          kind: string
-          name: string
-          link: string | null
-          note: string | null
+          added_by: string | null
           created_at: string
+          is_first: boolean
+          user_id: string
         }
         Insert: {
-          id?: string
-          user_id?: string
-          place_name?: string | null
-          place_country?: string | null
-          place_latitude?: number | null
-          place_longitude?: number | null
-          kind?: string
-          name: string
-          link?: string | null
-          note?: string | null
+          added_by?: string | null
           created_at?: string
+          is_first?: boolean
+          user_id: string
         }
         Update: {
-          id?: string
-          user_id?: string
-          place_name?: string | null
-          place_country?: string | null
-          place_latitude?: number | null
-          place_longitude?: number | null
-          kind?: string
-          name?: string
-          link?: string | null
-          note?: string | null
+          added_by?: string | null
           created_at?: string
+          is_first?: boolean
+          user_id?: string
         }
         Relationships: []
       }
@@ -341,45 +319,6 @@ export type Database = {
           },
         ]
       }
-      trip_mails: {
-        Row: {
-          forwarded_by: string | null
-          forwarder: string | null
-          found: Json | null
-          id: string
-          problem: string | null
-          received_at: string
-          resend_id: string
-          status: string
-          subject: string | null
-          trip_id: string
-        }
-        Insert: {
-          forwarded_by?: string | null
-          forwarder?: string | null
-          found?: Json | null
-          id?: string
-          problem?: string | null
-          received_at?: string
-          resend_id: string
-          status?: string
-          subject?: string | null
-          trip_id: string
-        }
-        Update: {
-          forwarded_by?: string | null
-          forwarder?: string | null
-          found?: Json | null
-          id?: string
-          problem?: string | null
-          received_at?: string
-          resend_id?: string
-          status?: string
-          subject?: string | null
-          trip_id?: string
-        }
-        Relationships: []
-      }
       item_files: {
         Row: {
           added_by: string | null
@@ -414,7 +353,43 @@ export type Database = {
           size?: number
           trip_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "item_files_item_id_trip_id_fkey"
+            columns: ["item_id", "trip_id"]
+            isOneToOne: false
+            referencedRelation: "items"
+            referencedColumns: ["id", "trip_id"]
+          },
+          {
+            foreignKeyName: "item_files_item_id_trip_id_fkey"
+            columns: ["item_id", "trip_id"]
+            isOneToOne: false
+            referencedRelation: "v_item_amounts"
+            referencedColumns: ["item_id", "trip_id"]
+          },
+          {
+            foreignKeyName: "item_files_item_id_trip_id_fkey"
+            columns: ["item_id", "trip_id"]
+            isOneToOne: false
+            referencedRelation: "v_item_left"
+            referencedColumns: ["item_id", "trip_id"]
+          },
+          {
+            foreignKeyName: "item_files_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "item_files_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "v_trip_budget"
+            referencedColumns: ["trip_id"]
+          },
+        ]
       }
       item_legs: {
         Row: {
@@ -561,17 +536,24 @@ export type Database = {
           category: string
           created_at: string
           day_number: number | null
+          deposit: number | null
           due_on: string | null
+          duration: string | null
           end_day_number: number | null
+          food_kind: string | null
+          from_place: string | null
           id: string
+          insurance_included: boolean | null
           is_cash: boolean
           kind: string
           latitude: number | null
           link: string | null
+          local_mode: string | null
           location_name: string | null
-          meal: string | null
           longitude: number | null
+          meal: string | null
           name: string
+          needs_booking: boolean | null
           note: string | null
           package_id: string | null
           paid_by: string | null
@@ -579,19 +561,12 @@ export type Database = {
           paid_on: string | null
           place_id: string | null
           position: number
+          price_per_person: boolean
+          start_time: string | null
           status: string
+          to_place: string | null
           trip_id: string
           verdict: string | null
-          start_time: string | null
-          price_per_person: boolean
-          needs_booking: boolean | null
-          duration: string | null
-          food_kind: string | null
-          from_place: string | null
-          to_place: string | null
-          local_mode: string | null
-          insurance_included: boolean | null
-          deposit: number | null
         }
         Insert: {
           actual_amount?: number | null
@@ -602,17 +577,24 @@ export type Database = {
           category: string
           created_at?: string
           day_number?: number | null
+          deposit?: number | null
           due_on?: string | null
+          duration?: string | null
           end_day_number?: number | null
+          food_kind?: string | null
+          from_place?: string | null
           id?: string
+          insurance_included?: boolean | null
           is_cash?: boolean
           kind: string
           latitude?: number | null
           link?: string | null
+          local_mode?: string | null
           location_name?: string | null
-          meal?: string | null
           longitude?: number | null
+          meal?: string | null
           name: string
+          needs_booking?: boolean | null
           note?: string | null
           package_id?: string | null
           paid_by?: string | null
@@ -620,19 +602,12 @@ export type Database = {
           paid_on?: string | null
           place_id?: string | null
           position?: number
+          price_per_person?: boolean
+          start_time?: string | null
           status?: string
+          to_place?: string | null
           trip_id: string
           verdict?: string | null
-          start_time?: string | null
-          price_per_person?: boolean | null
-          needs_booking?: boolean | null
-          duration?: string | null
-          food_kind?: string | null
-          from_place?: string | null
-          to_place?: string | null
-          local_mode?: string | null
-          insurance_included?: boolean | null
-          deposit?: number | null
         }
         Update: {
           actual_amount?: number | null
@@ -643,17 +618,24 @@ export type Database = {
           category?: string
           created_at?: string
           day_number?: number | null
+          deposit?: number | null
           due_on?: string | null
+          duration?: string | null
           end_day_number?: number | null
+          food_kind?: string | null
+          from_place?: string | null
           id?: string
+          insurance_included?: boolean | null
           is_cash?: boolean
           kind?: string
           latitude?: number | null
           link?: string | null
+          local_mode?: string | null
           location_name?: string | null
-          meal?: string | null
           longitude?: number | null
+          meal?: string | null
           name?: string
+          needs_booking?: boolean | null
           note?: string | null
           package_id?: string | null
           paid_by?: string | null
@@ -661,19 +643,12 @@ export type Database = {
           paid_on?: string | null
           place_id?: string | null
           position?: number
+          price_per_person?: boolean
+          start_time?: string | null
           status?: string
+          to_place?: string | null
           trip_id?: string
           verdict?: string | null
-          start_time?: string | null
-          price_per_person?: boolean | null
-          needs_booking?: boolean | null
-          duration?: string | null
-          food_kind?: string | null
-          from_place?: string | null
-          to_place?: string | null
-          local_mode?: string | null
-          insurance_included?: boolean | null
-          deposit?: number | null
         }
         Relationships: [
           {
@@ -757,12 +732,12 @@ export type Database = {
           longitude: number | null
           name: string
           note: string | null
+          photo_path: string | null
+          photo_url: string | null
           position: number
           rate: number
           rate_is_manual: boolean
           trip_id: string
-          photo_url: string | null
-          photo_path: string | null
         }
         Insert: {
           amount?: number | null
@@ -779,12 +754,12 @@ export type Database = {
           longitude?: number | null
           name: string
           note?: string | null
+          photo_path?: string | null
+          photo_url?: string | null
           position?: number
           rate?: number
           rate_is_manual?: boolean
           trip_id: string
-          photo_url?: string | null
-          photo_path?: string | null
         }
         Update: {
           amount?: number | null
@@ -801,12 +776,12 @@ export type Database = {
           longitude?: number | null
           name?: string
           note?: string | null
+          photo_path?: string | null
+          photo_url?: string | null
           position?: number
           rate?: number
           rate_is_manual?: boolean
           trip_id?: string
-          photo_url?: string | null
-          photo_path?: string | null
         }
         Relationships: [
           {
@@ -845,14 +820,29 @@ export type Database = {
           id?: string
           trip_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "pay_groups_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pay_groups_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "v_trip_budget"
+            referencedColumns: ["trip_id"]
+          },
+        ]
       }
       payments: {
         Row: {
           amount: number
           created_at: string
-          for_payer: boolean
           currency: string
+          for_payer: boolean
           id: string
           item_id: string
           kind: string
@@ -866,8 +856,8 @@ export type Database = {
         Insert: {
           amount: number
           created_at?: string
-          for_payer?: boolean
           currency: string
+          for_payer?: boolean
           id?: string
           item_id: string
           kind?: string
@@ -881,8 +871,8 @@ export type Database = {
         Update: {
           amount?: number
           created_at?: string
-          for_payer?: boolean
           currency?: string
+          for_payer?: boolean
           id?: string
           item_id?: string
           kind?: string
@@ -1001,9 +991,27 @@ export type Database = {
         ]
       }
       push_subscriptions: {
-        Row: { auth: string; created_at: string; endpoint: string; p256dh: string; user_id: string }
-        Insert: { auth: string; created_at?: string; endpoint: string; p256dh: string; user_id?: string }
-        Update: { auth?: string; created_at?: string; endpoint?: string; p256dh?: string; user_id?: string }
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          p256dh: string
+          user_id: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          p256dh: string
+          user_id?: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          p256dh?: string
+          user_id?: string
+        }
         Relationships: []
       }
       repayments: {
@@ -1175,6 +1183,48 @@ export type Database = {
           },
         ]
       }
+      someday_ideas: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          link: string | null
+          name: string
+          note: string | null
+          place_country: string | null
+          place_latitude: number | null
+          place_longitude: number | null
+          place_name: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind?: string
+          link?: string | null
+          name: string
+          note?: string | null
+          place_country?: string | null
+          place_latitude?: number | null
+          place_longitude?: number | null
+          place_name?: string | null
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          link?: string | null
+          name?: string
+          note?: string | null
+          place_country?: string | null
+          place_latitude?: number | null
+          place_longitude?: number | null
+          place_name?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       travellers: {
         Row: {
           id: string
@@ -1202,6 +1252,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "travellers_pay_group_fk"
+            columns: ["pay_group_id", "trip_id"]
+            isOneToOne: false
+            referencedRelation: "pay_groups"
+            referencedColumns: ["id", "trip_id"]
+          },
+          {
             foreignKeyName: "travellers_trip_id_fkey"
             columns: ["trip_id"]
             isOneToOne: false
@@ -1210,6 +1267,60 @@ export type Database = {
           },
           {
             foreignKeyName: "travellers_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "v_trip_budget"
+            referencedColumns: ["trip_id"]
+          },
+        ]
+      }
+      trip_mails: {
+        Row: {
+          forwarded_by: string | null
+          forwarder: string | null
+          found: Json | null
+          id: string
+          problem: string | null
+          received_at: string
+          resend_id: string
+          status: string
+          subject: string | null
+          trip_id: string
+        }
+        Insert: {
+          forwarded_by?: string | null
+          forwarder?: string | null
+          found?: Json | null
+          id?: string
+          problem?: string | null
+          received_at?: string
+          resend_id: string
+          status?: string
+          subject?: string | null
+          trip_id: string
+        }
+        Update: {
+          forwarded_by?: string | null
+          forwarder?: string | null
+          found?: Json | null
+          id?: string
+          problem?: string | null
+          received_at?: string
+          resend_id?: string
+          status?: string
+          subject?: string | null
+          trip_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_mails_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_mails_trip_id_fkey"
             columns: ["trip_id"]
             isOneToOne: false
             referencedRelation: "v_trip_budget"
@@ -1248,6 +1359,48 @@ export type Database = {
             foreignKeyName: "trip_members_trip_id_fkey"
             columns: ["trip_id"]
             isOneToOne: false
+            referencedRelation: "v_trip_budget"
+            referencedColumns: ["trip_id"]
+          },
+        ]
+      }
+      trip_shares: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          show_names: boolean
+          show_prices: boolean
+          token: string
+          trip_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          show_names?: boolean
+          show_prices?: boolean
+          token: string
+          trip_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          show_names?: boolean
+          show_prices?: boolean
+          token?: string
+          trip_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_shares_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: true
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_shares_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: true
             referencedRelation: "v_trip_budget"
             referencedColumns: ["trip_id"]
           },
@@ -1306,43 +1459,6 @@ export type Database = {
       }
     }
     Views: {
-      v_group_between: {
-        Row: {
-          amount: number | null
-          group_id: string | null
-          item_id: string | null
-          owed_by: string | null
-          owed_to: string | null
-          paid_on: string | null
-          trip_id: string | null
-        }
-        Relationships: []
-      }
-      v_item_bills: {
-        Row: {
-          common_part: number | null
-          item_id: string | null
-          left_to_pay: number | null
-          paid_own: number | null
-          share: number | null
-          traveller_id: string | null
-          trip_id: string | null
-        }
-        Relationships: []
-      }
-      v_party_balances: {
-        Row: {
-          balance: number | null
-          group_id: string | null
-          lead_traveller: string | null
-          paid: number | null
-          position: number | null
-          share_of_paid: number | null
-          traveller_id: string | null
-          trip_id: string | null
-        }
-        Relationships: []
-      }
       v_budget_by_category: {
         Row: {
           category: string | null
@@ -1428,6 +1544,18 @@ export type Database = {
           },
         ]
       }
+      v_group_between: {
+        Row: {
+          amount: number | null
+          group_id: string | null
+          item_id: string | null
+          owed_by: string | null
+          owed_to: string | null
+          paid_on: string | null
+          trip_id: string | null
+        }
+        Relationships: []
+      }
       v_item_amounts: {
         Row: {
           actual: number | null
@@ -1464,6 +1592,18 @@ export type Database = {
             referencedColumns: ["trip_id"]
           },
         ]
+      }
+      v_item_bills: {
+        Row: {
+          common_part: number | null
+          item_id: string | null
+          left_to_pay: number | null
+          paid_own: number | null
+          share: number | null
+          traveller_id: string | null
+          trip_id: string | null
+        }
+        Relationships: []
       }
       v_item_left: {
         Row: {
@@ -1502,6 +1642,7 @@ export type Database = {
       v_item_payments: {
         Row: {
           amount: number | null
+          for_payer: boolean | null
           item_id: string | null
           kind: string | null
           paid_by: string | null
@@ -1520,6 +1661,41 @@ export type Database = {
           trip_id: string | null
         }
         Relationships: []
+      }
+      v_party_balances: {
+        Row: {
+          balance: number | null
+          group_id: string | null
+          lead_traveller: string | null
+          paid: number | null
+          position: number | null
+          share_of_paid: number | null
+          traveller_id: string | null
+          trip_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "travellers_pay_group_fk"
+            columns: ["group_id", "trip_id"]
+            isOneToOne: false
+            referencedRelation: "pay_groups"
+            referencedColumns: ["id", "trip_id"]
+          },
+          {
+            foreignKeyName: "travellers_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "travellers_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "v_trip_budget"
+            referencedColumns: ["trip_id"]
+          },
+        ]
       }
       v_traveller_balances: {
         Row: {
@@ -1627,6 +1803,7 @@ export type Database = {
       }
     }
     Functions: {
+      accept_invitation: { Args: { p_token: string }; Returns: string }
       add_cash: {
         Args: {
           p_amount: number
@@ -1641,105 +1818,6 @@ export type Database = {
           p_rate?: number
           p_trip_id: string
         }
-        Returns: string
-      }
-      party_name: {
-        Args: { p_group_id: string; p_traveller_id: string }
-        Returns: string
-      }
-      remove_pay_group: { Args: { p_group_id: string }; Returns: undefined }
-      set_pay_group: {
-        Args: { p_group_id?: string; p_traveller_ids: string[]; p_trip_id: string }
-        Returns: string
-      }
-      delete_my_account: { Args: never; Returns: undefined }
-      add_to_try: {
-        Args: {
-          p_amount?: number
-          p_link?: string
-          p_name: string
-          p_kind?: string
-          p_note?: string
-          p_place_id: string
-        }
-        Returns: string
-      }
-      accept_invitation: { Args: { p_token: string }; Returns: string }
-      start_trip_from_someday: { Args: { p_place_name: string; p_me?: string }; Returns: string }
-      someday_into_place: { Args: { p_place_id: string }; Returns: number }
-      import_lines: { Args: { p_payload: Json; p_trip_id: string }; Returns: Json }
-      am_i_admin: { Args: never; Returns: boolean }
-      admin_overview: { Args: never; Returns: Json }
-      admin_people: {
-        Args: never
-        Returns: {
-          confirmed: boolean
-          created_at: string
-          email: string
-          first_name: string | null
-          is_admin: boolean
-          is_first: boolean
-          last_seen: string | null
-          trips: number
-          user_id: string
-        }[]
-      }
-      admin_feedback: {
-        Args: never
-        Returns: {
-          can_reply: boolean
-          created_at: string
-          device: string | null
-          email: string | null
-          first_name: string | null
-          id: string
-          kind: string
-          message: string
-          page: string | null
-          status: string
-        }[]
-      }
-      admin_add: { Args: { p_email: string }; Returns: string }
-      admin_ai: { Args: never; Returns: Json }
-      trip_mail_address: { Args: { p_trip_id: string; p_new?: boolean }; Returns: string }
-      share_link: {
-        Args: { p_trip_id: string }
-        Returns: { token: string; show_prices: boolean; show_names: boolean }[]
-      }
-      set_share: { Args: { p_trip_id: string; p_show_prices: boolean; p_show_names: boolean }; Returns: undefined }
-      stop_share: { Args: { p_trip_id: string }; Returns: undefined }
-      shared_trip: { Args: { p_token: string }; Returns: Json }
-      admin_set_ai: { Args: { p_enabled: boolean }; Returns: undefined }
-      apply_booking: {
-        Args: {
-          p_trip_id: string
-          p_item_id?: string
-          p_kind?: string
-          p_name?: string
-          p_place_id?: string
-          p_day_number?: number
-          p_option_name?: string
-          p_amount?: number
-          p_currency?: string
-          p_rate?: number
-          p_ref?: string
-          p_link?: string
-        }
-        Returns: string
-      }
-      admin_remove: { Args: { p_user_id: string }; Returns: undefined }
-      admin_list: {
-        Args: never
-        Returns: {
-          added_by_name: string | null
-          created_at: string
-          first_name: string | null
-          is_first: boolean
-          user_id: string
-        }[]
-      }
-      duplicate_trip: {
-        Args: { p_all_options?: boolean; p_name: string; p_travellers?: string[]; p_trip_id: string }
         Returns: string
       }
       add_item: {
@@ -1785,6 +1863,79 @@ export type Database = {
         }
         Returns: string
       }
+      add_to_try: {
+        Args: {
+          p_amount?: number
+          p_kind?: string
+          p_link?: string
+          p_name: string
+          p_note?: string
+          p_place_id: string
+        }
+        Returns: string
+      }
+      admin_add: { Args: { p_email: string }; Returns: string }
+      admin_ai: { Args: never; Returns: Json }
+      admin_feedback: {
+        Args: never
+        Returns: {
+          can_reply: boolean
+          created_at: string
+          device: string
+          email: string
+          first_name: string
+          id: string
+          kind: string
+          message: string
+          page: string
+          status: string
+        }[]
+      }
+      admin_list: {
+        Args: never
+        Returns: {
+          added_by_name: string
+          created_at: string
+          first_name: string
+          is_first: boolean
+          user_id: string
+        }[]
+      }
+      admin_overview: { Args: never; Returns: Json }
+      admin_people: {
+        Args: never
+        Returns: {
+          confirmed: boolean
+          created_at: string
+          email: string
+          first_name: string
+          is_admin: boolean
+          is_first: boolean
+          last_seen: string
+          trips: number
+          user_id: string
+        }[]
+      }
+      admin_remove: { Args: { p_user_id: string }; Returns: undefined }
+      admin_set_ai: { Args: { p_enabled: boolean }; Returns: undefined }
+      am_i_admin: { Args: never; Returns: boolean }
+      apply_booking: {
+        Args: {
+          p_amount?: number
+          p_currency?: string
+          p_day_number?: number
+          p_item_id?: string
+          p_kind?: string
+          p_link?: string
+          p_name?: string
+          p_option_name?: string
+          p_place_id?: string
+          p_rate?: number
+          p_ref?: string
+          p_trip_id: string
+        }
+        Returns: string
+      }
       cancel_invitation: {
         Args: { p_traveller_id: string }
         Returns: undefined
@@ -1809,8 +1960,22 @@ export type Database = {
         }
         Returns: string
       }
+      delete_my_account: { Args: never; Returns: undefined }
       delete_payment: { Args: { p_payment_id: string }; Returns: undefined }
       delete_place: { Args: { p_place_id: string }; Returns: undefined }
+      duplicate_trip: {
+        Args: {
+          p_all_options?: boolean
+          p_name: string
+          p_travellers?: string[]
+          p_trip_id: string
+        }
+        Returns: string
+      }
+      import_lines: {
+        Args: { p_payload: Json; p_trip_id: string }
+        Returns: Json
+      }
       invitation_preview: {
         Args: { p_token: string }
         Returns: {
@@ -1836,6 +2001,11 @@ export type Database = {
         Returns: string
       }
       leave_trip: { Args: { p_trip_id: string }; Returns: undefined }
+      party_name: {
+        Args: { p_group_id: string; p_traveller_id: string }
+        Returns: string
+      }
+      remove_pay_group: { Args: { p_group_id: string }; Returns: undefined }
       remove_traveller: { Args: { p_traveller_id: string }; Returns: undefined }
       save_daily_estimate: {
         Args: {
@@ -1864,10 +2034,6 @@ export type Database = {
         Args: { p_item_id: string; p_package_id: string }
         Returns: undefined
       }
-      set_restaurant_day: {
-        Args: { p_day: number; p_item_id: string; p_meal?: string }
-        Returns: undefined
-      }
       set_item_split: {
         Args: { p_item_id: string; p_travellers: string[] }
         Returns: undefined
@@ -1893,6 +2059,41 @@ export type Database = {
         Args: { p_items: string[]; p_package_id: string }
         Returns: undefined
       }
+      set_pay_group: {
+        Args: {
+          p_group_id?: string
+          p_traveller_ids: string[]
+          p_trip_id: string
+        }
+        Returns: string
+      }
+      set_restaurant_day: {
+        Args: { p_day: number; p_item_id: string; p_meal?: string }
+        Returns: undefined
+      }
+      set_share: {
+        Args: {
+          p_show_names: boolean
+          p_show_prices: boolean
+          p_trip_id: string
+        }
+        Returns: undefined
+      }
+      share_link: {
+        Args: { p_trip_id: string }
+        Returns: {
+          show_names: boolean
+          show_prices: boolean
+          token: string
+        }[]
+      }
+      shared_trip: { Args: { p_token: string }; Returns: Json }
+      someday_into_place: { Args: { p_place_id: string }; Returns: number }
+      start_trip_from_someday: {
+        Args: { p_me?: string; p_place_name: string }
+        Returns: string
+      }
+      stop_share: { Args: { p_trip_id: string }; Returns: undefined }
       trip_cards: {
         Args: never
         Returns: {
@@ -1915,6 +2116,10 @@ export type Database = {
           undecided_count: number
         }[]
       }
+      trip_mail_address: {
+        Args: { p_new?: boolean; p_trip_id: string }
+        Returns: string
+      }
       trip_settlement: {
         Args: { p_trip_id: string }
         Returns: {
@@ -1924,17 +2129,6 @@ export type Database = {
           to_group: string
           to_traveller: string
         }[]
-      }
-      update_to_try: {
-        Args: {
-          p_amount?: number
-          p_item_id: string
-          p_link?: string
-          p_name: string
-          p_note?: string
-          p_place_id: string
-        }
-        Returns: undefined
       }
       update_item: {
         Args: {
@@ -1960,6 +2154,17 @@ export type Database = {
           p_round_trip?: boolean
           p_to: string
           p_via?: string
+        }
+        Returns: undefined
+      }
+      update_to_try: {
+        Args: {
+          p_amount?: number
+          p_item_id: string
+          p_link?: string
+          p_name: string
+          p_note?: string
+          p_place_id: string
         }
         Returns: undefined
       }

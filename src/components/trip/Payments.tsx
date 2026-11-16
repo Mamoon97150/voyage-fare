@@ -159,9 +159,12 @@ function OwnBills({
   const [error, setError] = useState<string>()
   if (isSolo(detail)) return null
   const payments = (detail.payments ?? []).filter((p) => p.item_id === item.id)
-  const common = payments.some((p) => !p.for_payer)
+  // Only after a deposit for everyone (or once someone paid their own bill): not for a line one
+  // person pays in instalments.
+  const deposit = payments.some((p) => !p.for_payer && p.kind === 'deposit')
   const own = payments.some((p) => p.for_payer)
-  if (!common && !own) return null
+  if (!deposit && !own) return null
+  const commonWord = payments.every((p) => p.for_payer || p.kind === 'deposit') ? 'deposit' : 'paid for everyone'
   const bills = (detail.bills ?? []).filter((b) => b.item_id === item.id)
   if (bills.length < 2) return null
   const currency = detail.trip.currency
@@ -182,7 +185,9 @@ function OwnBills({
                 <span className="payments__kind">{you ? 'You' : name(b.traveller_id)}</span>
                 <small className="num">
                   share {formatMoney(Number(b.share ?? 0), currency)}
-                  {Number(b.common_part ?? 0) > 0 ? ` − deposit ${formatMoney(Number(b.common_part), currency)}` : ''}
+                  {Number(b.common_part ?? 0) > 0
+                    ? ` − ${commonWord} ${formatMoney(Number(b.common_part), currency)}`
+                    : ''}
                   {Number(b.paid_own ?? 0) > 0 ? ` · paid ${formatMoney(Number(b.paid_own), currency)}` : ''}
                 </small>
               </span>

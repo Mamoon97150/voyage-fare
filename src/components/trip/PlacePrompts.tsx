@@ -28,11 +28,14 @@ export function DayPrompts({
   placeId,
   day,
   onAdd,
+  cash = false,
 }: {
   items: Item[]
   placeId: string
   day: number
   onAdd: (kind: 'activity' | 'restaurant' | 'cash') => void
+  /** "+ Cash" on each day only once the trip has started (build 10): before, it's noise. */
+  cash?: boolean
 }) {
   const eat = mealsLeft(items, placeId, day).length > 0
   return (
@@ -55,9 +58,16 @@ export function DayPrompts({
           <i aria-hidden="true">+</i>Where we eat
         </button>
       )}
-      <button type="button" className="day-prompt" onClick={() => onAdd('cash')} aria-label={`Cash paid on day ${day}`}>
-        <i aria-hidden="true">+</i>Cash
-      </button>
+      {cash && (
+        <button
+          type="button"
+          className="day-prompt"
+          onClick={() => onAdd('cash')}
+          aria-label={`Cash paid on day ${day}`}
+        >
+          <i aria-hidden="true">+</i>Cash
+        </button>
+      )}
     </div>
   )
 }
