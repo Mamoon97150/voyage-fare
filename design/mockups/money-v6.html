@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Money: paying together, deposits, cash, reminders, offline (v6, 16 Nov)</title>
+    <script type="module">
+      import '/src/index.css'
+      import './forms.css'
+      import './v4.css'
+      import './v5.js'
+    </script>
+    <style>
+      .hand { font-family: var(--font-hand); color: var(--ink-soft); line-height: 1.2; font-size: 1.05rem; }
+      .pad { padding: var(--space-4); }
+      .kicker { font-size: var(--text-2xs); letter-spacing: .08em; text-transform: uppercase; font-weight: 700; color: var(--ink-soft); }
+      .sheet { position: relative; margin-top: var(--space-3); padding: var(--space-4); background: var(--paper-raised); border: 1px solid var(--line); border-radius: 10px; }
+      .sheet h3 { font-family: var(--font-title); font-size: var(--text-lg); font-weight: 600; display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-2); }
+      .sheet h3 small { font-family: var(--font-text); font-size: var(--text-xs); font-weight: 400; color: var(--ink-soft); }
+      .lnk { color: var(--pen); text-decoration: underline; text-underline-offset: 3px; font-size: var(--text-sm); }
+      .field { margin-top: var(--space-3); }
+      .field__label { font-size: var(--text-2xs); letter-spacing: .07em; text-transform: uppercase; font-weight: 700; color: var(--ink-soft); }
+      .fi { display: flex; align-items: center; min-height: 2.75rem; padding: 0 var(--space-3); border-radius: 8px; background: color-mix(in srgb, var(--line) 45%, var(--paper-raised)); font-size: var(--text-base); color: var(--ink); margin-top: 4px; }
+      .fi small { margin-left: auto; color: var(--ink-soft); font-size: var(--text-sm); }
+      .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
+      .chips { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-2); }
+      .acts { display: flex; gap: var(--space-2); justify-content: flex-end; margin-top: var(--space-4); }
+      .new { display: inline-block; margin-left: .3rem; padding: 0 .35rem; border-radius: 4px; font-size: .6rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; background: color-mix(in srgb, var(--estimated) 25%, transparent); color: var(--estimated-text); vertical-align: 2px; }
+      .grp { display: flex; justify-content: space-between; align-items: center; font-size: var(--text-2xs); letter-spacing: .08em; text-transform: uppercase; font-weight: 700; color: var(--ink-soft); margin-top: var(--space-4); padding-bottom: var(--space-1); border-bottom: 1px solid var(--line); }
+      .ln { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-2); align-items: center; padding: var(--space-2) 0; border-bottom: 1px solid var(--line); font-size: var(--text-md); }
+      .ln small { display: block; font-size: var(--text-xs); color: var(--ink-soft); }
+      .ln .num { font-weight: 600; }
+      .ln--av { grid-template-columns: auto minmax(0, 1fr) auto; }
+      .av { width: 1.9rem; height: 1.9rem; border-radius: 50%; border: 1.5px solid var(--ink); display: grid; place-items: center; font-size: var(--text-xs); font-weight: 700; background: var(--paper); }
+      .av--me { background: var(--ink); color: var(--paper); }
+      .avs { display: inline-flex; }
+      .avs .av + .av { margin-left: -.55rem; }
+      .tie { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--space-2); align-items: center; padding: var(--space-2) var(--space-3); margin-top: var(--space-2); border: 1.5px dashed var(--line); border-radius: 10px; font-size: var(--text-md); }
+      .tie small { display: block; font-size: var(--text-xs); color: var(--ink-soft); }
+      .check { display: grid; grid-template-columns: 1.4rem auto minmax(0, 1fr); gap: var(--space-2); align-items: center; padding: var(--space-2) 0; border-bottom: 1px solid var(--line); font-size: var(--text-md); }
+      .box { width: 1.25rem; height: 1.25rem; border: 1.5px solid var(--ink); border-radius: 4px; display: grid; place-items: center; font-size: .8rem; font-weight: 800; }
+      .box--on { color: var(--pen); border-color: var(--pen); }
+      .plus { color: var(--confirmed); font-weight: 700; }
+      .minus { color: var(--over); font-weight: 700; }
+      .between { margin-top: var(--space-3); padding: var(--space-3); border-radius: 10px; background: color-mix(in srgb, var(--estimated) 10%, var(--paper-raised)); border: 1px solid color-mix(in srgb, var(--estimated) 35%, var(--line)); }
+      .between h4 { font-family: var(--font-title); font-size: var(--text-md); display: flex; justify-content: space-between; align-items: baseline; }
+      .between h4 small { font-family: var(--font-text); font-size: var(--text-xs); font-weight: 400; color: var(--ink-soft); }
+      .track { display: flex; gap: var(--space-1); align-items: center; font-size: var(--text-xs); color: var(--ink-soft); margin-top: var(--space-1); }
+      .track b { color: var(--confirmed); }
+      .bigline { display: flex; justify-content: space-between; align-items: baseline; margin-top: var(--space-2); }
+      .bigline .num { font-size: var(--text-xl); font-weight: 600; }
+      .cash { display: inline-block; margin-left: .3rem; padding: 0 .35rem; border-radius: 4px; font-size: .62rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; border: 1px solid var(--line); color: var(--ink-soft); vertical-align: 1px; }
+      .bigamount { display: flex; align-items: baseline; justify-content: center; gap: .4rem; margin-top: var(--space-2); font-size: 2.4rem; font-weight: 600; }
+      .bigamount small { font-size: var(--text-base); color: var(--ink-soft); font-weight: 400; }
+      .lock { margin: var(--space-4) var(--space-3) 0; padding: var(--space-3); border-radius: 14px; background: rgb(44 38 32 / .08); }
+      .notif { display: grid; grid-template-columns: 2rem minmax(0, 1fr); gap: var(--space-2); padding: var(--space-3); border-radius: 12px; background: var(--paper-raised); box-shadow: 0 2px 8px rgb(0 0 0 / .08); font-size: var(--text-sm); }
+      .notif + .notif { margin-top: var(--space-2); }
+      .notif .ic { width: 2rem; height: 2rem; border-radius: 8px; background: var(--ink); color: var(--paper); display: grid; place-items: center; font-size: 1rem; }
+      .notif small { color: var(--ink-soft); }
+      .setrow { display: flex; justify-content: space-between; align-items: center; padding: var(--space-3) 0; border-bottom: 1px solid var(--line); font-size: var(--text-md); }
+      .setrow small { display: block; font-size: var(--text-xs); color: var(--ink-soft); }
+      .tog { width: 2.6rem; height: 1.5rem; border-radius: 999px; border: 1.5px solid var(--ink); position: relative; flex: none; }
+      .tog::after { content: ''; position: absolute; top: 2px; left: 2px; width: 1.05rem; height: 1.05rem; border-radius: 50%; background: var(--ink); }
+      .tog--on { background: color-mix(in srgb, var(--confirmed) 20%, transparent); }
+      .tog--on::after { left: auto; right: 2px; background: var(--confirmed); }
+      .offline { display: flex; justify-content: space-between; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-4); background: var(--ink); color: var(--paper); font-size: var(--text-xs); }
+      .muted { opacity: .45; }
+      .notes h4 { font-family: var(--font-title); margin-top: var(--space-3); }
+      .notes p, .notes li { font-size: var(--text-sm); margin-top: var(--space-1); }
+      .notes ul { padding-left: 1.1rem; }
+    </style>
+  </head>
+  <body>
+    <div class="phones">
+
+      <!-- 1. Travellers: who pays together -->
+      <figure>
+        <div class="phone">
+          <div class="pad">
+            <p class="kicker">Colombia &amp; Panama · Trip settings</p>
+            <div class="sheet">
+              <h3>Travellers <small>4</small></h3>
+              <div class="ln ln--av"><span class="av av--me">D</span><span>Djamina<small>you · organizer</small></span><span></span></div>
+              <div class="ln ln--av"><span class="av">D</span><span>Danielle<small>has joined</small></span><span></span></div>
+              <div class="ln ln--av"><span class="av">P</span><span>Peggy<small>invited</small></span><span></span></div>
+              <div class="ln ln--av"><span class="av">G</span><span>Gabriel<small>no account (fine)</small></span><span></span></div>
+
+              <p class="grp">Who pays together <span class="new">new</span></p>
+              <div class="tie"><span class="avs"><span class="av av--me">D</span><span class="av">D</span></span><span><b>Djamina &amp; Danielle</b><small>one share in the balances</small></span><span class="lnk">Change</span></div>
+              <div class="tie"><span class="avs"><span class="av">P</span><span class="av">G</span></span><span><b>Peggy &amp; Gabriel</b><small>one share in the balances</small></span><span class="lnk">Change</span></div>
+              <button class="add-row" type="button" style="margin-top: var(--space-3)"><span class="add-row__plus">+</span>People who pay together</button>
+            </div>
+          </div>
+        </div>
+        <figcaption><b>1 · Who pays together, set once per trip.</b>
+          <ul>
+            <li>In Trip settings, under the travellers. Any size: a couple, two sisters, <b>a family of 4</b>.</li>
+            <li>Each group counts as <b>one</b> in who-owes-whom. Everyone still has their own share.</li>
+            <li>Nobody needs an account for this (Gabriel doesn’t have one).</li>
+          </ul>
+        </figcaption>
+      </figure>
+
+      <!-- 2. Making a group -->
+      <figure>
+        <div class="phone">
+          <div class="pad">
+            <p class="kicker">New trip · step 2 of 3</p>
+            <div class="sheet">
+              <h3>Anyone paying together?</h3>
+              <p class="hand" style="margin-top:var(--space-1)">a couple, a family… they’ll settle up as one</p>
+              <div class="check"><span class="box box--on">✓</span><span class="av av--me">D</span><span>Djamina (you)</span></div>
+              <div class="check"><span class="box box--on">✓</span><span class="av">D</span><span>Danielle</span></div>
+              <div class="check"><span class="box"></span><span class="av">P</span><span>Peggy</span></div>
+              <div class="check"><span class="box"></span><span class="av">G</span><span>Gabriel</span></div>
+              <p class="calc" style="margin-top:var(--space-2);font-size:var(--text-sm);color:var(--ink-soft)">Djamina &amp; Danielle will pay together</p>
+              <div class="acts"><button class="button button--quiet">Add another group</button><button class="button button--primary">Next</button></div>
+              <p style="text-align:center;margin-top:var(--space-3)"><span class="lnk">Skip: everyone pays their own</span></p>
+            </div>
+          </div>
+        </div>
+        <figcaption><b>2 · When you create a trip.</b> The question only comes up with <b>3 or more travellers</b>, and you can skip it. Tick the people, Next; “Add another group” for a second couple. Someone can only be in one group.</figcaption>
+      </figure>
+
+      <!-- 3. Who it's for -->
+      <figure>
+        <div class="phone">
+          <div class="pad">
+            <p class="kicker">Cartagena · a line</p>
+            <div class="sheet">
+              <h3>Who it’s for</h3>
+              <div class="chips">
+                <button class="chip">Everyone</button>
+                <button class="chip" aria-pressed="true">Djamina &amp; Danielle</button>
+                <button class="chip">Peggy &amp; Gabriel</button>
+                <button class="chip">Just me</button>
+                <button class="chip">Pick people…</button>
+              </div>
+              <h3 style="margin-top:var(--space-4)">Who paid</h3>
+              <div class="chips">
+                <button class="chip">Me</button>
+                <button class="chip">Danielle</button>
+                <button class="chip">Peggy</button>
+                <button class="chip">Gabriel</button>
+                <button class="chip">Each their own</button>
+              </div>
+              <p class="hand" style="margin-top:var(--space-3)">a group is a shortcut, not a lock: one of you can still buy something just for herself</p>
+              <div class="acts"><button class="button button--primary">Save</button></div>
+            </div>
+          </div>
+        </div>
+        <figcaption><b>3 · Groups are one tap in “Who it’s for”.</b>
+          <ul>
+            <li>Each group appears as a choice, next to Everyone and Just me.</li>
+            <li>“Who paid” stays <b>one real person</b>: what the app needs to know is whose card it was.</li>
+          </ul>
+        </figcaption>
+      </figure>
+
+      <!-- 4. Who paid what with groups + Between you -->
+      <figure>
+        <div class="phone">
+          <div class="pad">
+            <p class="kicker">Colombia &amp; Panama · Who paid what</p>
+            <section class="sketch-box sketch-box--strong card card--hero" data-seed="81" style="margin-top:var(--space-3)">
+              <svg class="sketch-box__line" aria-hidden="true"></svg>
+              <header class="card__head"><h2>Peggy &amp; Gabriel owe you two</h2></header>
+              <p class="bigline"><span class="hand">to Djamina or Danielle</span><span class="num">134 €</span></p>
+              <span class="small-button" style="margin-top:var(--space-2)">Paid back</span>
+            </section>
+            <section class="sketch-box sketch-box--light card" data-seed="82" style="margin-top:var(--space-3)">
+              <svg class="sketch-box__line" aria-hidden="true"></svg>
+              <header class="card__head"><h2>Balances</h2></header>
+              <div class="ln ln--av"><span class="avs"><span class="av av--me">D</span><span class="av">D</span></span><span>Djamina &amp; Danielle<small>paid 5 388 € · share 5 254 €</small></span><span class="plus num">+134 €</span></div>
+              <div class="ln ln--av"><span class="avs"><span class="av">P</span><span class="av">G</span></span><span>Peggy &amp; Gabriel<small>paid 4 986 € · share 5 120 €</small></span><span class="minus num">−134 €</span></div>
+            </section>
+            <div class="between">
+              <h4>Between you two <small>only you and Danielle see this</small></h4>
+              <div class="ln" style="border-bottom:0"><span>You owe Danielle<small>she paid your massage in Cartagena</small></span><span class="num">40 €</span></div>
+              <span class="small-button">Paid back</span>
+            </div>
+          </div>
+        </div>
+        <figcaption><b>4 · Who paid what: groups settle as one.</b>
+          <ul>
+            <li>Balances show <b>one row per group</b>, and the answer card speaks to the group (“owe you two”). Either of you can mark it paid back.</li>
+            <li><b>Between you two</b> (option B) only appears when one of you paid a line that’s just for the other. Only the group sees it. No such line, no card.</li>
+            <li>The per-person switch on the trip still shows <b>your own share</b>, the real one.</li>
+          </ul>
+        </figcaption>
+      </figure>
+
+      <!-- 5. Shared deposit -->
+      <figure>
+        <div class="phone">
+          <div class="pad">
+            <p class="kicker">Cartagena · Stay · a line</p>
+            <div class="sheet">
+              <h3>Casa del Porvenir <small>booked · 5 nights</small></h3>
+              <div class="track"><b>Chosen</b> → <b>Booked</b> → Paid</div>
+              <p class="bigline"><span>For everyone · by room</span><span class="num">1 650 €</span></p>
+
+              <p class="grp">Payments</p>
+              <div class="ln"><span>Deposit for everyone<small>paid by you · 12 Aug · split like the line</small></span><span class="num">400 €</span></div>
+
+              <p class="grp">Then each pays their own <span class="new">new</span></p>
+              <div class="ln ln--av"><span class="av av--me">D</span><span>You<small>share 450 € − deposit 109 €</small></span><span class="num">341 € <span class="lnk">Paid</span></span></div>
+              <div class="ln ln--av"><span class="av">D</span><span>Danielle<small>share 450 € − deposit 109 €</small></span><span class="num">341 €</span></div>
+              <div class="ln ln--av"><span class="av">P</span><span>Peggy<small>share 375 € − deposit 91 €</small></span><span class="num">284 €</span></div>
+              <div class="ln ln--av"><span class="av">G</span><span>Gabriel<small>share 375 € − deposit 91 €</small></span><span class="num">284 €</span></div>
+              <p class="hand" style="margin-top:var(--space-2)">different rooms, different bills: the app works out each one</p>
+              <div class="acts"><button class="button button--primary">Mark what I paid</button></div>
+            </div>
+          </div>
+        </div>
+        <figcaption><b>5 · A deposit for everyone, then each their own bill.</b>
+          <ul>
+            <li>One person pays the deposit for the group; it’s split <b>like the line</b> (here by room).</li>
+            <li>Then each sees <b>their bill = their share − their part of the deposit</b>, and marks it paid when they pay at the desk. Amounts can differ.</li>
+            <li>The deposit payer is owed the others’ parts in Who paid what, as usual. The Colombia case we had to split into separate lines.</li>
+          </ul>
+        </figcaption>
+      </figure>
+
+      <!-- 6. Quick cash -->
+      <figure>
+        <div class="phone">
+          <div class="pad">
+            <p class="kicker">Cartagena · Day 4</p>
+            <div class="sheet">
+              <h3>I paid cash <span class="new">new</span></h3>
+              <div class="bigamount">≈ 40 <small>€ ▾</small></div>
+              <div class="field"><p class="field__label">For what</p><div class="fi">Taxi to the old town</div></div>
+              <div class="chips"><button class="chip">Getting around</button><button class="chip">Food</button><button class="chip">Activities</button><button class="chip">Other</button></div>
+              <div class="row2">
+                <div class="field"><p class="field__label">Who paid</p><div class="fi">Me ▾</div></div>
+                <div class="field"><p class="field__label">For</p><div class="fi">Just me ▾</div></div>
+              </div>
+              <div class="acts"><button class="button button--quiet">Cancel</button><button class="button button--primary">Add</button></div>
+            </div>
+            <div class="sheet">
+              <p class="grp" style="margin-top:0">Day 4 · Sat 8 Sept</p>
+              <div class="ln"><span>Taxi to the old town <span class="cash">cash</span><small>Getting around · you</small></span><span class="num">≈ 40 €</span></div>
+              <div class="ln"><span>Street food, Getsemaní <span class="cash">cash</span><small>Food · Djamina &amp; Danielle</small></span><span class="num">≈ 25 €</span></div>
+            </div>
+          </div>
+        </div>
+        <figcaption><b>6 · Cash in two taps.</b>
+          <ul>
+            <li><b>+ Cash</b> on a day, a place or the whole trip: an amount (rough is fine), a word, a category. Who paid and who it’s for default to you.</li>
+            <li>It counts as <b>paid</b> straight away, with a small “cash” mark. Budget shows the cash total.</li>
+            <li>The 9 Colombia lines with no price would have taken a minute.</li>
+          </ul>
+        </figcaption>
+      </figure>
+
+      <!-- 7. Reminders + offline -->
+      <figure>
+        <div class="phone">
+          <div class="offline"><span>● Offline · trip as of 14:32</span><span>read only</span></div>
+          <div class="lock">
+            <div class="notif"><span class="ic">⌖</span><span><b>Casa del Porvenir</b> · balance due in 3 days<br /><small>your part: 341 € · Colombia &amp; Panama</small></span></div>
+            <div class="notif"><span class="ic">⌖</span><span><b>Palenque tour</b> · balance due today<br /><small>440 $ (≈ 405 €) · you said you’d pay</small></span></div>
+          </div>
+          <div class="pad">
+            <p class="kicker">Me · The app</p>
+            <div class="setrow"><span>Reminders<small>3 days before a balance is due, and on the day</small></span><span class="tog tog--on"></span></div>
+            <div class="setrow"><span>Keep my trips on this phone<small>to read them with no signal · 3 trips · 2 MB</small></span><span class="tog tog--on"></span></div>
+            <p class="hand" style="margin-top:var(--space-3)">no signal: you can read everything, changes wait until you’re back online</p>
+            <button class="button button--primary muted" style="margin-top:var(--space-3);width:100%">+ Add (needs a connection)</button>
+          </div>
+        </div>
+        <figcaption><b>7 · Reminders and trips offline.</b>
+          <ul>
+            <li>A notification <b>3 days before</b> a balance is due and <b>on the day</b>, to whoever is set to pay it (everyone when “each their own”). One switch in Me, on by default once you install the app.</li>
+            <li>Trips you’ve opened stay on the phone: no signal at the airport, you still see everything. A dark strip says it’s offline and since when; adding and editing are greyed out.</li>
+          </ul>
+        </figcaption>
+      </figure>
+
+      <!-- 8. Behind the scenes -->
+      <figure>
+        <div class="phone">
+          <div class="pad notes">
+            <p class="kicker">Behind the scenes</p>
+            <h4>Groups</h4>
+            <p>A new “pays together” link between travellers. The balances add up each group’s members before working out who owes whom; “Between you” runs the same sum inside the group, only for lines one member paid for another. Tested on Colombia: the result must match today’s, just grouped.</p>
+            <h4>Deposit</h4>
+            <p>A deposit payment marked “for everyone” is shared like the line; each person’s bill is what’s left of their share. Reuses the payments built in build 6.</p>
+            <h4>Reminders</h4>
+            <p>Notifications already work for Admin. A daily job in the database (8:00 trip time) finds balances due in 3 days or today and sends them. iPhone: only once the app is on the home screen (Apple’s rule).</p>
+            <h4>Offline</h4>
+            <p>The service worker keeps a copy of each trip you open on the phone. No queued changes for now (decided 16/11).</p>
+            <h4>Not in this build</h4>
+            <ul><li>Several people paying one line together (still “each their own”).</li><li>Gift pot with outside friends (dropped).</li></ul>
+          </div>
+        </div>
+        <figcaption><b>8 · What it needs from you.</b> Nothing to set up: no new service, no cost.</figcaption>
+      </figure>
+
+    </div>
+  </body>
+</html>
