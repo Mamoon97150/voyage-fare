@@ -121,3 +121,11 @@
   --shadow-3: 0 8px 24px rgb(0 0 0 / 0.5);
   color-scheme: dark;
 }
+
+/* At night the main button is coloured in with deep ink (cream words, 4.7:1), not the light pen:
+   a big light-blue block glowed brighter than anything else (decided 16 Nov). Links and the circled
+   option keep the lighter pen, which reads better as thin strokes. */
+:root[data-theme='dark'] .button--primary {
+  --btn-ink: #4a63a8;
+  color: var(--ink);
+}
