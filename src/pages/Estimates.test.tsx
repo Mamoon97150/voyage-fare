@@ -42,7 +42,7 @@ describe('daily estimates and the category words (build 6)', () => {
     )
     const picker = screen.getByRole('radiogroup', { name: 'What is it?' })
     const words = [...picker.querySelectorAll('[role=radio]')].map((r) => r.textContent!.replace(/^\S+\s/, '').trim())
-    expect(words).toEqual(['Stay', 'Activities', 'Food', 'Getting around', 'Other'])
+    expect(words).toEqual(['Stay', 'Activities', 'Food', 'Getting around', 'Car rental', 'Other'])
   })
 
   it('an estimate under its place: ≈, the sum by hand, your share, estimated', async () => {

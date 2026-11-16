@@ -52,7 +52,12 @@ describe('the pool and the days', () => {
     expect(isToTry(item({ day_number: 7 }))).toBe(false)
     expect(isToTry(item({ status: 'dropped' }))).toBe(false)
     expect(isToTry(item({ status: 'chosen' }))).toBe(false)
-    expect(isToTry(item({ kind: 'activity' }))).toBe(false)
+    expect(isToTry(item({ kind: 'activity' }))).toBe(true)
+    expect(isToTry(item({ kind: 'housing' }))).toBe(false)
+    // Several options compared: a decision, not To try.
+    const two = [{ item_id: 'i' }, { item_id: 'i' }]
+    expect(isToTry(item({}), two)).toBe(false)
+    expect(isToTry(item({}), two.slice(1))).toBe(true)
   })
 
   it('a place’s days, their dates, what’s on them', () => {

@@ -364,10 +364,12 @@ input[type='radio'] {
   color: var(--ink);
 }
 
-/* Picked chips: ink, unless they are a category (then that category's pencil). */
+/* Picked chips: ink, unless they are a category (then that category's pencil). The drawn line is
+   the only edge: no straight blue border under it (16 Nov, "less blue"). */
 .chip[aria-pressed='true'],
 .chip[role='radio'][aria-checked='true'],
 .chip[aria-checked='true'] {
+  border-color: transparent;
   --btn-ink: var(--ink);
   background-color: color-mix(in srgb, var(--ink) 6%, transparent);
   color: var(--ink);

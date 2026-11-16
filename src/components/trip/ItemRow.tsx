@@ -2,7 +2,9 @@ import { BookingMarks } from './Booking'
 import { LineSheet } from './LineSheet'
 import { useState } from 'react'
 import { amountForInput } from '../../lib/money'
-import { setPackageCover, updateItem, type Item, type ItemKind, type TripDetail } from '../../lib/trips'
+import { setItemDetails, setPackageCover, updateItem, type Item, type ItemKind, type TripDetail } from '../../lib/trips'
+import { detailsOf, detailsText, sharers } from '../../lib/itemDetails'
+import { placeDays } from '../../lib/toTry'
 import { coversText, daysText, itemLine, itemTitle, kindLabel, leftLine, type Mode } from '../../lib/tripView'
 import { LeftWords } from './LeftWords'
 import { optionCount } from '../../lib/options'
@@ -60,6 +62,7 @@ export function ItemRow({
     decision ?? kindLabel(item.kind as ItemKind, item.place_id !== null).label,
     showDays ? daysText(item, detail.trip.start_date) : null,
     item.meal ? MEALS.find(([k]) => k === item.meal)?.[1].toLowerCase() : null,
+    ...detailsText(item, detail.trip.currency),
     optionCount(detail, item) >= 2 ? `${optionCount(detail, item)} options compared` : null,
     item.note,
   ]
@@ -71,6 +74,7 @@ export function ItemRow({
 
   if (editing) {
     const price = priceOf(detail, item)
+    const place = detail.places.find((p) => p.id === item.place_id)
     return (
       <li className="item-row item-row--editing">
         <LineSheet
@@ -89,6 +93,8 @@ export function ItemRow({
               formId={`edit-${item.id}`}
               kinds={editKinds(kinds, item.kind as ItemKind)}
               days={days}
+              placeDays={place ? placeDays(detail, place) : undefined}
+              people={sharers(detail, item.id)}
               foldKind
               initial={{
                 kind: item.kind as ItemKind,
@@ -97,12 +103,14 @@ export function ItemRow({
                 day: item.day_number ? String(item.day_number) : '',
                 endDay: item.end_day_number ? String(item.end_day_number) : '',
                 price: amountForInput(price),
+                details: detailsOf(item),
               }}
               submitLabel="Save"
               options={inCompare}
               nameLabel={decision ? 'What you’re deciding' : 'Name'}
-              onSubmit={async ({ covers, ...v }) => {
+              onSubmit={async ({ covers, details, toTry: _toTry, ...v }) => {
                 await updateItem({ id: item.id, ...v, keepPrice: inCompare !== undefined })
+                await setItemDetails(item.id, details)
                 if (v.kind === 'package') await setPackageCover(item.id, covers ?? [])
                 done()
               }}
@@ -174,12 +182,7 @@ export function ItemRow({
   )
 }
 
-/**
- * The kinds offered when changing a line: its own kind stays pickable. An older rental car in a
- * place takes the place of "Getting around" (both say it), so the word isn't there twice.
- */
+/** The kinds offered when changing a line: its own kind stays pickable. */
 function editKinds(kinds: ItemKind[], own: ItemKind): ItemKind[] {
-  if (kinds.includes(own)) return kinds
-  if (own === 'car_rental' && kinds.includes('transport')) return kinds.map((k) => (k === 'transport' ? own : k))
-  return [own, ...kinds]
+  return kinds.includes(own) ? kinds : [own, ...kinds]
 }

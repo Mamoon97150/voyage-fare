@@ -2,6 +2,7 @@
 // No budget arithmetic here beyond picking the right figure: the database does the sums (BR-13).
 import { addDays, formatShortDates } from './tripText'
 import { num } from './money'
+import { isToTry } from './toTry'
 import type { Item, ItemKind, Leg, Place, TicketChange, TicketMode, TripDetail } from './trips'
 
 export type Mode = 'mine' | 'total'
@@ -16,20 +17,22 @@ export const KINDS: Record<ItemKind, { label: string; icon: string }> = {
   housing: { label: 'Stay', icon: '⌂' },
   activity: { label: 'Activities', icon: '✦' },
   restaurant: { label: 'Food', icon: '◍' },
-  car_rental: { label: 'Getting around', icon: '⇄' },
+  car_rental: { label: 'Car rental', icon: '⊶' },
   insurance: { label: 'Insurance', icon: '☂' },
   package: { label: 'Package', icon: '▣' },
   other: { label: 'Other', icon: '•' },
 }
 
 /** A kind's word where it is: transport inside a place is "Getting around". */
+const AROUND = { label: 'Getting around', icon: '⇄' }
+
 export function kindLabel(kind: ItemKind, inPlace: boolean): { label: string; icon: string } {
-  if (kind === 'transport' && inPlace) return KINDS.car_rental
+  if (kind === 'transport' && inPlace) return AROUND
   return KINDS[kind] ?? KINDS.other
 }
 
 /** What can be added where: tickets and insurance belong to the whole trip, stays and outings to a place. */
-export const KINDS_FOR_PLACE: ItemKind[] = ['housing', 'activity', 'restaurant', 'transport', 'other']
+export const KINDS_FOR_PLACE: ItemKind[] = ['housing', 'activity', 'restaurant', 'transport', 'car_rental', 'other']
 export const KINDS_FOR_TRIP: ItemKind[] = ['transport', 'car_rental', 'insurance', 'package', 'other']
 
 /** Kinds that usually last several days. */
@@ -119,19 +122,28 @@ export function daysText(
   return dayLabel(item.day_number, start)
 }
 
-export type ItemGroup = { key: string; label: string; items: Item[] }
+export type ItemGroup = { key: string; label: string; items: Item[]; day?: number }
 
 /** A place's items as in the mockup: the stay first, then day by day, then To try, then ideas with no day. */
-export function groupPlaceItems(items: Item[], start: string | null = null): ItemGroup[] {
+export function groupPlaceItems(
+  items: Item[],
+  start: string | null = null,
+  allDays: number[] = [],
+  options: { item_id: string }[] = [],
+): ItemGroup[] {
   const stays = items.filter((i) => i.kind === 'housing')
   const rest = items.filter((i) => i.kind !== 'housing')
-  const days = [...new Set(rest.filter((i) => i.day_number).map((i) => i.day_number as number))].sort((a, b) => a - b)
+  // Every day of the place shows (kinds-v6), even an empty one: it has "+ What we do".
+  const days = [...new Set([...allDays, ...rest.filter((i) => i.day_number).map((i) => i.day_number as number)])].sort(
+    (a, b) => a - b,
+  )
   const groups: ItemGroup[] = []
   if (stays.length) groups.push({ key: 'stay', label: 'Stay', items: stays })
   for (const d of days)
-    groups.push({ key: `day-${d}`, label: dayLabel(d, start), items: rest.filter((i) => i.day_number === d) })
-  // Restaurants with no day are the pool "To try" (build 7); other things with no day are ideas.
-  const toTry = rest.filter((i) => !i.day_number && i.kind === 'restaurant' && i.status === 'idea')
+    groups.push({ key: `day-${d}`, label: dayLabel(d, start), items: rest.filter((i) => i.day_number === d), day: d })
+  // Restaurants and activities with no day are the pool "To try" (build 7, kinds-v6); other things
+  // with no day are ideas.
+  const toTry = rest.filter((i) => isToTry(i, options))
   if (toTry.length) groups.push({ key: 'to-try', label: 'To try', items: toTry })
   const ideas = rest.filter((i) => !i.day_number && !toTry.includes(i))
   if (ideas.length) groups.push({ key: 'ideas', label: 'Ideas, no day yet', items: ideas })

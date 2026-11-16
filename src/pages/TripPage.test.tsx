@@ -99,7 +99,8 @@ describe('inside a trip', () => {
       {
         id: 'i2',
         place_id: 'p1',
-        kind: 'activity',
+        // An idea with no day: not To try (that's restaurants and activities), so it says "Idea".
+        kind: 'other',
         name: 'Rosario islands',
         status: 'idea',
         day_number: null,

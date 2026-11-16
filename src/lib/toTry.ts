@@ -35,11 +35,20 @@ export function sourceOf(link: string | null): (Source & { handle: string | null
 }
 
 /**
- * A pool restaurant: a restaurant in a place, with no day, still an idea (not counting). One that
- * already counts with no day (chosen, booked, in a package) stays with the place's other ideas.
+ * In the pool: a restaurant or an activity (kinds-v6) in a place, with no day, still an idea (not
+ * counting). One that already counts with no day (chosen, booked, in a package) stays with the
+ * place's other ideas.
  */
-export const isToTry = (i: Item) =>
-  i.kind === 'restaurant' && i.place_id !== null && !i.day_number && i.status === 'idea'
+export const isToTry = (
+  i: Pick<Item, 'id' | 'kind' | 'place_id' | 'day_number' | 'status'>,
+  options: { item_id: string }[] = [],
+) =>
+  (i.kind === 'restaurant' || i.kind === 'activity') &&
+  i.place_id !== null &&
+  !i.day_number &&
+  i.status === 'idea' &&
+  // Several options compared: a decision, not an idea kept for later.
+  options.filter((o) => o.item_id === i.id).length <= 1
 
 /** The days you're in a place: day numbers of the whole trip, one per night, in order. */
 export function placeDays(detail: Pick<TripDetail, 'places'>, place: Place): number[] {

@@ -8,7 +8,8 @@ import { AddPlace } from '../components/trip/AddPlace'
 import { EstimateForm, EstimateRows } from '../components/trip/DailyEstimates'
 import { AddItem } from '../components/trip/ItemForm'
 import { ItemRow } from '../components/trip/ItemRow'
-import { PlacesWeLoved, ToTryForm, ToTryRow } from '../components/trip/ToTry'
+import { PlacesWeLoved, ToTryForm, ToTryList } from '../components/trip/ToTry'
+import { DayPrompts, WhereWeSleep } from '../components/trip/PlacePrompts'
 import { PlaceForm } from '../components/trip/PlaceForm'
 import { RouteGap } from '../components/trip/RouteGap'
 import { RouteCard } from '../components/trip/RouteCard'
@@ -16,7 +17,8 @@ import { TripTopBar } from '../components/trip/TripTopBar'
 import { WelcomeNote } from '../components/trip/WelcomeNote'
 import { ToReview } from '../components/trip/TripAddress'
 import { Loading } from '../lib/auth'
-import { isToTry } from '../lib/toTry'
+import { isToTry, placeDays } from '../lib/toTry'
+import { needsStay } from '../lib/itemDetails'
 import { useTrip } from '../lib/useTrip'
 import { isReadOnly, useTripId, useViewer } from '../lib/demo'
 import { DemoStrip, YourTurn } from '../components/DemoParts'
@@ -156,6 +158,23 @@ export function TripPage() {
             />
             {places.map((place, i) => {
               const placeItems = items.filter((it) => it.place_id === place.id)
+              const ownDays = placeDays(detail, place)
+              const addHere = (kind: 'housing' | 'activity' | 'restaurant', day?: number) =>
+                setAdding(`${kind}:${place.id}:${day ?? ''}`)
+              const addingHere = (kind: string, day?: number) => adding === `${kind}:${place.id}:${day ?? ''}`
+              const inlineAdd = (kind: 'housing' | 'activity' | 'restaurant', day?: number) => (
+                <AddItem
+                  detail={detail}
+                  placeId={place.id}
+                  kinds={KINDS_FOR_PLACE}
+                  days={days}
+                  placeDays={ownDays}
+                  startKind={kind}
+                  startDay={day}
+                  onAdded={added}
+                  onCancel={() => setAdding(null)}
+                />
+              )
               return (
                 <Fragment key={place.id}>
                   <section aria-labelledby={`place-${place.id}`}>
@@ -168,7 +187,8 @@ export function TripPage() {
                           {place.name}
                           <small>
                             {place.nights ? plural(place.nights, 'night') : 'nights not set'}
-                            {placeItems.some(isToTry) && ` · ${placeItems.filter(isToTry).length} to try`}
+                            {placeItems.some((it) => isToTry(it, detail.options)) &&
+                              ` · ${placeItems.filter((it) => isToTry(it, detail.options)).length} to try`}
                           </small>
                         </h2>
                         <span className="place__total num">
@@ -202,34 +222,57 @@ export function TripPage() {
                           onCancel={() => setEditingPlace(null)}
                         />
                       )}
-                      {groupPlaceItems(placeItems, trip.start_date).map((group) => (
-                        <div key={group.key} className="item-group">
-                          <p className="item-group__label">
-                            {group.label}
-                            {group.key === 'to-try' && <span className="hand item-group__note">no day yet</span>}
-                          </p>
-                          <ul className="item-list">
-                            {group.items.map((it) =>
-                              group.key === 'to-try' ? (
-                                <ToTryRow key={it.id} detail={detail} item={it} onChanged={reload} />
-                              ) : (
-                                <ItemRow
-                                  key={it.id}
-                                  detail={detail}
-                                  item={it}
-                                  viewer={viewer}
-                                  mode={shownMode}
-                                  kinds={KINDS_FOR_PLACE}
-                                  days={days}
-                                  onChanged={reload}
-                                  onOpen={opened}
-                                  showDays={group.key === 'stay' || group.key === 'ideas'}
-                                />
-                              ),
+                      {needsStay(placeItems, place.id, place.nights) &&
+                        !readOnly &&
+                        (addingHere('housing') ? (
+                          inlineAdd('housing')
+                        ) : (
+                          <WhereWeSleep onAdd={() => addHere('housing')} />
+                        ))}
+                      {groupPlaceItems(placeItems, trip.start_date, readOnly ? [] : ownDays, detail.options).map(
+                        (group) => (
+                          <div key={group.key} className="item-group">
+                            <p className="item-group__label">
+                              {group.label}
+                              {group.key === 'to-try' && <span className="hand item-group__note">no day yet</span>}
+                            </p>
+                            {group.key === 'to-try' ? (
+                              <ToTryList detail={detail} items={group.items} onChanged={reload} />
+                            ) : (
+                              <ul className="item-list">
+                                {group.items.map((it) => (
+                                  <ItemRow
+                                    key={it.id}
+                                    detail={detail}
+                                    item={it}
+                                    viewer={viewer}
+                                    mode={shownMode}
+                                    kinds={KINDS_FOR_PLACE}
+                                    days={days}
+                                    onChanged={reload}
+                                    onOpen={opened}
+                                    showDays={group.key === 'stay' || group.key === 'ideas'}
+                                  />
+                                ))}
+                              </ul>
                             )}
-                          </ul>
-                        </div>
-                      ))}
+                            {group.day !== undefined &&
+                              !readOnly &&
+                              (addingHere('activity', group.day) ? (
+                                inlineAdd('activity', group.day)
+                              ) : addingHere('restaurant', group.day) ? (
+                                inlineAdd('restaurant', group.day)
+                              ) : (
+                                <DayPrompts
+                                  items={placeItems}
+                                  placeId={place.id}
+                                  day={group.day}
+                                  onAdd={(kind) => addHere(kind, group.day)}
+                                />
+                              ))}
+                          </div>
+                        ),
+                      )}
                       <EstimateRows
                         detail={detail}
                         placeId={place.id}
@@ -243,6 +286,7 @@ export function TripPage() {
                           placeId={place.id}
                           kinds={KINDS_FOR_PLACE}
                           days={days}
+                          placeDays={ownDays}
                           onAdded={added}
                           onCancel={() => setAdding(null)}
                         />

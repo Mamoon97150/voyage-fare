@@ -2,6 +2,7 @@
 import type { Json } from '../database.types'
 import { supabase } from '../supabase'
 import { sqlNull } from './sql'
+import type { ItemDetails } from '../itemDetails'
 import type { Place } from './trips'
 
 export type ItemKind =
@@ -106,6 +107,12 @@ export async function updateItem(item: {
     p_amount: item.amount ?? undefined,
     p_keep_price: item.keepPrice ?? false,
   })
+  if (error) throw error
+}
+
+/** A line's questions by kind (build 8¾, kinds-v6): time, booking, meal, from → to, deposit… */
+export async function setItemDetails(id: string, details: ItemDetails): Promise<void> {
+  const { error } = await supabase.from('items').update(details).eq('id', id)
   if (error) throw error
 }
 
@@ -225,6 +232,8 @@ export async function addToTry(entry: {
   link: string | null
   note: string | null
   amount: number | null
+  /** Restaurants and activities (kinds-v6). */
+  kind?: 'restaurant' | 'activity'
 }): Promise<string> {
   const { data, error } = await supabase.rpc('add_to_try', {
     p_place_id: entry.placeId,
@@ -232,6 +241,7 @@ export async function addToTry(entry: {
     p_link: entry.link ?? undefined,
     p_note: entry.note ?? undefined,
     p_amount: entry.amount ?? undefined,
+    p_kind: entry.kind ?? 'restaurant',
   })
   if (error) throw error
   return data

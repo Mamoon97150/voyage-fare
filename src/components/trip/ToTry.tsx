@@ -84,6 +84,7 @@ export function ToTryRow({ detail, item, onChanged }: { detail: TripDetail; item
           onClick={() => setMode('edit')}
           aria-label={`Change ${item.name}`}
         >
+          <i className={`cat-dot cat-dot--${item.kind}`} aria-hidden="true" />
           {item.name}
         </button>
         <SourceBadge link={item.link} />
@@ -115,6 +116,45 @@ export function ToTryRow({ detail, item, onChanged }: { detail: TripDetail; item
         />
       )}
     </li>
+  )
+}
+
+/** A place's To try: restaurants and activities with no day yet, filtered All · Eat · Do once both are there. */
+export function ToTryList({ detail, items, onChanged }: { detail: TripDetail; items: Item[]; onChanged: () => void }) {
+  const [show, setShow] = useState<'all' | 'restaurant' | 'activity'>('all')
+  const both = items.some((i) => i.kind === 'restaurant') && items.some((i) => i.kind === 'activity')
+  const shown = both && show !== 'all' ? items.filter((i) => i.kind === show) : items
+  return (
+    <>
+      {both && (
+        <div className="to-try-filter" role="radiogroup" aria-label="Show">
+          {(
+            [
+              ['all', 'All'],
+              ['restaurant', 'Eat'],
+              ['activity', 'Do'],
+            ] as const
+          ).map(([k, word]) => (
+            <button
+              key={k}
+              type="button"
+              role="radio"
+              className={`chip chip--pick cat--${k}`}
+              aria-checked={show === k}
+              onClick={() => setShow(k)}
+            >
+              {k !== 'all' && <i className={`cat-dot cat-dot--${k}`} aria-hidden="true" />}
+              {word}
+            </button>
+          ))}
+        </div>
+      )}
+      <ul className="item-list">
+        {shown.map((it) => (
+          <ToTryRow key={it.id} detail={detail} item={it} onChanged={onChanged} />
+        ))}
+      </ul>
+    </>
   )
 }
 
@@ -161,21 +201,25 @@ function DayPicker({
           )
         })}
       </div>
-      <div className="day-picker__meals" role="radiogroup" aria-label="Meal">
-        {MEALS.map(([key, label]) => (
-          <button
-            key={key}
-            type="button"
-            role="radio"
-            className="chip"
-            aria-checked={meal === key}
-            onClick={() => setMeal(meal === key ? null : key)}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
-      <p className="hand day-picker__hint">a day already has a dinner? you’ll see it before you choose</p>
+      {item.kind === 'restaurant' && (
+        <div className="day-picker__meals" role="radiogroup" aria-label="Meal">
+          {MEALS.map(([key, label]) => (
+            <button
+              key={key}
+              type="button"
+              role="radio"
+              className="chip"
+              aria-checked={meal === key}
+              onClick={() => setMeal(meal === key ? null : key)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
+      {item.kind === 'restaurant' && (
+        <p className="hand day-picker__hint">a day already has a dinner? you’ll see it before you choose</p>
+      )}
       <div className="add-item__actions">
         <button type="button" className="button button--quiet" onClick={onCancel}>
           Cancel
@@ -219,6 +263,7 @@ export function ToTryForm({
   const [name, setName] = useState(item?.name ?? '')
   const [where, setWhere] = useState(placeId)
   const [note, setNote] = useState(item?.note ?? '')
+  const [kind, setKind] = useState<'restaurant' | 'activity'>(item?.kind === 'activity' ? 'activity' : 'restaurant')
   const [showPrice, setShowPrice] = useState(startEach !== null)
   const [price, setPrice] = useState(startEach !== null ? amountForInput(Math.round(startEach * 100) / 100) : '')
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -265,7 +310,7 @@ export function ToTryForm({
     }
     await run(async () => {
       if (item) await updateToTry({ id: item.id, ...entry })
-      else await addToTry(entry)
+      else await addToTry({ ...entry, kind })
       onDone()
     }, setFormError)
   }
@@ -310,6 +355,21 @@ export function ToTryForm({
               {source.handle ?? (source.name ? source.name : 'the name is yours to type')}
             </span>
           </p>
+        )}
+        {!item && (
+          <div className="switch to-try-kind" role="radiogroup" aria-label="To eat or to do">
+            <button
+              type="button"
+              role="radio"
+              aria-checked={kind === 'restaurant'}
+              onClick={() => setKind('restaurant')}
+            >
+              To eat
+            </button>
+            <button type="button" role="radio" aria-checked={kind === 'activity'} onClick={() => setKind('activity')}>
+              To do
+            </button>
+          </div>
         )}
         <div className={`field${errors.name ? ' field--error' : ''}`}>
           <label htmlFor={`${id}-name`} className="field__label">

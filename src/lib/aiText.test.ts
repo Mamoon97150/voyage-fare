@@ -214,7 +214,7 @@ describe('copy the trip for my AI', () => {
   it('To try apart, then what’s left, who owes whom, the date, the question', () => {
     const t = text({ question: AI_QUESTIONS[0].text })
     expect(t).toContain(
-      '## To try (restaurants kept for later, not counted yet)\n- Medellín: Carmen · Instagram, @carmen · “the tasting menu” · ≈ 95 € each',
+      '## To try (restaurants and activities kept for later, not counted yet)\n- Medellín: Carmen · Instagram, @carmen · “the tasting menu” · ≈ 95 € each',
     )
     expect(t).toContain('- 1 decision left: Boat tour (2 options)')
     expect(t).toContain('## Who owes whom\n- Bea pays Ana 354 €')

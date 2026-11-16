@@ -89,6 +89,7 @@ describe('To try', () => {
         link: 'https://www.google.com/maps/place/Pergamino+Caf%C3%A9/@6.2,-75.5,17z',
         note: 'best coffee',
         amount: 12,
+        kind: 'restaurant',
       }),
     )
   })

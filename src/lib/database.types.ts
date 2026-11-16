@@ -539,6 +539,16 @@ export type Database = {
           status: string
           trip_id: string
           verdict: string | null
+          start_time: string | null
+          price_per_person: boolean
+          needs_booking: boolean | null
+          duration: string | null
+          food_kind: string | null
+          from_place: string | null
+          to_place: string | null
+          local_mode: string | null
+          insurance_included: boolean | null
+          deposit: number | null
         }
         Insert: {
           actual_amount?: number | null
@@ -569,6 +579,16 @@ export type Database = {
           status?: string
           trip_id: string
           verdict?: string | null
+          start_time?: string | null
+          price_per_person?: boolean | null
+          needs_booking?: boolean | null
+          duration?: string | null
+          food_kind?: string | null
+          from_place?: string | null
+          to_place?: string | null
+          local_mode?: string | null
+          insurance_included?: boolean | null
+          deposit?: number | null
         }
         Update: {
           actual_amount?: number | null
@@ -599,6 +619,16 @@ export type Database = {
           status?: string
           trip_id?: string
           verdict?: string | null
+          start_time?: string | null
+          price_per_person?: boolean | null
+          needs_booking?: boolean | null
+          duration?: string | null
+          food_kind?: string | null
+          from_place?: string | null
+          to_place?: string | null
+          local_mode?: string | null
+          insurance_included?: boolean | null
+          deposit?: number | null
         }
         Relationships: [
           {
@@ -1494,6 +1524,7 @@ export type Database = {
           p_amount?: number
           p_link?: string
           p_name: string
+          p_kind?: string
           p_note?: string
           p_place_id: string
         }

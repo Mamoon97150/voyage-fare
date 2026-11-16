@@ -356,3 +356,24 @@ a.source:hover {
 .heart {
   color: var(--estimated);
 }
+
+/* To try holds activities too (kinds-v6): each with its category's pencil, and All · Eat · Do. */
+.to-try__name .cat-dot {
+  margin-right: 0.4rem;
+  vertical-align: 1px;
+}
+
+.to-try-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: var(--space-2) 0 var(--space-1);
+}
+
+.to-try-filter .cat-dot {
+  margin-right: 0.3rem;
+}
+
+.to-try-kind {
+  margin-bottom: var(--space-2);
+}

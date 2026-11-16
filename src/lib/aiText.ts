@@ -191,12 +191,12 @@ export function tripForAi(detail: TripDetail, o: AiTextOptions): string {
     const days = items
       .filter((i) => i.kind !== 'housing' && i.day_number)
       .sort((a, c) => (a.day_number ?? 0) - (c.day_number ?? 0) || a.position - c.position)
-    const ideas = items.filter((i) => i.kind !== 'housing' && !i.day_number && !isToTry(i))
+    const ideas = items.filter((i) => i.kind !== 'housing' && !i.day_number && !isToTry(i, detail.options))
     for (const i of stays) add(...line(i, 'Stay'))
     for (const i of days) add(...line(i, `Day ${i.day_number}${i.meal ? ` · ${i.meal}` : ''}`))
     for (const i of ideas) add(...line(i, 'Idea, no day yet'))
     if (!items.length) add('- Nothing planned yet')
-    for (const i of items.filter(isToTry)) {
+    for (const i of items.filter((x) => isToTry(x, detail.options))) {
       const src = sourceOf(i.link)
       const opt = detail.options.find((x) => x.item_id === i.id)
       const each =
@@ -216,13 +216,13 @@ export function tripForAi(detail: TripDetail, o: AiTextOptions): string {
     }
   }
 
-  if (toTry.length) add('', '## To try (restaurants kept for later, not counted yet)', ...toTry)
+  if (toTry.length) add('', '## To try (restaurants and activities kept for later, not counted yet)', ...toTry)
 
   // What's left
   const undecided = detail.items.filter(
     (i) =>
       live(i) &&
-      !isToTry(i) &&
+      !isToTry(i, detail.options) &&
       detail.options.filter((x) => x.item_id === i.id).length > 1 &&
       !detail.options.some((x) => x.item_id === i.id && x.is_chosen),
   )
